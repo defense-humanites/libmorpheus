@@ -74,7 +74,8 @@ parse_request(const char *global_keys, const char *request_keys,
 	if (name_length < 0 || (size_t)name_length >= sizeof principal_name)
 		return 0;
 	request->principal_part = GetStemClass(principal_name);
-	if (request->principal_part <= 0)
+	if (request->principal_part == 0 ||
+	    request->principal_part == (Stemtype)-1)
 		return 0;
 
 	request->suffix[0] = 0;

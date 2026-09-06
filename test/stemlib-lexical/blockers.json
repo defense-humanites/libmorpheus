@@ -1744,7 +1744,7 @@
           "record": 2915
         },
         {
-          "diagnostics": "unmatched derivation: r(h/gnumi | r(a^g | reg_conj | vs,hs_es\ndo_conj: unmatched explicit principal part\n",
+          "diagnostics": "unknown principal part: vs\ndo_conj: unknown principal part\n",
           "exit_code": 1,
           "first_line": 19591,
           "last_line": 19615,
@@ -1752,7 +1752,7 @@
           "record": 3137
         },
         {
-          "diagnostics": "unmatched derivation: stei/bw | sti^b | reg_conj | vs,-t\ndo_conj: unmatched explicit principal part\n",
+          "diagnostics": "unknown principal part: vs\ndo_conj: unknown principal part\n",
           "exit_code": 1,
           "first_line": 20749,
           "last_line": 20757,

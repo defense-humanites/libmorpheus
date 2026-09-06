@@ -934,6 +934,13 @@ if(BUILD_TESTING)
     gener_source_preparer
     PROPERTIES ENVIRONMENT "MORPHLIB=${PROJECT_SOURCE_DIR}/stemlib"
   )
+  add_executable(morpheus_gener_derivation_request_test test/gener-derivation-request.c)
+  target_link_libraries(morpheus_gener_derivation_request_test PRIVATE morpheus_gener_derivation)
+  add_test(NAME gener_derivation_request
+    COMMAND morpheus_gener_derivation_request_test
+      "${CMAKE_CURRENT_BINARY_DIR}/test-gener-derivation-request.out")
+  set_tests_properties(gener_derivation_request PROPERTIES
+    ENVIRONMENT "MORPHLIB=${PROJECT_SOURCE_DIR}/stemlib")
   add_test(
     NAME gener_corpus_manifest
     COMMAND

@@ -225,3 +225,36 @@ are recorded separately (none observed here). Thus this inventory supplements
 the full-corpus failures; it is neither exhaustive semantic validation nor an
 exception list authorizing partial production. CTest checks its input hashes,
 positions and diagnostics against fresh corpus stages.
+
+### Greek verb refusal diagnosis
+
+The eight isolated Greek expansion refusals have the following causes in the
+committed inputs and matching ASCII derivation tables. Paths below are relative
+to `stemlib/Greek/`; line references identify the original sources, not the
+concatenated audit input.
+
+| Lemma | Source | Request and observed incompatibility |
+| --- | --- | --- |
+| `bibrw/skw` | `stemsrc/vbs.simp.ml`, lemma at 3456 | `vn,-mm,h_hs` selects `mm`; `derivs/ascii/o_stem.asc` has `wm h_hs` (line 31). |
+| `ka/mnw` | `stemsrc/vbs.simp.ml`, lemma at 10010 | `vn,-h,s_tos` has no corresponding nominal rule in `a_stem.asc`; its nominal `wn_on` rules use `a_m` or `hm` (67–69). |
+| `pi/mplhmi` | `stemsrc/vbs.simp.ml`, lemma at 16938 | `va,-ht os_h_on` combines a suffix and type not present together: `ht os_on` is at line 59 of `a_stem.asc`, whereas `os_h_on` uses `a^t` (66). |
+| `r(h/gnumi` | `stemsrc/vbs.simp.ml`, lemma at 18232 | `vs,hs_es` uses an unregistered principal-part name, `vs`. |
+| `stei/bw` | `stemsrc/vbs.simp.ml`, lemma at 19390 | `vs,-t` has the same unregistered principal-part name. |
+| `te/mnw` | `stemsrc/vbs.simp.ml`, lemma at 20383 | `fp,-h` selects `h`; the future-perfect rules in `a_stem.asc` use `a_s`, `hs`, `a_c` or `hc` (53–57). |
+| `e/w` | `stemsrc/lsj.vbs`, lemma at 27328 | `:de: ew_denom` has no stem before the derivation name. |
+| `i/zomai` | `stemsrc/lsj.vbs`, lemma at 31798 | `:de: izw mp` likewise has an empty stem. |
+
+Nearby rules explain the mismatches; they are not proposed philological
+replacements. No input is corrected or excluded on this evidence alone, and
+the empty-stem cases remain rejected rather than receiving an inferred stem.
+
+The two `vs` requests also exposed a tool defect: `GetStemClass` returns
+`(Stemtype)-1` for an unknown name, but `Stemtype` is unsigned. A positivity
+check therefore accepted the sentinel as a class and reported a misleading
+unmatched derivation. Both `do_conj` and the independent ASCII derivation
+expander now reject this sentinel explicitly. The former reports an unknown
+principal part; the latter returns its documented malformed-input result
+(`-1`) instead of the no-match result (`0`). Regression tests distinguish these
+outcomes from successful expansion and check failed CLI output cleanup.
+The eight notices still fail; only the two `vs` diagnostics change in the
+pinned inventory. Existing fixture outputs and corpus exceptions are unchanged.

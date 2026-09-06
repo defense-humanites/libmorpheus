@@ -94,6 +94,13 @@ for language in ["Greek", "Latin"]:
 # The expander must remove both owned outputs on all input failures and must
 # preserve pre-existing files. Exercise cases with and without a final newline.
 env = dict(os.environ, MORPHLIB=str(work / "Greek-first-fixture"), LC_ALL="C")
+for index, request in enumerate(["vs,-t", "missing", "vs,hs_es"]):
+    input_path = work / f"unknown-part-{index}"
+    input_path.write_text(":le:probe\n:de:log reg_conj\n;" + request + "\n")
+    output, odd = work / f"unknown-{index}.out", work / f"unknown-{index}.odd"
+    result = run([binary / "do_conj", input_path, output, odd], 1, env=env)
+    assert b"unknown principal part" in result.stderr and b"unmatched" not in result.stderr
+    assert not output.exists() and not odd.exists()
 for index, data in enumerate([b"", b":le:x\n:de:x missing\n;pr\n", b";pr\n",
                               b":le:x\n:de:x ../missing\n", b":le:" + b"x" * 2048,
                               b":le:x\n:de:br o_stem\n;vn,-mm,h_hs\n"]):

@@ -106,6 +106,12 @@ ConjGkstr(gk_string * gstr, char * suffstr, char * globalkeys, char * keys, char
     conj_key(keytmp,ppartname+3,sizeof ppartname-3);
 
     stype = GetStemClass(ppartname);
+    /* Stemtype is unsigned; GetStemClass uses its all-ones value for failure. */
+    if (stype == 0 || stype == (Stemtype)-1) {
+        fprintf(stderr,"unknown principal part: %s\n",ppartname+3);
+        FreeGkword(TmpGkword);
+        conj_fail("unknown principal part");
+    }
 
     if( keytmp[0] == '-' ) {
 
