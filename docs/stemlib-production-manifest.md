@@ -180,3 +180,48 @@ claim a qualified verb build. These are first blockers, not an exhaustive
 corpus-error inventory. Full lexical baseline comparisons and Git/compiler
 provenance remain open; fixture reproducibility does not certify the
 complete distribution. The 229 existing table-binary exceptions remain intact.
+
+### Locating additional lexical refusals
+
+`tools/audit-stemlib-lexical.py` diagnoses a prepared input using the restored
+producer and a stage whose table inputs and outputs pass checksum verification:
+
+```sh
+python3 tools/audit-stemlib-lexical.py \
+  --stage /absolute/path/to/greek-stage --language Greek \
+  --input /absolute/path/to/greek-stage/Greek/lexical/nominal.input \
+  --tool build/dev/indexnoms --producer indexnoms \
+  --output /absolute/path/to/nominal-audit.json
+```
+
+For Greek expansion, select `--producer do_conj`, `build/dev/do_conj` and
+`lexical/verb.input`. `indexvbs` can similarly inspect an already expanded input.
+The Latin recipe still refuses to assemble verbs without `vbs.mpi`; the audit
+does not supply or omit that missing source.
+
+The audit first runs the complete input, then bisects failing batches at lemma
+boundaries. It records isolated refusals with one-based record and prepared-input
+line numbers, lemma and stderr. Successful temporary outputs are discarded;
+neither staged indexes nor production success receipts are created. Exit status
+is 0 when the original batch succeeds, 1 when it fails, and 2 for an audit error.
+An existing report is preserved. Reports identify the input, tool, audit recipe
+and staged table receipts by SHA-256.
+
+`test/stemlib-lexical/blockers.json` pins these diagnostic observations:
+
+| Prepared input | Lemma records | Isolated refusals |
+| --- | ---: | ---: |
+| Greek nominal | 107,442 | 64 |
+| Latin nominal | 53,403 | 148 |
+| Greek verb expansion | 20,324 | 8 |
+
+These counts describe notices, not unique lemmas or philological corrections.
+Only the first failure inside each isolated notice is reported. In particular,
+two Latin notices yield no stem records in isolation, although an empty notice
+need not prevent an aggregate build. Successful batches are not subdivided, so
+the audit does not enumerate all empty notices. Cross-notice interactions may
+also change after splitting; failures that disappear in both immediate halves
+are recorded separately (none observed here). Thus this inventory supplements
+the full-corpus failures; it is neither exhaustive semantic validation nor an
+exception list authorizing partial production. CTest checks its input hashes,
+positions and diagnostics against fresh corpus stages.

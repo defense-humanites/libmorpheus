@@ -15,6 +15,7 @@ if work.exists():
     shutil.rmtree(work)
 work.mkdir()
 expected = [row for row in (source / "test/stemlib-lexical/outputs.tsv").read_text().splitlines() if row and not row.startswith("#")]
+blockers = json.loads((source / "test/stemlib-lexical/blockers.json").read_text())["reports"]
 
 
 def run(command, expected_code=0, **kwargs):
@@ -61,6 +62,25 @@ for language in ["Greek", "Latin"]:
                     assert report["producers"]["do_conj"]["exit_code"] == 1
                     assert "unmatched" in (stage / language / "lexical/do_conj.log").read_text()
                 assert not list((stage / language / "steminds").iterdir())
+                if pass_name == "first":
+                    for baseline in [item for item in blockers if item["language"] == language]:
+                        producer = baseline["producer"]
+                        audit_output = work / f"{language}-{producer}-audit.json"
+                        audit_command = [sys.executable, source / "tools/audit-stemlib-lexical.py",
+                                         "--stage", stage, "--input", stage / language / "lexical" /
+                                         ("verb.input" if producer == "do_conj" else "nominal.input"),
+                                         "--tool", binary / producer, "--producer", producer,
+                                         "--language", language, "--output", audit_output]
+                        run(audit_command, 1)
+                        audit = json.loads(audit_output.read_text())
+                        assert audit["diagnostic_only"]
+                        assert audit["sha256"]["input"] == baseline["input_sha256"]
+                        for key in ["records", "failures", "batch_only_failures"]:
+                            assert audit[key] == baseline[key], (language, producer, key)
+                        original = audit_output.read_bytes()
+                        run(audit_command, 2)
+                        assert audit_output.read_bytes() == original
+                    assert not receipt.exists() and not list((stage / language / "steminds").iterdir())
             else:
                 rows = [row for row in receipt.read_text().splitlines() if row and not row.startswith("#")]
                 assert rows == [row for row in expected if row.startswith(language + "/")]
