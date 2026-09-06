@@ -261,6 +261,8 @@ jobs:
             --target morpheus_gener_source_preparer
           cmp build/deno-gener-wasm/gener_preparer.mjs \
             bindings/js/deno/internal/gener_preparer.mjs
+          cmp build/deno-gener-wasm/gener_preparer.mjs \
+            bindings/js/node/internal/gener-preparer.mjs
 
       - name: Upload WebAssembly preparer
         uses: actions/upload-artifact@v4
