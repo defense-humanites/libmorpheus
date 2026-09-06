@@ -2,8 +2,8 @@
 
 `libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
 morphological analyzer for Ancient Greek and Latin. It turns the historical C
-programs into an installable C17 shared library with a stable, opaque ABI and a
-typed Deno 2 binding.
+programs into an installable C17 shared library with a stable, opaque ABI, and
+comes with JavaScript and Python bindings.
 
 ## Summary
 
@@ -24,7 +24,7 @@ typed Deno 2 binding.
 
 ## Project status
 
-| Operation | Ancient Greek | Latin | Status |
+| Available operation | Ancient Greek | Latin | Status |
 | --- | :---: | :---: | --- |
 | Analyze an inflected form | Yes | Yes | Supported |
 | Generate forms from a lemma | Yes | No | Experimental |
@@ -34,14 +34,12 @@ The public runtime includes:
 - structured, caller-owned analysis and generation results;
 - per-request analysis options and generation filters;
 - isolated contexts that can be used concurrently;
-- a Deno 2 FFI binding published on JSR as
-  [`@libmorpheus/deno`](https://jsr.io/@libmorpheus/deno);
 - `cruncher`, retained as a compatibility client of the public library;
 - CMake and `pkg-config` installation metadata.
 
 > [!NOTE]
-> Native archives and the JSR package contain no linguistic data. Applications must
-> acquire a compatible stem library separately; see [Runtime data](#runtime-data).
+> Native archives and the distributed packages contain no linguistic data. Applications
+> must acquire a compatible stem library separately; see [Runtime data](#runtime-data).
 
 ## Bindings
 
@@ -51,11 +49,8 @@ is published; the Node.js binding is under active development:
 | Binding | Description | Documentation |
 | --- | --- | --- |
 | Deno 2 | Typed TypeScript API for analysis and experimental Greek generation, published on JSR | [Deno binding guide](bindings/js/deno/README.md) |
-| Node.js 20+ | ESM facade over an asynchronous Node-API addon; not yet published | [Node.js binding guide](bindings/js/node/README.md) |
-| Python 3.11+ | Pure-Python `ctypes` facade over the stable C ABI; under active development | [Python binding guide](bindings/python/README.md) |
-
-The historical `@humanities/libmorpheus` package remains available through
-version `0.3.2`; new Deno releases use `@libmorpheus/deno`.
+| Node.js 20+ | ESM facade over an asynchronous Node-API addon | [Node.js binding guide](bindings/js/node/README.md) |
+| Python 3.11+ | Pure-Python `ctypes` facade over the stable C ABI | [Python binding guide](bindings/python/README.md) |
 
 Native consumers should instead use the [public C API](docs/public-api.md).
 
