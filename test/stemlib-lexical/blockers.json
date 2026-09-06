@@ -6,7 +6,7 @@
       "batch_only_failures": [],
       "failures": [
         {
-          "diagnostics": "untyped record:  *glisa=s *glis eas_eantos masc geog_name\n\n",
+          "diagnostics": "untyped record:  *glisa=s *glis eas_eantos masc geog_name\n\nunrecognized keys: eas_eantos\n",
           "exit_code": 1,
           "first_line": 7596,
           "last_line": 7598,
@@ -14,7 +14,7 @@
           "record": 1545
         },
         {
-          "diagnostics": "untyped record:  *seouh=ros *seouhr stem_acc masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  *seouh=ros *seouhr stem_acc masc pers_name sg\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 7977,
           "last_line": 7978,
@@ -22,7 +22,7 @@
           "record": 1651
         },
         {
-          "diagnostics": "untyped record:  *seouh=ros-pl *seouhr stem_acc masc is_group pl\n\n",
+          "diagnostics": "untyped record:  *seouh=ros-pl *seouhr stem_acc masc is_group pl\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 7979,
           "last_line": 7982,
@@ -30,7 +30,7 @@
           "record": 1652
         },
         {
-          "diagnostics": "untyped record:  *seouh=ros-pl *seouhr stem_acc masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  *seouh=ros-pl *seouhr stem_acc masc pers_name dual\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 7983,
           "last_line": 7987,
@@ -38,7 +38,7 @@
           "record": 1653
         },
         {
-          "diagnostics": "untyped record:  *si/llwn *sill wn_ons masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  *si/llwn *sill wn_ons masc pers_name sg\n\nunrecognized keys: wn_ons\n",
           "exit_code": 1,
           "first_line": 9499,
           "last_line": 9500,
@@ -46,7 +46,7 @@
           "record": 2085
         },
         {
-          "diagnostics": "untyped record:  *si/llwn-pl *sill wn_ons masc is_group pl\n\n",
+          "diagnostics": "untyped record:  *si/llwn-pl *sill wn_ons masc is_group pl\n\nunrecognized keys: wn_ons\n",
           "exit_code": 1,
           "first_line": 9501,
           "last_line": 9504,
@@ -54,7 +54,7 @@
           "record": 2086
         },
         {
-          "diagnostics": "untyped record:  *si/llwn-pl *sill wn_ons masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  *si/llwn-pl *sill wn_ons masc pers_name dual\n\nunrecognized keys: wn_ons\n",
           "exit_code": 1,
           "first_line": 9505,
           "last_line": 9509,
@@ -62,7 +62,7 @@
           "record": 2087
         },
         {
-          "diagnostics": "untyped record:  *ske/lmios *skelmi os_h_no\n\n",
+          "diagnostics": "untyped record:  *ske/lmios *skelmi os_h_no\n\nunrecognized keys: os_h_no\n",
           "exit_code": 1,
           "first_line": 14777,
           "last_line": 14779,
@@ -70,7 +70,7 @@
           "record": 3549
         },
         {
-          "diagnostics": "untyped record:  Pulcher *poulx er_ros masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  Pulcher *poulx er_ros masc pers_name sg\n\nunrecognized keys: er_ros\n",
           "exit_code": 1,
           "first_line": 14990,
           "last_line": 14991,
@@ -78,7 +78,7 @@
           "record": 3608
         },
         {
-          "diagnostics": "untyped record:  Pulcher-pl *poulx er_ros masc is_group pl\n\n",
+          "diagnostics": "untyped record:  Pulcher-pl *poulx er_ros masc is_group pl\n\nunrecognized keys: er_ros\n",
           "exit_code": 1,
           "first_line": 14992,
           "last_line": 14995,
@@ -86,7 +86,7 @@
           "record": 3609
         },
         {
-          "diagnostics": "untyped record:  Pulcher-pl *poulx er_ros masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  Pulcher-pl *poulx er_ros masc pers_name dual\n\nunrecognized keys: er_ros\n",
           "exit_code": 1,
           "first_line": 14996,
           "last_line": 15000,
@@ -94,7 +94,7 @@
           "record": 3610
         },
         {
-          "diagnostics": "untyped record:  *)ameinokle/os *)ameino kleos_klehs masc suff_acc \n\n",
+          "diagnostics": "untyped record:  *)ameinokle/os *)ameino kleos_klehs masc suff_acc \n\nunrecognized keys: kleos_klehs\n",
           "exit_code": 1,
           "first_line": 22218,
           "last_line": 22220,
@@ -102,7 +102,7 @@
           "record": 5777
         },
         {
-          "diagnostics": "untyped record:  *tufw=n *tuf wCn_wCnos masc   pers_name sg\n\n",
+          "diagnostics": "untyped record:  *tufw=n *tuf wCn_wCnos masc   pers_name sg\n\nunrecognized keys: wCn_wCnos\n",
           "exit_code": 1,
           "first_line": 34360,
           "last_line": 34361,
@@ -110,7 +110,7 @@
           "record": 9656
         },
         {
-          "diagnostics": "untyped record:  *tufw=n-pl *tuf wCn_wCnos masc   is_group pl\n\n",
+          "diagnostics": "untyped record:  *tufw=n-pl *tuf wCn_wCnos masc   is_group pl\n\nunrecognized keys: wCn_wCnos\n",
           "exit_code": 1,
           "first_line": 34362,
           "last_line": 34365,
@@ -118,7 +118,7 @@
           "record": 9657
         },
         {
-          "diagnostics": "untyped record:  *tufw=n-pl *tuf wCn_wCnos masc   pers_name dual\n\n",
+          "diagnostics": "untyped record:  *tufw=n-pl *tuf wCn_wCnos masc   pers_name dual\n\nunrecognized keys: wCn_wCnos\n",
           "exit_code": 1,
           "first_line": 34366,
           "last_line": 34370,
@@ -126,7 +126,7 @@
           "record": 9658
         },
         {
-          "diagnostics": "untyped record:  *)/oresqas *)oresqa s_dis fem stem_acc\n\n",
+          "diagnostics": "untyped record:  *)/oresqas *)oresqa s_dis fem stem_acc\n\nunrecognized keys: s_dis\n",
           "exit_code": 1,
           "first_line": 47433,
           "last_line": 47436,
@@ -134,7 +134,7 @@
           "record": 13481
         },
         {
-          "diagnostics": "0) [*ke :*ke/ws:ws_w:fem]\nuntyped record:  *ke/ws *kei=os \n",
+          "diagnostics": "0) [*ke :*ke/ws:ws_w:fem]\nuntyped record:  *ke/ws *kei=os \nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 101583,
           "last_line": 101590,
@@ -142,7 +142,7 @@
           "record": 30088
         },
         {
-          "diagnostics": "untyped record:  *fru=nis *fru_n is_ios masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  *fru=nis *fru_n is_ios masc pers_name sg\n\nunrecognized keys: is_ios\n",
           "exit_code": 1,
           "first_line": 161243,
           "last_line": 161244,
@@ -150,7 +150,7 @@
           "record": 48124
         },
         {
-          "diagnostics": "untyped record:  *fru=nis-pl *fru_n is_ios masc is_group pl\n\n",
+          "diagnostics": "untyped record:  *fru=nis-pl *fru_n is_ios masc is_group pl\n\nunrecognized keys: is_ios\n",
           "exit_code": 1,
           "first_line": 161245,
           "last_line": 161248,
@@ -158,7 +158,7 @@
           "record": 48125
         },
         {
-          "diagnostics": "untyped record:  *fru=nis-pl *fru_n is_ios masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  *fru=nis-pl *fru_n is_ios masc pers_name dual\n\nunrecognized keys: is_ios\n",
           "exit_code": 1,
           "first_line": 161249,
           "last_line": 161253,
@@ -166,7 +166,7 @@
           "record": 48126
         },
         {
-          "diagnostics": "untyped record:  *qumoxa/rhs *qumoxar hs_eous masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  *qumoxa/rhs *qumoxar hs_eous masc pers_name sg\n\nunrecognized keys: hs_eous\n",
           "exit_code": 1,
           "first_line": 161254,
           "last_line": 161255,
@@ -174,7 +174,7 @@
           "record": 48127
         },
         {
-          "diagnostics": "untyped record:  *qumoxa/rhs-pl *qumoxar hs_eous masc is_group pl\n\n",
+          "diagnostics": "untyped record:  *qumoxa/rhs-pl *qumoxar hs_eous masc is_group pl\n\nunrecognized keys: hs_eous\n",
           "exit_code": 1,
           "first_line": 161256,
           "last_line": 161259,
@@ -182,7 +182,7 @@
           "record": 48128
         },
         {
-          "diagnostics": "untyped record:  *qumoxa/rhs-pl *qumoxar hs_eous masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  *qumoxa/rhs-pl *qumoxar hs_eous masc pers_name dual\n\nunrecognized keys: hs_eous\n",
           "exit_code": 1,
           "first_line": 161260,
           "last_line": 161264,
@@ -190,7 +190,7 @@
           "record": 48129
         },
         {
-          "diagnostics": "untyped record:  *te/llis *tell is_ios masc\n\n",
+          "diagnostics": "untyped record:  *te/llis *tell is_ios masc\n\nunrecognized keys: is_ios\n",
           "exit_code": 1,
           "first_line": 161298,
           "last_line": 161300,
@@ -198,7 +198,7 @@
           "record": 48139
         },
         {
-          "diagnostics": "untyped record:  *)ampeli/dhs *)ampelid hs_ous masc pers_name sg\n\n",
+          "diagnostics": "untyped record:  *)ampeli/dhs *)ampelid hs_ous masc pers_name sg\n\nunrecognized keys: hs_ous\n",
           "exit_code": 1,
           "first_line": 161568,
           "last_line": 161569,
@@ -206,7 +206,7 @@
           "record": 48213
         },
         {
-          "diagnostics": "untyped record:  *)ampeli/dhs-pl *)ampelid hs_ous masc is_group pl\n\n",
+          "diagnostics": "untyped record:  *)ampeli/dhs-pl *)ampelid hs_ous masc is_group pl\n\nunrecognized keys: hs_ous\n",
           "exit_code": 1,
           "first_line": 161570,
           "last_line": 161573,
@@ -214,7 +214,7 @@
           "record": 48214
         },
         {
-          "diagnostics": "untyped record:  *)ampeli/dhs-pl *)ampelid hs_ous masc pers_name dual\n\n",
+          "diagnostics": "untyped record:  *)ampeli/dhs-pl *)ampelid hs_ous masc pers_name dual\n\nunrecognized keys: hs_ous\n",
           "exit_code": 1,
           "first_line": 161574,
           "last_line": 161578,
@@ -222,7 +222,7 @@
           "record": 48215
         },
         {
-          "diagnostics": "untyped record:  a)glao/pais a)glao pais_paidos masc\n\n",
+          "diagnostics": "untyped record:  a)glao/pais a)glao pais_paidos masc\n\nunrecognized keys: pais_paidos\n",
           "exit_code": 1,
           "first_line": 189213,
           "last_line": 189215,
@@ -230,7 +230,7 @@
           "record": 55956
         },
         {
-          "diagnostics": "untyped record:  a)la/lugc a)lalu gc_ggos fem ant_acc\n\n",
+          "diagnostics": "untyped record:  a)la/lugc a)lalu gc_ggos fem ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 193859,
           "last_line": 193861,
@@ -238,7 +238,7 @@
           "record": 57504
         },
         {
-          "diagnostics": "untyped record:  a)ma/rugc a)maru gc_ggos fem ant_acc\n\n",
+          "diagnostics": "untyped record:  a)ma/rugc a)maru gc_ggos fem ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 195470,
           "last_line": 195472,
@@ -246,7 +246,7 @@
           "record": 58041
         },
         {
-          "diagnostics": "untyped record:  a)/ndrosfigc a)ndrosfi gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  a)/ndrosfigc a)ndrosfi gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 199169,
           "last_line": 199171,
@@ -254,7 +254,7 @@
           "record": 59274
         },
         {
-          "diagnostics": "untyped record:  a)/stligc a)stli gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  a)/stligc a)stli gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 210042,
           "last_line": 210044,
@@ -262,7 +262,7 @@
           "record": 62895
         },
         {
-          "diagnostics": "untyped record:  o/s os_ou suff_acc masc\n\n",
+          "diagnostics": "untyped record:  o/s os_ou suff_acc masc\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 210966,
           "last_line": 210968,
@@ -270,7 +270,7 @@
           "record": 63203
         },
         {
-          "diagnostics": "untyped record:  baqusmh=rigc baqusmhri gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  baqusmh=rigc baqusmhri gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 213719,
           "last_line": 213721,
@@ -278,7 +278,7 @@
           "record": 64120
         },
         {
-          "diagnostics": "untyped record:  baqusph=lugc baqusphlu gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  baqusph=lugc baqusphlu gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 213722,
           "last_line": 213724,
@@ -286,7 +286,7 @@
           "record": 64121
         },
         {
-          "diagnostics": "untyped record:  bdellola/rugc bdellolaru gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  bdellola/rugc bdellolaru gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 214540,
           "last_line": 214542,
@@ -294,7 +294,7 @@
           "record": 64393
         },
         {
-          "diagnostics": "untyped record:  e)risa/lpigc e)risalpi gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  e)risa/lpigc e)risalpi gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 241788,
           "last_line": 241790,
@@ -302,7 +302,7 @@
           "record": 73466
         },
         {
-          "diagnostics": "untyped record:  e)usmh=rigc e)usmhri gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  e)usmh=rigc e)usmhri gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 245678,
           "last_line": 245680,
@@ -310,7 +310,7 @@
           "record": 74762
         },
         {
-          "diagnostics": "untyped record:  h(dufa/rugc h(dufaru gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  h(dufa/rugc h(dufaru gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 247930,
           "last_line": 247932,
@@ -318,7 +318,7 @@
           "record": 75512
         },
         {
-          "diagnostics": "untyped record:  i)=ligc i)li gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  i)=ligc i)li gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 253369,
           "last_line": 253371,
@@ -326,7 +326,7 @@
           "record": 77323
         },
         {
-          "diagnostics": "untyped record:  ku/stigc kusti gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  ku/stigc kusti gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 268682,
           "last_line": 268684,
@@ -334,7 +334,7 @@
           "record": 82422
         },
         {
-          "diagnostics": "untyped record:  o/n os_ou suff_acc masc\n\n",
+          "diagnostics": "untyped record:  o/n os_ou suff_acc masc\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 273225,
           "last_line": 273227,
@@ -342,7 +342,7 @@
           "record": 83935
         },
         {
-          "diagnostics": "untyped record:  melirraqa/migc melirraqami gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  melirraqa/migc melirraqami gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 276074,
           "last_line": 276076,
@@ -350,7 +350,7 @@
           "record": 84884
         },
         {
-          "diagnostics": "untyped record:  mello/pais mello pais_paidos masc\n\n",
+          "diagnostics": "untyped record:  mello/pais mello pais_paidos masc\n\nunrecognized keys: pais_paidos\n",
           "exit_code": 1,
           "first_line": 276263,
           "last_line": 276265,
@@ -358,7 +358,7 @@
           "record": 84947
         },
         {
-          "diagnostics": "untyped record:  mh=nigc mhni gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  mh=nigc mhni gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 277935,
           "last_line": 277937,
@@ -366,7 +366,7 @@
           "record": 85503
         },
         {
-          "diagnostics": "untyped record:  mh=rigc mhri gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  mh=rigc mhri gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 277959,
           "last_line": 277961,
@@ -374,7 +374,7 @@
           "record": 85511
         },
         {
-          "diagnostics": "untyped record:  ne is_ews fem\n\n",
+          "diagnostics": "untyped record:  ne is_ews fem\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 282138,
           "last_line": 282140,
@@ -382,7 +382,7 @@
           "record": 86902
         },
         {
-          "diagnostics": "untyped record:  o)brimo/pais o)brimo pais_paidos masc\n\n",
+          "diagnostics": "untyped record:  o)brimo/pais o)brimo pais_paidos masc\n\nunrecognized keys: pais_paidos\n",
           "exit_code": 1,
           "first_line": 284786,
           "last_line": 284788,
@@ -390,7 +390,7 @@
           "record": 87784
         },
         {
-          "diagnostics": "untyped record:  o/s os_on suff_acc\n\n",
+          "diagnostics": "untyped record:  o/s os_on suff_acc\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 285545,
           "last_line": 285547,
@@ -398,7 +398,7 @@
           "record": 88037
         },
         {
-          "diagnostics": "untyped record:  eu/s eus_ews masc suff_acc\n\n",
+          "diagnostics": "untyped record:  eu/s eus_ews masc suff_acc\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 285617,
           "last_line": 285619,
@@ -406,7 +406,7 @@
           "record": 88061
         },
         {
-          "diagnostics": "untyped record:  o)/stligc o)stli gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  o)/stligc o)stli gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 290132,
           "last_line": 290134,
@@ -414,7 +414,7 @@
           "record": 89564
         },
         {
-          "diagnostics": "untyped record:  pantofa/rugc pantofaru gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  pantofa/rugc pantofaru gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 293273,
           "last_line": 293275,
@@ -422,7 +422,7 @@
           "record": 90609
         },
         {
-          "diagnostics": "untyped record:  polurraqa/migc polurraqa^mi gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  polurraqa/migc polurraqa^mi gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 303469,
           "last_line": 303471,
@@ -430,7 +430,7 @@
           "record": 94004
         },
         {
-          "diagnostics": "untyped record:  polustro/faligc polustrofali gc_ggos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  polustro/faligc polustrofali gc_ggos masc ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 303634,
           "last_line": 303636,
@@ -438,7 +438,7 @@
           "record": 94059
         },
         {
-          "diagnostics": "untyped record:  pu/ligc puli gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  pu/ligc puli gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 309399,
           "last_line": 309401,
@@ -446,7 +446,7 @@
           "record": 95980
         },
         {
-          "diagnostics": "untyped record:  smh=rigc smhri gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  smh=rigc smhri gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 315893,
           "last_line": 315895,
@@ -454,7 +454,7 @@
           "record": 98140
         },
         {
-          "diagnostics": "untyped record:  sph=lugc sphlu gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  sph=lugc sphlu gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 316618,
           "last_line": 316620,
@@ -462,7 +462,7 @@
           "record": 98381
         },
         {
-          "diagnostics": "untyped record:  taxustrofa/ligc taxustrofali gc_ggos fem ant_acc\n\n",
+          "diagnostics": "untyped record:  taxustrofa/ligc taxustrofali gc_ggos fem ant_acc\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 324032,
           "last_line": 324034,
@@ -470,7 +470,7 @@
           "record": 100852
         },
         {
-          "diagnostics": "untyped record:  fau=sigc fausi gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  fau=sigc fausi gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 334512,
           "last_line": 334514,
@@ -478,7 +478,7 @@
           "record": 104344
         },
         {
-          "diagnostics": "untyped record:  filobou/pais filobou pais_paidos masc\n\n",
+          "diagnostics": "untyped record:  filobou/pais filobou pais_paidos masc\n\nunrecognized keys: pais_paidos\n",
           "exit_code": 1,
           "first_line": 335373,
           "last_line": 335375,
@@ -486,7 +486,7 @@
           "record": 104631
         },
         {
-          "diagnostics": "untyped record:  fw=tigc fwti gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  fw=tigc fwti gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 338154,
           "last_line": 338156,
@@ -494,7 +494,7 @@
           "record": 105558
         },
         {
-          "diagnostics": "untyped record:  xqonopais xqono pais_paidos masc\n\n",
+          "diagnostics": "untyped record:  xqonopais xqono pais_paidos masc\n\nunrecognized keys: pais_paidos\n",
           "exit_code": 1,
           "first_line": 339863,
           "last_line": 339865,
@@ -502,7 +502,7 @@
           "record": 106127
         },
         {
-          "diagnostics": "untyped record:  ya/ltigc yalti gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  ya/ltigc yalti gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 342056,
           "last_line": 342058,
@@ -510,7 +510,7 @@
           "record": 106858
         },
         {
-          "diagnostics": "untyped record:  ya=figc ya_fi gc_ggos fem\n\n",
+          "diagnostics": "untyped record:  ya=figc ya_fi gc_ggos fem\n\nunrecognized keys: gc_ggos\n",
           "exit_code": 1,
           "first_line": 342140,
           "last_line": 342142,
@@ -527,7 +527,7 @@
       "batch_only_failures": [],
       "failures": [
         {
-          "diagnostics": "untyped record:  Jeremiah Hieremi as_a masc pers_name\n\n",
+          "diagnostics": "untyped record:  Jeremiah Hieremi as_a masc pers_name\n\nunrecognized keys: as_a\n",
           "exit_code": 1,
           "first_line": 636,
           "last_line": 639,
@@ -535,7 +535,7 @@
           "record": 204
         },
         {
-          "diagnostics": "untyped record:  Ezechias Ezechi as_a masc pers_name\n\n",
+          "diagnostics": "untyped record:  Ezechias Ezechi as_a masc pers_name\n\nunrecognized keys: as_a\n",
           "exit_code": 1,
           "first_line": 691,
           "last_line": 694,
@@ -543,7 +543,7 @@
           "record": 221
         },
         {
-          "diagnostics": "untyped record:  Moses Mos es_eIi masc pers_name\n\n",
+          "diagnostics": "untyped record:  Moses Mos es_eIi masc pers_name\n\nunrecognized keys: es_eIi\n",
           "exit_code": 1,
           "first_line": 711,
           "last_line": 714,
@@ -551,7 +551,7 @@
           "record": 227
         },
         {
-          "diagnostics": "untyped record:  Adiatorix Adiator ix_igis masc\n\n",
+          "diagnostics": "untyped record:  Adiatorix Adiator ix_igis masc\n\nunrecognized keys: ix_igis\n",
           "exit_code": 1,
           "first_line": 1590,
           "last_line": 1593,
@@ -559,7 +559,7 @@
           "record": 452
         },
         {
-          "diagnostics": "untyped record:  Anio Ani o_enis masc\n\n",
+          "diagnostics": "untyped record:  Anio Ani o_enis masc\n\nunrecognized keys: o_enis\n",
           "exit_code": 1,
           "first_line": 1674,
           "last_line": 1675,
@@ -567,7 +567,7 @@
           "record": 474
         },
         {
-          "diagnostics": "untyped record:  Arsinoe Arsino e_ae fem\n\n",
+          "diagnostics": "untyped record:  Arsinoe Arsino e_ae fem\n\nunrecognized keys: e_ae\n",
           "exit_code": 1,
           "first_line": 1791,
           "last_line": 1793,
@@ -575,7 +575,7 @@
           "record": 507
         },
         {
-          "diagnostics": "untyped record:  Crus Cru s_ris masc pers_name\n\n",
+          "diagnostics": "untyped record:  Crus Cru s_ris masc pers_name\n\nunrecognized keys: s_ris\n",
           "exit_code": 1,
           "first_line": 3664,
           "last_line": 3666,
@@ -583,7 +583,7 @@
           "record": 765
         },
         {
-          "diagnostics": "untyped record: 2 familia paterfamilias irreg_decl3 nom masc sg\n\n",
+          "diagnostics": "untyped record: 2 familia paterfamilias irreg_decl3 nom masc sg\n\nunrecognized keys: irreg_decl3\n",
           "exit_code": 1,
           "first_line": 3825,
           "last_line": 3830,
@@ -591,7 +591,7 @@
           "record": 811
         },
         {
-          "diagnostics": "0) [Liby :Libya:a_ae:fem]\nuntyped record:  Libya Liby a_es fem\n\n",
+          "diagnostics": "0) [Liby :Libya:a_ae:fem]\nuntyped record:  Libya Liby a_es fem\n\nunrecognized keys: a_es\n",
           "exit_code": 1,
           "first_line": 4052,
           "last_line": 4055,
@@ -599,7 +599,7 @@
           "record": 877
         },
         {
-          "diagnostics": "0) [Nymph :Nympho:o_oLnis:masc]\nuntyped record:  Nympho Nymph o_ontis masc\n\n",
+          "diagnostics": "0) [Nymph :Nympho:o_oLnis:masc]\nuntyped record:  Nympho Nymph o_ontis masc\n\nunrecognized keys: o_ontis\n",
           "exit_code": 1,
           "first_line": 4218,
           "last_line": 4221,
@@ -607,7 +607,7 @@
           "record": 924
         },
         {
-          "diagnostics": "untyped record:  rus ru s_ris neut\n\n",
+          "diagnostics": "untyped record:  rus ru s_ris neut\n\nunrecognized keys: s_ris\n",
           "exit_code": 1,
           "first_line": 4500,
           "last_line": 4502,
@@ -615,7 +615,7 @@
           "record": 1005
         },
         {
-          "diagnostics": "untyped record: 2 Abel Abel iregg_decl3 nom voc acc gen abl dat sg masc pers_name\n\n",
+          "diagnostics": "untyped record: 2 Abel Abel iregg_decl3 nom voc acc gen abl dat sg masc pers_name\n\nunrecognized keys: iregg_decl3\n",
           "exit_code": 1,
           "first_line": 4779,
           "last_line": 4781,
@@ -639,7 +639,7 @@
           "record": 1089
         },
         {
-          "diagnostics": "untyped record:  Thelyphron Thelyphr on_ontos masc pers_name\n\n",
+          "diagnostics": "untyped record:  Thelyphron Thelyphr on_ontos masc pers_name\n\nunrecognized keys: on_ontos\n",
           "exit_code": 1,
           "first_line": 4791,
           "last_line": 4793,
@@ -647,7 +647,7 @@
           "record": 1090
         },
         {
-          "diagnostics": "untyped record:  Libertas Libert as_atis fem\n\n",
+          "diagnostics": "untyped record:  Libertas Libert as_atis fem\n\nunrecognized keys: as_atis\n",
           "exit_code": 1,
           "first_line": 5211,
           "last_line": 5213,
@@ -655,7 +655,7 @@
           "record": 1227
         },
         {
-          "diagnostics": "untyped record:  Thraex Thrae c_cis masc fem group\n\n",
+          "diagnostics": "untyped record:  Thraex Thrae c_cis masc fem group\n\nunrecognized keys: c_cis group\n",
           "exit_code": 1,
           "first_line": 5560,
           "last_line": 5562,
@@ -663,7 +663,7 @@
           "record": 1341
         },
         {
-          "diagnostics": "0) [Hege :Hegeas:as_ae:masc:pers_name]\nuntyped record:  Hegeas Herbesus \n",
+          "diagnostics": "0) [Hege :Hegeas:as_ae:masc:pers_name]\nuntyped record:  Hegeas Herbesus \nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 6156,
           "last_line": 6162,
@@ -671,7 +671,7 @@
           "record": 1535
         },
         {
-          "diagnostics": "untyped record:  Ilerges Ilerg es_eLtis_adj\n\n",
+          "diagnostics": "untyped record:  Ilerges Ilerg es_eLtis_adj\n\nunrecognized keys: es_eLtis_adj\n",
           "exit_code": 1,
           "first_line": 6172,
           "last_line": 6174,
@@ -679,7 +679,7 @@
           "record": 1539
         },
         {
-          "diagnostics": "untyped record:  Menige Menig e_ae fem geog_name\n\n",
+          "diagnostics": "untyped record:  Menige Menig e_ae fem geog_name\n\nunrecognized keys: e_ae\n",
           "exit_code": 1,
           "first_line": 6230,
           "last_line": 6232,
@@ -687,7 +687,7 @@
           "record": 1558
         },
         {
-          "diagnostics": "untyped record:  Amelesagoras Amelesagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Amelesagoras Amelesagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 7513,
           "last_line": 7515,
@@ -695,7 +695,7 @@
           "record": 1927
         },
         {
-          "diagnostics": "untyped record:  Antagoras Antagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Antagoras Antagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 7807,
           "last_line": 7813,
@@ -703,7 +703,7 @@
           "record": 2011
         },
         {
-          "diagnostics": "untyped record:  Aristagoras Aristagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Aristagoras Aristagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 8281,
           "last_line": 8289,
@@ -711,7 +711,7 @@
           "record": 2147
         },
         {
-          "diagnostics": "untyped record:  Chrysoloras Chrysolor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Chrysoloras Chrysolor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 10077,
           "last_line": 10079,
@@ -719,7 +719,7 @@
           "record": 2661
         },
         {
-          "diagnostics": "untyped record:  Crinagoras Crinagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Crinagoras Crinagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 10551,
           "last_line": 10555,
@@ -727,7 +727,7 @@
           "record": 2793
         },
         {
-          "diagnostics": "untyped record:  Damagoras Damagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Damagoras Damagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 10756,
           "last_line": 10758,
@@ -735,7 +735,7 @@
           "record": 2854
         },
         {
-          "diagnostics": "untyped record:  Demagoras Demagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Demagoras Demagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 10940,
           "last_line": 10942,
@@ -743,7 +743,7 @@
           "record": 2906
         },
         {
-          "diagnostics": "untyped record:  Eury Eur y_pos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Eury Eur y_pos masc ant_acc pers_name\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 12063,
           "last_line": 12067,
@@ -751,7 +751,7 @@
           "record": 3231
         },
         {
-          "diagnostics": "untyped record:  Evagoras Evagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Evagoras Evagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 12223,
           "last_line": 12225,
@@ -759,7 +759,7 @@
           "record": 3277
         },
         {
-          "diagnostics": "untyped record:  Genseric Genseri c_kos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Genseric Genseri c_kos masc ant_acc pers_name\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 12624,
           "last_line": 12626,
@@ -767,7 +767,7 @@
           "record": 3390
         },
         {
-          "diagnostics": "untyped record:  Goras Gor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Goras Gor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 12726,
           "last_line": 12730,
@@ -775,7 +775,7 @@
           "record": 3416
         },
         {
-          "diagnostics": "untyped record:  Gregoras Gregor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Gregoras Gregor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 12787,
           "last_line": 12789,
@@ -783,7 +783,7 @@
           "record": 3431
         },
         {
-          "diagnostics": "untyped record:  Harpocras Harpocr hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Harpocras Harpocr hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 12892,
           "last_line": 12898,
@@ -791,7 +791,7 @@
           "record": 3460
         },
         {
-          "diagnostics": "untyped record:  Heragoras Heragor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Heragoras Heragor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13042,
           "last_line": 13046,
@@ -799,7 +799,7 @@
           "record": 3500
         },
         {
-          "diagnostics": "untyped record:  Hilderic Hilderi c_kos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Hilderic Hilderi c_kos masc ant_acc pers_name\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 13185,
           "last_line": 13187,
@@ -807,7 +807,7 @@
           "record": 3541
         },
         {
-          "diagnostics": "untyped record:  Hippagoras Hippagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Hippagoras Hippagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13199,
           "last_line": 13201,
@@ -815,7 +815,7 @@
           "record": 3545
         },
         {
-          "diagnostics": "untyped record:  Hunneric Hunneri c_kos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Hunneric Hunneri c_kos masc ant_acc pers_name\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 13350,
           "last_line": 13352,
@@ -823,7 +823,7 @@
           "record": 3588
         },
         {
-          "diagnostics": "untyped record:  Isaac Isaa c_kos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Isaac Isaa c_kos masc ant_acc pers_name\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 13624,
           "last_line": 13626,
@@ -831,7 +831,7 @@
           "record": 3662
         },
         {
-          "diagnostics": "untyped record:  Isagoras Isagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Isagoras Isagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13627,
           "last_line": 13631,
@@ -839,7 +839,7 @@
           "record": 3663
         },
         {
-          "diagnostics": "untyped record:  Ischagoras Ischagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Ischagoras Ischagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13635,
           "last_line": 13639,
@@ -847,7 +847,7 @@
           "record": 3665
         },
         {
-          "diagnostics": "untyped record:  Lagoras Lagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Lagoras Lagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13842,
           "last_line": 13846,
@@ -855,7 +855,7 @@
           "record": 3713
         },
         {
-          "diagnostics": "untyped record:  Laogoras Laogor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Laogoras Laogor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 13911,
           "last_line": 13913,
@@ -863,7 +863,7 @@
           "record": 3732
         },
         {
-          "diagnostics": "untyped record:  Leogoras Leogor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Leogoras Leogor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 14057,
           "last_line": 14061,
@@ -871,7 +871,7 @@
           "record": 3778
         },
         {
-          "diagnostics": "untyped record:  Molpagoras Molpagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Molpagoras Molpagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 15273,
           "last_line": 15275,
@@ -879,7 +879,7 @@
           "record": 4124
         },
         {
-          "diagnostics": "untyped record:  Nic Ni c_kos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Nic Ni c_kos masc ant_acc pers_name\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 15605,
           "last_line": 15607,
@@ -887,7 +887,7 @@
           "record": 4218
         },
         {
-          "diagnostics": "untyped record:  Nicagoras Nicagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Nicagoras Nicagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 15614,
           "last_line": 15616,
@@ -895,7 +895,7 @@
           "record": 4221
         },
         {
-          "diagnostics": "untyped record:  Orthagoras Orthagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Orthagoras Orthagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 16131,
           "last_line": 16133,
@@ -903,7 +903,7 @@
           "record": 4374
         },
         {
-          "diagnostics": "untyped record:  Pausiras Pausir hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Pausiras Pausir hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 16527,
           "last_line": 16533,
@@ -911,7 +911,7 @@
           "record": 4488
         },
         {
-          "diagnostics": "untyped record:  Peithagoras Peithagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Peithagoras Peithagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 16584,
           "last_line": 16592,
@@ -919,7 +919,7 @@
           "record": 4501
         },
         {
-          "diagnostics": "untyped record:  Poly Pol y_pos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Poly Pol y_pos masc ant_acc pers_name\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 17439,
           "last_line": 17441,
@@ -927,7 +927,7 @@
           "record": 4740
         },
         {
-          "diagnostics": "untyped record:  Pteras Pter hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Pteras Pter hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 17851,
           "last_line": 17853,
@@ -935,7 +935,7 @@
           "record": 4856
         },
         {
-          "diagnostics": "untyped record:  Sauras Saur hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Sauras Saur hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 18422,
           "last_line": 18428,
@@ -943,7 +943,7 @@
           "record": 5019
         },
         {
-          "diagnostics": "untyped record:  Sciras Scir hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Sciras Scir hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 18471,
           "last_line": 18473,
@@ -951,7 +951,7 @@
           "record": 5032
         },
         {
-          "diagnostics": "untyped record:  Stesagoras Stesagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Stesagoras Stesagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 18974,
           "last_line": 18978,
@@ -959,7 +959,7 @@
           "record": 5173
         },
         {
-          "diagnostics": "untyped record:  Syadras Syadr hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Syadras Syadr hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 19081,
           "last_line": 19085,
@@ -967,7 +967,7 @@
           "record": 5198
         },
         {
-          "diagnostics": "untyped record:  Themistagoras Themistagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Themistagoras Themistagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 19479,
           "last_line": 19481,
@@ -975,7 +975,7 @@
           "record": 5304
         },
         {
-          "diagnostics": "untyped record:  Thrasy Thras y_pos masc ant_acc pers_name\n\n",
+          "diagnostics": "untyped record:  Thrasy Thras y_pos masc ant_acc pers_name\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 19656,
           "last_line": 19660,
@@ -983,7 +983,7 @@
           "record": 5353
         },
         {
-          "diagnostics": "untyped record:  Timagoras Timagor hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Timagoras Timagor hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 19730,
           "last_line": 19732,
@@ -991,7 +991,7 @@
           "record": 5375
         },
         {
-          "diagnostics": "untyped record:  Zonaras Zonar hs_ou masc pers_name\n\n",
+          "diagnostics": "untyped record:  Zonaras Zonar hs_ou masc pers_name\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 20605,
           "last_line": 20607,
@@ -999,7 +999,7 @@
           "record": 5628
         },
         {
-          "diagnostics": "untyped record:  Aepy Aep y_pos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Aepy Aep y_pos masc ant_acc\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 20912,
           "last_line": 20914,
@@ -1007,7 +1007,7 @@
           "record": 5725
         },
         {
-          "diagnostics": "untyped record:  Athyras Athyr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Athyras Athyr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 22229,
           "last_line": 22231,
@@ -1015,7 +1015,7 @@
           "record": 6136
         },
         {
-          "diagnostics": "untyped record:  Babras Babr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Babras Babr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 22509,
           "last_line": 22511,
@@ -1023,7 +1023,7 @@
           "record": 6226
         },
         {
-          "diagnostics": "untyped record:  Baphyras Baphyr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Baphyras Baphyr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 22701,
           "last_line": 22703,
@@ -1031,7 +1031,7 @@
           "record": 6286
         },
         {
-          "diagnostics": "untyped record:  Bethany Bethan y_pos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Bethany Bethan y_pos masc ant_acc\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 22990,
           "last_line": 22994,
@@ -1039,7 +1039,7 @@
           "record": 6375
         },
         {
-          "diagnostics": "untyped record:  Buphras Buphr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Buphras Buphr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 23444,
           "last_line": 23446,
@@ -1047,7 +1047,7 @@
           "record": 6511
         },
         {
-          "diagnostics": "untyped record:  Carcoras Carcor hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Carcoras Carcor hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 24002,
           "last_line": 24004,
@@ -1055,7 +1055,7 @@
           "record": 6687
         },
         {
-          "diagnostics": "untyped record:  Chaboras Chabor hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Chaboras Chabor hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 24551,
           "last_line": 24553,
@@ -1063,7 +1063,7 @@
           "record": 6862
         },
         {
-          "diagnostics": "untyped record:  Chrysoceras Chrysocer hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Chrysoceras Chrysocer hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 24790,
           "last_line": 24792,
@@ -1071,7 +1071,7 @@
           "record": 6933
         },
         {
-          "diagnostics": "untyped record:  Coroc Coro c_kos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Coroc Coro c_kos masc ant_acc\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 25406,
           "last_line": 25408,
@@ -1079,7 +1079,7 @@
           "record": 7127
         },
         {
-          "diagnostics": "untyped record:  Cory Cor y_pos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Cory Cor y_pos masc ant_acc\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 25457,
           "last_line": 25459,
@@ -1087,7 +1087,7 @@
           "record": 7144
         },
         {
-          "diagnostics": "untyped record:  Daras Dar hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Daras Dar hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 26030,
           "last_line": 26032,
@@ -1095,7 +1095,7 @@
           "record": 7323
         },
         {
-          "diagnostics": "untyped record:  Dyras Dyr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Dyras Dyr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 26584,
           "last_line": 26586,
@@ -1103,7 +1103,7 @@
           "record": 7495
         },
         {
-          "diagnostics": "untyped record:  Evoras Evor hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Evoras Evor hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 27245,
           "last_line": 27249,
@@ -1111,7 +1111,7 @@
           "record": 7698
         },
         {
-          "diagnostics": "untyped record:  Locras Locr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Locras Locr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 29866,
           "last_line": 29868,
@@ -1119,7 +1119,7 @@
           "record": 8474
         },
         {
-          "diagnostics": "untyped record:  Macaras Macar hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Macaras Macar hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 30074,
           "last_line": 30076,
@@ -1127,7 +1127,7 @@
           "record": 8540
         },
         {
-          "diagnostics": "untyped record:  Magoras Magor hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Magoras Magor hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 30238,
           "last_line": 30240,
@@ -1135,7 +1135,7 @@
           "record": 8594
         },
         {
-          "diagnostics": "untyped record:  Mysocaras Mysocar hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Mysocaras Mysocar hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 31391,
           "last_line": 31393,
@@ -1143,7 +1143,7 @@
           "record": 8953
         },
         {
-          "diagnostics": "untyped record:  Ochras Ochr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Ochras Ochr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 31943,
           "last_line": 31945,
@@ -1151,7 +1151,7 @@
           "record": 9121
         },
         {
-          "diagnostics": "untyped record:  Oenobaras Oenobar hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Oenobaras Oenobar hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 31998,
           "last_line": 32000,
@@ -1159,7 +1159,7 @@
           "record": 9138
         },
         {
-          "diagnostics": "untyped record:  Omiras Omir hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Omiras Omir hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 32148,
           "last_line": 32150,
@@ -1167,7 +1167,7 @@
           "record": 9184
         },
         {
-          "diagnostics": "untyped record:  Ottorocorras Ottorocorr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Ottorocorras Ottorocorr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 32462,
           "last_line": 32464,
@@ -1175,7 +1175,7 @@
           "record": 9278
         },
         {
-          "diagnostics": "untyped record:  Parachoatras Parachoatr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Parachoatras Parachoatr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 32764,
           "last_line": 32766,
@@ -1183,7 +1183,7 @@
           "record": 9374
         },
         {
-          "diagnostics": "untyped record:  Pras Pr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Pras Pr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 33843,
           "last_line": 33845,
@@ -1191,7 +1191,7 @@
           "record": 9707
         },
         {
-          "diagnostics": "untyped record:  Pydaras Pydar hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Pydaras Pydar hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 34037,
           "last_line": 34039,
@@ -1199,7 +1199,7 @@
           "record": 9767
         },
         {
-          "diagnostics": "untyped record:  Saocoras Saocor hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Saocoras Saocor hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 34998,
           "last_line": 35000,
@@ -1207,7 +1207,7 @@
           "record": 10068
         },
         {
-          "diagnostics": "untyped record:  Scyras Scyr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Scyras Scyr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 35386,
           "last_line": 35388,
@@ -1215,7 +1215,7 @@
           "record": 10192
         },
         {
-          "diagnostics": "untyped record:  Siroc Siro c_kos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Siroc Siro c_kos masc ant_acc\n\nunrecognized keys: c_kos\n",
           "exit_code": 1,
           "first_line": 36068,
           "last_line": 36072,
@@ -1223,7 +1223,7 @@
           "record": 10398
         },
         {
-          "diagnostics": "untyped record:  Talacory Talacor y_pos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Talacory Talacor y_pos masc ant_acc\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 36730,
           "last_line": 36732,
@@ -1231,7 +1231,7 @@
           "record": 10598
         },
         {
-          "diagnostics": "untyped record:  Tamyras Tamyr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Tamyras Tamyr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 36808,
           "last_line": 36812,
@@ -1239,7 +1239,7 @@
           "record": 10622
         },
         {
-          "diagnostics": "untyped record:  Tarsuras Tarsur hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Tarsuras Tarsur hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 36908,
           "last_line": 36910,
@@ -1247,7 +1247,7 @@
           "record": 10652
         },
         {
-          "diagnostics": "untyped record:  Tharras Tharr hs_ou masc\n\n",
+          "diagnostics": "untyped record:  Tharras Tharr hs_ou masc\n\nunrecognized keys: hs_ou\n",
           "exit_code": 1,
           "first_line": 37288,
           "last_line": 37290,
@@ -1255,7 +1255,7 @@
           "record": 10772
         },
         {
-          "diagnostics": "untyped record:  Trachy Trach y_pos masc ant_acc\n\n",
+          "diagnostics": "untyped record:  Trachy Trach y_pos masc ant_acc\n\nunrecognized keys: y_pos\n",
           "exit_code": 1,
           "first_line": 37822,
           "last_line": 37824,
@@ -1263,7 +1263,7 @@
           "record": 10938
         },
         {
-          "diagnostics": "untyped record:  albicolor albi^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  albicolor albi^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 46229,
           "last_line": 46233,
@@ -1271,7 +1271,7 @@
           "record": 12741
         },
         {
-          "diagnostics": "untyped record:  Androgeos Andro^ge^ os_o masc\n\n",
+          "diagnostics": "untyped record:  Androgeos Andro^ge^ os_o masc\n\nunrecognized keys: os_o\n",
           "exit_code": 1,
           "first_line": 50110,
           "last_line": 50114,
@@ -1279,7 +1279,7 @@
           "record": 13466
         },
         {
-          "diagnostics": "untyped record:  atricolor a_tri^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  atricolor a_tri^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 58522,
           "last_line": 58526,
@@ -1287,7 +1287,7 @@
           "record": 15040
         },
         {
-          "diagnostics": "untyped record:  auricolor auri^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  auricolor auri^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 59494,
           "last_line": 59499,
@@ -1295,7 +1295,7 @@
           "record": 15219
         },
         {
-          "diagnostics": "untyped record:  caelebs caeleb s_e\n\n",
+          "diagnostics": "untyped record:  caelebs caeleb s_e\n\nunrecognized keys: s_e\n",
           "exit_code": 1,
           "first_line": 67166,
           "last_line": 67169,
@@ -1303,7 +1303,7 @@
           "record": 16662
         },
         {
-          "diagnostics": "untyped record:  campter campt eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  campter campt eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 69301,
           "last_line": 69305,
@@ -1311,7 +1311,7 @@
           "record": 17054
         },
         {
-          "diagnostics": "untyped record:  catheter ca^the^t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  catheter ca^the^t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 72780,
           "last_line": 72784,
@@ -1319,7 +1319,7 @@
           "record": 17719
         },
         {
-          "diagnostics": "untyped record:  cauter caut eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  cauter caut eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 73346,
           "last_line": 73350,
@@ -1327,7 +1327,7 @@
           "record": 17823
         },
         {
-          "diagnostics": "untyped record:  character cha^ract eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  character cha^ract eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 75814,
           "last_line": 75818,
@@ -1335,7 +1335,7 @@
           "record": 18284
         },
         {
-          "diagnostics": "untyped record:  climacter cli_mact eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  climacter cli_mact eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 79375,
           "last_line": 79379,
@@ -1343,7 +1343,7 @@
           "record": 18965
         },
         {
-          "diagnostics": "untyped record:  Closter Clo_st eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  Closter Clo_st eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 79607,
           "last_line": 79612,
@@ -1351,7 +1351,7 @@
           "record": 19010
         },
         {
-          "diagnostics": "untyped record:  convenienter conve^ni^en-t er_i neut\n\n",
+          "diagnostics": "untyped record:  convenienter conve^ni^en-t er_i neut\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 87480,
           "last_line": 87484,
@@ -1359,7 +1359,7 @@
           "record": 20496
         },
         {
-          "diagnostics": "untyped record:  crater cra_t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  crater cra_t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 89781,
           "last_line": 89785,
@@ -1367,7 +1367,7 @@
           "record": 20926
         },
         {
-          "diagnostics": "0) [cyclamin cyclami_n:cyclaminos:os_i:fem]\nuntyped record:  cyclaminos cycla^mi_n on_i neut\n\n",
+          "diagnostics": "0) [cyclamin cyclami_n:cyclaminos:os_i:fem]\nuntyped record:  cyclaminos cycla^mi_n on_i neut\n\nunrecognized keys: on_i\n",
           "exit_code": 1,
           "first_line": 92612,
           "last_line": 92617,
@@ -1375,7 +1375,7 @@
           "record": 21468
         },
         {
-          "diagnostics": "untyped record:  David Da_vi_d 0_us masc pers_name\n\n",
+          "diagnostics": "untyped record:  David Da_vi_d 0_us masc pers_name\n\nunrecognized keys: 0_us\n",
           "exit_code": 1,
           "first_line": 94249,
           "last_line": 94253,
@@ -1383,7 +1383,7 @@
           "record": 21776
         },
         {
-          "diagnostics": "untyped record:  diversicolor di_versi^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  diversicolor di_versi^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 101187,
           "last_line": 101193,
@@ -1391,7 +1391,7 @@
           "record": 23094
         },
         {
-          "diagnostics": "untyped record:  ens ens_entis neut\n\n",
+          "diagnostics": "untyped record:  ens ens_entis neut\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 106292,
           "last_line": 106296,
@@ -1399,7 +1399,7 @@
           "record": 24074
         },
         {
-          "diagnostics": "untyped record:  flucticolor flucti^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  flucticolor flucti^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 116251,
           "last_line": 116255,
@@ -1407,7 +1407,7 @@
           "record": 25971
         },
         {
-          "diagnostics": "untyped record:  hageter ha_ge_t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  hageter ha_ge_t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 124277,
           "last_line": 124281,
@@ -1415,7 +1415,7 @@
           "record": 27494
         },
         {
-          "diagnostics": "untyped record:  halter halt eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  halter halt eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 124446,
           "last_line": 124451,
@@ -1423,7 +1423,7 @@
           "record": 27525
         },
         {
-          "diagnostics": "untyped record:  idoleum ius_i neut\n\n",
+          "diagnostics": "untyped record:  idoleum ius_i neut\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 130491,
           "last_line": 130495,
@@ -1431,7 +1431,7 @@
           "record": 28677
         },
         {
-          "diagnostics": "untyped record:  inops i^nop s_e\n\n",
+          "diagnostics": "untyped record:  inops i^nop s_e\n\nunrecognized keys: s_e\n",
           "exit_code": 1,
           "first_line": 140040,
           "last_line": 140045,
@@ -1439,7 +1439,7 @@
           "record": 30391
         },
         {
-          "diagnostics": "untyped record:  ion#1 ios_i neut\n\n",
+          "diagnostics": "untyped record:  ion#1 ios_i neut\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 143983,
           "last_line": 143987,
@@ -1447,7 +1447,7 @@
           "record": 31159
         },
         {
-          "diagnostics": "untyped record:  iricolor i_ri^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  iricolor i_ri^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 144208,
           "last_line": 144212,
@@ -1455,7 +1455,7 @@
           "record": 31202
         },
         {
-          "diagnostics": "untyped record:  is is_is fem\n\n",
+          "diagnostics": "untyped record:  is is_is fem\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 144895,
           "last_line": 144898,
@@ -1463,7 +1463,7 @@
           "record": 31309
         },
         {
-          "diagnostics": "untyped record:  is is_is fem\n\n",
+          "diagnostics": "untyped record:  is is_is fem\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 144899,
           "last_line": 144907,
@@ -1471,7 +1471,7 @@
           "record": 31310
         },
         {
-          "diagnostics": "untyped record:  lacticolor lacti^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  lacticolor lacti^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 147609,
           "last_line": 147615,
@@ -1479,7 +1479,7 @@
           "record": 31820
         },
         {
-          "diagnostics": "untyped record:  Leander Le_and er_i masc\n\n",
+          "diagnostics": "untyped record:  Leander Le_and er_i masc\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 150224,
           "last_line": 150228,
@@ -1487,7 +1487,7 @@
           "record": 32318
         },
         {
-          "diagnostics": "untyped record:  luter lu_t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  luter lu_t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 155917,
           "last_line": 155921,
@@ -1495,7 +1495,7 @@
           "record": 33405
         },
         {
-          "diagnostics": "untyped record:  Menander Me^nand er_i masc\n\n",
+          "diagnostics": "untyped record:  Menander Me^nand er_i masc\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 162731,
           "last_line": 162735,
@@ -1503,7 +1503,7 @@
           "record": 34716
         },
         {
-          "diagnostics": "untyped record:  mnester#1 mne_st eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  mnester#1 mne_st eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 166040,
           "last_line": 166044,
@@ -1511,7 +1511,7 @@
           "record": 35348
         },
         {
-          "diagnostics": "untyped record:  Mnester Mne_st eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  Mnester Mne_st eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 166045,
           "last_line": 166050,
@@ -1519,7 +1519,7 @@
           "record": 35349
         },
         {
-          "diagnostics": "untyped record:  multicolor multi^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  multicolor multi^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 168410,
           "last_line": 168415,
@@ -1527,7 +1527,7 @@
           "record": 35805
         },
         {
-          "diagnostics": "untyped record:  nigricolor ni_^gri^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  nigricolor ni_^gri^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 173575,
           "last_line": 173579,
@@ -1535,7 +1535,7 @@
           "record": 36790
         },
         {
-          "diagnostics": "untyped record:  nocticolor nocti^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  nocticolor nocti^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 174124,
           "last_line": 174128,
@@ -1543,7 +1543,7 @@
           "record": 36892
         },
         {
-          "diagnostics": "untyped record:  omnicolor omni^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  omnicolor omni^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 179819,
           "last_line": 179824,
@@ -1551,7 +1551,7 @@
           "record": 37978
         },
         {
-          "diagnostics": "untyped record:  onager o^na^g er_i masc\n\n",
+          "diagnostics": "untyped record:  onager o^na^g er_i masc\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 180005,
           "last_line": 180009,
@@ -1559,7 +1559,7 @@
           "record": 38014
         },
         {
-          "diagnostics": "0) [Orchomen :Orchomenus:us_i:masc/fem]\nuntyped record:  Orchomenus Orcho^me^n on_i masc orth\n\n",
+          "diagnostics": "0) [Orchomen :Orchomenus:us_i:masc/fem]\nuntyped record:  Orchomenus Orcho^me^n on_i masc orth\n\nunrecognized keys: on_i orth\n",
           "exit_code": 1,
           "first_line": 181392,
           "last_line": 181396,
@@ -1567,7 +1567,7 @@
           "record": 38274
         },
         {
-          "diagnostics": "untyped record:  ostricolor ostri^co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  ostricolor ostri^co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 182667,
           "last_line": 182671,
@@ -1575,7 +1575,7 @@
           "record": 38519
         },
         {
-          "diagnostics": "untyped record:  pandecter pandect eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  pandecter pandect eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 184821,
           "last_line": 184825,
@@ -1583,7 +1583,7 @@
           "record": 38936
         },
         {
-          "diagnostics": "untyped record:  panther#2 panth eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  panther#2 panth eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 185258,
           "last_line": 185262,
@@ -1591,7 +1591,7 @@
           "record": 39020
         },
         {
-          "diagnostics": "untyped record:  pes peLs_pedis masc\n\n",
+          "diagnostics": "untyped record:  pes peLs_pedis masc\n\nno inflectional stem type among recognized keys\n",
           "exit_code": 1,
           "first_line": 193169,
           "last_line": 193173,
@@ -1599,7 +1599,7 @@
           "record": 40547
         },
         {
-          "diagnostics": "untyped record:  phager pha^g er_i masc\n\n",
+          "diagnostics": "untyped record:  phager pha^g er_i masc\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 193904,
           "last_line": 193910,
@@ -1607,7 +1607,7 @@
           "record": 40689
         },
         {
-          "diagnostics": "untyped record:  physeter phy_se_t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  physeter phy_se_t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 195901,
           "last_line": 195905,
@@ -1615,7 +1615,7 @@
           "record": 41069
         },
         {
-          "diagnostics": "untyped record:  prester pre_st eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  prester pre_st eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 204048,
           "last_line": 204052,
@@ -1623,7 +1623,7 @@
           "record": 42630
         },
         {
-          "diagnostics": "untyped record:  progener pro_-ge^n er_i masc\n\n",
+          "diagnostics": "untyped record:  progener pro_-ge^n er_i masc\n\nunrecognized keys: er_i\n",
           "exit_code": 1,
           "first_line": 205561,
           "last_line": 205565,
@@ -1631,7 +1631,7 @@
           "record": 42922
         },
         {
-          "diagnostics": "untyped record:  pudoricolor pu^do_ri^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  pudoricolor pu^do_ri^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 208533,
           "last_line": 208537,
@@ -1639,7 +1639,7 @@
           "record": 43494
         },
         {
-          "diagnostics": "untyped record:  Soter So_t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  Soter So_t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 230806,
           "last_line": 230810,
@@ -1647,7 +1647,7 @@
           "record": 47735
         },
         {
-          "diagnostics": "untyped record:  sphincter sphinct eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  sphincter sphinct eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 231471,
           "last_line": 231475,
@@ -1655,7 +1655,7 @@
           "record": 47864
         },
         {
-          "diagnostics": "untyped record:  spinter spint eLr_eLis neut\n\n",
+          "diagnostics": "untyped record:  spinter spint eLr_eLis neut\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 231627,
           "last_line": 231631,
@@ -1663,7 +1663,7 @@
           "record": 47893
         },
         {
-          "diagnostics": "untyped record:  Spinther Spinth eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  Spinther Spinth eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 231637,
           "last_line": 231641,
@@ -1671,7 +1671,7 @@
           "record": 47895
         },
         {
-          "diagnostics": "untyped record:  stater sta^t eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  stater sta^t eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 232685,
           "last_line": 232689,
@@ -1679,7 +1679,7 @@
           "record": 48096
         },
         {
-          "diagnostics": "untyped record:  Suffenas Suffen as_a masc pers_name\n\n",
+          "diagnostics": "untyped record:  Suffenas Suffen as_a masc pers_name\n\nunrecognized keys: as_a\n",
           "exit_code": 1,
           "first_line": 236958,
           "last_line": 236960,
@@ -1687,7 +1687,7 @@
           "record": 48909
         },
         {
-          "diagnostics": "untyped record:  unicolor u_ni^-co^lor 0_e\n\n",
+          "diagnostics": "untyped record:  unicolor u_ni^-co^lor 0_e\n\nunrecognized keys: 0_e\n",
           "exit_code": 1,
           "first_line": 252468,
           "last_line": 252472,
@@ -1695,7 +1695,7 @@
           "record": 51848
         },
         {
-          "diagnostics": "untyped record:  zoster#1 zost eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  zoster#1 zost eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 260569,
           "last_line": 260573,
@@ -1703,7 +1703,7 @@
           "record": 53393
         },
         {
-          "diagnostics": "untyped record:  Zoster Zost eLr_eLis masc\n\n",
+          "diagnostics": "untyped record:  Zoster Zost eLr_eLis masc\n\nunrecognized keys: eLr_eLis\n",
           "exit_code": 1,
           "first_line": 260574,
           "last_line": 260578,

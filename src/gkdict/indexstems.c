@@ -460,12 +460,18 @@ int do_curstem(char *curstem, char *curlemma, char *curline, char *prefix)
 	
 	clear_globs(curline);
 	int parsed=ScanAsciiKeys(curline,&GkWord,&Gstr,&AvoidGstr);
-    free(oddkeys_of(&GkWord));
-    oddkeys_of(&GkWord)=NULL;
     if(!parsed && !(strcmp(prefix,"3")==0 && derivtype_of(&Gstr))) {
         fprintf(stderr,"untyped record: %s %s %s %s\n",prefix,curlemma,curstem,curline);
+        if(oddkeys_of(&GkWord) && oddkeys_of(&GkWord)[0])
+            fprintf(stderr,"unrecognized keys: %s\n",oddkeys_of(&GkWord));
+        else
+            fprintf(stderr,"no inflectional stem type among recognized keys\n");
+        free(oddkeys_of(&GkWord));
+        oddkeys_of(&GkWord)=NULL;
         return 0;
     }
+    free(oddkeys_of(&GkWord));
+    oddkeys_of(&GkWord)=NULL;
 /*
 	if( ! stemtype_of(&Gstr) ) {
 		fprintf(stderr,"no stemtype in:%s\n", curline );

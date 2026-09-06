@@ -258,3 +258,57 @@ principal part; the latter returns its documented malformed-input result
 outcomes from successful expansion and check failed CLI output cleanup.
 The eight notices still fail; only the two `vs` diagnostics change in the
 pinned inventory. Existing fixture outputs and corpus exceptions are unchanged.
+
+### Nominal refusal diagnosis
+
+The indexer now retains the scanner's unrecognized keys in diagnostics for an
+untyped record. If all remaining keys are recognized, it reports that none
+provides an inflectional stem type. This affects diagnostics only: unknown
+editorial keys alongside a valid type remain accepted, and failed indexing
+still produces no output. Both nominal and verbal indexer CLIs exercise these
+cases in regression tests.
+
+The pinned nominal observations divide as follows:
+
+| Observation on the first failing record in a notice | Greek | Latin |
+| --- | ---: | ---: |
+| Untyped record with unrecognized keys | 55 | 139 |
+| Untyped record with only recognized keys remaining after stem extraction | 9 | 7 |
+| No stem records when the notice is isolated | 0 | 2 |
+| Total isolated refusals | 64 | 148 |
+
+These are notice counts, including duplicate lemmas and generated constraints.
+The second category does not imply that the original record had a well-formed
+stem: for example, an empty stem can cause its type token to be consumed as the
+stem, leaving only gender or accent keys. It also includes records missing type
+annotations. Such cases require inspection of the original notice.
+
+The most frequent unrecognized keys are:
+
+| Corpus | Key or key group | Notices |
+| --- | --- | ---: |
+| Greek | `gc_ggos` | 27 |
+| Greek | `pais_paidos` | 5 |
+| Greek | `is_ios` | 4 |
+| Greek | Other keys | 19 |
+| Latin | `hs_ou` | 57 |
+| Latin | `eLr_eLis` | 23 |
+| Latin | `0_e` | 14 |
+| Latin | `y_pos` | 8 |
+| Latin | `c_kos` | 7 |
+| Latin | `er_i` | 6 |
+| Latin | Other keys or groups | 24 |
+
+The complete key strings remain in `test/stemlib-lexical/blockers.json`, including
+non-type annotations such as Latin `group` and `orth`. Unknown keys must not be
+equated automatically with missing inflectional types.
+
+Of the twelve distinct unrecognized Greek keys, only `is_ios` has a same-named
+ending source in the committed Greek tree. `endtables/source/is_ios.end` is
+explicitly excluded by the table manifest and `is_ios` is absent from the stem
+type registry. Its four affected notices therefore cannot be repaired merely
+by adding it to a build list: registry and table qualification must be reviewed
+together. No same-named ending source exists in the Latin tree for its observed
+unknown keys. This filename check is not evidence that a similarly named table
+is a valid replacement. No registry, source, exclusion or output baseline has
+been changed by this diagnostic tranche.

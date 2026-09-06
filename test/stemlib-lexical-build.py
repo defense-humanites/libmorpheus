@@ -117,6 +117,20 @@ assert (work / "good.out").read_bytes() == input_path.read_bytes()
 run([binary / "do_conj", input_path, work / "good.out", work / "other.odd"], 1, env=env)
 assert (work / "good.out").read_bytes() == input_path.read_bytes()
 for tool in ["indexnoms", "indexvbs"]:
+    for case, keys, diagnostic in [
+            ("unknown", "missing_nominal_type masc", b"unrecognized keys: missing_nominal_type"),
+            ("untyped", "masc", b"no inflectional stem type among recognized keys"),
+            ("metadata", "os_ou masc editorial_note", None)]:
+        probe = work / f"{tool}-{case}.input"
+        probe.write_text(":le:logos\n:no:log " + keys + "\n")
+        target = work / f"{tool}-{case}.out"
+        result = run([binary / tool, probe, target], 1 if diagnostic else 0, env=env)
+        if diagnostic:
+            assert diagnostic in result.stderr
+            assert not target.exists() and not Path(str(target) + ".lindex").exists()
+        else:
+            # Unknown editorial metadata must not become a new rejection rule.
+            assert target.exists() and Path(str(target) + ".lindex").exists()
     output = work / tool
     sidecar = work / (tool + ".lindex")
     sidecar.write_text("sentinel")
