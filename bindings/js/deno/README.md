@@ -35,10 +35,6 @@ TypeScript objects before their C allocations are released.
 
 ## Quick start (using the JSR package)
 
-The package moved from `@humanities/libmorpheus` after version `0.3.2`. Existing
-applications can keep that pinned version; new releases and applications use
-`@libmorpheus/deno`.
-
 The simplest installation needs no C toolchain. The prebuilt native
 archives currently support Linux x86-64 glibc, Linux aarch64 glibc, and macOS
 arm64. Install the binding:
@@ -315,9 +311,9 @@ What must be acquired depends on the distribution:
 
 | Distribution | Native library | Stem data | What to do |
 | --- | --- | --- | --- |
-| JSR package | Not included | Not included | Run `/setup`, or use `/native` and `/data` separately. |
-| Standalone binding archive | Not included | Not included | Install the matching native release and acquire a stemlib as described below. |
-| `deno-runtime` Docker image | Included | Alpheios included | Add the binding from JSR; use `MORPHEUS_LIBRARY` and `MORPHEUS_STEMLIB` without running `/setup`. |
+| JSR package | Not included | Not included | Run `/setup`, or use `/native` and `/data` separately |
+| Standalone binding archive | Not included | Not included | Install the matching native release and acquire a stemlib as described below |
+| `deno-runtime` Docker image | Included | Alpheios included | Add the binding from JSR; use `MORPHEUS_LIBRARY` and `MORPHEUS_STEMLIB` without running `/setup` |
 
 The following acquisition commands therefore apply to the JSR package and the
 standalone binding archive, not to the Docker image.
@@ -408,10 +404,10 @@ The operation and selected dataset together determine language coverage:
 
 | Operation or dataset | Ancient Greek | Latin | Additional requirement |
 | --- | :---: | :---: | --- |
-| `analyze()` | Yes | Yes | A stemlib for the selected language. |
-| `generate()` | Yes | No | Alpheios data prepared with `gener.index`. |
+| `analyze()` | Yes | Yes | A stemlib for the selected language |
+| `generate()` | Yes | No | Alpheios data prepared with `gener.index` |
 | Perseids | Yes | Yes | No |
-| Alpheios | Yes | No | With `--with-gener`; already prepared in Docker. |
+| Alpheios | Yes | No | With `--with-gener`; already prepared in Docker |
 
 See the [stem-library inventory](https://github.com/defense-humanites/libmorpheus/blob/main/docs/stem-libraries.md)
 for dataset origins and repository locations.
