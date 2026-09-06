@@ -43,8 +43,7 @@ The public runtime includes:
 
 ## Bindings
 
-Bindings expose the native C API to other language ecosystems. The Deno binding
-is published; the Node.js binding is under active development:
+Bindings expose the native C API to other language ecosystems.
 
 | Binding | Description | Documentation |
 | --- | --- | --- |
@@ -60,8 +59,7 @@ Native consumers should instead use the [public C API](docs/public-api.md).
 
 - CMake 3.25 or newer;
 - Ninja;
-- a C17 compiler;
-- Deno 2 only for the binding tests.
+- a C17 compiler.
 
 ### Steps and options
 
