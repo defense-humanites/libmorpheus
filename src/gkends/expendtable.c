@@ -56,6 +56,19 @@ int
 */	
 		TmpGstr = blank;
 		stype = 0;
+		{
+			gk_word *word = CreatGkword(1);
+			if (!word) return -1;
+			ScanAsciiKeys(basename,word,&TmpGstr,NULL);
+			FreeGkword(word);
+			stype = stemtype_of(&TmpGstr);
+			if ((formcode == DOEND && !stype) ||
+			    (formcode == DODERIV && !derivtype_of(&TmpGstr))) {
+				fprintf(stderr,"unregistered %s table: %s\n",
+				        formcode == DODERIV ? "derivation" : "ending",basename);
+				return -1;
+			}
+		}
 		
 		if( formcode == DODERIV ) {
 			
@@ -77,14 +90,6 @@ int
 				}
 			}
 		} else {
-			gk_word * TmpGkword;
-			
-			TmpGkword = CreatGkword(1);
-			ScanAsciiKeys(basename,TmpGkword,&TmpGstr,NULL);
-			FreeGkword(TmpGkword);
-			
-			stype = stemtype_of(&TmpGstr);
-
 			if( snprintf(shortname,sizeof shortname,"%s.end",fname) >= (int)sizeof shortname )
 				return(-1);
 			if(! (finput=fopen(shortname,"r"))) {

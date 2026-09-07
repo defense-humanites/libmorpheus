@@ -312,3 +312,24 @@ together. No same-named ending source exists in the Latin tree for its observed
 unknown keys. This filename check is not evidence that a similarly named table
 is a valid replacement. No registry, source, exclusion or output baseline has
 been changed by this diagnostic tranche.
+
+### Excluded-table producer guard
+
+All twelve excluded Greek table names are also absent from their respective
+registries: the seven ending names from `stemtypes.table`, and the five
+derivation names from `derivtypes.table`. Every active table name in both
+languages is registered. The exclusions therefore involve more than a missing
+compiled baseline, including the `is_ios` source used by four nominal notices.
+
+An isolated production probe exposed a false-success path: `buildend` and
+`buildderiv` returned success for each excluded source even though the table
+name supplied no registered type. The producers now validate the requested
+main table's inflectional or derivation type before opening any output file.
+An unregistered name produces an explicit error. This does not register a new
+type, choose a historical numeric code, or qualify an excluded source.
+
+Regression tests copy all twelve actual excluded sources alongside the
+committed Greek registries and ending macros. Each request must fail with the
+unregistered-table diagnostic, create no binary or ASCII output, and preserve
+pre-existing output sentinels. The ordinary two-build comparison continues to
+qualify the active Greek and Latin tables against their unchanged baselines.
