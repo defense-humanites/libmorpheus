@@ -324,7 +324,7 @@
 :vs:empt pp4
 
 :le:eneco
-:vs:e_ne^c	are_vb
+:de:e_ne^c	are_vb
 :de:e_ni^c	are_vb orth
 :vs:e_ne^cu	perfstem
 
@@ -384,7 +384,7 @@
 
 :le:explico
 :de:explic	are_vb
-:de:explicu	perfstem
+:vs:explicu	perfstem
 
 :le:facio
 :vs:fac		conj3_io no_comp
@@ -626,7 +626,7 @@
 :vs:nec	 	conj1
 :vs:necu	perfstem
 :vs:neca_v	perfstem no_comp
-:vs:neca_t	ppf4 no_comp
+:vs:neca_t	pp4 no_comp
 :vs:nect	pp4	comp_only
 
 :le:necto
@@ -883,7 +883,7 @@
 
 :le:salio#2
 :de:sa^l	ire_vb no_comp
-:vs:si^l	ire_vb comp_only
+:de:si^l	ire_vb comp_only
 
 :le:sancio
 :vs:sanc	conj4
@@ -986,7 +986,7 @@
 :vs:surripu	perfstem
 :vs:subripu	perfstem orth
 :vs:surrept	pp4
-:vs:subrept	ppf orth
+:vs:subrept	pp4 orth
 :vs:surrupu	perfstem orth early
 :vs:subrupu	perfstem orth early
 :vs:surpu	perfstem orth early

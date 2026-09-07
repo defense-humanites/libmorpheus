@@ -324,7 +324,7 @@
 :vs:empt pp4
 
 :le:eneco
-:vs:e_ne^c	are_vb
+:de:e_ne^c	are_vb
 :de:e_ni^c	are_vb orth
 :vs:e_ne^cu	perfstem
 
@@ -384,7 +384,7 @@
 
 :le:explico
 :de:explic	are_vb
-:de:explicu	perfstem
+:vs:explicu	perfstem
 
 :le:facio
 :vs:fac		conj3_io no_comp
@@ -626,7 +626,7 @@
 :vs:nec	 	conj1
 :vs:necu	perfstem
 :vs:nec	avperf no_comp
-:vs:neca_t	ppf4 no_comp
+:vs:neca_t	pp4 no_comp
 :vs:nect	pp4	comp_only
 
 :le:necto
@@ -883,7 +883,7 @@
 
 :le:salio#2
 :de:sa^l	ire_vb no_comp
-:vs:si^l	ire_vb comp_only
+:de:si^l	ire_vb comp_only
 
 :le:sancio
 :vs:sanc	conj4
@@ -986,7 +986,7 @@
 :vs:surripu	perfstem
 :vs:subripu	perfstem orth
 :vs:surrept	pp4
-:vs:subrept	ppf orth
+:vs:subrept	pp4 orth
 :vs:surrupu	perfstem orth early
 :vs:subrupu	perfstem orth early
 :vs:surpu	perfstem orth early
@@ -19018,7 +19018,6 @@
 :vs:aufe^r conj3 part
 :vb:auferre irreg_pp1 pres inf act
 :vb:auferri_ irreg_pp1 pres inf pass
-:vs:
 :vs:abs-tul	perfstem
 :vs:ab-lat	pp4
 :vb:auferrem   irreg_pp1 imperf act 1st sg
@@ -19262,12 +19261,12 @@
 :vb:pro_si_mus   irreg_pp1 pres subj act 1st pl
 :vb:pro_si_tis   irreg_pp1 pres subj act 2nd pl
 :vb:pro_sint   irreg_pp1 pres subj act 3rd pl
-:wd:pro_dero_   fut ind act 1st sg
-:wd:pro_deris   fut ind act 2nd sg
-:wd:pro_derit   fut ind act 3rd sg
-:wd:pro_derimus   fut ind act 1st pl
-:wd:pro_deritis   fut ind act 2nd pl
-:wd:pro_derunt   fut ind act 3rd pl
+:vb:pro_dero_   irreg_pp1 fut ind act 1st sg
+:vb:pro_deris   irreg_pp1 fut ind act 2nd sg
+:vb:pro_derit   irreg_pp1 fut ind act 3rd sg
+:vb:pro_derimus   irreg_pp1 fut ind act 1st pl
+:vb:pro_deritis   irreg_pp1 fut ind act 2nd pl
+:vb:pro_derunt   irreg_pp1 fut ind act 3rd pl
 :vb:pro_deram   irreg_pp1 imperf ind act 1st sg
 :vb:pro_dera_s   irreg_pp1 imperf ind act 2nd sg
 :vb:pro_derat   irreg_pp1 imperf ind act 3rd sg

@@ -57,7 +57,8 @@ def build(args):
         raise ValueError("empty table input receipt")
     rows = []
     seen = set()
-    roles = {"nominal", "verb", "constraints", "constraint-tool", "unavailable", "excluded"}
+    roles = {"nominal", "verb", "constraints", "constraint-tool", "assembly-baseline",
+             "unavailable", "excluded"}
     for row in args.manifest.read_text().splitlines():
         if not row or row.startswith("#"):
             continue
@@ -91,7 +92,7 @@ def build(args):
     work.mkdir()  # refuse reuse, including failed attempts
     (root / "steminds").mkdir()
     for role, name, expected in rows:
-        if role in {"unavailable", "excluded"}:
+        if role in {"assembly-baseline", "unavailable", "excluded"}:
             continue
         target = root / name
         if target.exists():
@@ -151,12 +152,28 @@ def build(args):
         run("indexnoms", [str(args.tools / "indexnoms"), *options, str(nominal_input), str(root / "steminds/nomind")])
     verb_input = work / "verb.input"
     unavailable = [name for role, name, _ in rows if role == "unavailable"]
+    assembly_baselines = [(name, source / language / name)
+                          for role, name, _ in rows if role == "assembly-baseline"]
+    data = b"".join((root / name).read_bytes() for role, name, _ in rows if role == "verb")
+    if language == "Latin":
+        data = re.sub(rb"([a-z])([aei])_v[ \t]+perfstem", rb"\1\t\2vperf", data)
+    assembled = not unavailable
     if unavailable:
-        report["producers"]["do_conj"] = {"blocked_missing_inputs": unavailable}
-    else:
-        data = b"".join((root / name).read_bytes() for role, name, _ in rows if role == "verb")
-        if language == "Latin":
-            data = re.sub(rb"([a-z])([aei])_v[ \t]+perfstem", rb"\1\t\2vperf", data)
+        if len(assembly_baselines) != 1:
+            report["producers"]["verb-source-assembly"] = {
+                "blocked_missing_inputs": unavailable,
+                "reason": "exactly one historical assembly baseline is required",
+            }
+        else:
+            baseline_name, baseline = assembly_baselines[0]
+            assembled = data == baseline.read_bytes()
+            report["producers"]["verb-source-assembly"] = {
+                "historically_omitted_inputs": unavailable,
+                "baseline": baseline_name,
+                "comparison": "identical" if assembled else "different",
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+    if assembled:
         verb_input.write_bytes(data)
         if run("do_conj", [str(args.tools / "do_conj"), *options, str(verb_input), str(work / "verb.expanded"), str(work / "oddkeys")]):
             run("indexvbs", [str(args.tools / "indexvbs"), *options, str(work / "verb.expanded"), str(root / "steminds/vbind")])
@@ -164,11 +181,26 @@ def build(args):
     outputs += [path for path in [work / "verb.expanded", work / "oddkeys"] if path.exists()]
     success = all(report["producers"].get(name, {}).get("exit_code") == 0 for name in ["indexnoms", "do_conj", "indexvbs"])
     report["complete"] = success
+    comparison_rows = []
     for path in sorted(outputs):
         relative = path.relative_to(stage).as_posix()
         baseline = source / relative
-        report["baselines"][relative] = {"sha256": digest(path), "comparison": "identical" if baseline.exists() and digest(baseline) == digest(path) else "different" if baseline.exists() else "unavailable"}
+        if relative == f"{language}/lexical/oddkeys" and (source / language / "oddfile").exists():
+            baseline = source / language / "oddfile"
+        output_sha = digest(path)
+        baseline_sha = digest(baseline) if baseline.exists() else None
+        comparison = "identical" if baseline_sha == output_sha else "different" if baseline_sha else "unavailable"
+        report["baselines"][relative] = {
+            "sha256": output_sha,
+            "baseline": baseline.relative_to(source).as_posix() if baseline.exists() else None,
+            "baseline_sha256": baseline_sha,
+            "comparison": comparison,
+        }
+        comparison_rows.append(f"{relative}\t{output_sha}\t{baseline_sha or '-'}\t{comparison}\n")
     (work / "comparison.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    (stage / "MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv").write_text(
+        "# SPDX-License-Identifier: MPL-2.0\n"
+        "# path\toutput_sha256\tbaseline_sha256\tcomparison\n" + "".join(comparison_rows))
     if success:
         (stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").write_text(
             "# SPDX-License-Identifier: MPL-2.0\n" + "".join(f"{p.relative_to(stage).as_posix()}\t{digest(p)}\n" for p in sorted(outputs)))

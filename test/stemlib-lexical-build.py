@@ -16,6 +16,11 @@ if work.exists():
 work.mkdir()
 expected = [row for row in (source / "test/stemlib-lexical/outputs.tsv").read_text().splitlines() if row and not row.startswith("#")]
 blockers = json.loads((source / "test/stemlib-lexical/blockers.json").read_text())["reports"]
+baseline_exceptions = {
+    row.split("\t")[0]
+    for row in (source / "test/stemlib-lexical-baseline-exceptions.tsv").read_text().splitlines()
+    if row and not row.startswith("#")
+}
 
 
 def run(command, expected_code=0, **kwargs):
@@ -27,6 +32,7 @@ def run(command, expected_code=0, **kwargs):
 
 for language in ["Greek", "Latin"]:
     receipts = []
+    comparison_receipts = []
     provenance_by_corpus = {}
     for pass_name in ["first", "second"]:
         tables = binary / "test-stemlib-table-build" / (language + "-" + pass_name)
@@ -40,6 +46,8 @@ for language in ["Greek", "Latin"]:
             run(command, 1 if corpus else 0)
             receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
             report = json.loads((stage / language / "lexical/comparison.json").read_text())
+            comparison_receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv"
+            assert comparison_receipt.exists()
             provenance = json.loads((stage / language / "lexical/provenance.json").read_text())
             # Relocating a clean build must not change its provenance. Keep
             # successful fixtures and blocked full corpora independently pinned.
@@ -57,11 +65,30 @@ for language in ["Greek", "Latin"]:
                 log = (stage / language / "lexical/indexnoms.log").read_text()
                 assert ("eas_eantos" if language == "Greek" else "as_a") in log
                 if language == "Latin":
-                    assert report["producers"]["do_conj"]["blocked_missing_inputs"] == ["stemsrc/vbs.mpi"]
+                    assert report["producers"]["verb-source-assembly"] == {
+                        "historically_omitted_inputs": ["stemsrc/vbs.mpi"],
+                        "baseline": "conjfile",
+                        "comparison": "identical",
+                        "sha256": "e2189e136902fded363d5d12ac6aa387992d566d45362546237644ba251746c4",
+                    }
+                    assert report["producers"]["do_conj"]["exit_code"] == 0
+                    assert report["producers"]["indexvbs"]["exit_code"] == 0
+                    assert sorted(path.name for path in (stage / language / "steminds").iterdir()) == [
+                        "vbind", "vbind.lindex"]
+                    differences = {
+                        path for path, value in report["baselines"].items()
+                        if value["comparison"] == "different"
+                    }
+                    assert differences == {path for path in baseline_exceptions if path.startswith("Latin/")}
+                    old_lines = set((source / "stemlib/Latin/steminds/vbind").read_text().splitlines())
+                    new_lines = set((stage / "Latin/steminds/vbind").read_text().splitlines())
+                    assert len(old_lines - new_lines) == 13
+                    assert len(new_lines - old_lines) == 14
+                    assert report["baselines"]["Latin/lexical/oddkeys"]["comparison"] == "identical"
                 else:
                     assert report["producers"]["do_conj"]["exit_code"] == 1
                     assert "unmatched" in (stage / language / "lexical/do_conj.log").read_text()
-                assert not list((stage / language / "steminds").iterdir())
+                    assert not list((stage / language / "steminds").iterdir())
                 if pass_name == "first":
                     for baseline in [item for item in blockers if item["language"] == language]:
                         producer = baseline["producer"]
@@ -80,7 +107,7 @@ for language in ["Greek", "Latin"]:
                         original = audit_output.read_bytes()
                         run(audit_command, 2)
                         assert audit_output.read_bytes() == original
-                    assert not receipt.exists() and not list((stage / language / "steminds").iterdir())
+                    assert not receipt.exists()
             else:
                 rows = [row for row in receipt.read_text().splitlines() if row and not row.startswith("#")]
                 assert rows == [row for row in expected if row.startswith(language + "/")]
@@ -88,8 +115,10 @@ for language in ["Greek", "Latin"]:
                     name, sha = row.split("\t")
                     assert hashlib.sha256((stage / name).read_bytes()).hexdigest() == sha
                 receipts.append(receipt.read_bytes())
+                comparison_receipts.append(comparison_receipt.read_bytes())
                 run(command, 1)  # no overlay, even after success
     assert receipts[0] == receipts[1]
+    assert comparison_receipts[0] == comparison_receipts[1]
 
 # The expander must remove both owned outputs on all input failures and must
 # preserve pre-existing files. Exercise cases with and without a final newline.

@@ -214,7 +214,6 @@ auferr@emsub	irreg_pp1 imperf
 :vs:aufe^r conj3 part
 :vb:auferre irreg_pp1 pres inf act
 :vb:auferri_ irreg_pp1 pres inf pass
-:vs:
 :vs:abs-tul	perfstem
 :vs:ab-lat	pp4
 
@@ -376,7 +375,7 @@ e_nt@decl3	irreg_pp1 pres part masc fem neut comp_only
 pro_si@basvb2		irreg_pp1 pres subj act
 pro_dera@basvb2		irreg_pp1 imperf ind act
 pro_desse@basvb2	irreg_pp1 imperf subj ct
-pro_der@ofut		fut ind act
+pro_der@ofut		irreg_pp1 fut ind act
 :vs:pro_fu		perfstem
 #
 :vb:pro_des		irreg_pp1 2nd sg pres imperat act

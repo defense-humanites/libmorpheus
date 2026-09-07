@@ -361,9 +361,11 @@ reviewed exception set.
 The subsequent lexical tranche restores `do_conj` as an internal MPL C17 target
 and connects all three lexical producers to a separate ordered source manifest
 and the verified table staging. Clean Greek and Latin fixture builds now yield
-twelve reproducible outputs with pinned hashes. Full-corpus attempts remain
-fail-closed at unregistered nominal types, an unmatched Greek principal part,
-and the declared absent Latin `vbs.mpi` input. See the
+twelve reproducible outputs with pinned hashes. The Latin verbal corpus now
+builds after an exact assembly proof for the historically absent `vbs.mpi` and
+seven evidence-backed malformed-record repairs; its two index differences are
+pinned and its odd-key output matches the baseline. Full-corpus attempts remain
+fail-closed at unregistered nominal types and unmatched Greek principal parts. See the
 [lexical production boundary](stemlib-production-manifest.md#lexical-production-and-explicit-blockers)
 for the exact failures and reproduction command. Complete corpus regeneration
-and lexical baseline equivalence are therefore still unqualified.
+remains unqualified.

@@ -166,6 +166,7 @@ foreach(mpl_file IN ITEMS
         test/gener-source-continuations.txt
         test/gener-source-orphan-continuation.txt
         test/stemlib-binary-baseline-exceptions.tsv
+        test/stemlib-lexical-baseline-exceptions.tsv
         tools/gener-source-preparer.c
         tools/gener-corpus-manifest.tsv
         tools/gener-corpus-exceptions.tsv

@@ -102,11 +102,14 @@ sources remains a later boundary.
 
 The lexical manifest has four tab-separated fields: `language`, `role`, `path`,
 and `sha256`. The roles are `nominal`, `verb`, `constraints`, `constraint-tool`,
-`excluded`, and `unavailable` (the last uses `-` instead of a digest). Nominal
-and verb rows define concatenation order. Greek nominal preparation uses the
-pinned `addconstraints.pl` and entity-name input. The historical Latin perfect
-stem substitution is retained, but the missing `vbs.mpi` is never silently
-omitted. An inventory, digest or unavailable-file change fails validation.
+`assembly-baseline`, `excluded`, and `unavailable` (the last uses `-` instead
+of a digest). Nominal and verb rows define concatenation order. Greek nominal
+preparation uses the pinned `addconstraints.pl` and entity-name input. The
+historical Latin perfect-stem substitution is retained. Although `vbs.mpi` is
+absent, concatenating the four available files in makefile order reproduces
+the committed `conjfile` baseline exactly; the recipe verifies that zero-byte
+historical contribution before continuing. An inventory, digest, baseline or
+unavailable-file change fails validation.
 
 After `build-stemlib-tables.cmake` completes in a fresh stage, run:
 
@@ -124,6 +127,9 @@ outputs, copies and verifies selected lexical sources, fixes the locale,
 timezone and `MORPHLIB`, and invokes `indexnoms`, `do_conj`, and `indexvbs` with
 explicit paths. It rejects reuse. `lexical/inputs.tsv`, per-producer diagnostics
 and `lexical/comparison.json` remain available when a corpus blocks production.
+A sorted `MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv` is also written after every
+attempt. It records output and baseline digests with an identical, different or
+unavailable classification, without implying that the complete build passed.
 A successful run emits `MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv` covering the four
 stem-index files, verb expansion, and odd-key output. No success receipt is
 written after a failed or blocked producer. Baseline comparisons explicitly
@@ -141,8 +147,11 @@ Records survive corpus failures and are not success receipts. These hashes
 identify exact files, not their Git ancestry or the compiler, dynamic libraries
 and complete operating-system environment used to build/run the executables.
 
-The restored `do_conj` uses the historical binary derivation reader, preserving
-its short-conjugation decisions. Its internal CLI is:
+The restored `do_conj` uses the historical binary derivation reader. Short mode
+expands the implicit present stem of regular derivations while preserving the
+historical handling of `@` continuations; this is the only combination that
+matches the committed Latin verbal index outside the corrected records. Its
+internal CLI is:
 
 ```text
 do_conj [-I|-L] [-f] INPUT EXPANDED_OUTPUT ODD_KEY_OUTPUT
@@ -162,24 +171,29 @@ future and aorist stems; the Latin fixture also checks that an indexed
 derivation need not carry an inflectional stem type. Existing output files,
 failed expansions, malformed inputs and missing dependencies are exercised.
 
-**Full-corpus qualification remains blocked.** The same test independently
-stages the committed corpora and verifies the following first failures, without
-adding binary exceptions or rewriting philological data:
+**Full-corpus qualification remains blocked on nominal and Greek verbal
+inputs.** The same test independently stages the committed corpora and verifies
+the following first failures:
 
 | Producer | Corpus | First blocker |
 | --- | --- | --- |
 | `indexnoms` | Greek | `*glisa=s`: `eas_eantos` is not a registered stem type. |
 | `indexnoms` | Latin | `Jeremiah`: `as_a` is not a registered stem type. |
 | `do_conj` | Greek | The explicit request `br / o_stem / vn,-mm,h_hs` has no matching derivation rule. |
-| Verb-source assembly | Latin | The historical input `stemsrc/vbs.mpi` is absent. |
+| Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce `conjfile` exactly, proving that it contributed no bytes to the baseline assembly. |
 
-A separate exploratory run over the available Latin verb files also encounters
-`:de:explicu perfstem`, which requests the absent `derivs/out/perfstem.out`.
-The supported recipe stops at the missing source and does not bypass it to
-claim a qualified verb build. These are first blockers, not an exhaustive
-corpus-error inventory. Full lexical baseline comparisons and Git/compiler
-provenance remain open; fixture reproducibility does not certify the
-complete distribution. The 229 existing table-binary exceptions remain intact.
+The Latin verb chain now completes. Seven malformed records were repaired from
+structural or historical evidence: five `:vs:`/`:de:` or stem-type typos in
+`vbs.latin.bas`, an empty `:vs:` in `irreg.vbs.src`, and a missing `irreg_pp1`
+type on the `prosum` future macro. The `explico` correction restores its
+pre-2006 `:vs:explicu perfstem` form. The generated `vbs.irreg` and assembled
+`conjfile` were updated from those sources. Against the committed Latin verbal
+baseline, the rebuilt text index has exactly 13 removed and 14 added lines;
+the changed `vbind` and `vbind.lindex` paths are pinned in
+`test/stemlib-lexical-baseline-exceptions.tsv`. All differences correspond to
+the seven repairs, including reclassification of the six `prosum` future forms
+from untyped words to `irreg_pp1` verbs. The odd-key output remains byte-identical.
+The 229 table-binary exceptions remain intact.
 
 ### Locating additional lexical refusals
 
@@ -196,8 +210,8 @@ python3 tools/audit-stemlib-lexical.py \
 
 For Greek expansion, select `--producer do_conj`, `build/dev/do_conj` and
 `lexical/verb.input`. `indexvbs` can similarly inspect an already expanded input.
-The Latin recipe still refuses to assemble verbs without `vbs.mpi`; the audit
-does not supply or omit that missing source.
+The Latin recipe continues only when the available verb assembly exactly
+matches its pinned historical baseline despite the declared absent `vbs.mpi`.
 
 The audit first runs the complete input, then bisects failing batches at lemma
 boundaries. It records isolated refusals with one-based record and prepared-input

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 
 #include "conjugation_internal.h"
+#include "../morphlib/setlang.proto.h"
 #include <gkstring.h>
 #include <string.h>
 
@@ -46,6 +47,13 @@ static int wantpparts = 0;
 
 int fullconj = 0;
 
+static int implicit_defaults(void)
+{
+    /* Latin's committed short index includes regular present-stem defaults;
+     * Greek short production expands only irregular defaults. */
+    return cur_lang() == LATIN ? regular_entry(derivbuf) : irreg_conj();
+}
+
 int GenConjForms(FILE * fin, FILE * fout, int conjmode)
 {
     char * lp;
@@ -68,7 +76,7 @@ int GenConjForms(FILE * fin, FILE * fout, int conjmode)
 
         if( ! strncmp(linebuf,":le:",4) ) {
 
-            if( ! npparts && wantpparts && (irreg_conj() || fullconj)) {
+            if( ! npparts && wantpparts && (implicit_defaults() || fullconj)) {
                 show_defvals(fout);
                 fprintf(fout,"\n");
             }
@@ -97,7 +105,7 @@ int GenConjForms(FILE * fin, FILE * fout, int conjmode)
         }
 
         if( ! strncmp(":de:",linebuf,4) ) {
-            if( ! npparts && wantpparts && (irreg_conj() || fullconj)) {
+            if( ! npparts && wantpparts && (implicit_defaults() || fullconj)) {
                 show_defvals(fout);
                 fprintf(fout,"\n");
             }
@@ -213,7 +221,7 @@ printf("rval %d stembuf [%s] global [%s] deriv [%s] tk [%s]\n", rval,
         fprintf(fout,"%s", linebuf );
 
     }
-    if( ! npparts && wantpparts && (irreg_conj() || fullconj ) )
+    if( ! npparts && wantpparts && (implicit_defaults() || fullconj ) )
             show_defvals(fout);
 
     return curlemma[0] && !ferror(fin) && !ferror(fout);
@@ -444,16 +452,6 @@ int regular_entry(char * s)
     return(rconj);
 }
 
-int has_alpha(char * s)
-{
-
-    while(*s) {
-        if(isalpha((unsigned char)*s) ) return(1);
-        s++;
-    }
-    return(0);
-}
-
 int irreg_conj(void)
 {
     gk_word TmpGkword;
@@ -464,4 +462,14 @@ int irreg_conj(void)
     scan_keys(derivbuf,&TmpGkword,&GlobGstr,NULL);
 
     return !Is_regconj(&GlobGstr);
+}
+
+int has_alpha(char * s)
+{
+
+    while(*s) {
+        if(isalpha((unsigned char)*s) ) return(1);
+        s++;
+    }
+    return(0);
 }
