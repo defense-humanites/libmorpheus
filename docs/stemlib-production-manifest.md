@@ -91,7 +91,7 @@ zero textual or index differences. Their complete sorted path set is pinned in
 `test/stemlib-binary-baseline-exceptions.tsv`; CI rejects a missing, unexpected,
 duplicated, reordered, malformed, or reclassified exception.
 
-## Lexical production and explicit blockers
+## Lexical production and qualification
 
 `tools/stemlib-lexical-manifest.tsv` adds an ordered lexical boundary without
 changing the 379-source table manifest. It inventories every file below both
@@ -172,14 +172,13 @@ future and aorist stems; the Latin fixture also checks that an indexed
 derivation need not carry an inflectional stem type. Existing output files,
 failed expansions, malformed inputs and missing dependencies are exercised.
 
-**Full-corpus qualification remains blocked on the Latin nominal input.** The
-same test independently stages the committed corpora and verifies
-the following status:
+The same test independently stages the complete committed corpora twice and
+verifies the following status:
 
 | Producer | Corpus | Status |
 | --- | --- | --- |
 | `indexnoms` | Greek | Complete; the regenerated nominal indexes are reproducible and their reviewed baseline differences are pinned. |
-| `indexnoms` | Latin | `Jeremiah`: `as_a` is not a registered stem type. |
+| `indexnoms` | Latin | Complete; verified staging corrections resolve or quarantine every formerly rejected record, and the regenerated indexes are reproducible with pinned baseline differences. |
 | `do_conj` and `indexvbs` | Greek | Complete; the expanded verbs, odd keys and regenerated indexes are reproducible and their reviewed baseline differences are pinned. |
 | Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce `conjfile` exactly, proving that it contributed no bytes to the baseline assembly. |
 
@@ -197,6 +196,17 @@ index has exactly 55 removed and 44 added lines. Its `nomind` and
 `nomind.lindex` differences are pinned in
 `test/stemlib-lexical-baseline-exceptions.tsv` as corrected Greek nominal
 records.
+
+The Latin nominal corrections cover all 154 affected source lines without
+editing the historical snapshots. Sixty-two records use registered paradigms
+supported by exact duplicates, nearby valid records or direct type-name
+correspondence. Ninety records whose Greek-style or otherwise ambiguous types
+have no qualified Latin replacement are marked `#noanalysis-stem`; this group
+includes six empty-stem records. Two malformed boundaries in `nom.livy` are
+repaired by changing an orphan `:le:` to `:no:` and an orphan `:no:` to `:le:`.
+The rebuilt Latin nominal text index has exactly 152 removed and 86 added lines.
+Its `nomind` and `nomind.lindex` differences are pinned in
+`test/stemlib-lexical-baseline-exceptions.tsv`.
 
 The same manifest handles eight Greek verbal source defects. Six explicit
 requests that the historical expander could not satisfy are marked as invalid
@@ -248,26 +258,20 @@ is 0 when the original batch succeeds, 1 when it fails, and 2 for an audit error
 An existing report is preserved. Reports identify the input, tool, audit recipe
 and staged table receipts by SHA-256.
 
-`test/stemlib-lexical/blockers.json` pins the remaining diagnostic observations:
+`test/stemlib-lexical/blockers.json` now has an empty `reports` list because all
+four complete nominal and verbal inputs succeed. CTest verifies each language's
+six reproducible outputs and exact baseline-difference counts instead.
 
-| Prepared input | Lemma records | Isolated refusals |
-| --- | ---: | ---: |
-| Latin nominal | 53,403 | 148 |
-
-The Greek nominal and verbal inputs are absent from this table because the
-complete Greek chain now succeeds. CTest instead verifies its six reproducible
-outputs and their exact baseline-difference counts.
-
-These counts describe notices, not unique lemmas or philological corrections.
+The former audit counts below describe notices, not unique lemmas or
+philological corrections.
 Only the first failure inside each isolated notice is reported. In particular,
 two Latin notices yield no stem records in isolation, although an empty notice
 need not prevent an aggregate build. Successful batches are not subdivided, so
 the audit does not enumerate all empty notices. Cross-notice interactions may
 also change after splitting; failures that disappear in both immediate halves
-are recorded separately (none observed here). Thus this inventory supplements
-the full-corpus failures; it is neither exhaustive semantic validation nor an
-exception list authorizing partial production. CTest checks its input hashes,
-positions and diagnostics against fresh corpus stages.
+are recorded separately (none observed here). This historical inventory is not
+exhaustive semantic validation or an exception list authorizing partial
+production; it is no longer an active blocker expectation.
 
 ### Greek verb correction qualification
 
@@ -313,7 +317,7 @@ editorial keys alongside a valid type remain accepted, and failed indexing
 still produces no output. Both nominal and verbal indexer CLIs exercise these
 cases in regression tests.
 
-The pinned nominal observations divide as follows:
+The pre-correction nominal observations divided as follows:
 
 | Observation on the first failing record in a notice | Greek | Latin |
 | --- | ---: | ---: |
@@ -344,9 +348,10 @@ The most frequent unrecognized keys are:
 | Latin | `er_i` | 6 |
 | Latin | Other keys or groups | 24 |
 
-The complete key strings remain in `test/stemlib-lexical/blockers.json`, including
-non-type annotations such as Latin `group` and `orth`. Unknown keys must not be
-equated automatically with missing inflectional types.
+The original diagnostics included non-type annotations such as Latin `group`
+and `orth`. Unknown keys were not equated automatically with missing
+inflectional types; every applied substitution or quarantine is pinned to its
+original source-line digest in the correction manifest.
 
 Of the twelve distinct unrecognized Greek keys, only `is_ios` has a same-named
 ending source in the committed Greek tree. `endtables/source/is_ios.end` is
@@ -355,8 +360,8 @@ type registry. Its four affected notices therefore cannot be repaired merely
 by adding it to a build list: registry and table qualification must be reviewed
 together. No same-named ending source exists in the Latin tree for its observed
 unknown keys. This filename check is not evidence that a similarly named table
-is a valid replacement. No registry, source, exclusion or output baseline has
-been changed by this diagnostic tranche.
+is a valid replacement; ambiguous Latin records were therefore quarantined in
+staging rather than assigned a synthesized paradigm.
 
 ### Excluded-table producer guard
 

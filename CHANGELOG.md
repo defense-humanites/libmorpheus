@@ -39,6 +39,12 @@ the corpus.
   source defects are repaired, and fourteen entries that require absent or
   unusable paradigms are explicitly marked `#noanalysis` rather than retained
   as untyped index entries.
+- The complete Latin nominal corpus now also passes the restored indexer. Its
+  verified staging corrections apply 62 evidence-backed type substitutions,
+  quarantine 90 records without a qualified Latin paradigm, and repair two
+  malformed notice boundaries without changing the historical source files.
+  Two independent full Greek and Latin lexical builds now emit identical
+  six-output receipts and pinned baseline comparisons.
 - Five inherited ending-table producers are restored as non-installed,
   default-disabled CMake targets with C17 entry points and fail-closed command
   handling. CI builds them explicitly and verifies that missing registries or
