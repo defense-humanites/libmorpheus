@@ -29,6 +29,11 @@ the corpus.
 
 ### Changed
 
+- The complete Greek nominal corpus now passes the restored fail-closed
+  indexer. Eight malformed stem types use existing registered paradigms, two
+  source defects are repaired, and fourteen entries that require absent or
+  unusable paradigms are explicitly marked `#noanalysis` rather than retained
+  as untyped index entries.
 - Five inherited ending-table producers are restored as non-installed,
   default-disabled CMake targets with C17 entry points and fail-closed command
   handling. CI builds them explicitly and verifies that missing registries or

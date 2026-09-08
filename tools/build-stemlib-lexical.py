@@ -57,6 +57,7 @@ def build(args):
         raise ValueError("empty table input receipt")
     rows = []
     seen = set()
+    role_by_input = {}
     roles = {"nominal", "verb", "constraints", "constraint-tool", "assembly-baseline",
              "unavailable", "excluded"}
     for row in args.manifest.read_text().splitlines():
@@ -70,6 +71,7 @@ def build(args):
         if (lang, name) in seen:
             raise ValueError("duplicate lexical input")
         seen.add((lang, name))
+        role_by_input[(lang, name)] = role
         path = source / lang / name
         if role == "unavailable":
             if path.exists() or expected != "-":
@@ -101,6 +103,53 @@ def build(args):
         target.write_bytes((source / language / name).read_bytes())
         if digest(target) != expected:
             raise ValueError("staged lexical checksum mismatch: " + name)
+    correction_rows = []
+    if args.corrections:
+        previous = None
+        corrected = set()
+        for row in args.corrections.read_text().splitlines():
+            if not row or row.startswith("#"):
+                continue
+            fields = row.split("\t", 4)
+            if len(fields) != 5:
+                raise ValueError("invalid lexical correction")
+            lang, name, line_text, expected, replacement_json = fields
+            if (lang not in {"Greek", "Latin"} or Path(name).is_absolute() or
+                    ".." in Path(name).parts or role_by_input.get((lang, name)) != "nominal"):
+                raise ValueError("invalid lexical correction target")
+            try:
+                line_number = int(line_text)
+                replacement = json.loads(replacement_json)
+            except (ValueError, json.JSONDecodeError):
+                raise ValueError("invalid lexical correction value") from None
+            location = (lang, name, line_number)
+            if line_number < 1 or location in corrected or (previous and location <= previous):
+                raise ValueError("unordered or duplicate lexical correction")
+            if not re.fullmatch("[0-9a-f]{64}", expected) or not isinstance(replacement, str):
+                raise ValueError("invalid lexical correction fields")
+            if "\n" in replacement or "\r" in replacement:
+                raise ValueError("multiline lexical correction")
+            original_lines = (source / lang / name).read_bytes().splitlines(keepends=True)
+            if line_number > len(original_lines):
+                raise ValueError("lexical correction line is absent")
+            original = original_lines[line_number - 1].rstrip(b"\r\n")
+            if hashlib.sha256(original).hexdigest() != expected:
+                raise ValueError("lexical correction source mismatch")
+            corrected.add(location)
+            previous = location
+            if lang == language:
+                target = root / name
+                target_lines = target.read_bytes().splitlines(keepends=True)
+                current = target_lines[line_number - 1]
+                ending = current[len(current.rstrip(b"\r\n")):]
+                target_lines[line_number - 1] = replacement.encode() + ending
+                target.write_bytes(b"".join(target_lines))
+                correction_rows.append(row)
+        if not corrected:
+            raise ValueError("empty lexical correction manifest")
+        (work / "corrections.tsv").write_text(
+            "# SPDX-License-Identifier: MPL-2.0\n" +
+            "\n".join(correction_rows) + ("\n" if correction_rows else ""))
     (work / "inputs.tsv").write_text("# SPDX-License-Identifier: MPL-2.0\n" + "".join(
         f"{language}\t{role}\t{name}\t{sha}\n" for role, name, sha in rows))
     env = dict(os.environ, MORPHLIB=str(stage), LC_ALL="C", LANG="C", TZ="UTC")
@@ -120,6 +169,8 @@ def build(args):
             **{name: digest(args.tools / name) for name in ["indexnoms", "do_conj", "indexvbs"]},
         },
     }
+    if args.corrections:
+        provenance["sha256"]["lexical_corrections"] = digest(args.corrections)
     if any(role == "constraint-tool" for role, _, _ in rows):
         perl_path = shutil.which(args.perl)
         if perl_path is None:
@@ -212,6 +263,7 @@ if __name__ == "__main__":
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--corrections", type=Path)
     parser.add_argument("--language", choices=["Greek", "Latin"], required=True)
     parser.add_argument("--tools", type=lambda value: Path(value).resolve(), required=True)
     parser.add_argument("--perl", default="perl")

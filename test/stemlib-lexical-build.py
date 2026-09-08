@@ -43,6 +43,8 @@ for language in ["Greek", "Latin"]:
                        "--stage", stage, "--source", source / ("stemlib" if corpus else "test/stemlib-lexical"),
                        "--manifest", source / ("tools/stemlib-lexical-manifest.tsv" if corpus else "test/stemlib-lexical/inputs.tsv"),
                        "--language", language, "--tools", binary, "--perl", perl]
+            if corpus:
+                command += ["--corrections", source / "tools/stemlib-lexical-corrections.tsv"]
             run(command, 1 if corpus else 0)
             receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
             report = json.loads((stage / language / "lexical/comparison.json").read_text())
@@ -61,10 +63,10 @@ for language in ["Greek", "Latin"]:
                 (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_bytes()).hexdigest()
             if corpus:
                 assert not receipt.exists() and not report["complete"]
-                assert report["producers"]["indexnoms"]["exit_code"] == 1
                 log = (stage / language / "lexical/indexnoms.log").read_text()
-                assert ("eas_eantos" if language == "Greek" else "as_a") in log
                 if language == "Latin":
+                    assert report["producers"]["indexnoms"]["exit_code"] == 1
+                    assert "as_a" in log
                     assert report["producers"]["verb-source-assembly"] == {
                         "historically_omitted_inputs": ["stemsrc/vbs.mpi"],
                         "baseline": "conjfile",
@@ -86,9 +88,20 @@ for language in ["Greek", "Latin"]:
                     assert len(new_lines - old_lines) == 14
                     assert report["baselines"]["Latin/lexical/oddkeys"]["comparison"] == "identical"
                 else:
+                    assert report["producers"]["indexnoms"]["exit_code"] == 0
+                    assert sorted(path.name for path in (stage / language / "steminds").iterdir()) == [
+                        "nomind", "nomind.lindex"]
                     assert report["producers"]["do_conj"]["exit_code"] == 1
                     assert "unmatched" in (stage / language / "lexical/do_conj.log").read_text()
-                    assert not list((stage / language / "steminds").iterdir())
+                    differences = {
+                        path for path, value in report["baselines"].items()
+                        if value["comparison"] == "different"
+                    }
+                    assert differences == {path for path in baseline_exceptions if path.startswith("Greek/")}
+                    old_lines = set((source / "stemlib/Greek/steminds/nomind").read_text().splitlines())
+                    new_lines = set((stage / "Greek/steminds/nomind").read_text().splitlines())
+                    assert len(old_lines - new_lines) == 55
+                    assert len(new_lines - old_lines) == 44
                 if pass_name == "first":
                     for baseline in [item for item in blockers if item["language"] == language]:
                         producer = baseline["producer"]
@@ -119,6 +132,24 @@ for language in ["Greek", "Latin"]:
                 run(command, 1)  # no overlay, even after success
     assert receipts[0] == receipts[1]
     assert comparison_receipts[0] == comparison_receipts[1]
+
+# A stale correction must fail before either nominal index is created.
+bad_stage = work / "bad-correction-stage"
+shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_stage)
+bad_corrections = work / "bad-corrections.tsv"
+correction_lines = (source / "tools/stemlib-lexical-corrections.tsv").read_text().splitlines()
+first_correction = next(index for index, row in enumerate(correction_lines) if row and not row.startswith("#"))
+fields = correction_lines[first_correction].split("\t")
+fields[3] = "0" * 64
+correction_lines[first_correction] = "\t".join(fields)
+bad_corrections.write_text("\n".join(correction_lines) + "\n")
+run([sys.executable, source / "tools/build-stemlib-lexical.py",
+     "--stage", bad_stage, "--source", source / "stemlib",
+     "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
+     "--corrections", bad_corrections, "--language", "Greek",
+     "--tools", binary, "--perl", perl], 1)
+assert not list((bad_stage / "Greek/steminds").iterdir())
+assert not (bad_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
 
 # The expander must remove both owned outputs on all input failures and must
 # preserve pre-existing files. Exercise cases with and without a final newline.

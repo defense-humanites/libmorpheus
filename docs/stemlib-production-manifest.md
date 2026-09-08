@@ -117,6 +117,7 @@ After `build-stemlib-tables.cmake` completes in a fresh stage, run:
 python3 tools/build-stemlib-lexical.py \
   --source stemlib \
   --manifest tools/stemlib-lexical-manifest.tsv \
+  --corrections tools/stemlib-lexical-corrections.tsv \
   --language Greek --stage /absolute/path/to/greek-stage \
   --tools build/dev
 ```
@@ -171,16 +172,31 @@ future and aorist stems; the Latin fixture also checks that an indexed
 derivation need not carry an inflectional stem type. Existing output files,
 failed expansions, malformed inputs and missing dependencies are exercised.
 
-**Full-corpus qualification remains blocked on nominal and Greek verbal
+**Full-corpus qualification remains blocked on Latin nominal and Greek verbal
 inputs.** The same test independently stages the committed corpora and verifies
-the following first failures:
+the following status:
 
-| Producer | Corpus | First blocker |
+| Producer | Corpus | Status |
 | --- | --- | --- |
-| `indexnoms` | Greek | `*glisa=s`: `eas_eantos` is not a registered stem type. |
+| `indexnoms` | Greek | Complete; the regenerated nominal indexes are reproducible and their reviewed baseline differences are pinned. |
 | `indexnoms` | Latin | `Jeremiah`: `as_a` is not a registered stem type. |
 | `do_conj` | Greek | The explicit request `br / o_stem / vn,-mm,h_hs` has no matching derivation rule. |
 | Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce `conjfile` exactly, proving that it contributed no bytes to the baseline assembly. |
+
+The correction manifest leaves the historical source snapshots unchanged and
+applies every replacement only after their original line numbers and SHA-256
+digests have been verified in staging. The Greek nominal repair replaces eight
+malformed type names with existing registered paradigms, affecting 42 prepared
+notices. Two additional source defects have direct structural evidence:
+`*seouh=ros` receives `os_ou`, and the orphan `:no:*kei=os` starts its own
+lemma. Fourteen source entries that
+depend on an absent paradigm (`er_ros`, `kleos_klehs`, `pais_paidos` or the
+unregistered `is_ios`) or contain no stem are explicitly marked
+`#noanalysis`; no replacement inflection was synthesized. The rebuilt text
+index has exactly 55 removed and 44 added lines. Its `nomind` and
+`nomind.lindex` differences are pinned in
+`test/stemlib-lexical-baseline-exceptions.tsv` as corrected Greek nominal
+records.
 
 The Latin verb chain now completes. Seven malformed records were repaired from
 structural or historical evidence: five `:vs:`/`:de:` or stem-type typos in
@@ -225,9 +241,12 @@ and staged table receipts by SHA-256.
 
 | Prepared input | Lemma records | Isolated refusals |
 | --- | ---: | ---: |
-| Greek nominal | 107,442 | 64 |
 | Latin nominal | 53,403 | 148 |
 | Greek verb expansion | 20,324 | 8 |
+
+The Greek nominal input is absent from this table because it now completes
+successfully; CTest instead verifies its two reproducible outputs and their
+exact baseline-difference counts.
 
 These counts describe notices, not unique lemmas or philological corrections.
 Only the first failure inside each isolated notice is reported. In particular,

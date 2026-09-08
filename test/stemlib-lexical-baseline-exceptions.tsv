@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: MPL-2.0
 # path	reason
+Greek/steminds/nomind	corrected-greek-nominal-records
+Greek/steminds/nomind.lindex	corrected-greek-nominal-records
 Latin/steminds/vbind	corrected-latin-verb-records
 Latin/steminds/vbind.lindex	corrected-latin-verb-records
