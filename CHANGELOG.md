@@ -29,6 +29,11 @@ the corpus.
 
 ### Changed
 
+- The complete Greek verbal corpus now passes the restored `do_conj` and
+  `indexvbs` chain. Six historically non-producing derivation requests are
+  disabled in the verified staging copy, and two empty-stem derivations are
+  replaced by their explicit historical stems; clean builds emit identical
+  six-output receipts and pinned baseline differences.
 - The complete Greek nominal corpus now passes the restored fail-closed
   indexer. Eight malformed stem types use existing registered paradigms, two
   source defects are repaired, and fourteen entries that require absent or

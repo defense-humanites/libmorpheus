@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
 # path	reason
+Greek/lexical/oddkeys	current-greek-verb-source-set
 Greek/steminds/nomind	corrected-greek-nominal-records
 Greek/steminds/nomind.lindex	corrected-greek-nominal-records
+Greek/steminds/vbind	current-greek-verb-source-set
+Greek/steminds/vbind.lindex	current-greek-verb-source-set
 Latin/steminds/vbind	corrected-latin-verb-records
 Latin/steminds/vbind.lindex	corrected-latin-verb-records

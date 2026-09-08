@@ -54,9 +54,11 @@ expanded-output and odd-key-output paths. It rejects missing rule tables and
 unmatched principal parts, and removes its owned outputs on failure.
 
 This remains production infrastructure, not a supported stemlib compiler.
-Positive Greek and Latin fixtures have reproducible output receipts; the full
-corpora currently fail on unregistered nominal types, an unmatched Greek
-principal part, and the declared missing Latin `vbs.mpi` input. See
+Positive Greek and Latin fixtures and the complete Greek corpus have
+reproducible output receipts. The Latin verbal chain also completes after
+proving that the declared missing `vbs.mpi` contributed no bytes to its
+historical assembly baseline; only the Latin nominal corpus remains blocked on
+unregistered types. See
 [`stemlib-production-manifest.md`](stemlib-production-manifest.md).
 
 ## Generation integration

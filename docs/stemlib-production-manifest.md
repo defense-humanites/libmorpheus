@@ -172,15 +172,15 @@ future and aorist stems; the Latin fixture also checks that an indexed
 derivation need not carry an inflectional stem type. Existing output files,
 failed expansions, malformed inputs and missing dependencies are exercised.
 
-**Full-corpus qualification remains blocked on Latin nominal and Greek verbal
-inputs.** The same test independently stages the committed corpora and verifies
+**Full-corpus qualification remains blocked on the Latin nominal input.** The
+same test independently stages the committed corpora and verifies
 the following status:
 
 | Producer | Corpus | Status |
 | --- | --- | --- |
 | `indexnoms` | Greek | Complete; the regenerated nominal indexes are reproducible and their reviewed baseline differences are pinned. |
 | `indexnoms` | Latin | `Jeremiah`: `as_a` is not a registered stem type. |
-| `do_conj` | Greek | The explicit request `br / o_stem / vn,-mm,h_hs` has no matching derivation rule. |
+| `do_conj` and `indexvbs` | Greek | Complete; the expanded verbs, odd keys and regenerated indexes are reproducible and their reviewed baseline differences are pinned. |
 | Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce `conjfile` exactly, proving that it contributed no bytes to the baseline assembly. |
 
 The correction manifest leaves the historical source snapshots unchanged and
@@ -197,6 +197,17 @@ index has exactly 55 removed and 44 added lines. Its `nomind` and
 `nomind.lindex` differences are pinned in
 `test/stemlib-lexical-baseline-exceptions.tsv` as corrected Greek nominal
 records.
+
+The same manifest handles eight Greek verbal source defects. Six explicit
+requests that the historical expander could not satisfy are marked as invalid
+derivations in staging, preserving the fact that they produced no indexed
+stem. The empty-stem `e/w` and `i/zomai` derivations are replaced by explicit
+`:vs:` records for the exact `ewpr` and `iz` stems present in the historical
+index. This removes implicit empty-stem behavior without inventing a new
+derivation. The current ordered source set rebuilds `vbind` with exactly 18,618
+baseline lines removed and 262 added; its odd-key output removes two baseline
+lines and adds none. Those three changed paths and both indexes are pinned as
+reviewed exceptions. The expanded source has no committed baseline.
 
 The Latin verb chain now completes. Seven malformed records were repaired from
 structural or historical evidence: five `:vs:`/`:de:` or stem-type typos in
@@ -237,16 +248,15 @@ is 0 when the original batch succeeds, 1 when it fails, and 2 for an audit error
 An existing report is preserved. Reports identify the input, tool, audit recipe
 and staged table receipts by SHA-256.
 
-`test/stemlib-lexical/blockers.json` pins these diagnostic observations:
+`test/stemlib-lexical/blockers.json` pins the remaining diagnostic observations:
 
 | Prepared input | Lemma records | Isolated refusals |
 | --- | ---: | ---: |
 | Latin nominal | 53,403 | 148 |
-| Greek verb expansion | 20,324 | 8 |
 
-The Greek nominal input is absent from this table because it now completes
-successfully; CTest instead verifies its two reproducible outputs and their
-exact baseline-difference counts.
+The Greek nominal and verbal inputs are absent from this table because the
+complete Greek chain now succeeds. CTest instead verifies its six reproducible
+outputs and their exact baseline-difference counts.
 
 These counts describe notices, not unique lemmas or philological corrections.
 Only the first failure inside each isolated notice is reported. In particular,
@@ -259,12 +269,12 @@ the full-corpus failures; it is neither exhaustive semantic validation nor an
 exception list authorizing partial production. CTest checks its input hashes,
 positions and diagnostics against fresh corpus stages.
 
-### Greek verb refusal diagnosis
+### Greek verb correction qualification
 
-The eight isolated Greek expansion refusals have the following causes in the
-committed inputs and matching ASCII derivation tables. Paths below are relative
-to `stemlib/Greek/`; line references identify the original sources, not the
-concatenated audit input.
+The eight formerly isolated Greek expansion refusals have the following causes
+in the committed inputs and matching ASCII derivation tables. Paths below are
+relative to `stemlib/Greek/`; line references identify the original sources,
+not the concatenated input.
 
 | Lemma | Source | Request and observed incompatibility |
 | --- | --- | --- |
@@ -277,9 +287,10 @@ concatenated audit input.
 | `e/w` | `stemsrc/lsj.vbs`, lemma at 27328 | `:de: ew_denom` has no stem before the derivation name. |
 | `i/zomai` | `stemsrc/lsj.vbs`, lemma at 31798 | `:de: izw mp` likewise has an empty stem. |
 
-Nearby rules explain the mismatches; they are not proposed philological
-replacements. No input is corrected or excluded on this evidence alone, and
-the empty-stem cases remain rejected rather than receiving an inferred stem.
+Nearby rules explain the mismatches but do not justify alternative
+philological forms. The six unmatched requests are therefore disabled only in
+the verified staging copy. The two empty-stem cases use explicit records for
+the exact stems already present in the committed historical index.
 
 The two `vs` requests also exposed a tool defect: `GetStemClass` returns
 `(Stemtype)-1` for an unknown name, but `Stemtype` is unsigned. A positivity
@@ -289,8 +300,9 @@ expander now reject this sentinel explicitly. The former reports an unknown
 principal part; the latter returns its documented malformed-input result
 (`-1`) instead of the no-match result (`0`). Regression tests distinguish these
 outcomes from successful expansion and check failed CLI output cleanup.
-The eight notices still fail; only the two `vs` diagnostics change in the
-pinned inventory. Existing fixture outputs and corpus exceptions are unchanged.
+Regression tests retain the unknown-principal-part distinction and failed CLI
+cleanup checks. Existing fixture outputs are unchanged; the Greek corpus now
+produces a success receipt instead of a blocker report.
 
 ### Nominal refusal diagnosis
 

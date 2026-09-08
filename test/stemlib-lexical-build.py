@@ -33,6 +33,8 @@ def run(command, expected_code=0, **kwargs):
 for language in ["Greek", "Latin"]:
     receipts = []
     comparison_receipts = []
+    corpus_receipts = []
+    corpus_comparison_receipts = []
     provenance_by_corpus = {}
     for pass_name in ["first", "second"]:
         tables = binary / "test-stemlib-table-build" / (language + "-" + pass_name)
@@ -45,7 +47,7 @@ for language in ["Greek", "Latin"]:
                        "--language", language, "--tools", binary, "--perl", perl]
             if corpus:
                 command += ["--corrections", source / "tools/stemlib-lexical-corrections.tsv"]
-            run(command, 1 if corpus else 0)
+            run(command, 1 if corpus and language == "Latin" else 0)
             receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
             report = json.loads((stage / language / "lexical/comparison.json").read_text())
             comparison_receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv"
@@ -62,9 +64,9 @@ for language in ["Greek", "Latin"]:
             assert provenance["sha256"]["table_provenance"] == hashlib.sha256(
                 (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_bytes()).hexdigest()
             if corpus:
-                assert not receipt.exists() and not report["complete"]
                 log = (stage / language / "lexical/indexnoms.log").read_text()
                 if language == "Latin":
+                    assert not receipt.exists() and not report["complete"]
                     assert report["producers"]["indexnoms"]["exit_code"] == 1
                     assert "as_a" in log
                     assert report["producers"]["verb-source-assembly"] == {
@@ -88,11 +90,12 @@ for language in ["Greek", "Latin"]:
                     assert len(new_lines - old_lines) == 14
                     assert report["baselines"]["Latin/lexical/oddkeys"]["comparison"] == "identical"
                 else:
+                    assert receipt.exists() and report["complete"]
                     assert report["producers"]["indexnoms"]["exit_code"] == 0
                     assert sorted(path.name for path in (stage / language / "steminds").iterdir()) == [
-                        "nomind", "nomind.lindex"]
-                    assert report["producers"]["do_conj"]["exit_code"] == 1
-                    assert "unmatched" in (stage / language / "lexical/do_conj.log").read_text()
+                        "nomind", "nomind.lindex", "vbind", "vbind.lindex"]
+                    assert report["producers"]["do_conj"]["exit_code"] == 0
+                    assert report["producers"]["indexvbs"]["exit_code"] == 0
                     differences = {
                         path for path, value in report["baselines"].items()
                         if value["comparison"] == "different"
@@ -102,6 +105,17 @@ for language in ["Greek", "Latin"]:
                     new_lines = set((stage / "Greek/steminds/nomind").read_text().splitlines())
                     assert len(old_lines - new_lines) == 55
                     assert len(new_lines - old_lines) == 44
+                    old_lines = set((source / "stemlib/Greek/steminds/vbind").read_text().splitlines())
+                    new_lines = set((stage / "Greek/steminds/vbind").read_text().splitlines())
+                    assert len(old_lines - new_lines) == 18618
+                    assert len(new_lines - old_lines) == 262
+                    old_lines = set((source / "stemlib/Greek/oddfile").read_text().splitlines())
+                    new_lines = set((stage / "Greek/lexical/oddkeys").read_text().splitlines())
+                    assert len(old_lines - new_lines) == 2
+                    assert not new_lines - old_lines
+                    corpus_receipts.append(receipt.read_bytes())
+                    corpus_comparison_receipts.append(comparison_receipt.read_bytes())
+                    run(command, 1)  # no overlay, even after success
                 if pass_name == "first":
                     for baseline in [item for item in blockers if item["language"] == language]:
                         producer = baseline["producer"]
@@ -120,7 +134,8 @@ for language in ["Greek", "Latin"]:
                         original = audit_output.read_bytes()
                         run(audit_command, 2)
                         assert audit_output.read_bytes() == original
-                    assert not receipt.exists()
+                    if language == "Latin":
+                        assert not receipt.exists()
             else:
                 rows = [row for row in receipt.read_text().splitlines() if row and not row.startswith("#")]
                 assert rows == [row for row in expected if row.startswith(language + "/")]
@@ -132,6 +147,9 @@ for language in ["Greek", "Latin"]:
                 run(command, 1)  # no overlay, even after success
     assert receipts[0] == receipts[1]
     assert comparison_receipts[0] == comparison_receipts[1]
+    if corpus_receipts:
+        assert corpus_receipts[0] == corpus_receipts[1]
+        assert corpus_comparison_receipts[0] == corpus_comparison_receipts[1]
 
 # A stale correction must fail before either nominal index is created.
 bad_stage = work / "bad-correction-stage"
@@ -196,4 +214,4 @@ for tool in ["indexnoms", "indexvbs"]:
     sidecar.write_text("sentinel")
     run([binary / tool, input_path, output], 1, env=env)
     assert sidecar.read_text() == "sentinel" and not output.exists()
-print("Greek/Latin fixture receipts match independent clean builds and pinned output hashes; full-corpus blockers remain fail-closed.")
+print("Greek/Latin fixture receipts and the complete Greek corpus match independent clean builds; the Latin nominal blocker remains fail-closed.")

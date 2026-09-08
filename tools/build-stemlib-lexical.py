@@ -115,7 +115,8 @@ def build(args):
                 raise ValueError("invalid lexical correction")
             lang, name, line_text, expected, replacement_json = fields
             if (lang not in {"Greek", "Latin"} or Path(name).is_absolute() or
-                    ".." in Path(name).parts or role_by_input.get((lang, name)) != "nominal"):
+                    ".." in Path(name).parts or
+                    role_by_input.get((lang, name)) not in {"nominal", "verb"}):
                 raise ValueError("invalid lexical correction target")
             try:
                 line_number = int(line_text)

@@ -364,8 +364,10 @@ and the verified table staging. Clean Greek and Latin fixture builds now yield
 twelve reproducible outputs with pinned hashes. The Latin verbal corpus now
 builds after an exact assembly proof for the historically absent `vbs.mpi` and
 seven evidence-backed malformed-record repairs; its two index differences are
-pinned and its odd-key output matches the baseline. Full-corpus attempts remain
-fail-closed at unregistered nominal types and unmatched Greek principal parts. See the
+pinned and its odd-key output matches the baseline. The complete Greek corpus
+also builds after the eight previously inventoried verbal refusals are handled
+in its verified staging copy, and emits a reproducible six-output receipt.
+Full-corpus qualification remains fail-closed at the Latin nominal types. See the
 [lexical production boundary](stemlib-production-manifest.md#lexical-production-and-explicit-blockers)
-for the exact failures and reproduction command. Complete corpus regeneration
-remains unqualified.
+for the remaining failures and reproduction command. Complete Latin corpus
+regeneration remains unqualified.
