@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: MPL-2.0
 # language	path	line	source_line_sha256	replacement_json
+Greek	stemsrc/irreg.vbs.src	193	e460e0ea4e96986ef7975ca74dec93bd7dedc32a83a7a9603d8d664cb1053152	"#invalid-expansion:@  fut"
+Greek	stemsrc/irreg.vbs.src	342	7a0b079d30265feb377c773aef4303c22095b4b6631653b676e0698a1ef03aff	"#invalid-expansion:@ 2nd sg"
+Greek	stemsrc/irreg.vbs.src	343	d429606bc2ef5ef360d1f817ce9018874a3e77419457b14f81c9669ac6032565	"#invalid-expansion:@ 3rd sg"
 Greek	stemsrc/lsj.nom	891	c5713d7e7e33a3e7aa0e3535a1f6fe3b34239c1f85de2b0b97d206ea5db69706	"#noanalysis:a)glao/pais"
 Greek	stemsrc/lsj.nom	892	908a1695064e39b04b8aad9397f19add7642622b07854899ee29820d1e053dd3	"#noanalysis-stem:a)glao pais_paidos masc"
 Greek	stemsrc/lsj.nom	5530	d95e15c7ebffe39dd8b9b68e17a7c6e5d26d78560c6d1296499cd7cc67471ff0	":no:a)lalu c_ggos fem ant_acc"

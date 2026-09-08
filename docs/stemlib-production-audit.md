@@ -368,8 +368,10 @@ pinned and its odd-key output matches the baseline. The complete Greek corpus
 also builds after the eight previously inventoried verbal refusals are handled
 in its verified staging copy. The complete Latin nominal corpus now builds after
 154 checksum-pinned staging corrections: 62 registered-type substitutions, 90
-explicit quarantines and two notice-boundary repairs. Two independent complete
-builds of each language emit identical six-output receipts, and all changed
-baseline paths are explicitly pinned. See the
+explicit quarantines and two notice-boundary repairs. `buildword` now also
+reconstructs both prepared irregular-word files per language from pinned source
+inside the stage. Two independent complete builds of each language emit
+identical eight-output receipts, and all changed baseline paths are explicitly
+pinned. See the
 [lexical production boundary](stemlib-production-manifest.md#lexical-production-and-qualification)
 for the reproduction command and correction evidence.

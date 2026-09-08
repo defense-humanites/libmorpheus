@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Build lexical indexes on a freshly produced, verified table staging tree.
 
-The source manifest is ordered: language, role, path, sha256. Prepared irregular
-sources are inputs at this boundary. This does not reconstruct lexicon exports.
+The source manifest is ordered: language, role, path, sha256. Irregular-word
+sources are expanded inside the stage. This does not reconstruct lexicon exports.
 """
 import argparse
 import hashlib
@@ -18,6 +18,41 @@ import sys
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def canonical_notices(data):
+    """Preserve lemma order while ignoring record order inside each notice."""
+    notices = []
+    header = None
+    body = []
+    preamble = []
+    for line in data.splitlines():
+        if line.startswith(b":le:"):
+            if header is not None:
+                notices.append((header, tuple(sorted(body))))
+            elif preamble:
+                notices.append((b"", tuple(sorted(preamble))))
+            header = line
+            body = []
+        elif header is None:
+            preamble.append(line)
+        else:
+            body.append(line)
+    if header is not None:
+        notices.append((header, tuple(sorted(body))))
+    elif preamble:
+        notices.append((b"", tuple(sorted(preamble))))
+    return notices
+
+
+def canonical_notice_digest(data):
+    result = hashlib.sha256()
+    for header, body in canonical_notices(data):
+        for line in (header, *body):
+            result.update(len(line).to_bytes(8, "big"))
+            result.update(line)
+        result.update(b"\xff")
+    return result.hexdigest()
 
 
 def build(args):
@@ -58,8 +93,10 @@ def build(args):
     rows = []
     seen = set()
     role_by_input = {}
+    irregular_roles = {"irregular-nominal-source", "irregular-verb-source",
+                       "irregular-nominal-baseline", "irregular-verb-baseline"}
     roles = {"nominal", "verb", "constraints", "constraint-tool", "assembly-baseline",
-             "unavailable", "excluded"}
+             "unavailable", "excluded", *irregular_roles}
     for row in args.manifest.read_text().splitlines():
         if not row or row.startswith("#"):
             continue
@@ -88,13 +125,19 @@ def build(args):
                         and (source / lang / name).exists()}
             if discovered != declared:
                 raise ValueError("lexical source inventory mismatch: " + lang)
-    if not any(role == "nominal" for role, _, _ in rows) or not any(role == "verb" for role, _, _ in rows):
+    has_irregular = any(role in irregular_roles for role, _, _ in rows)
+    if has_irregular and any(sum(role == expected for role, _, _ in rows) != 1
+                             for expected in irregular_roles):
+        raise ValueError("exactly one source and baseline per irregular class are required")
+    if (not any(role in {"nominal", "irregular-nominal-baseline"} for role, _, _ in rows) or
+            not any(role in {"verb", "irregular-verb-baseline"} for role, _, _ in rows)):
         raise ValueError("both nominal and verb input lists are required")
     work = root / "lexical"
     work.mkdir()  # refuse reuse, including failed attempts
     (root / "steminds").mkdir()
     for role, name, expected in rows:
-        if role in {"assembly-baseline", "unavailable", "excluded"}:
+        if role in {"assembly-baseline", "unavailable", "excluded",
+                    "irregular-nominal-baseline", "irregular-verb-baseline"}:
             continue
         target = root / name
         if target.exists():
@@ -116,7 +159,8 @@ def build(args):
             lang, name, line_text, expected, replacement_json = fields
             if (lang not in {"Greek", "Latin"} or Path(name).is_absolute() or
                     ".." in Path(name).parts or
-                    role_by_input.get((lang, name)) not in {"nominal", "verb"}):
+                    role_by_input.get((lang, name)) not in
+                    {"nominal", "verb", "irregular-nominal-source", "irregular-verb-source"}):
                 raise ValueError("invalid lexical correction target")
             try:
                 line_number = int(line_text)
@@ -167,7 +211,8 @@ def build(args):
             "table_inputs": digest(input_receipt),
             "table_outputs": digest(receipt),
             "table_provenance": digest(stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"),
-            **{name: digest(args.tools / name) for name in ["indexnoms", "do_conj", "indexvbs"]},
+            **{name: digest(args.tools / name)
+               for name in ["buildword", "indexnoms", "do_conj", "indexvbs"]},
         },
     }
     if args.corrections:
@@ -181,8 +226,9 @@ def build(args):
     options = ["-L"] if language == "Latin" else []
     report = {"language": language, "producers": {}, "baselines": {}}
 
-    def run(label, command, output=None):
-        result = subprocess.run(command, cwd=root, env=env, capture_output=True)
+    def run(label, command, output=None, input_path=None):
+        data = input_path.read_bytes() if input_path is not None else None
+        result = subprocess.run(command, cwd=root, env=env, capture_output=True, input=data)
         diagnostics = result.stderr.decode("utf-8", "replace").replace(str(stage), "<stage>")
         (work / (label + ".log")).write_text(diagnostics)
         if output is not None and result.returncode == 0:
@@ -190,10 +236,28 @@ def build(args):
         report["producers"][label] = {"exit_code": result.returncode}
         return result.returncode == 0
 
-    nominal = [root / name for role, name, _ in rows if role == "nominal"]
+    irregular_outputs = []
+    irregular_ready = True
+    if has_irregular:
+        for kind in ["nominal", "verb"]:
+            source_name = next(name for role, name, _ in rows
+                               if role == f"irregular-{kind}-source")
+            baseline_name = next(name for role, name, _ in rows
+                                 if role == f"irregular-{kind}-baseline")
+            output = root / baseline_name
+            options = ["-L"] if language == "Latin" else []
+            irregular_ready = run(
+                f"buildword-{kind}", [str(args.tools / "buildword"), *options],
+                output, root / source_name) and irregular_ready
+            irregular_outputs.append(output)
+
+    nominal = [root / name for role, name, _ in rows
+               if role in {"nominal", "irregular-nominal-baseline"}]
     constraint_tools = [root / name for role, name, _ in rows if role == "constraint-tool"]
     nominal_input = work / "nominal.input"
-    if constraint_tools:
+    if not irregular_ready:
+        prepared = False
+    elif constraint_tools:
         if len(constraint_tools) != 1:
             raise ValueError("exactly one constraint tool is supported")
         prepared = run("constraints", [args.perl, str(constraint_tools[0]), *map(str, nominal)], nominal_input)
@@ -206,11 +270,13 @@ def build(args):
     unavailable = [name for role, name, _ in rows if role == "unavailable"]
     assembly_baselines = [(name, source / language / name)
                           for role, name, _ in rows if role == "assembly-baseline"]
-    data = b"".join((root / name).read_bytes() for role, name, _ in rows if role == "verb")
+    data = (b"".join((root / name).read_bytes() for role, name, _ in rows
+                     if role in {"verb", "irregular-verb-baseline"})
+            if irregular_ready else b"")
     if language == "Latin":
         data = re.sub(rb"([a-z])([aei])_v[ \t]+perfstem", rb"\1\t\2vperf", data)
-    assembled = not unavailable
-    if unavailable:
+    assembled = irregular_ready and not unavailable
+    if unavailable and irregular_ready:
         if len(assembly_baselines) != 1:
             report["producers"]["verb-source-assembly"] = {
                 "blocked_missing_inputs": unavailable,
@@ -218,11 +284,17 @@ def build(args):
             }
         else:
             baseline_name, baseline = assembly_baselines[0]
-            assembled = data == baseline.read_bytes()
+            baseline_data = baseline.read_bytes()
+            exact = data == baseline_data
+            record_identical = canonical_notices(data) == canonical_notices(baseline_data)
+            assembled = exact or record_identical
             report["producers"]["verb-source-assembly"] = {
                 "historically_omitted_inputs": unavailable,
                 "baseline": baseline_name,
-                "comparison": "identical" if assembled else "different",
+                "baseline_sha256": hashlib.sha256(baseline_data).hexdigest(),
+                "comparison": ("identical" if exact else
+                               "notice-record-identical" if record_identical else "different"),
+                "notice_records_sha256": canonical_notice_digest(data),
                 "sha256": hashlib.sha256(data).hexdigest(),
             }
     if assembled:
@@ -230,8 +302,12 @@ def build(args):
         if run("do_conj", [str(args.tools / "do_conj"), *options, str(verb_input), str(work / "verb.expanded"), str(work / "oddkeys")]):
             run("indexvbs", [str(args.tools / "indexvbs"), *options, str(work / "verb.expanded"), str(root / "steminds/vbind")])
     outputs = [path for path in (root / "steminds").glob("*") if path.is_file()]
+    outputs += [path for path in irregular_outputs if path.exists()]
     outputs += [path for path in [work / "verb.expanded", work / "oddkeys"] if path.exists()]
-    success = all(report["producers"].get(name, {}).get("exit_code") == 0 for name in ["indexnoms", "do_conj", "indexvbs"])
+    required = ["indexnoms", "do_conj", "indexvbs"]
+    if has_irregular:
+        required += ["buildword-nominal", "buildword-verb"]
+    success = all(report["producers"].get(name, {}).get("exit_code") == 0 for name in required)
     report["complete"] = success
     comparison_rows = []
     for path in sorted(outputs):

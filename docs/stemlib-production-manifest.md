@@ -96,20 +96,21 @@ duplicated, reordered, malformed, or reclassified exception.
 `tools/stemlib-lexical-manifest.tsv` adds an ordered lexical boundary without
 changing the 379-source table manifest. It inventories every file below both
 `stemsrc/` trees, pins selected inputs and exclusions by SHA-256, and declares
-Latin `stemsrc/vbs.mpi` as `unavailable`. Prepared `nom.irreg` and `vbs.irreg`
-files are inputs here; regenerating those snapshots from their irregular-word
-sources remains a later boundary.
+Latin `stemsrc/vbs.mpi` as `unavailable`. The prepared `nom.irreg` and
+`vbs.irreg` files are pinned comparison baselines; their `irreg.nom.src` and
+`irreg.vbs.src` inputs are expanded afresh inside every complete staging.
 
 The lexical manifest has four tab-separated fields: `language`, `role`, `path`,
-and `sha256`. The roles are `nominal`, `verb`, `constraints`, `constraint-tool`,
-`assembly-baseline`, `excluded`, and `unavailable` (the last uses `-` instead
-of a digest). Nominal and verb rows define concatenation order. Greek nominal
-preparation uses the pinned `addconstraints.pl` and entity-name input. The
-historical Latin perfect-stem substitution is retained. Although `vbs.mpi` is
-absent, concatenating the four available files in makefile order reproduces
-the committed `conjfile` baseline exactly; the recipe verifies that zero-byte
-historical contribution before continuing. An inventory, digest, baseline or
-unavailable-file change fails validation.
+and `sha256`. In addition to `nominal`, `verb`, `constraints`,
+`constraint-tool`, `assembly-baseline`, `excluded`, and `unavailable`, four
+irregular source/baseline roles identify exactly one nominal and one verbal pair
+per language. Nominal and verb rows, including each irregular baseline's
+position, define concatenation order. Greek nominal preparation uses the pinned
+`addconstraints.pl` and entity-name input. The historical Latin perfect-stem
+substitution is retained. Although `vbs.mpi` is absent, the available ordered
+inputs reproduce the same `conjfile` lemma sequence and per-lemma record
+multisets; the recipe verifies that notice-level equivalence before continuing.
+An inventory, digest, baseline or unavailable-file change fails validation.
 
 After `build-stemlib-tables.cmake` completes in a fresh stage, run:
 
@@ -126,22 +127,25 @@ Use a separately built Latin stage with `--language Latin`. Python 3 and Perl
 are build-time dependencies only. The recipe verifies staged table inputs and
 outputs, copies and verifies selected lexical sources, fixes the locale,
 timezone and `MORPHLIB`, and invokes `indexnoms`, `do_conj`, and `indexvbs` with
-explicit paths. It rejects reuse. `lexical/inputs.tsv`, per-producer diagnostics
+explicit paths after two `buildword` expansions. It rejects reuse.
+`lexical/inputs.tsv`, per-producer diagnostics
 and `lexical/comparison.json` remain available when a corpus blocks production.
 A sorted `MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv` is also written after every
 attempt. It records output and baseline digests with an identical, different or
 unavailable classification, without implying that the complete build passed.
-A successful run emits `MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv` covering the four
-stem-index files, verb expansion, and odd-key output. No success receipt is
-written after a failed or blocked producer. Baseline comparisons explicitly
-distinguish identical, different, and unavailable references.
+A successful complete-corpus run emits
+`MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv` covering both rebuilt irregular files,
+the four stem-index files, verb expansion, and odd-key output. Fixture receipts
+remain limited to their six applicable outputs. No success receipt is written
+after a failed or blocked producer. Baseline comparisons explicitly distinguish
+identical, different, and unavailable references.
 
 `MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` records SHA-256 identities for the
 table manifest, validator, staging and production recipes, four producer
 executables and CMake executable. The lexical recipe requires this record and
 writes `lexical/provenance.json` before invoking producers. It identifies the
 lexical manifest, staged input and table-output receipts, table provenance,
-recipe, three native tools, Python executable/version and, when used, the Perl
+recipe, four native tools, Python executable/version and, when used, the Perl
 executable. Neither record contains absolute build paths or timestamps, so two
 clean builds with the same inputs and executables can compare them directly.
 Records survive corpus failures and are not success receipts. These hashes
@@ -177,14 +181,23 @@ verifies the following status:
 
 | Producer | Corpus | Status |
 | --- | --- | --- |
+| `buildword` | Greek and Latin | Complete; all four prepared irregular files are rebuilt reproducibly from their source forms before indexing. |
 | `indexnoms` | Greek | Complete; the regenerated nominal indexes are reproducible and their reviewed baseline differences are pinned. |
 | `indexnoms` | Latin | Complete; verified staging corrections resolve or quarantine every formerly rejected record, and the regenerated indexes are reproducible with pinned baseline differences. |
 | `do_conj` and `indexvbs` | Greek | Complete; the expanded verbs, odd keys and regenerated indexes are reproducible and their reviewed baseline differences are pinned. |
-| Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce `conjfile` exactly, proving that it contributed no bytes to the baseline assembly. |
+| Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce the same lemma sequence and per-lemma record multisets as `conjfile`; only equivalent record ordering differs. |
 
 The correction manifest leaves the historical source snapshots unchanged and
 applies every replacement only after their original line numbers and SHA-256
-digests have been verified in staging. The Greek nominal repair replaces eight
+digests have been verified in staging. Three bare `@` records in the Greek
+irregular verb source name no ending table and are explicitly disabled in the
+staging copy. The rebuilt `vbs.irreg` then matches its baseline byte for byte.
+Both rebuilt Latin irregular files contain exactly the same line multisets as
+their baselines, with only producer ordering differences. The rebuilt Greek
+`nom.irreg` has six removed and five added lines due to current accent handling;
+all three differing prepared paths are pinned baseline exceptions.
+
+The Greek nominal repair replaces eight
 malformed type names with existing registered paradigms, affecting 42 prepared
 notices. Two additional source defects have direct structural evidence:
 `*seouh=ros` receives `os_ou`, and the orphan `:no:*kei=os` starts its own
@@ -192,7 +205,8 @@ lemma. Fourteen source entries that
 depend on an absent paradigm (`er_ros`, `kleos_klehs`, `pais_paidos` or the
 unregistered `is_ios`) or contain no stem are explicitly marked
 `#noanalysis`; no replacement inflection was synthesized. The rebuilt text
-index has exactly 55 removed and 44 added lines. Its `nomind` and
+index has exactly 61 removed and 49 added lines after consuming the rebuilt
+irregular snapshot. Its `nomind` and
 `nomind.lindex` differences are pinned in
 `test/stemlib-lexical-baseline-exceptions.tsv` as corrected Greek nominal
 records.
@@ -247,8 +261,9 @@ python3 tools/audit-stemlib-lexical.py \
 
 For Greek expansion, select `--producer do_conj`, `build/dev/do_conj` and
 `lexical/verb.input`. `indexvbs` can similarly inspect an already expanded input.
-The Latin recipe continues only when the available verb assembly exactly
-matches its pinned historical baseline despite the declared absent `vbs.mpi`.
+The Latin recipe continues only when the available verb assembly matches the
+pinned historical baseline exactly or has the same ordered lemmas and per-lemma
+record multisets despite the declared absent `vbs.mpi`.
 
 The audit first runs the complete input, then bisects failing batches at lemma
 boundaries. It records isolated refusals with one-based record and prepared-input
@@ -260,7 +275,8 @@ and staged table receipts by SHA-256.
 
 `test/stemlib-lexical/blockers.json` now has an empty `reports` list because all
 four complete nominal and verbal inputs succeed. CTest verifies each language's
-six reproducible outputs and exact baseline-difference counts instead.
+eight reproducible complete-corpus outputs and exact baseline-difference counts
+instead.
 
 The former audit counts below describe notices, not unique lemmas or
 philological corrections.

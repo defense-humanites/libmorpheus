@@ -53,6 +53,12 @@ verified table staging. `do_conj` is an internal C17 tool with explicit input,
 expanded-output and odd-key-output paths. It rejects missing rule tables and
 unmatched principal parts, and removes its owned outputs on failure.
 
+The same recipe now invokes `buildword` on the pinned Greek and Latin
+`irreg.nom.src` and `irreg.vbs.src` inputs before assembling the nominal and
+verbal corpora. The prepared `nom.irreg` and `vbs.irreg` files are comparison
+baselines rather than trusted inputs. Producer failures retain diagnostics but
+cannot emit a lexical success receipt.
+
 This remains production infrastructure, not a supported stemlib compiler.
 Positive Greek and Latin fixtures and both complete corpora have reproducible
 output receipts. The Latin verbal chain completes after proving that the

@@ -58,7 +58,7 @@ for language in ["Greek", "Latin"]:
                 provenance_by_corpus[corpus] = provenance
             else:
                 assert provenance == provenance_by_corpus[corpus]
-            for tool in ["indexnoms", "do_conj", "indexvbs"]:
+            for tool in ["buildword", "indexnoms", "do_conj", "indexvbs"]:
                 assert provenance["sha256"][tool] == hashlib.sha256((binary / tool).read_bytes()).hexdigest()
             assert provenance["sha256"]["table_provenance"] == hashlib.sha256(
                 (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_bytes()).hexdigest()
@@ -67,6 +67,8 @@ for language in ["Greek", "Latin"]:
                 assert report["producers"]["indexnoms"]["exit_code"] == 0
                 assert report["producers"]["do_conj"]["exit_code"] == 0
                 assert report["producers"]["indexvbs"]["exit_code"] == 0
+                assert report["producers"]["buildword-nominal"]["exit_code"] == 0
+                assert report["producers"]["buildword-verb"]["exit_code"] == 0
                 assert sorted(path.name for path in (stage / language / "steminds").iterdir()) == [
                     "nomind", "nomind.lindex", "vbind", "vbind.lindex"]
                 differences = {
@@ -80,9 +82,15 @@ for language in ["Greek", "Latin"]:
                     assert report["producers"]["verb-source-assembly"] == {
                         "historically_omitted_inputs": ["stemsrc/vbs.mpi"],
                         "baseline": "conjfile",
-                        "comparison": "identical",
-                        "sha256": "e2189e136902fded363d5d12ac6aa387992d566d45362546237644ba251746c4",
+                        "baseline_sha256": "e2189e136902fded363d5d12ac6aa387992d566d45362546237644ba251746c4",
+                        "comparison": "notice-record-identical",
+                        "notice_records_sha256": "26a298a44c9267822e5359f573e8635172c32c228ff49a2c9e0ab18298b96554",
+                        "sha256": "0d754f027283ba32c183e291fec45c5e5d2a273fc796b5d524247693603e4309",
                     }
+                    for name in ["nom.irreg", "vbs.irreg"]:
+                        old_lines = (source / "stemlib/Latin/stemsrc" / name).read_text().splitlines()
+                        new_lines = (stage / "Latin/stemsrc" / name).read_text().splitlines()
+                        assert sorted(old_lines) == sorted(new_lines)
                     old_lines = set((source / "stemlib/Latin/steminds/nomind").read_text().splitlines())
                     new_lines = set((stage / "Latin/steminds/nomind").read_text().splitlines())
                     assert len(old_lines - new_lines) == 152
@@ -93,10 +101,15 @@ for language in ["Greek", "Latin"]:
                     assert len(new_lines - old_lines) == 14
                     assert report["baselines"]["Latin/lexical/oddkeys"]["comparison"] == "identical"
                 else:
+                    assert report["baselines"]["Greek/stemsrc/vbs.irreg"]["comparison"] == "identical"
+                    old_lines = set((source / "stemlib/Greek/stemsrc/nom.irreg").read_text().splitlines())
+                    new_lines = set((stage / "Greek/stemsrc/nom.irreg").read_text().splitlines())
+                    assert len(old_lines - new_lines) == 6
+                    assert len(new_lines - old_lines) == 5
                     old_lines = set((source / "stemlib/Greek/steminds/nomind").read_text().splitlines())
                     new_lines = set((stage / "Greek/steminds/nomind").read_text().splitlines())
-                    assert len(old_lines - new_lines) == 55
-                    assert len(new_lines - old_lines) == 44
+                    assert len(old_lines - new_lines) == 61
+                    assert len(new_lines - old_lines) == 49
                     old_lines = set((source / "stemlib/Greek/steminds/vbind").read_text().splitlines())
                     new_lines = set((stage / "Greek/steminds/vbind").read_text().splitlines())
                     assert len(old_lines - new_lines) == 18618
@@ -140,6 +153,33 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--tools", binary, "--perl", perl], 1)
 assert not list((bad_stage / "Greek/steminds").iterdir())
 assert not (bad_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
+
+# A valid correction manifest that re-enables an invalid irregular expansion
+# must retain diagnostics without publishing partial lexical success.
+bad_expansion_stage = work / "bad-expansion-stage"
+shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_expansion_stage)
+bad_expansion_corrections = work / "bad-expansion-corrections.tsv"
+correction_lines = (source / "tools/stemlib-lexical-corrections.tsv").read_text().splitlines()
+bad_expansion = next(index for index, row in enumerate(correction_lines)
+                     if row.startswith("Greek\tstemsrc/irreg.vbs.src\t193\t"))
+fields = correction_lines[bad_expansion].split("\t")
+fields[4] = json.dumps("@  fut")
+correction_lines[bad_expansion] = "\t".join(fields)
+bad_expansion_corrections.write_text("\n".join(correction_lines) + "\n")
+run([sys.executable, source / "tools/build-stemlib-lexical.py",
+     "--stage", bad_expansion_stage, "--source", source / "stemlib",
+     "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
+     "--corrections", bad_expansion_corrections, "--language", "Greek",
+     "--tools", binary, "--perl", perl], 1)
+bad_report = json.loads(
+    (bad_expansion_stage / "Greek/lexical/comparison.json").read_text())
+assert not bad_report["complete"]
+assert bad_report["producers"]["buildword-nominal"]["exit_code"] == 0
+assert bad_report["producers"]["buildword-verb"]["exit_code"] == 1
+assert (bad_expansion_stage / "Greek/stemsrc/nom.irreg").exists()
+assert not (bad_expansion_stage / "Greek/stemsrc/vbs.irreg").exists()
+assert not list((bad_expansion_stage / "Greek/steminds").iterdir())
+assert not (bad_expansion_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
 
 # The expander must remove both owned outputs on all input failures and must
 # preserve pre-existing files. Exercise cases with and without a final newline.

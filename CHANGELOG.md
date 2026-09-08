@@ -29,11 +29,17 @@ the corpus.
 
 ### Changed
 
+- The lexical recipe now rebuilds Greek and Latin `nom.irreg` and `vbs.irreg`
+  from their checksum-pinned irregular-word sources before indexing. Three
+  malformed Greek expansions are disabled only in staging; the Greek verbal
+  snapshot is byte-identical, both Latin snapshots have identical notice
+  records in producer order, and the reviewed Greek nominal divergence is
+  pinned. Complete-corpus receipts now cover eight outputs per language.
 - The complete Greek verbal corpus now passes the restored `do_conj` and
   `indexvbs` chain. Six historically non-producing derivation requests are
   disabled in the verified staging copy, and two empty-stem derivations are
   replaced by their explicit historical stems; clean builds emit identical
-  six-output receipts and pinned baseline differences.
+  eight-output receipts and pinned baseline differences.
 - The complete Greek nominal corpus now passes the restored fail-closed
   indexer. Eight malformed stem types use existing registered paradigms, two
   source defects are repaired, and fourteen entries that require absent or
@@ -44,7 +50,7 @@ the corpus.
   quarantine 90 records without a qualified Latin paradigm, and repair two
   malformed notice boundaries without changing the historical source files.
   Two independent full Greek and Latin lexical builds now emit identical
-  six-output receipts and pinned baseline comparisons.
+  eight-output receipts and pinned baseline comparisons.
 - Five inherited ending-table producers are restored as non-installed,
   default-disabled CMake targets with C17 entry points and fail-closed command
   handling. CI builds them explicitly and verifies that missing registries or
