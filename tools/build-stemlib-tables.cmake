@@ -72,6 +72,7 @@ set(build_environment
 set(provenance "# SPDX-License-Identifier: MPL-2.0\n# key\tvalue\n")
 string(APPEND provenance
        "schema\t2\n"
+       "execution_model\tsingle-pass-explicit-dag\n"
        "source_revision\t${MORPHEUS_SOURCE_REVISION}\n"
        "compiler_name\t${compiler_name}\n"
        "compiler_id\t${MORPHEUS_C_COMPILER_ID}\n"
@@ -91,7 +92,14 @@ file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" recipe_sha256)
 string(APPEND provenance "recipe\t${recipe_sha256}\n")
 file(WRITE "${stage_root}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv" "${provenance}")
 
+set(producer_labels)
 function(run_producer label program)
+  list(FIND producer_labels "${label}" producer_label_index)
+  if(NOT producer_label_index EQUAL -1)
+    message(FATAL_ERROR "table producer invoked twice: ${label}")
+  endif()
+  list(APPEND producer_labels "${label}")
+  set(producer_labels "${producer_labels}" PARENT_SCOPE)
   execute_process(
     COMMAND "${CMAKE_COMMAND}" -E env ${build_environment}
             "${program}" ${ARGN}

@@ -29,6 +29,9 @@ the corpus.
 
 ### Changed
 
+- Stemlib production now declares a single-pass explicit dependency graph in
+  its provenance and final receipt. Duplicate producer labels are rejected,
+  making the inherited undocumented second make pass unnecessary.
 - Successful full stemlib builds now emit one deterministic production receipt
   containing the source revision, environment, toolchain, ordered table and
   lexical input digests, all table and lexical output digests, and provenance

@@ -387,3 +387,9 @@ toolchain identity, ordered source digests, all table and lexical output
 digests, and both provenance-record digests in one deterministic production
 receipt. CI verifies its contents and requires byte-identical receipts from the
 two independent builds of each language.
+
+The restored recipes remove the historical second make pass. Their declared
+`single-pass-explicit-dag` model builds every table source once, rebuilds both
+irregular lexical sources before assembly, and treats indexes as terminal
+outputs. Duplicate producer labels fail closed; convergence is established by
+comparing two fresh executions rather than mutating one tree twice.

@@ -69,6 +69,14 @@ the pinned registry. The list-driven index mode filters nominal and verb tables 
 registered stem class, rejects malformed or unknown names, and never treats an
 unlisted registry entry as an implicit input.
 
+This is a single-pass explicit dependency graph, not the inherited makefile's
+undocumented two-pass iteration. Table sources produce tables, rebuilt
+irregular sources and the complete table stage feed lexical assembly, and the
+stem indexes are terminal outputs. No generated index feeds a producer input.
+Each labeled producer may run only once; duplicate labels are fatal. Two fresh
+executions then provide the independent reproducibility proof rather than a
+second mutation of one staging tree.
+
 Every producer runs with `LC_ALL=C`, `LANG=C`, `TZ=UTC`, and `MORPHLIB` fixed to
 the staging root. Successful completion emits
 `MORPHEUS-STEMLIB-TABLE-OUTPUTS.tsv`, containing the sorted output paths and
@@ -143,7 +151,8 @@ Every successful fixture or complete-corpus run also emits
 `MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json`. This deterministic aggregate receipt
 contains the source revision, fixed environment, compiler identity, ordered
 table and lexical input digests, every table and lexical output digest, and the
-digests of both provenance records. It is absent after any failed producer.
+digests of both provenance records. It also declares the single-pass execution
+model and one table and lexical pass. It is absent after any failed producer.
 CTest verifies every received output against it and compares receipts from the
 two independent builds byte for byte.
 

@@ -70,6 +70,7 @@ for language in ["Greek", "Latin"]:
                 for row in (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_text().splitlines()
                 if row and not row.startswith("#"))
             assert provenance["source_revision"] == table_provenance["source_revision"]
+            assert provenance["execution_model"] == "single-pass-explicit-dag"
             assert provenance["toolchain"] == {
                 key: table_provenance[key] for key in [
                     "compiler_name", "compiler_id", "compiler_version", "compiler_sha256",
@@ -153,6 +154,11 @@ for language in ["Greek", "Latin"]:
             assert production["schema"] == 1 and production["language"] == language
             assert production["source_revision"] == provenance["source_revision"]
             assert production["environment"] == provenance["environment"]
+            assert production["execution"] == {
+                "model": "single-pass-explicit-dag",
+                "table_passes": 1,
+                "lexical_passes": 1,
+            }
             assert production["toolchain"] == provenance["toolchain"]
             assert production["provenance_sha256"] == {
                 "table": hashlib.sha256(

@@ -103,10 +103,12 @@ def build(args):
         if key in table_provenance:
             raise ValueError("duplicate table provenance field: " + key)
         table_provenance[key] = value
-    provenance_fields = {"schema", "source_revision", "compiler_name", "compiler_id",
-                         "compiler_version", "compiler_sha256", "system_name",
-                         "system_processor"}
-    if not provenance_fields <= table_provenance.keys() or table_provenance["schema"] != "2":
+    provenance_fields = {"schema", "execution_model", "source_revision", "compiler_name",
+                         "compiler_id", "compiler_version", "compiler_sha256",
+                         "system_name", "system_processor"}
+    if (not provenance_fields <= table_provenance.keys() or
+            table_provenance["schema"] != "2" or
+            table_provenance["execution_model"] != "single-pass-explicit-dag"):
         raise ValueError("incomplete table provenance")
     rows = []
     seen = set()
@@ -220,6 +222,7 @@ def build(args):
         "schema": 1,
         "language": language,
         "environment": {"LC_ALL": "C", "LANG": "C", "TZ": "UTC"},
+        "execution_model": table_provenance["execution_model"],
         "python_version": sys.version,
         "source_revision": table_provenance["source_revision"],
         "toolchain": {key: table_provenance[key] for key in [
@@ -249,6 +252,8 @@ def build(args):
     report = {"language": language, "producers": {}, "baselines": {}}
 
     def run(label, command, output=None, input_path=None):
+        if label in report["producers"]:
+            raise ValueError("lexical producer invoked twice: " + label)
         data = input_path.read_bytes() if input_path is not None else None
         result = subprocess.run(command, cwd=root, env=env, capture_output=True, input=data)
         diagnostics = result.stderr.decode("utf-8", "replace").replace(str(stage), "<stage>")
@@ -365,6 +370,11 @@ def build(args):
             "language": language,
             "source_revision": provenance["source_revision"],
             "environment": provenance["environment"],
+            "execution": {
+                "model": provenance["execution_model"],
+                "table_passes": 1,
+                "lexical_passes": 1,
+            },
             "toolchain": provenance["toolchain"],
             "inputs": {
                 "table": table_inputs,

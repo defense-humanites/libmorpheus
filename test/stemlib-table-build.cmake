@@ -142,6 +142,7 @@ function(compare_builds language)
        provenance_lines)
   foreach(expected_line IN ITEMS
       "schema\t2"
+      "execution_model\tsingle-pass-explicit-dag"
       "source_revision\t${MORPHEUS_SOURCE_REVISION}"
       "compiler_name\t${compiler_name}"
       "compiler_id\t${MORPHEUS_C_COMPILER_ID}"
