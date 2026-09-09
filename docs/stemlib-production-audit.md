@@ -284,6 +284,12 @@ The recent explicit little-endian ending-table and index I/O work reduces one
 class of host-format variance. It does not by itself make ordering, staging,
 iteration or the rest of the toolchain deterministic.
 
+The restored pipeline now supplies fresh language-scoped staging, ordered and
+checksum-pinned manifests, fail-closed producers, source/toolchain provenance,
+output receipts, independent clean-build comparisons, and reviewed baseline
+exceptions. The list above remains the audit of inherited upstream recipes;
+the remaining qualification gaps are stated in the production manifest.
+
 ## Acceptance criteria for the restoration phase
 
 The later reproducible-build work should be accepted only when it provides all

@@ -560,6 +560,34 @@ else()
 endif()
 
 if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
+  set(morpheus_source_revision unavailable)
+  find_package(Git QUIET)
+  if(GIT_FOUND)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" rev-parse --verify HEAD
+      WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+      RESULT_VARIABLE morpheus_revision_result
+      OUTPUT_VARIABLE morpheus_revision_output
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_QUIET
+    )
+    string(LENGTH "${morpheus_revision_output}" morpheus_revision_length)
+    if(morpheus_revision_result EQUAL 0 AND
+       morpheus_revision_output MATCHES "^[0-9a-f]+$" AND
+       morpheus_revision_length EQUAL 40)
+      set(morpheus_source_revision "${morpheus_revision_output}")
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" status --porcelain --untracked-files=no
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        RESULT_VARIABLE morpheus_dirty_result
+        OUTPUT_VARIABLE morpheus_dirty_output
+        ERROR_QUIET
+      )
+      if(morpheus_dirty_result EQUAL 0 AND morpheus_dirty_output)
+        string(APPEND morpheus_source_revision "+dirty")
+      endif()
+    endif()
+  endif()
   add_test(
     NAME stemlib_ending_tools_fail_closed
     COMMAND
@@ -595,6 +623,12 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
       -DMORPHEUS_BUILDDERIV=$<TARGET_FILE:morpheus_stemlib_buildderiv>
       -DMORPHEUS_INDENDTABLES=$<TARGET_FILE:morpheus_stemlib_indendtables>
       -DMORPHEUS_INDDERIVTABLES=$<TARGET_FILE:morpheus_stemlib_indderivtables>
+      -DMORPHEUS_SOURCE_REVISION=${morpheus_source_revision}
+      -DMORPHEUS_C_COMPILER=${CMAKE_C_COMPILER}
+      -DMORPHEUS_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+      -DMORPHEUS_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+      -DMORPHEUS_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+      -DMORPHEUS_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}
       -DMORPHEUS_WORK_DIR=${PROJECT_BINARY_DIR}/test-stemlib-table-build
       -P ${PROJECT_SOURCE_DIR}/test/stemlib-table-build.cmake
   )

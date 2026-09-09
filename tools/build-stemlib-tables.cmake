@@ -7,7 +7,10 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_STEMLIB_STAGER MORPHEUS_STEMLIB_LANGUAGE
                           MORPHEUS_STEMLIB_STAGE MORPHEUS_BUILDEND
                           MORPHEUS_BUILDDERIV MORPHEUS_INDENDTABLES
-                          MORPHEUS_INDDERIVTABLES)
+                          MORPHEUS_INDDERIVTABLES MORPHEUS_SOURCE_REVISION
+                          MORPHEUS_C_COMPILER MORPHEUS_C_COMPILER_ID
+                          MORPHEUS_C_COMPILER_VERSION MORPHEUS_SYSTEM_NAME
+                          MORPHEUS_SYSTEM_PROCESSOR)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -15,6 +18,29 @@ endforeach()
 if(NOT MORPHEUS_STEMLIB_LANGUAGE MATCHES "^(Greek|Latin)$")
   message(FATAL_ERROR "MORPHEUS_STEMLIB_LANGUAGE must be Greek or Latin")
 endif()
+
+# Validate provenance before creating the staging tree.
+if(NOT MORPHEUS_SOURCE_REVISION STREQUAL "unavailable")
+  string(REGEX REPLACE "[+]dirty$" "" revision_base
+         "${MORPHEUS_SOURCE_REVISION}")
+  string(LENGTH "${revision_base}" revision_length)
+  if(NOT revision_base MATCHES "^[0-9a-f]+$" OR
+     NOT revision_length EQUAL 40 OR
+     NOT MORPHEUS_SOURCE_REVISION MATCHES "^[0-9a-f]+([+]dirty)?$")
+    message(FATAL_ERROR "invalid source revision")
+  endif()
+endif()
+foreach(field IN ITEMS MORPHEUS_C_COMPILER_ID MORPHEUS_C_COMPILER_VERSION
+                       MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR)
+  if(NOT "${${field}}" MATCHES "^[A-Za-z0-9_.+-]+$")
+    message(FATAL_ERROR "invalid provenance field: ${field}")
+  endif()
+endforeach()
+get_filename_component(compiler_name "${MORPHEUS_C_COMPILER}" NAME)
+if(NOT compiler_name MATCHES "^[A-Za-z0-9_.+-]+$")
+  message(FATAL_ERROR "invalid compiler name")
+endif()
+file(SHA256 "${MORPHEUS_C_COMPILER}" compiler_sha256)
 
 execute_process(
   COMMAND "${CMAKE_COMMAND}"
@@ -41,9 +67,18 @@ endif()
 set(build_environment
     "MORPHLIB=${stage_root}" "LC_ALL=C" "LANG=C" "TZ=UTC")
 
-# Record the actual recipe and executables, including for failed production.
-# This identifies build inputs; it is not a successful-output receipt.
-set(provenance "# SPDX-License-Identifier: MPL-2.0\n# component\tsha256\n")
+# Record the actual recipe, revision, toolchain and executables, including for
+# failed production. This identifies build inputs; it is not a success receipt.
+set(provenance "# SPDX-License-Identifier: MPL-2.0\n# key\tvalue\n")
+string(APPEND provenance
+       "schema\t2\n"
+       "source_revision\t${MORPHEUS_SOURCE_REVISION}\n"
+       "compiler_name\t${compiler_name}\n"
+       "compiler_id\t${MORPHEUS_C_COMPILER_ID}\n"
+       "compiler_version\t${MORPHEUS_C_COMPILER_VERSION}\n"
+       "compiler_sha256\t${compiler_sha256}\n"
+       "system_name\t${MORPHEUS_SYSTEM_NAME}\n"
+       "system_processor\t${MORPHEUS_SYSTEM_PROCESSOR}\n")
 foreach(component IN ITEMS MORPHEUS_STEMLIB_MANIFEST
                            MORPHEUS_STEMLIB_MANIFEST_VALIDATOR
                            MORPHEUS_STEMLIB_STAGER MORPHEUS_BUILDEND

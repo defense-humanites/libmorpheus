@@ -29,6 +29,9 @@ the corpus.
 
 ### Changed
 
+- Stemlib table provenance schema 2 now records the configured Git revision,
+  dirty tracked state, compiler identity/version/executable digest, and target
+  system. Lexical provenance verifies and carries this identity forward.
 - The lexical recipe now rebuilds Greek and Latin `nom.irreg` and `vbs.irreg`
   from their checksum-pinned irregular-word sources before indexing. Three
   malformed Greek expansions are disabled only in staging; the Greek verbal

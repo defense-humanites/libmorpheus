@@ -90,6 +90,20 @@ def build(args):
         input_count += 1
     if not input_count:
         raise ValueError("empty table input receipt")
+    table_provenance_path = stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
+    table_provenance = {}
+    for row in table_provenance_path.read_text().splitlines():
+        if not row or row.startswith("#"):
+            continue
+        key, value = row.split("\t")
+        if key in table_provenance:
+            raise ValueError("duplicate table provenance field: " + key)
+        table_provenance[key] = value
+    provenance_fields = {"schema", "source_revision", "compiler_name", "compiler_id",
+                         "compiler_version", "compiler_sha256", "system_name",
+                         "system_processor"}
+    if not provenance_fields <= table_provenance.keys() or table_provenance["schema"] != "2":
+        raise ValueError("incomplete table provenance")
     rows = []
     seen = set()
     role_by_input = {}
@@ -203,6 +217,10 @@ def build(args):
         "language": language,
         "environment": {"LC_ALL": "C", "LANG": "C", "TZ": "UTC"},
         "python_version": sys.version,
+        "source_revision": table_provenance["source_revision"],
+        "toolchain": {key: table_provenance[key] for key in [
+            "compiler_name", "compiler_id", "compiler_version", "compiler_sha256",
+            "system_name", "system_processor"]},
         "sha256": {
             "recipe": digest(Path(__file__)),
             "python": digest(Path(sys.executable)),
@@ -210,7 +228,7 @@ def build(args):
             "lexical_inputs": digest(work / "inputs.tsv"),
             "table_inputs": digest(input_receipt),
             "table_outputs": digest(receipt),
-            "table_provenance": digest(stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"),
+            "table_provenance": digest(table_provenance_path),
             **{name: digest(args.tools / name)
                for name in ["buildword", "indexnoms", "do_conj", "indexvbs"]},
         },

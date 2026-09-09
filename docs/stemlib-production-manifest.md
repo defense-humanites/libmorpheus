@@ -34,12 +34,11 @@ Latin currently has no source-file exclusions in these two groups. This does
 not resolve the separate Latin registry entries whose source tables are absent;
 they remain an audited corpus gap and must not be silently synthesized.
 
-The manifest is intentionally narrower than a complete stemlib build receipt.
-It does not yet select lexical `stemsrc/` inputs, record producer or toolchain
-versions, or prove that regenerated outputs match the baselines. The next
-stage consumes only active rows into an empty language-scoped staging tree;
-later manifests will add nominal and verb sources as their producers are
-restored.
+The table manifest is intentionally narrower than the complete stemlib build
+receipts. It selects table inputs but not lexical `stemsrc/` inputs; the
+separate lexical manifest supplies that layer. Production receipts and
+provenance records connect both manifests to their producers and regenerated
+outputs.
 
 ## Isolated source staging
 
@@ -73,9 +72,9 @@ unlisted registry entry as an implicit input.
 Every producer runs with `LC_ALL=C`, `LANG=C`, `TZ=UTC`, and `MORPHLIB` fixed to
 the staging root. Successful completion emits
 `MORPHEUS-STEMLIB-TABLE-OUTPUTS.tsv`, containing the sorted output paths and
-their SHA-256 digests. The receipt currently covers expanded ASCII and binary
-tables plus their three text indexes; it does not yet contain a compiler
-identity or source revision.
+their SHA-256 digests. The receipt covers expanded ASCII and binary tables plus
+their three text indexes. Its companion table-provenance record identifies the
+configured source revision and C toolchain.
 
 CI performs two complete clean table builds for each language. It requires the
 two receipts and every received output to be byte-identical, then compares all
@@ -140,17 +139,24 @@ remain limited to their six applicable outputs. No success receipt is written
 after a failed or blocked producer. Baseline comparisons explicitly distinguish
 identical, different, and unavailable references.
 
-`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` records SHA-256 identities for the
-table manifest, validator, staging and production recipes, four producer
-executables and CMake executable. The lexical recipe requires this record and
-writes `lexical/provenance.json` before invoking producers. It identifies the
-lexical manifest, staged input and table-output receipts, table provenance,
-recipe, four native tools, Python executable/version and, when used, the Perl
-executable. Neither record contains absolute build paths or timestamps, so two
-clean builds with the same inputs and executables can compare them directly.
-Records survive corpus failures and are not success receipts. These hashes
-identify exact files, not their Git ancestry or the compiler, dynamic libraries
-and complete operating-system environment used to build/run the executables.
+`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 2 records the configured Git
+revision (or `unavailable` outside a Git checkout), marks tracked modifications
+with `+dirty`, and identifies the compiler by name, CMake ID, version and
+executable SHA-256. It also records the target system and processor, plus
+SHA-256 identities for the table manifest, validator, staging and production
+recipes, four producer executables and CMake executable. Invalid metadata is
+rejected before staging.
+
+The lexical recipe requires this record and writes
+`lexical/provenance.json` before invoking producers. It verifies and carries
+forward the source/toolchain identity, then identifies the lexical manifest,
+staged input and table-output receipts, table provenance, recipe, four native
+tools, Python executable/version and, when used, the Perl executable. Neither
+record contains absolute build paths or timestamps, so two clean builds with
+the same inputs and executables can compare them directly. Records survive
+corpus failures and are not success receipts. They do not identify every
+dynamic library or the complete operating-system environment used to build and
+run the executables.
 
 The restored `do_conj` uses the historical binary derivation reader. Short mode
 expands the implicit present stem of regular derivations while preserving the

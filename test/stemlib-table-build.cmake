@@ -8,6 +8,9 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_STEMLIB_STAGER MORPHEUS_STEMLIB_BUILDER
                           MORPHEUS_BUILDEND MORPHEUS_BUILDDERIV
                           MORPHEUS_INDENDTABLES MORPHEUS_INDDERIVTABLES
+                          MORPHEUS_SOURCE_REVISION MORPHEUS_C_COMPILER
+                          MORPHEUS_C_COMPILER_ID MORPHEUS_C_COMPILER_VERSION
+                          MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR
                           MORPHEUS_WORK_DIR)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
@@ -16,6 +19,37 @@ endforeach()
 
 file(REMOVE_RECURSE "${MORPHEUS_WORK_DIR}")
 file(MAKE_DIRECTORY "${MORPHEUS_WORK_DIR}")
+
+set(invalid_provenance_stage "${MORPHEUS_WORK_DIR}/invalid-provenance")
+execute_process(
+  COMMAND "${CMAKE_COMMAND}"
+          -DMORPHEUS_STEMLIB_ROOT=${MORPHEUS_STEMLIB_ROOT}
+          -DMORPHEUS_STEMLIB_MANIFEST=${MORPHEUS_STEMLIB_MANIFEST}
+          -DMORPHEUS_STEMLIB_MANIFEST_VALIDATOR=${MORPHEUS_STEMLIB_MANIFEST_VALIDATOR}
+          -DMORPHEUS_STEMLIB_STAGER=${MORPHEUS_STEMLIB_STAGER}
+          -DMORPHEUS_STEMLIB_LANGUAGE=Greek
+          -DMORPHEUS_STEMLIB_STAGE=${invalid_provenance_stage}
+          -DMORPHEUS_BUILDEND=${MORPHEUS_BUILDEND}
+          -DMORPHEUS_BUILDDERIV=${MORPHEUS_BUILDDERIV}
+          -DMORPHEUS_INDENDTABLES=${MORPHEUS_INDENDTABLES}
+          -DMORPHEUS_INDDERIVTABLES=${MORPHEUS_INDDERIVTABLES}
+          -DMORPHEUS_SOURCE_REVISION=invalid
+          -DMORPHEUS_C_COMPILER=${MORPHEUS_C_COMPILER}
+          -DMORPHEUS_C_COMPILER_ID=${MORPHEUS_C_COMPILER_ID}
+          -DMORPHEUS_C_COMPILER_VERSION=${MORPHEUS_C_COMPILER_VERSION}
+          -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
+          -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
+          -P "${MORPHEUS_STEMLIB_BUILDER}"
+  RESULT_VARIABLE invalid_provenance_result
+  OUTPUT_QUIET
+  ERROR_QUIET
+)
+if(invalid_provenance_result EQUAL 0)
+  message(FATAL_ERROR "invalid source revision was accepted")
+endif()
+if(EXISTS "${invalid_provenance_stage}")
+  message(FATAL_ERROR "invalid provenance created a staging tree")
+endif()
 
 function(build_and_validate language pass expected_outputs)
   set(stage "${MORPHEUS_WORK_DIR}/${language}-${pass}")
@@ -31,6 +65,12 @@ function(build_and_validate language pass expected_outputs)
             -DMORPHEUS_BUILDDERIV=${MORPHEUS_BUILDDERIV}
             -DMORPHEUS_INDENDTABLES=${MORPHEUS_INDENDTABLES}
             -DMORPHEUS_INDDERIVTABLES=${MORPHEUS_INDDERIVTABLES}
+            -DMORPHEUS_SOURCE_REVISION=${MORPHEUS_SOURCE_REVISION}
+            -DMORPHEUS_C_COMPILER=${MORPHEUS_C_COMPILER}
+            -DMORPHEUS_C_COMPILER_ID=${MORPHEUS_C_COMPILER_ID}
+            -DMORPHEUS_C_COMPILER_VERSION=${MORPHEUS_C_COMPILER_VERSION}
+            -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
+            -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
             -P "${MORPHEUS_STEMLIB_BUILDER}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
@@ -87,6 +127,33 @@ function(compare_builds language)
   if(NOT receipt_compare_result EQUAL 0)
     message(FATAL_ERROR "${language} table-output receipts differ")
   endif()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -E compare_files
+            "${first}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
+            "${second}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
+    RESULT_VARIABLE provenance_compare_result
+  )
+  if(NOT provenance_compare_result EQUAL 0)
+    message(FATAL_ERROR "${language} table provenance differs")
+  endif()
+  file(SHA256 "${MORPHEUS_C_COMPILER}" compiler_sha256)
+  get_filename_component(compiler_name "${MORPHEUS_C_COMPILER}" NAME)
+  file(STRINGS "${first}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
+       provenance_lines)
+  foreach(expected_line IN ITEMS
+      "schema\t2"
+      "source_revision\t${MORPHEUS_SOURCE_REVISION}"
+      "compiler_name\t${compiler_name}"
+      "compiler_id\t${MORPHEUS_C_COMPILER_ID}"
+      "compiler_version\t${MORPHEUS_C_COMPILER_VERSION}"
+      "compiler_sha256\t${compiler_sha256}"
+      "system_name\t${MORPHEUS_SYSTEM_NAME}"
+      "system_processor\t${MORPHEUS_SYSTEM_PROCESSOR}")
+    list(FIND provenance_lines "${expected_line}" expected_index)
+    if(expected_index EQUAL -1)
+      message(FATAL_ERROR "missing table provenance: ${expected_line}")
+    endif()
+  endforeach()
 
   file(STRINGS "${first}/${receipt_name}" receipt_lines)
   set(binary_baseline_differences)

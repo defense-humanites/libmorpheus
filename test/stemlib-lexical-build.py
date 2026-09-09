@@ -62,6 +62,16 @@ for language in ["Greek", "Latin"]:
                 assert provenance["sha256"][tool] == hashlib.sha256((binary / tool).read_bytes()).hexdigest()
             assert provenance["sha256"]["table_provenance"] == hashlib.sha256(
                 (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_bytes()).hexdigest()
+            table_provenance = dict(
+                row.split("\t")
+                for row in (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_text().splitlines()
+                if row and not row.startswith("#"))
+            assert provenance["source_revision"] == table_provenance["source_revision"]
+            assert provenance["toolchain"] == {
+                key: table_provenance[key] for key in [
+                    "compiler_name", "compiler_id", "compiler_version", "compiler_sha256",
+                    "system_name", "system_processor"]
+            }
             if corpus:
                 assert receipt.exists() and report["complete"]
                 assert report["producers"]["indexnoms"]["exit_code"] == 0
@@ -135,6 +145,20 @@ for language in ["Greek", "Latin"]:
     if corpus_receipts:
         assert corpus_receipts[0] == corpus_receipts[1]
         assert corpus_comparison_receipts[0] == corpus_comparison_receipts[1]
+
+# Invalid table provenance must fail before creating lexical staging outputs.
+bad_provenance_stage = work / "bad-provenance-stage"
+shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_provenance_stage)
+table_provenance = bad_provenance_stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
+table_provenance.write_text(
+    table_provenance.read_text().replace("schema\t2\n", "schema\t1\n"))
+run([sys.executable, source / "tools/build-stemlib-lexical.py",
+     "--stage", bad_provenance_stage, "--source", source / "stemlib",
+     "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
+     "--corrections", source / "tools/stemlib-lexical-corrections.tsv",
+     "--language", "Greek", "--tools", binary, "--perl", perl], 1)
+assert not (bad_provenance_stage / "Greek/lexical").exists()
+assert not (bad_provenance_stage / "Greek/steminds").exists()
 
 # A stale correction must fail before either nominal index is created.
 bad_stage = work / "bad-correction-stage"
