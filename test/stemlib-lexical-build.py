@@ -34,6 +34,8 @@ for language in ["Greek", "Latin"]:
     comparison_receipts = []
     corpus_receipts = []
     corpus_comparison_receipts = []
+    production_receipts = []
+    corpus_production_receipts = []
     provenance_by_corpus = {}
     for pass_name in ["first", "second"]:
         tables = binary / "test-stemlib-table-build" / (language + "-" + pass_name)
@@ -48,6 +50,7 @@ for language in ["Greek", "Latin"]:
                 command += ["--corrections", source / "tools/stemlib-lexical-corrections.tsv"]
             run(command)
             receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
+            production_receipt = stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json"
             report = json.loads((stage / language / "lexical/comparison.json").read_text())
             comparison_receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv"
             assert comparison_receipt.exists()
@@ -73,7 +76,7 @@ for language in ["Greek", "Latin"]:
                     "system_name", "system_processor"]
             }
             if corpus:
-                assert receipt.exists() and report["complete"]
+                assert receipt.exists() and production_receipt.exists() and report["complete"]
                 assert report["producers"]["indexnoms"]["exit_code"] == 0
                 assert report["producers"]["do_conj"]["exit_code"] == 0
                 assert report["producers"]["indexvbs"]["exit_code"] == 0
@@ -130,7 +133,10 @@ for language in ["Greek", "Latin"]:
                     assert not new_lines - old_lines
                 corpus_receipts.append(receipt.read_bytes())
                 corpus_comparison_receipts.append(comparison_receipt.read_bytes())
+                production_bytes = production_receipt.read_bytes()
+                corpus_production_receipts.append(production_bytes)
                 run(command, 1)  # no overlay, even after success
+                assert production_receipt.read_bytes() == production_bytes
             else:
                 rows = [row for row in receipt.read_text().splitlines() if row and not row.startswith("#")]
                 assert rows == [row for row in expected if row.startswith(language + "/")]
@@ -139,12 +145,54 @@ for language in ["Greek", "Latin"]:
                     assert hashlib.sha256((stage / name).read_bytes()).hexdigest() == sha
                 receipts.append(receipt.read_bytes())
                 comparison_receipts.append(comparison_receipt.read_bytes())
+                production_bytes = production_receipt.read_bytes()
+                production_receipts.append(production_bytes)
                 run(command, 1)  # no overlay, even after success
+                assert production_receipt.read_bytes() == production_bytes
+            production = json.loads(production_receipt.read_text())
+            assert production["schema"] == 1 and production["language"] == language
+            assert production["source_revision"] == provenance["source_revision"]
+            assert production["environment"] == provenance["environment"]
+            assert production["toolchain"] == provenance["toolchain"]
+            assert production["provenance_sha256"] == {
+                "table": hashlib.sha256(
+                    (stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv").read_bytes()).hexdigest(),
+                "lexical": hashlib.sha256(
+                    (stage / language / "lexical/provenance.json").read_bytes()).hexdigest(),
+            }
+            assert production["inputs"]["table"] == [
+                {"kind": fields[2], "path": fields[3], "sha256": fields[4]}
+                for row in (stage / "MORPHEUS-STEMLIB-INPUTS.tsv").read_text().splitlines()
+                if row and not row.startswith("#")
+                for fields in [row.split("\t")]
+            ]
+            assert production["inputs"]["lexical"] == [
+                {"role": fields[1], "path": fields[2], "sha256": fields[3]}
+                for row in (stage / language / "lexical/inputs.tsv").read_text().splitlines()
+                if row and not row.startswith("#")
+                for fields in [row.split("\t")]
+            ]
+            assert production["outputs"]["table"] == [
+                {"path": fields[0], "sha256": fields[1]}
+                for row in (stage / "MORPHEUS-STEMLIB-TABLE-OUTPUTS.tsv").read_text().splitlines()
+                if row and not row.startswith("#")
+                for fields in [row.split("\t")]
+            ]
+            received_outputs = production["outputs"]["table"] + production["outputs"]["lexical"]
+            assert all(hashlib.sha256((stage / item["path"]).read_bytes()).hexdigest()
+                       == item["sha256"] for item in received_outputs)
+            assert production["outputs"]["lexical"] == [
+                {"path": row.split("\t")[0], "sha256": row.split("\t")[1]}
+                for row in receipt.read_text().splitlines()
+                if row and not row.startswith("#")
+            ]
     assert receipts[0] == receipts[1]
     assert comparison_receipts[0] == comparison_receipts[1]
+    assert production_receipts[0] == production_receipts[1]
     if corpus_receipts:
         assert corpus_receipts[0] == corpus_receipts[1]
         assert corpus_comparison_receipts[0] == corpus_comparison_receipts[1]
+        assert corpus_production_receipts[0] == corpus_production_receipts[1]
 
 # Invalid table provenance must fail before creating lexical staging outputs.
 bad_provenance_stage = work / "bad-provenance-stage"
@@ -159,6 +207,7 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--language", "Greek", "--tools", binary, "--perl", perl], 1)
 assert not (bad_provenance_stage / "Greek/lexical").exists()
 assert not (bad_provenance_stage / "Greek/steminds").exists()
+assert not (bad_provenance_stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").exists()
 
 # A stale correction must fail before either nominal index is created.
 bad_stage = work / "bad-correction-stage"
@@ -177,6 +226,7 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--tools", binary, "--perl", perl], 1)
 assert not list((bad_stage / "Greek/steminds").iterdir())
 assert not (bad_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
+assert not (bad_stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").exists()
 
 # A valid correction manifest that re-enables an invalid irregular expansion
 # must retain diagnostics without publishing partial lexical success.
@@ -204,6 +254,7 @@ assert (bad_expansion_stage / "Greek/stemsrc/nom.irreg").exists()
 assert not (bad_expansion_stage / "Greek/stemsrc/vbs.irreg").exists()
 assert not list((bad_expansion_stage / "Greek/steminds").iterdir())
 assert not (bad_expansion_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
+assert not (bad_expansion_stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").exists()
 
 # The expander must remove both owned outputs on all input failures and must
 # preserve pre-existing files. Exercise cases with and without a final newline.

@@ -139,6 +139,14 @@ remain limited to their six applicable outputs. No success receipt is written
 after a failed or blocked producer. Baseline comparisons explicitly distinguish
 identical, different, and unavailable references.
 
+Every successful fixture or complete-corpus run also emits
+`MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json`. This deterministic aggregate receipt
+contains the source revision, fixed environment, compiler identity, ordered
+table and lexical input digests, every table and lexical output digest, and the
+digests of both provenance records. It is absent after any failed producer.
+CTest verifies every received output against it and compares receipts from the
+two independent builds byte for byte.
+
 `MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 2 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and

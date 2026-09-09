@@ -381,3 +381,9 @@ identical eight-output receipts, and all changed baseline paths are explicitly
 pinned. See the
 [lexical production boundary](stemlib-production-manifest.md#lexical-production-and-qualification)
 for the reproduction command and correction evidence.
+
+Successful builds now consolidate their source revision, fixed environment,
+toolchain identity, ordered source digests, all table and lexical output
+digests, and both provenance-record digests in one deterministic production
+receipt. CI verifies its contents and requires byte-identical receipts from the
+two independent builds of each language.

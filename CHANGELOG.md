@@ -29,6 +29,10 @@ the corpus.
 
 ### Changed
 
+- Successful full stemlib builds now emit one deterministic production receipt
+  containing the source revision, environment, toolchain, ordered table and
+  lexical input digests, all table and lexical output digests, and provenance
+  record digests.
 - Stemlib table provenance schema 2 now records the configured Git revision,
   dirty tracked state, compiler identity/version/executable digest, and target
   system. Lexical provenance verifies and carries this identity forward.

@@ -64,6 +64,7 @@ def build(args):
         raise ValueError("stage must be outside the source tree")
     receipt = stage / "MORPHEUS-STEMLIB-TABLE-OUTPUTS.tsv"
     received = set()
+    table_outputs = []
     for row in receipt.read_text().splitlines():
         if not row or row.startswith("#"):
             continue
@@ -75,10 +76,12 @@ def build(args):
         received.add(name)
         if digest(stage / name) != expected:
             raise ValueError("table receipt mismatch: " + name)
+        table_outputs.append({"path": name, "sha256": expected})
     if not received:
         raise ValueError("empty table receipt")
     input_receipt = stage / "MORPHEUS-STEMLIB-INPUTS.tsv"
     input_count = 0
+    table_inputs = []
     for row in input_receipt.read_text().splitlines():
         if not row or row.startswith("#"):
             continue
@@ -87,6 +90,7 @@ def build(args):
             raise ValueError("invalid staged table input receipt")
         if digest(root / name) != expected:
             raise ValueError("staged table input checksum mismatch: " + name)
+        table_inputs.append({"kind": kind, "path": name, "sha256": expected})
         input_count += 1
     if not input_count:
         raise ValueError("empty table input receipt")
@@ -348,8 +352,35 @@ def build(args):
         "# SPDX-License-Identifier: MPL-2.0\n"
         "# path\toutput_sha256\tbaseline_sha256\tcomparison\n" + "".join(comparison_rows))
     if success:
-        (stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").write_text(
-            "# SPDX-License-Identifier: MPL-2.0\n" + "".join(f"{p.relative_to(stage).as_posix()}\t{digest(p)}\n" for p in sorted(outputs)))
+        lexical_outputs = [
+            {"path": path.relative_to(stage).as_posix(), "sha256": digest(path)}
+            for path in sorted(outputs)
+        ]
+        lexical_receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
+        lexical_receipt.write_text(
+            "# SPDX-License-Identifier: MPL-2.0\n" + "".join(
+                f"{item['path']}\t{item['sha256']}\n" for item in lexical_outputs))
+        production_receipt = {
+            "schema": 1,
+            "language": language,
+            "source_revision": provenance["source_revision"],
+            "environment": provenance["environment"],
+            "toolchain": provenance["toolchain"],
+            "inputs": {
+                "table": table_inputs,
+                "lexical": [
+                    {"role": role, "path": name, "sha256": sha}
+                    for role, name, sha in rows
+                ],
+            },
+            "outputs": {"table": table_outputs, "lexical": lexical_outputs},
+            "provenance_sha256": {
+                "table": digest(table_provenance_path),
+                "lexical": digest(work / "provenance.json"),
+            },
+        }
+        (stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").write_text(
+            json.dumps(production_receipt, indent=2, sort_keys=True) + "\n")
     return 0 if success else 1
 
 
