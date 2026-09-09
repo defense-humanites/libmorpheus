@@ -29,6 +29,10 @@ the corpus.
 
 ### Changed
 
+- Complete Greek builds now compare all 143 runtime artifacts shared with the
+  pinned Alpheios distribution and emit both digests and their classification.
+  Three additional generated tables are reported as unavailable in that
+  reference. This comparison remains distinct from the Perseids baseline.
 - Stemlib production now declares a single-pass explicit dependency graph in
   its provenance and final receipt. Duplicate producer labels are rejected,
   making the inherited undocumented second make pass unnecessary.

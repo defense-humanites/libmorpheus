@@ -393,3 +393,11 @@ The restored recipes remove the historical second make pass. Their declared
 irregular lexical sources before assembly, and treats indexes as terminal
 outputs. Duplicate producer labels fail closed; convergence is established by
 comparing two fresh executions rather than mutating one tree twice.
+
+The Greek qualification now also compares the complete selected runtime-output
+boundary with the pinned Alpheios distribution: all 143 Alpheios paths are
+present in the reconstruction, two ending tables are byte-identical, 141 paths
+differ, and three additional generated tables have no Alpheios counterpart. A
+deterministic CI report records both digests for every path. This keeps the Alpheios reference
+visible without conflating its different source snapshot with the Perseids
+baseline used to review reconstruction changes.

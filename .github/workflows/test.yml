@@ -39,6 +39,7 @@ jobs:
           ctest --preset dev
           cmake -E cat build/dev/test-stemlib-table-build/baseline-summary.tsv
           cmake -E cat build/dev/test-stemlib-table-build/baseline-differences.tsv
+          cmake -E cat build/dev/test-stemlib-lexical-build/alpheios-reference-comparison.tsv
 
       - name: Test runtime-data preparation helper
         env:

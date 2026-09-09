@@ -210,6 +210,19 @@ verifies the following status:
 | `do_conj` and `indexvbs` | Greek | Complete; the expanded verbs, odd keys and regenerated indexes are reproducible and their reviewed baseline differences are pinned. |
 | Verb-source assembly | Latin | `vbs.mpi` is absent, but the available ordered inputs reproduce the same lemma sequence and per-lemma record multisets as `conjfile`; only equivalent record ordering differs. |
 
+The complete Greek stage is additionally compared with every runtime artifact
+in the pinned Alpheios distribution's `derivs/indices`, `endtables/indices`,
+`endtables/out`, and `steminds` directories. All 143 Alpheios paths occur in the
+reconstruction, which additionally produces `as_a.out`, `eas_ea.out`, and
+`hs_entos.out`. The comparison currently records two identical ending tables
+(`ewn_ewnos.out` and `oeis_oentos.out`), 141 differences, and three outputs with
+no Alpheios reference. CI
+emits `alpheios-reference-comparison.tsv` with both SHA-256 digests for every
+path and the verified Alpheios revision, rejects tracked submodule changes, and
+requires the two clean builds to produce the same report. These
+differences reflect distinct source snapshots and serialization histories; the
+report does not classify them as acceptable replacements for Alpheios data.
+
 The correction manifest leaves the historical source snapshots unchanged and
 applies every replacement only after their original line numbers and SHA-256
 digests have been verified in staging. Three bare `@` records in the Greek

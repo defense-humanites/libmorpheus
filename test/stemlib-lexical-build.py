@@ -10,6 +10,7 @@ import sys
 
 source, binary = map(lambda p: Path(p).resolve(), sys.argv[1:3])
 perl = sys.argv[3] if len(sys.argv) > 3 else "perl"
+alpheios = source / "vendor/alpheios-morpheus/dist/stemlib/Greek"
 work = binary / "test-stemlib-lexical-build"
 if work.exists():
     shutil.rmtree(work)
@@ -28,6 +29,13 @@ def run(command, expected_code=0, **kwargs):
         raise AssertionError((command, result.returncode, result.stdout.decode(errors="replace"), result.stderr.decode(errors="replace")))
     return result
 
+
+alpheios_revision = run(
+    ["git", "-C", alpheios, "rev-parse", "HEAD"]).stdout.decode().strip()
+assert alpheios_revision == "4632415fe93c85e9fdca47a0c5a13f31385f0023"
+assert not run(
+    ["git", "-C", alpheios, "status", "--porcelain", "--untracked-files=no"]
+).stdout
 
 for language in ["Greek", "Latin"]:
     receipts = []
@@ -199,6 +207,51 @@ for language in ["Greek", "Latin"]:
         assert corpus_receipts[0] == corpus_receipts[1]
         assert corpus_comparison_receipts[0] == corpus_comparison_receipts[1]
         assert corpus_production_receipts[0] == corpus_production_receipts[1]
+    if language == "Greek":
+        reference_groups = ["derivs/indices", "endtables/indices",
+                            "endtables/out", "steminds"]
+        reference_paths = sorted(
+            path.relative_to(alpheios).as_posix()
+            for group in reference_groups
+            for path in (alpheios / group).glob("*") if path.is_file())
+        assert len(reference_paths) == 143 and len(set(reference_paths)) == 143
+        reference_reports = []
+        for pass_name in ["first", "second"]:
+            stage = work / (language + "-" + pass_name + "-corpus") / language
+            generated_paths = sorted(
+                path.relative_to(stage).as_posix()
+                for group in reference_groups
+                for path in (stage / group).glob("*") if path.is_file())
+            assert len(generated_paths) == 146
+            assert set(generated_paths) - set(reference_paths) == {
+                "endtables/out/as_a.out",
+                "endtables/out/eas_ea.out",
+                "endtables/out/hs_entos.out",
+            }
+            assert not set(reference_paths) - set(generated_paths)
+            rows = []
+            identical = set()
+            for relative in generated_paths:
+                generated_sha = hashlib.sha256((stage / relative).read_bytes()).hexdigest()
+                reference = alpheios / relative
+                reference_sha = (hashlib.sha256(reference.read_bytes()).hexdigest()
+                                 if reference.exists() else "-")
+                comparison = ("unavailable-reference" if reference_sha == "-" else
+                              "identical" if generated_sha == reference_sha else "different")
+                if comparison == "identical":
+                    identical.add(relative)
+                rows.append(f"Greek/{relative}\t{generated_sha}\t{reference_sha}\t{comparison}\n")
+            assert identical == {
+                "endtables/out/ewn_ewnos.out",
+                "endtables/out/oeis_oentos.out",
+            }
+            report = ("# SPDX-License-Identifier: MPL-2.0\n"
+                      f"# alpheios_revision\t{alpheios_revision}\n"
+                      "# path\tgenerated_sha256\talpheios_sha256\tcomparison\n" +
+                      "".join(rows))
+            reference_reports.append(report)
+        assert reference_reports[0] == reference_reports[1]
+        (work / "alpheios-reference-comparison.tsv").write_text(reference_reports[0])
 
 # Invalid table provenance must fail before creating lexical staging outputs.
 bad_provenance_stage = work / "bad-provenance-stage"
