@@ -103,11 +103,12 @@ def build(args):
         if key in table_provenance:
             raise ValueError("duplicate table provenance field: " + key)
         table_provenance[key] = value
-    provenance_fields = {"schema", "execution_model", "source_revision", "compiler_name",
+    provenance_fields = {"schema", "execution_model", "qualification_profile",
+                         "source_revision", "compiler_name",
                          "compiler_id", "compiler_version", "compiler_sha256",
                          "system_name", "system_processor"}
     if (not provenance_fields <= table_provenance.keys() or
-            table_provenance["schema"] != "2" or
+            table_provenance["schema"] != "3" or
             table_provenance["execution_model"] != "single-pass-explicit-dag"):
         raise ValueError("incomplete table provenance")
     rows = []
@@ -219,10 +220,11 @@ def build(args):
         f"{language}\t{role}\t{name}\t{sha}\n" for role, name, sha in rows))
     env = dict(os.environ, MORPHLIB=str(stage), LC_ALL="C", LANG="C", TZ="UTC")
     provenance = {
-        "schema": 1,
+        "schema": 2,
         "language": language,
         "environment": {"LC_ALL": "C", "LANG": "C", "TZ": "UTC"},
         "execution_model": table_provenance["execution_model"],
+        "qualification_profile": table_provenance["qualification_profile"],
         "python_version": sys.version,
         "source_revision": table_provenance["source_revision"],
         "toolchain": {key: table_provenance[key] for key in [
@@ -366,9 +368,10 @@ def build(args):
             "# SPDX-License-Identifier: MPL-2.0\n" + "".join(
                 f"{item['path']}\t{item['sha256']}\n" for item in lexical_outputs))
         production_receipt = {
-            "schema": 1,
+            "schema": 2,
             "language": language,
             "source_revision": provenance["source_revision"],
+            "qualification_profile": provenance["qualification_profile"],
             "environment": provenance["environment"],
             "execution": {
                 "model": provenance["execution_model"],

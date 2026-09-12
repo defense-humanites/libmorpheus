@@ -83,6 +83,16 @@ option(
   "Build internal stemlib-production tools by default"
   OFF
 )
+set(
+  MORPHEUS_STEMLIB_QUALIFICATION_PROFILE
+  "portable"
+  CACHE STRING
+  "Toolchain policy used to qualify reproducible stemlib production"
+)
+set_property(
+  CACHE MORPHEUS_STEMLIB_QUALIFICATION_PROFILE PROPERTY STRINGS
+  portable github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
+)
 option(
   MORPHEUS_ENABLE_SANITIZERS
   "Build the runtime with AddressSanitizer and UndefinedBehaviorSanitizer"
@@ -560,6 +570,27 @@ else()
 endif()
 
 if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  find_package(Perl REQUIRED)
+  if(MORPHEUS_STEMLIB_QUALIFICATION_PROFILE STREQUAL
+     "github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38")
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+       NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$" OR
+       NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
+       NOT CMAKE_C_COMPILER_VERSION MATCHES "^14[.]" OR
+       NOT Python3_VERSION MATCHES "^3[.]12([.]|$)" OR
+       NOT PERL_VERSION_STRING MATCHES "^5[.]38([.]|$)")
+      message(FATAL_ERROR
+        "stemlib qualification profile mismatch: "
+        "system=${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}, "
+        "compiler=${CMAKE_C_COMPILER_ID}/${CMAKE_C_COMPILER_VERSION}, "
+        "python=${Python3_VERSION}, perl=${PERL_VERSION_STRING}")
+    endif()
+  elseif(NOT MORPHEUS_STEMLIB_QUALIFICATION_PROFILE STREQUAL "portable")
+    message(FATAL_ERROR
+      "unknown stemlib qualification profile: "
+      "${MORPHEUS_STEMLIB_QUALIFICATION_PROFILE}")
+  endif()
   set(morpheus_source_revision unavailable)
   find_package(Git QUIET)
   if(GIT_FOUND)
@@ -629,12 +660,11 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
       -DMORPHEUS_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
       -DMORPHEUS_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
       -DMORPHEUS_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}
+      -DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_STEMLIB_QUALIFICATION_PROFILE}
       -DMORPHEUS_WORK_DIR=${PROJECT_BINARY_DIR}/test-stemlib-table-build
       -P ${PROJECT_SOURCE_DIR}/test/stemlib-table-build.cmake
   )
   set_tests_properties(stemlib_table_build PROPERTIES TIMEOUT 600)
-  find_package(Python3 REQUIRED COMPONENTS Interpreter)
-  find_package(Perl REQUIRED)
   add_test(NAME stemlib_lexical_build
     COMMAND ${Python3_EXECUTABLE}
       ${PROJECT_SOURCE_DIR}/test/stemlib-lexical-build.py

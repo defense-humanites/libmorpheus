@@ -10,7 +10,8 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_INDDERIVTABLES MORPHEUS_SOURCE_REVISION
                           MORPHEUS_C_COMPILER MORPHEUS_C_COMPILER_ID
                           MORPHEUS_C_COMPILER_VERSION MORPHEUS_SYSTEM_NAME
-                          MORPHEUS_SYSTEM_PROCESSOR)
+                          MORPHEUS_SYSTEM_PROCESSOR
+                          MORPHEUS_QUALIFICATION_PROFILE)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -31,7 +32,8 @@ if(NOT MORPHEUS_SOURCE_REVISION STREQUAL "unavailable")
   endif()
 endif()
 foreach(field IN ITEMS MORPHEUS_C_COMPILER_ID MORPHEUS_C_COMPILER_VERSION
-                       MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR)
+                       MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR
+                       MORPHEUS_QUALIFICATION_PROFILE)
   if(NOT "${${field}}" MATCHES "^[A-Za-z0-9_.+-]+$")
     message(FATAL_ERROR "invalid provenance field: ${field}")
   endif()
@@ -71,8 +73,9 @@ set(build_environment
 # failed production. This identifies build inputs; it is not a success receipt.
 set(provenance "# SPDX-License-Identifier: MPL-2.0\n# key\tvalue\n")
 string(APPEND provenance
-       "schema\t2\n"
+       "schema\t3\n"
        "execution_model\tsingle-pass-explicit-dag\n"
+       "qualification_profile\t${MORPHEUS_QUALIFICATION_PROFILE}\n"
        "source_revision\t${MORPHEUS_SOURCE_REVISION}\n"
        "compiler_name\t${compiler_name}\n"
        "compiler_id\t${MORPHEUS_C_COMPILER_ID}\n"

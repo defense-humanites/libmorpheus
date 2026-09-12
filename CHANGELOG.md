@@ -29,6 +29,9 @@ the corpus.
 
 ### Changed
 
+- Reference stemlib qualification now runs on an explicit Ubuntu 24.04 image
+  and fails closed unless GCC 14, Python 3.12 and Perl 5.38 are selected. The
+  applied profile is carried through table, lexical and aggregate provenance.
 - Complete Greek builds now compare all 143 runtime artifacts shared with the
   pinned Alpheios distribution and emit both digests and their classification.
   Three additional generated tables are reported as unavailable in that
@@ -40,7 +43,8 @@ the corpus.
   containing the source revision, environment, toolchain, ordered table and
   lexical input digests, all table and lexical output digests, and provenance
   record digests.
-- Stemlib table provenance schema 2 now records the configured Git revision,
+- Stemlib table provenance schema 3 now records the qualification profile,
+  configured Git revision,
   dirty tracked state, compiler identity/version/executable digest, and target
   system. Lexical provenance verifies and carries this identity forward.
 - The lexical recipe now rebuilds Greek and Latin `nom.irreg` and `vbs.irreg`

@@ -401,3 +401,10 @@ differ, and three additional generated tables have no Alpheios counterpart. A
 deterministic CI report records both digests for every path. This keeps the Alpheios reference
 visible without conflating its different source snapshot with the Perseids
 baseline used to review reconstruction changes.
+
+The reference qualification environment is now an explicit Ubuntu 24.04
+x86-64 profile rather than the moving `ubuntu-latest` alias. Configuration
+fails closed unless GCC 14, Python 3.12 and Perl 5.38 are selected. The profile
+is recorded in table provenance, lexical provenance and the aggregate receipt;
+the exact executable versions and hashes remain attached to each run. Portable
+developer builds retain a separate default profile.

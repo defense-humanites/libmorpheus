@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   cmake:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Check out sources and stemlib
@@ -29,7 +29,12 @@ jobs:
           submodules: recursive
 
       - name: Configure
-        run: cmake --preset dev -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+        env:
+          CC: gcc-14
+        run: >-
+          cmake --preset dev
+          -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+          -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
 
       - name: Build
         run: cmake --build --preset dev

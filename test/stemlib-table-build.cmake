@@ -11,7 +11,7 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_SOURCE_REVISION MORPHEUS_C_COMPILER
                           MORPHEUS_C_COMPILER_ID MORPHEUS_C_COMPILER_VERSION
                           MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR
-                          MORPHEUS_WORK_DIR)
+                          MORPHEUS_QUALIFICATION_PROFILE MORPHEUS_WORK_DIR)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -39,6 +39,7 @@ execute_process(
           -DMORPHEUS_C_COMPILER_VERSION=${MORPHEUS_C_COMPILER_VERSION}
           -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
           -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
+          -DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_QUALIFICATION_PROFILE}
           -P "${MORPHEUS_STEMLIB_BUILDER}"
   RESULT_VARIABLE invalid_provenance_result
   OUTPUT_QUIET
@@ -71,6 +72,7 @@ function(build_and_validate language pass expected_outputs)
             -DMORPHEUS_C_COMPILER_VERSION=${MORPHEUS_C_COMPILER_VERSION}
             -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
             -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
+            -DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_QUALIFICATION_PROFILE}
             -P "${MORPHEUS_STEMLIB_BUILDER}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
@@ -141,8 +143,9 @@ function(compare_builds language)
   file(STRINGS "${first}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
        provenance_lines)
   foreach(expected_line IN ITEMS
-      "schema\t2"
+      "schema\t3"
       "execution_model\tsingle-pass-explicit-dag"
+      "qualification_profile\t${MORPHEUS_QUALIFICATION_PROFILE}"
       "source_revision\t${MORPHEUS_SOURCE_REVISION}"
       "compiler_name\t${compiler_name}"
       "compiler_id\t${MORPHEUS_C_COMPILER_ID}"

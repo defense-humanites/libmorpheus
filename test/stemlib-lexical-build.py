@@ -63,6 +63,7 @@ for language in ["Greek", "Latin"]:
             comparison_receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv"
             assert comparison_receipt.exists()
             provenance = json.loads((stage / language / "lexical/provenance.json").read_text())
+            assert provenance["schema"] == 2
             # Relocating a clean build must not change its provenance. Keep
             # fixtures and full corpora independently pinned.
             if pass_name == "first":
@@ -79,6 +80,7 @@ for language in ["Greek", "Latin"]:
                 if row and not row.startswith("#"))
             assert provenance["source_revision"] == table_provenance["source_revision"]
             assert provenance["execution_model"] == "single-pass-explicit-dag"
+            assert provenance["qualification_profile"] == table_provenance["qualification_profile"]
             assert provenance["toolchain"] == {
                 key: table_provenance[key] for key in [
                     "compiler_name", "compiler_id", "compiler_version", "compiler_sha256",
@@ -159,7 +161,8 @@ for language in ["Greek", "Latin"]:
                 run(command, 1)  # no overlay, even after success
                 assert production_receipt.read_bytes() == production_bytes
             production = json.loads(production_receipt.read_text())
-            assert production["schema"] == 1 and production["language"] == language
+            assert production["schema"] == 2 and production["language"] == language
+            assert production["qualification_profile"] == provenance["qualification_profile"]
             assert production["source_revision"] == provenance["source_revision"]
             assert production["environment"] == provenance["environment"]
             assert production["execution"] == {
@@ -258,7 +261,7 @@ bad_provenance_stage = work / "bad-provenance-stage"
 shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_provenance_stage)
 table_provenance = bad_provenance_stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
 table_provenance.write_text(
-    table_provenance.read_text().replace("schema\t2\n", "schema\t1\n"))
+    table_provenance.read_text().replace("schema\t3\n", "schema\t1\n"))
 run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_provenance_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",

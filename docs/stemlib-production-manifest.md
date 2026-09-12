@@ -147,7 +147,7 @@ remain limited to their six applicable outputs. No success receipt is written
 after a failed or blocked producer. Baseline comparisons explicitly distinguish
 identical, different, and unavailable references.
 
-Every successful fixture or complete-corpus run also emits
+Every successful fixture or complete-corpus run also emits the schema 2
 `MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json`. This deterministic aggregate receipt
 contains the source revision, fixed environment, compiler identity, ordered
 table and lexical input digests, every table and lexical output digest, and the
@@ -156,7 +156,7 @@ model and one table and lexical pass. It is absent after any failed producer.
 CTest verifies every received output against it and compares receipts from the
 two independent builds byte for byte.
 
-`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 2 records the configured Git
+`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 3 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and
 executable SHA-256. It also records the target system and processor, plus
@@ -164,7 +164,14 @@ SHA-256 identities for the table manifest, validator, staging and production
 recipes, four producer executables and CMake executable. Invalid metadata is
 rejected before staging.
 
-The lexical recipe requires this record and writes
+The reference CI qualification uses the explicit
+`github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38` profile. Configuration fails
+closed unless the runner is Linux x86-64 and the configured compiler and
+interpreters have those major/minor versions. Local and portability builds use
+the `portable` profile by default; both profiles are recorded in table, lexical
+and aggregate production provenance.
+
+The lexical recipe requires this record and writes schema 2
 `lexical/provenance.json` before invoking producers. It verifies and carries
 forward the source/toolchain identity, then identifies the lexical manifest,
 staged input and table-output receipts, table provenance, recipe, four native
