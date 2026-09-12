@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import xml.etree.ElementTree as ET
 
 
 def digest(path):
@@ -46,12 +47,42 @@ def current_revision(source):
     return commit + ("+dirty" if dirty else "")
 
 
-def build(source, build_root, output):
+def build(source, build_root, ctest_junit, output):
     if output.exists():
         output.unlink()
     table_root = build_root / "test-stemlib-table-build"
     lexical_root = build_root / "test-stemlib-lexical-build"
     production_root = build_root / "stemlib-production"
+
+    suite = ET.parse(ctest_junit).getroot()
+    require(suite.tag == "testsuite", "invalid CTest JUnit root")
+    testcases = suite.findall("testcase")
+    test_names = [case.get("name") for case in testcases]
+    require(None not in test_names and len(test_names) == len(set(test_names)),
+            "invalid or duplicate CTest case")
+    required_tests = {
+        "alpheios_greek_fixtures",
+        "dialect_option_context",
+        "gener_core_fixtures",
+        "gener_corpus",
+        "gener_service_differential",
+        "legacy_fixtures",
+        "public_analysis",
+        "public_context",
+        "public_fixtures",
+        "public_generation",
+        "public_request_options",
+        "public_result",
+    }
+    require(required_tests <= set(test_names),
+            "required runtime qualification tests are missing")
+    require(suite.get("tests") == str(len(testcases)) and
+            suite.get("failures") == "0" and suite.get("disabled") == "0" and
+            suite.get("skipped") == "0" and all(
+                case.get("status") == "run" and
+                not any(case.find(kind) is not None
+                        for kind in ["error", "failure", "skipped"])
+                for case in testcases), "CTest qualification did not pass")
 
     summary_path = table_root / "baseline-summary.tsv"
     difference_path = table_root / "baseline-differences.tsv"
@@ -182,6 +213,11 @@ def build(source, build_root, output):
             "production_target_matches_ctest": True,
         },
         "languages": languages,
+        "runtime_ctest": {
+            "all_passed": True,
+            "required_tests": sorted(required_tests),
+            "tests": len(testcases),
+        },
         "references": {
             "alpheios": {
                 "revision": revision_rows[0],
@@ -209,10 +245,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=lambda value: Path(value).resolve(), required=True)
     parser.add_argument("--build", type=lambda value: Path(value).resolve(), required=True)
+    parser.add_argument("--ctest-junit", type=lambda value: Path(value).resolve(),
+                        required=True)
     parser.add_argument("--output", type=lambda value: Path(value).resolve(), required=True)
     arguments = parser.parse_args()
     try:
-        build(arguments.source, arguments.build, arguments.output)
-    except (IndexError, KeyError, OSError, ValueError, json.JSONDecodeError,
+        build(arguments.source, arguments.build, arguments.ctest_junit,
+              arguments.output)
+    except (IndexError, KeyError, OSError, ValueError, ET.ParseError,
+            json.JSONDecodeError,
             subprocess.CalledProcessError) as error:
         parser.exit(1, f"stemlib qualification: {error}\n")

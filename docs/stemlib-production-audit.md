@@ -420,4 +420,7 @@ that cross-checks the two independent CTest builds against the public CMake
 target, the 229 reviewed Perseids binary exceptions, the twelve reviewed
 lexical differences, and all 146 selected Alpheios comparison paths. The report
 and its supporting receipts, provenance and comparison tables are retained
-together as a revision-named CI artifact.
+together as a revision-named CI artifact. Its final gate also parses the full
+CTest JUnit result and requires the named public API, null-handling,
+multiple-analysis, dialect, dual, Greek-generation and Greek/Latin fixture
+tests to be present and successful.
