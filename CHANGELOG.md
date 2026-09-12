@@ -16,7 +16,8 @@ the corpus.
 - A deterministic stemlib qualification report now cross-checks both clean
   CTest builds, the production target and the reviewed Perseids/Alpheios
   comparisons. It also binds the required public runtime and generation tests
-  from CTest's JUnit result; CI retains all supporting evidence.
+  from CTest's JUnit result; a dedicated fail-closed parser regression test is
+  itself required by the report, and CI retains all supporting evidence.
 - An initial `@libmorpheus/node` binding uses a stable Node-API addon to load
   the separately installed C runtime and performs analysis and experimental
   generation on Node's asynchronous worker pool.

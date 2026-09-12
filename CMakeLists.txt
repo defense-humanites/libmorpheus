@@ -721,6 +721,11 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
     COMMAND ${Python3_EXECUTABLE}
       ${PROJECT_SOURCE_DIR}/test/stemlib-lexical-build.py
       ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} ${PERL_EXECUTABLE})
+  add_test(NAME stemlib_qualification_junit
+    COMMAND ${Python3_EXECUTABLE}
+      ${PROJECT_SOURCE_DIR}/test/stemlib-qualification-junit.py
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_BINARY_DIR}/test-stemlib-qualification-junit)
   set_tests_properties(stemlib_table_build PROPERTIES FIXTURES_SETUP stemlib_tables)
   set_tests_properties(stemlib_lexical_build PROPERTIES
     FIXTURES_REQUIRED stemlib_tables TIMEOUT 120)

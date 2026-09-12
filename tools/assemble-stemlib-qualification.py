@@ -10,6 +10,23 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 
+REQUIRED_RUNTIME_TESTS = frozenset({
+    "alpheios_greek_fixtures",
+    "dialect_option_context",
+    "gener_core_fixtures",
+    "gener_corpus",
+    "gener_service_differential",
+    "legacy_fixtures",
+    "public_analysis",
+    "public_context",
+    "public_fixtures",
+    "public_generation",
+    "public_request_options",
+    "public_result",
+    "stemlib_qualification_junit",
+})
+
+
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -47,6 +64,30 @@ def current_revision(source):
     return commit + ("+dirty" if dirty else "")
 
 
+def ctest_result(ctest_junit):
+    suite = ET.parse(ctest_junit).getroot()
+    require(suite.tag == "testsuite", "invalid CTest JUnit root")
+    testcases = suite.findall("testcase")
+    test_names = [case.get("name") for case in testcases]
+    require(None not in test_names and len(test_names) == len(set(test_names)),
+            "invalid or duplicate CTest case")
+    require(REQUIRED_RUNTIME_TESTS <= set(test_names),
+            "required runtime qualification tests are missing")
+    require(suite.get("tests") == str(len(testcases)) and
+            suite.get("errors", "0") == "0" and
+            suite.get("failures") == "0" and suite.get("disabled") == "0" and
+            suite.get("skipped") == "0" and all(
+                case.get("status") == "run" and
+                not any(case.find(kind) is not None
+                        for kind in ["error", "failure", "skipped"])
+                for case in testcases), "CTest qualification did not pass")
+    return {
+        "all_passed": True,
+        "required_tests": sorted(REQUIRED_RUNTIME_TESTS),
+        "tests": len(testcases),
+    }
+
+
 def build(source, build_root, ctest_junit, output):
     if output.exists():
         output.unlink()
@@ -54,35 +95,7 @@ def build(source, build_root, ctest_junit, output):
     lexical_root = build_root / "test-stemlib-lexical-build"
     production_root = build_root / "stemlib-production"
 
-    suite = ET.parse(ctest_junit).getroot()
-    require(suite.tag == "testsuite", "invalid CTest JUnit root")
-    testcases = suite.findall("testcase")
-    test_names = [case.get("name") for case in testcases]
-    require(None not in test_names and len(test_names) == len(set(test_names)),
-            "invalid or duplicate CTest case")
-    required_tests = {
-        "alpheios_greek_fixtures",
-        "dialect_option_context",
-        "gener_core_fixtures",
-        "gener_corpus",
-        "gener_service_differential",
-        "legacy_fixtures",
-        "public_analysis",
-        "public_context",
-        "public_fixtures",
-        "public_generation",
-        "public_request_options",
-        "public_result",
-    }
-    require(required_tests <= set(test_names),
-            "required runtime qualification tests are missing")
-    require(suite.get("tests") == str(len(testcases)) and
-            suite.get("failures") == "0" and suite.get("disabled") == "0" and
-            suite.get("skipped") == "0" and all(
-                case.get("status") == "run" and
-                not any(case.find(kind) is not None
-                        for kind in ["error", "failure", "skipped"])
-                for case in testcases), "CTest qualification did not pass")
+    runtime_ctest = ctest_result(ctest_junit)
 
     summary_path = table_root / "baseline-summary.tsv"
     difference_path = table_root / "baseline-differences.tsv"
@@ -213,11 +226,7 @@ def build(source, build_root, ctest_junit, output):
             "production_target_matches_ctest": True,
         },
         "languages": languages,
-        "runtime_ctest": {
-            "all_passed": True,
-            "required_tests": sorted(required_tests),
-            "tests": len(testcases),
-        },
+        "runtime_ctest": runtime_ctest,
         "references": {
             "alpheios": {
                 "revision": revision_rows[0],

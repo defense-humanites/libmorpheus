@@ -288,7 +288,7 @@ The restored pipeline now supplies fresh language-scoped staging, ordered and
 checksum-pinned manifests, fail-closed producers, source/toolchain provenance,
 output receipts, independent clean-build comparisons, and reviewed baseline
 exceptions. The list above remains the audit of inherited upstream recipes;
-the remaining qualification gaps are stated in the production manifest.
+the restoration progress below records how each acceptance criterion is met.
 
 ## Acceptance criteria for the restoration phase
 
@@ -313,9 +313,9 @@ of the following:
   analysis cases, dialects, duals and Greek generation qualification still
   passing.
 
-Until those criteria are met, compiled stemlibs remain pinned external or
-checked-in data dependencies. Runtime releases and binding releases must not
-silently regenerate or rewrite them.
+The criteria are now met by the opt-in qualification pipeline described below.
+Compiled stemlibs remain pinned external or checked-in data dependencies:
+runtime and binding releases do not silently regenerate or rewrite them.
 
 ## Restoration progress
 
@@ -355,7 +355,7 @@ Greek and Latin compiled-table baselines. Textual tables and indexes must remain
 byte-identical. Binary `.out` differences are tracked separately because the
 restored writer uses explicit serialization instead of historical in-memory
 structure bytes. This establishes convergence for the table-production
-subgraph independently of the still-quarantined stem indexers.
+subgraph independently of the lexical production proof described below.
 
 The checked-in baseline comparison currently contains 156 Greek and 73 Latin
 binary differences, against zero differences in ASCII expansions or indexes.

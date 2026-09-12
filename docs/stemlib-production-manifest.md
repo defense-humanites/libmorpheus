@@ -91,7 +91,8 @@ Textual expansions and indexes must match byte for byte. Binary `.out`
 differences are counted separately because the restored writer uses the
 qualified explicit serialization rather than historical in-memory structure
 bytes. CI prints a compact TSV summary of the comparison. This comparison
-covers table production only; stem indexes remain outside this phase.
+covers table production, including its nominal, verb and derivation table
+indexes; the separate lexical proof below covers the stem indexes.
 
 The current comparison records 156 Greek and 73 Latin binary differences, with
 zero textual or index differences. Their complete sorted path set is pinned in
