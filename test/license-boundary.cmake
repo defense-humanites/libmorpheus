@@ -86,6 +86,7 @@ set(agpl_files
     src/api/generation.c
     src/api/result.c
     tools/prepare-runtime-data.sh
+    tools/assemble-stemlib-qualification.py
     tools/build-stemlib-distribution.cmake
     tools/build-stemlib-tables.cmake
     tools/stage-stemlib-sources.cmake

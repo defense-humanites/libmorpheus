@@ -414,3 +414,10 @@ The reconstruction is now exposed as the opt-in
 stages below the build tree, runs the explicit table and lexical graph, and
 requires a final receipt from each language. The orchestration recipe itself is
 hashed in table provenance; CI invokes the target directly.
+
+CI finally assembles a deterministic machine-readable qualification report
+that cross-checks the two independent CTest builds against the public CMake
+target, the 229 reviewed Perseids binary exceptions, the twelve reviewed
+lexical differences, and all 146 selected Alpheios comparison paths. The report
+and its supporting receipts, provenance and comparison tables are retained
+together as a revision-named CI artifact.

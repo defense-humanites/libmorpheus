@@ -155,6 +155,18 @@ model and one table and lexical pass. It is absent after any failed producer.
 CTest verifies every received output against it and compares receipts from the
 two independent builds byte for byte.
 
+After the two CTest builds and one execution of the production target, CI
+validates and emits `stemlib-qualification.json`. This schema 1 report binds the
+common source revision, qualification profile and execution model to both
+language receipts. It records table and lexical output counts, reviewed
+Perseids difference-manifest hashes and the complete pinned Alpheios comparison
+summary. It is written only when the independent CTest receipts match each
+other, both match the production target, and all comparison counts and
+exception sets retain their reviewed values. CI preserves
+the report, receipts, provenance and comparison tables as one revision-named
+artifact for 30 days. Stale evidence is rejected when its recorded revision and
+tracked dirty state do not match the source tree being qualified.
+
 `MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 4 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and

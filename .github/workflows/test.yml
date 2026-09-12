@@ -47,16 +47,8 @@ jobs:
           cmake -E sha256sum \
             build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
             build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
-            > build/dev/stemlib-production-receipts.first.sha256
-          cmake --build --preset dev --target morpheus_stemlib_production
-          cmake -E sha256sum \
-            build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
-            build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
-            > build/dev/stemlib-production-receipts.second.sha256
-          cmake -E compare_files \
-            build/dev/stemlib-production-receipts.first.sha256 \
-            build/dev/stemlib-production-receipts.second.sha256
-          cmake -E cat build/dev/stemlib-production-receipts.second.sha256
+            > build/dev/stemlib-production-receipts.sha256
+          cmake -E cat build/dev/stemlib-production-receipts.sha256
 
       - name: Test
         run: |
@@ -64,6 +56,30 @@ jobs:
           cmake -E cat build/dev/test-stemlib-table-build/baseline-summary.tsv
           cmake -E cat build/dev/test-stemlib-table-build/baseline-differences.tsv
           cmake -E cat build/dev/test-stemlib-lexical-build/alpheios-reference-comparison.tsv
+
+      - name: Assemble stemlib qualification evidence
+        run: |
+          python3 tools/assemble-stemlib-qualification.py \
+            --source . --build build/dev \
+            --output build/dev/stemlib-qualification.json
+          cmake -E cat build/dev/stemlib-qualification.json
+
+      - name: Preserve stemlib qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stemlib-qualification-${{ github.sha }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            build/dev/stemlib-qualification.json
+            build/dev/stemlib-production-receipts.sha256
+            build/dev/stemlib-production/*/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
+            build/dev/stemlib-production/*/MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv
+            build/dev/stemlib-production/*/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv
+            build/dev/stemlib-production/*/*/lexical/provenance.json
+            build/dev/test-stemlib-table-build/baseline-summary.tsv
+            build/dev/test-stemlib-table-build/baseline-differences.tsv
+            build/dev/test-stemlib-lexical-build/alpheios-reference-comparison.tsv
 
       - name: Test runtime-data preparation helper
         env:
