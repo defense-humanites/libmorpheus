@@ -261,7 +261,7 @@ bad_provenance_stage = work / "bad-provenance-stage"
 shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_provenance_stage)
 table_provenance = bad_provenance_stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
 table_provenance.write_text(
-    table_provenance.read_text().replace("schema\t3\n", "schema\t1\n"))
+    table_provenance.read_text().replace("schema\t4\n", "schema\t1\n"))
 run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_provenance_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",

@@ -11,7 +11,8 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_C_COMPILER MORPHEUS_C_COMPILER_ID
                           MORPHEUS_C_COMPILER_VERSION MORPHEUS_SYSTEM_NAME
                           MORPHEUS_SYSTEM_PROCESSOR
-                          MORPHEUS_QUALIFICATION_PROFILE)
+                          MORPHEUS_QUALIFICATION_PROFILE
+                          MORPHEUS_PRODUCTION_RECIPE)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -73,7 +74,7 @@ set(build_environment
 # failed production. This identifies build inputs; it is not a success receipt.
 set(provenance "# SPDX-License-Identifier: MPL-2.0\n# key\tvalue\n")
 string(APPEND provenance
-       "schema\t3\n"
+       "schema\t4\n"
        "execution_model\tsingle-pass-explicit-dag\n"
        "qualification_profile\t${MORPHEUS_QUALIFICATION_PROFILE}\n"
        "source_revision\t${MORPHEUS_SOURCE_REVISION}\n"
@@ -85,7 +86,8 @@ string(APPEND provenance
        "system_processor\t${MORPHEUS_SYSTEM_PROCESSOR}\n")
 foreach(component IN ITEMS MORPHEUS_STEMLIB_MANIFEST
                            MORPHEUS_STEMLIB_MANIFEST_VALIDATOR
-                           MORPHEUS_STEMLIB_STAGER MORPHEUS_BUILDEND
+                           MORPHEUS_STEMLIB_STAGER MORPHEUS_PRODUCTION_RECIPE
+                           MORPHEUS_BUILDEND
                            MORPHEUS_BUILDDERIV MORPHEUS_INDENDTABLES
                            MORPHEUS_INDDERIVTABLES CMAKE_COMMAND)
   file(SHA256 "${${component}}" component_sha256)

@@ -11,6 +11,8 @@ the corpus.
 
 ### Added
 
+- An opt-in `morpheus_stemlib_production` CMake target now builds fresh Greek
+  and Latin distributions through the qualified table and lexical recipes.
 - An initial `@libmorpheus/node` binding uses a stable Node-API addon to load
   the separately installed C runtime and performs analysis and experimental
   generation on Node's asynchronous worker pool.
@@ -43,10 +45,10 @@ the corpus.
   containing the source revision, environment, toolchain, ordered table and
   lexical input digests, all table and lexical output digests, and provenance
   record digests.
-- Stemlib table provenance schema 3 now records the qualification profile,
-  configured Git revision,
-  dirty tracked state, compiler identity/version/executable digest, and target
-  system. Lexical provenance verifies and carries this identity forward.
+- Stemlib table provenance schema 4 now records the qualification profile and
+  top-level production recipe, configured Git revision, dirty tracked state,
+  compiler identity/version/executable digest, and target system. Lexical
+  provenance verifies and carries this identity forward.
 - The lexical recipe now rebuilds Greek and Latin `nom.irreg` and `vbs.irreg`
   from their checksum-pinned irregular-word sources before indexing. Three
   malformed Greek expansions are disabled only in staging; the Greek verbal

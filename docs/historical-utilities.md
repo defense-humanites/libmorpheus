@@ -44,6 +44,11 @@ They are excluded from the default build unless
 never installed. Their points of entry now obey C17 declarations, reject
 invalid command lines, and propagate table-expansion and output failures.
 
+The opt-in `morpheus_stemlib_production` target composes the ending and lexical
+producers into fresh Greek and Latin build-tree stages. It is an internal data
+qualification target, is never part of the default build or installation, and
+records its orchestration recipe in the resulting provenance.
+
 The nominal and verb stem indexers are also internal, opt-in CMake tools. Their
 drivers require explicit input and output paths, eliminating the inherited
 shared `/tmp/nommorph` and `/tmp/vbmorph` interface. The underlying producer is

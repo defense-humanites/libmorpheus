@@ -119,22 +119,21 @@ inputs reproduce the same `conjfile` lemma sequence and per-lemma record
 multisets; the recipe verifies that notice-level equivalence before continuing.
 An inventory, digest, baseline or unavailable-file change fails validation.
 
-After `build-stemlib-tables.cmake` completes in a fresh stage, run:
+Configure the internal tools and build both complete distributions with:
 
 ```sh
-python3 tools/build-stemlib-lexical.py \
-  --source stemlib \
-  --manifest tools/stemlib-lexical-manifest.tsv \
-  --corrections tools/stemlib-lexical-corrections.tsv \
-  --language Greek --stage /absolute/path/to/greek-stage \
-  --tools build/dev
+cmake --preset dev -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+cmake --build --preset dev --target morpheus_stemlib_production
 ```
 
-Use a separately built Latin stage with `--language Latin`. Python 3 and Perl
-are build-time dependencies only. The recipe verifies staged table inputs and
-outputs, copies and verifies selected lexical sources, fixes the locale,
+The opt-in target deletes only its two prior build-tree destinations, then
+creates fresh `stemlib-production/greek` and `stemlib-production/latin` stages.
+The language-specific targets remain available independently. The orchestrator
+and lower-level recipes reject direct reuse of an existing stage. Python 3 and
+Perl are build-time dependencies only. The recipe verifies staged table inputs
+and outputs, copies and verifies selected lexical sources, fixes the locale,
 timezone and `MORPHLIB`, and invokes `indexnoms`, `do_conj`, and `indexvbs` with
-explicit paths after two `buildword` expansions. It rejects reuse.
+explicit paths after two `buildword` expansions.
 `lexical/inputs.tsv`, per-producer diagnostics
 and `lexical/comparison.json` remain available when a corpus blocks production.
 A sorted `MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv` is also written after every
@@ -156,13 +155,13 @@ model and one table and lexical pass. It is absent after any failed producer.
 CTest verifies every received output against it and compares receipts from the
 two independent builds byte for byte.
 
-`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 3 records the configured Git
+`MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 4 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and
 executable SHA-256. It also records the target system and processor, plus
-SHA-256 identities for the table manifest, validator, staging and production
-recipes, four producer executables and CMake executable. Invalid metadata is
-rejected before staging.
+SHA-256 identities for the table manifest, validator, staging and table-build
+recipes, the top-level distribution orchestrator, four producer executables
+and CMake executable. Invalid metadata is rejected before staging.
 
 The reference CI qualification uses the explicit
 `github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38` profile. Configuration fails

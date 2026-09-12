@@ -108,7 +108,7 @@ def build(args):
                          "compiler_id", "compiler_version", "compiler_sha256",
                          "system_name", "system_processor"}
     if (not provenance_fields <= table_provenance.keys() or
-            table_provenance["schema"] != "3" or
+            table_provenance["schema"] != "4" or
             table_provenance["execution_model"] != "single-pass-explicit-dag"):
         raise ValueError("incomplete table provenance")
     rows = []

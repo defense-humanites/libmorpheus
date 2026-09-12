@@ -39,6 +39,25 @@ jobs:
       - name: Build
         run: cmake --build --preset dev
 
+      - name: Build qualified stemlib distributions
+        run: |
+          cmake --build --preset dev --target morpheus_stemlib_production
+          test -f build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
+          test -f build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
+          cmake -E sha256sum \
+            build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
+            build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
+            > build/dev/stemlib-production-receipts.first.sha256
+          cmake --build --preset dev --target morpheus_stemlib_production
+          cmake -E sha256sum \
+            build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
+            build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
+            > build/dev/stemlib-production-receipts.second.sha256
+          cmake -E compare_files \
+            build/dev/stemlib-production-receipts.first.sha256 \
+            build/dev/stemlib-production-receipts.second.sha256
+          cmake -E cat build/dev/stemlib-production-receipts.second.sha256
+
       - name: Test
         run: |
           ctest --preset dev

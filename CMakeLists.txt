@@ -569,7 +569,7 @@ else()
   )
 endif()
 
-if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
+if(MORPHEUS_BUILD_STEMLIB_TOOLS)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
   find_package(Perl REQUIRED)
   if(MORPHEUS_STEMLIB_QUALIFICATION_PROFILE STREQUAL
@@ -619,6 +619,57 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
       endif()
     endif()
   endif()
+
+  function(add_stemlib_production_target target_name language stage_name)
+    set(stage "${PROJECT_BINARY_DIR}/stemlib-production/${stage_name}")
+    add_custom_target(
+      ${target_name}
+      COMMAND "${CMAKE_COMMAND}" -E remove_directory "${stage}"
+      COMMAND
+        "${CMAKE_COMMAND}"
+        "-DMORPHEUS_STEMLIB_ROOT=${PROJECT_SOURCE_DIR}/stemlib"
+        "-DMORPHEUS_STEMLIB_MANIFEST=${PROJECT_SOURCE_DIR}/tools/stemlib-source-manifest.tsv"
+        "-DMORPHEUS_STEMLIB_MANIFEST_VALIDATOR=${PROJECT_SOURCE_DIR}/test/stemlib-source-manifest.cmake"
+        "-DMORPHEUS_STEMLIB_STAGER=${PROJECT_SOURCE_DIR}/tools/stage-stemlib-sources.cmake"
+        "-DMORPHEUS_STEMLIB_BUILDER=${PROJECT_SOURCE_DIR}/tools/build-stemlib-tables.cmake"
+        "-DMORPHEUS_STEMLIB_LEXICAL_BUILDER=${PROJECT_SOURCE_DIR}/tools/build-stemlib-lexical.py"
+        "-DMORPHEUS_STEMLIB_LEXICAL_MANIFEST=${PROJECT_SOURCE_DIR}/tools/stemlib-lexical-manifest.tsv"
+        "-DMORPHEUS_STEMLIB_LEXICAL_CORRECTIONS=${PROJECT_SOURCE_DIR}/tools/stemlib-lexical-corrections.tsv"
+        "-DMORPHEUS_STEMLIB_LANGUAGE=${language}"
+        "-DMORPHEUS_STEMLIB_STAGE=${stage}"
+        "-DMORPHEUS_BUILDEND=$<TARGET_FILE:morpheus_stemlib_buildend>"
+        "-DMORPHEUS_BUILDDERIV=$<TARGET_FILE:morpheus_stemlib_buildderiv>"
+        "-DMORPHEUS_INDENDTABLES=$<TARGET_FILE:morpheus_stemlib_indendtables>"
+        "-DMORPHEUS_INDDERIVTABLES=$<TARGET_FILE:morpheus_stemlib_indderivtables>"
+        "-DMORPHEUS_STEMLIB_TOOLS_DIR=$<TARGET_FILE_DIR:morpheus_stemlib_buildword>"
+        "-DMORPHEUS_SOURCE_REVISION=${morpheus_source_revision}"
+        "-DMORPHEUS_C_COMPILER=${CMAKE_C_COMPILER}"
+        "-DMORPHEUS_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}"
+        "-DMORPHEUS_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}"
+        "-DMORPHEUS_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}"
+        "-DMORPHEUS_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}"
+        "-DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_STEMLIB_QUALIFICATION_PROFILE}"
+        "-DMORPHEUS_PYTHON=${Python3_EXECUTABLE}"
+        "-DMORPHEUS_PERL=${PERL_EXECUTABLE}"
+        -P "${PROJECT_SOURCE_DIR}/tools/build-stemlib-distribution.cmake"
+      DEPENDS ${morpheus_stemlib_ending_tools} ${morpheus_stemlib_lexical_tools}
+      VERBATIM
+    )
+  endfunction()
+
+  add_stemlib_production_target(
+    morpheus_stemlib_production_greek Greek greek
+  )
+  add_stemlib_production_target(
+    morpheus_stemlib_production_latin Latin latin
+  )
+  add_custom_target(
+    morpheus_stemlib_production
+    DEPENDS morpheus_stemlib_production_greek morpheus_stemlib_production_latin
+  )
+endif()
+
+if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
   add_test(
     NAME stemlib_ending_tools_fail_closed
     COMMAND
@@ -650,6 +701,7 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
       -DMORPHEUS_STEMLIB_MANIFEST_VALIDATOR=${PROJECT_SOURCE_DIR}/test/stemlib-source-manifest.cmake
       -DMORPHEUS_STEMLIB_STAGER=${PROJECT_SOURCE_DIR}/tools/stage-stemlib-sources.cmake
       -DMORPHEUS_STEMLIB_BUILDER=${PROJECT_SOURCE_DIR}/tools/build-stemlib-tables.cmake
+      -DMORPHEUS_PRODUCTION_RECIPE=${PROJECT_SOURCE_DIR}/tools/build-stemlib-distribution.cmake
       -DMORPHEUS_BUILDEND=$<TARGET_FILE:morpheus_stemlib_buildend>
       -DMORPHEUS_BUILDDERIV=$<TARGET_FILE:morpheus_stemlib_buildderiv>
       -DMORPHEUS_INDENDTABLES=$<TARGET_FILE:morpheus_stemlib_indendtables>

@@ -6,6 +6,7 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_STEMLIB_BINARY_EXCEPTIONS
                           MORPHEUS_STEMLIB_MANIFEST_VALIDATOR
                           MORPHEUS_STEMLIB_STAGER MORPHEUS_STEMLIB_BUILDER
+                          MORPHEUS_PRODUCTION_RECIPE
                           MORPHEUS_BUILDEND MORPHEUS_BUILDDERIV
                           MORPHEUS_INDENDTABLES MORPHEUS_INDDERIVTABLES
                           MORPHEUS_SOURCE_REVISION MORPHEUS_C_COMPILER
@@ -40,6 +41,7 @@ execute_process(
           -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
           -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
           -DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_QUALIFICATION_PROFILE}
+          -DMORPHEUS_PRODUCTION_RECIPE=${MORPHEUS_PRODUCTION_RECIPE}
           -P "${MORPHEUS_STEMLIB_BUILDER}"
   RESULT_VARIABLE invalid_provenance_result
   OUTPUT_QUIET
@@ -73,6 +75,7 @@ function(build_and_validate language pass expected_outputs)
             -DMORPHEUS_SYSTEM_NAME=${MORPHEUS_SYSTEM_NAME}
             -DMORPHEUS_SYSTEM_PROCESSOR=${MORPHEUS_SYSTEM_PROCESSOR}
             -DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_QUALIFICATION_PROFILE}
+            -DMORPHEUS_PRODUCTION_RECIPE=${MORPHEUS_PRODUCTION_RECIPE}
             -P "${MORPHEUS_STEMLIB_BUILDER}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
@@ -139,11 +142,12 @@ function(compare_builds language)
     message(FATAL_ERROR "${language} table provenance differs")
   endif()
   file(SHA256 "${MORPHEUS_C_COMPILER}" compiler_sha256)
+  file(SHA256 "${MORPHEUS_PRODUCTION_RECIPE}" production_recipe_sha256)
   get_filename_component(compiler_name "${MORPHEUS_C_COMPILER}" NAME)
   file(STRINGS "${first}/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
        provenance_lines)
   foreach(expected_line IN ITEMS
-      "schema\t3"
+      "schema\t4"
       "execution_model\tsingle-pass-explicit-dag"
       "qualification_profile\t${MORPHEUS_QUALIFICATION_PROFILE}"
       "source_revision\t${MORPHEUS_SOURCE_REVISION}"
@@ -152,7 +156,8 @@ function(compare_builds language)
       "compiler_version\t${MORPHEUS_C_COMPILER_VERSION}"
       "compiler_sha256\t${compiler_sha256}"
       "system_name\t${MORPHEUS_SYSTEM_NAME}"
-      "system_processor\t${MORPHEUS_SYSTEM_PROCESSOR}")
+      "system_processor\t${MORPHEUS_SYSTEM_PROCESSOR}"
+      "MORPHEUS_PRODUCTION_RECIPE\t${production_recipe_sha256}")
     list(FIND provenance_lines "${expected_line}" expected_index)
     if(expected_index EQUAL -1)
       message(FATAL_ERROR "missing table provenance: ${expected_line}")

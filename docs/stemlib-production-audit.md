@@ -408,3 +408,9 @@ fails closed unless GCC 14, Python 3.12 and Perl 5.38 are selected. The profile
 is recorded in table provenance, lexical provenance and the aggregate receipt;
 the exact executable versions and hashes remain attached to each run. Portable
 developer builds retain a separate default profile.
+
+The reconstruction is now exposed as the opt-in
+`morpheus_stemlib_production` CMake target. It creates fresh Greek and Latin
+stages below the build tree, runs the explicit table and lexical graph, and
+requires a final receipt from each language. The orchestration recipe itself is
+hashed in table provenance; CI invokes the target directly.
