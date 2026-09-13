@@ -53,12 +53,6 @@ mask values to their declared bitfield widths, and ending selection applies the
 same bounded writes when it propagates voice, case, gender, and degree. The
 runtime closure is consequently clean under both conversion diagnostics without
 changing the public ABI or the stemlib record layout.
-The WebAssembly closure now enforces that same boundary without a compiler
-exception: morphology-table values and classes must fit the signed legacy flag
-field unless they carry the inherited unknown-class sentinel, whose conversion
-is now explicit. Numeric inputs must be non-negative, and 32-bit stemlib offsets
-must fit the `long` consumed by `fseek`; invalid values fail before becoming
-platform-dependent file positions.
 
 The entire `cruncher` runtime closure is now a strict boundary. Its internal
 interfaces are declared in `src/anal/cruncher_internal.h`,

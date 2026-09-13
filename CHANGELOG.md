@@ -105,14 +105,6 @@ the corpus.
   and prepared data; applications consume the binding as a normal JSR
   dependency and use the preconfigured runtime environment variables.
 
-### Fixed
-
-- Morphology-key flags now cross their legacy signed boundary explicitly, with
-  negative numeric inputs rejected, while stemlib pre-index offsets receive an
-  exact range check. The Emscripten generation-preparer build consequently
-  restores sign-conversion warnings as errors instead of carrying a
-  target-wide exception.
-
 ## [0.3.2] - 2026-08-29
 
 Target project version: **0.3.2**. C ABI: **2**. Shared-library SONAME: **1**.

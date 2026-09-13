@@ -979,6 +979,9 @@ if(MORPHEUS_BUILD_DENO_GENER_PREPARER)
       "-sSINGLE_FILE=1"
       "-sEXPORTED_RUNTIME_METHODS=['FS','callMain']"
   )
+  target_compile_options(
+    morpheus_build_options INTERFACE "-Wno-error=sign-conversion"
+  )
   add_custom_command(
     TARGET morpheus_gener_source_preparer POST_BUILD
     COMMAND

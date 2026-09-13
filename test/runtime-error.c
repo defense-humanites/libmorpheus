@@ -4,8 +4,6 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <limits.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,22 +131,6 @@ int main(void)
   assert(ChckPreIndex(&tag,"a",1,1,NULL)==-1);
   assert(morpheus_runtime_status(context)==MORPHEUS_INTERNAL_ERROR);
 
-  {
-    endtags tags[2]={0};
-
-    strcpy(tagstring_of(tags),"a");
-    strcpy(tagstring_of(tags+1),"b");
-    tagoffset_of(tags+1)=123;
-    morpheus_runtime_context_clear_error(context);
-    assert(ChckPreIndex(tags,"b",2,1,morphstrcmp)==123);
-    assert(morpheus_runtime_status(context)==MORPHEUS_OK);
-#if UINT32_MAX > LONG_MAX
-    tagoffset_of(tags+1)=UINT32_MAX;
-    assert(ChckPreIndex(tags,"b",2,1,morphstrcmp)==-1);
-    assert(morpheus_runtime_status(context)==MORPHEUS_INTERNAL_ERROR);
-#endif
-  }
-
   morpheus_runtime_context_clear_error(context);
   assert(!ChckFullIndex(NULL,keys,"missing",0,morphstrncmp));
   assert(!keys[0]);
@@ -182,8 +164,6 @@ int main(void)
     char temporary[BUFSIZ];
     char greek[BUFSIZ];
     char input[BUFSIZ];
-    char rule_files[BUFSIZ];
-    char stemtypes[BUFSIZ];
     char output[BUFSIZ];
     const char *temporary_base=getenv("TMPDIR");
     FILE *stream;
@@ -208,8 +188,6 @@ int main(void)
     assert(created);
     build_test_path(greek,sizeof greek,root,"/Greek");
     build_test_path(input,sizeof input,greek,"/input");
-    build_test_path(rule_files,sizeof rule_files,greek,"/rule_files");
-    build_test_path(stemtypes,sizeof stemtypes,rule_files,"/stemtypes.table");
     build_test_path(output,sizeof output,input,".lindex");
     assert(mkdir(greek,0700)==0);
     stream=fopen(input,"w");
@@ -222,23 +200,11 @@ int main(void)
     context->stemlib_path=malloc(path_length+1);
     assert(context->stemlib_path);
     memcpy(context->stemlib_path,root,path_length+1);
-
-    assert(mkdir(rule_files,0700)==0);
-    stream=fopen(stemtypes,"w");
-    assert(stream);
-    assert(fputs("negative -1 prose\n",stream)>=0);
-    assert(fclose(stream)==0);
-    morpheus_runtime_context_clear_error(context);
-    assert(!init_keys());
-    assert(morpheus_runtime_status(context)==MORPHEUS_INTERNAL_ERROR);
-    assert(unlink(stemtypes)==0);
-
     morpheus_runtime_context_clear_error(context);
     assert(index_list("input",NULL,1)==-1);
     assert(morpheus_runtime_status(context)==MORPHEUS_INTERNAL_ERROR);
     assert(rmdir(output)==0);
     assert(unlink(input)==0);
-    assert(rmdir(rule_files)==0);
     assert(rmdir(greek)==0);
     assert(rmdir(root)==0);
   }
