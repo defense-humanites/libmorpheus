@@ -111,8 +111,15 @@ ChckPreIndex(endtags *etags, char *tag, int ntags, int exact_match,
 
 	if( ! rval )
 		roff = 0;
-	else
-		roff = tagoffset_of(etags+rval);
+	else {
+		morpheus_stemlib_offset offset = tagoffset_of(etags+rval);
+
+		if ((uintmax_t)offset > (uintmax_t)LONG_MAX) {
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+			return((long)-1);
+		}
+		roff = (long)offset;
+	}
 	
 return( roff  );
 }

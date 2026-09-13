@@ -1,6 +1,7 @@
 #include "morphlib_internal.h"
 #include <errno.h>
 #include <limits.h>
+#include <stdint.h>
 /*
  * copyright Gregory Crane
  *
@@ -543,6 +544,7 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 	char line[LONGSTRING];
 	Stemtype stemnum = 0;
 	Stemtype declnum = 0;
+	Stemtype combined = 0;
 	char stemname[MAXWORDSIZE];
 	char stemnumber[MAXWORDSIZE];
 	char decl[MAXWORDSIZE];
@@ -596,20 +598,28 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 		base = stemnumber[0] == '0' ? 8 : 10;
 		errno = 0;
 		parsed = strtol(stemnumber,&end,base);
-		if (errno || *end || parsed < INT_MIN || parsed > INT_MAX) {
+		if (errno || *end || parsed < 0 ||
+		    (uintmax_t)parsed > (uintmax_t)UINT_MAX) {
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			goto failed;
 		}
 		stemnum = (Stemtype)parsed;
 		Xstrncpy(targs[i].morph_key , stemname,(size_t)MAXWORDSIZE);
 		declnum = (*classfunc)(decl);
+		combined = stemnum | declnum;
+		if (declnum != (Stemtype)-1 &&
+		    (uintmax_t)combined > (uintmax_t)LONG_MAX) {
+			fprintf(stderr,"invalid morphology key flags for [%s]\n",stemname);
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+			goto failed;
+		}
 		
 
 /*		if( declnum == 0 ) { 
 			fprintf(stdout,"could not recognize [%s]\n", decl );
 			targs[i].morph_flags = (stemnum );
 		} else */
-			targs[i].morph_flags = (stemnum | declnum);
+			targs[i].morph_flags = (Morph_flags)combined;
 		targs[i].add_val = curfunc;
 
 /*
