@@ -9,11 +9,12 @@ from C++.
 
 ## Versioning
 
-The current project version is 0.3.2, the SONAME major is 1, and
-`MORPHEUS_ABI_VERSION` is 2. Version 0.3.2 changes Deno native acquisition
-only: the public C declarations and symbol set are identical to 0.3.1. The
-generation surface remains experimental, but its additions remain covered by
-the same ABI 2 compatibility contract.
+The current project version is 0.4.0, the SONAME major is 1, and
+`MORPHEUS_ABI_VERSION` is 2. Version 0.4.0 adds opt-in, non-installed stemlib
+production and qualification infrastructure: the public C declarations and
+symbol set remain identical to 0.3.2. The generation surface remains
+experimental, but its additions remain covered by the same ABI 2 compatibility
+contract.
 
 Call `morpheus_abi_version()` after dynamically loading the library and compare
 it with the header constant. `morpheus_analysis_size()` returns the producing

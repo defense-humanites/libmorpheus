@@ -9,6 +9,8 @@ the corpus.
 
 ## [Unreleased]
 
+Target project version: **0.4.0**. C ABI: **2**. Shared-library SONAME: **1**.
+
 ### Added
 
 - An opt-in `morpheus_stemlib_production` CMake target now builds fresh Greek

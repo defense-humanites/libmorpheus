@@ -23,7 +23,7 @@ this separation and used one `v<version>` tag for the native and Deno tracks.
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
 `release-node-0.1.0.md`. The current native candidate is recorded in
-`release-0.3.2.md`; the earlier decisions remain historical evidence.
+`release-0.4.0.md`; the earlier decisions remain historical evidence.
 
 ## 1. Version and compatibility decisions
 

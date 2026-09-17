@@ -235,3 +235,28 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.3.2")
     message(FATAL_ERROR "Accepted 0.3.2 benchmark digest differs")
   endif()
 endif()
+
+if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.0")
+  foreach(expected_minor_release_value IN ITEMS
+          "Previous release tag: `v0.3.2`"
+          "Benchmark evidence: **pending**"
+          "public C declarations and symbol set remain identical to 0.3.2"
+          "`morpheus_stemlib_production`"
+          "Tag that qualified commit as `v0.4.0` only after explicit authorization")
+    string(FIND "${release_decision}" "${expected_minor_release_value}"
+                minor_release_value_at)
+    if(minor_release_value_at EQUAL -1)
+      message(FATAL_ERROR
+        "release-0.4.0.md is missing: ${expected_minor_release_value}")
+    endif()
+  endforeach()
+  foreach(pending_benchmark_path IN ITEMS
+          "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.0.json"
+          "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.0.json.sha256")
+    if(EXISTS "${pending_benchmark_path}")
+      message(FATAL_ERROR
+        "Pending 0.4.0 benchmark evidence must not be committed before acceptance: "
+        "${pending_benchmark_path}")
+    endif()
+  endforeach()
+endif()
