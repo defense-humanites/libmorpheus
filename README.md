@@ -14,13 +14,14 @@ comes with JavaScript and Python bindings.
    2. [Steps and options](#steps-and-options)
 4. [Install and consume from C](#install-and-consume-from-c)
 5. [Runtime data](#runtime-data)
+   1. [Rebuild and qualify the stemlibs](#rebuild-and-qualify-the-stemlibs)
 6. [Alpine container images](#alpine-container-images)
    1. [`runtime`](#runtime)
    2. [`deno-runtime`](#deno-runtime)
-8. [`cruncher`](#cruncher)
-9. [Releases and platform support](#releases-and-platform-support)
-10. [Architecture and provenance](#architecture-and-provenance)
-11. [License](#license)
+7. [`cruncher`](#cruncher)
+8. [Releases and platform support](#releases-and-platform-support)
+9. [Architecture and provenance](#architecture-and-provenance)
+10. [License](#license)
 
 ## Project status
 
@@ -207,8 +208,58 @@ sh tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
 The [runtime-data guide](docs/runtime-data.md) records exact pinned revisions,
 digests, acquisition permissions, and redistribution caveats. The
 [stem-library inventory](docs/stem-libraries.md) explains the origin and role of
-each dataset; the [production audit](docs/stemlib-production-audit.md) records
-why the checked-in build drivers are not yet a supported reproducible compiler.
+each dataset.
+
+### Rebuild and qualify the stemlibs
+
+The source checkout can reconstruct complete Greek and Latin stemlibs through
+an explicit, opt-in production graph. Python 3 and Perl are required in
+addition to the native build requirements. Configure the internal producers,
+then invoke the aggregate target:
+
+```sh
+cmake --preset dev -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+cmake --build --preset dev --target morpheus_stemlib_production
+```
+
+The target recreates two isolated stages without modifying the source tree or
+the checked-in stemlibs:
+
+| Language | Reconstructed stemlib root | Production receipt |
+| --- | --- | --- |
+| Greek | `build/dev/stemlib-production/greek/` | `build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json` |
+| Latin | `build/dev/stemlib-production/latin/` | `build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json` |
+
+Each root contains its `Greek/` or `Latin/` runtime tree plus ordered input and
+output manifests, provenance, and baseline comparisons. The
+`morpheus_stemlib_production_greek` and
+`morpheus_stemlib_production_latin` targets can be run independently. Repeated
+invocations delete and recreate only the corresponding build-tree stage.
+
+Portable developer builds record the local compiler and tool versions. The
+reference qualification is deliberately stricter and fails configuration
+unless it runs on Ubuntu 24.04 x86-64 with GCC 14, Python 3.12, and Perl 5.38:
+
+```sh
+CC=gcc-14 cmake --preset dev \
+  -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON \
+  -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
+cmake --build --preset dev --target morpheus_stemlib_production
+ctest --preset dev
+```
+
+CI performs two additional clean builds per language, compares their complete
+outputs and receipts, and checks every reviewed difference against the
+Perseids and pinned Alpheios baselines. The
+[production manifest](docs/stemlib-production-manifest.md) documents the 379
+source inputs and staging corrections; the
+[production audit](docs/stemlib-production-audit.md) records the restored
+producers, reproducibility proof, and accepted binary-format exceptions.
+
+This facility is internal production and qualification infrastructure. It is
+not installed, its outputs are not included in native or binding packages, and
+successful reconstruction does not grant permission to redistribute the
+linguistic datasets.
 
 ## Alpine container images
 
