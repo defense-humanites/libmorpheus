@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-17T18:23:49.781Z",
+  "label": "release-candidate",
+  "platform": {
+    "target": "aarch64-apple-darwin",
+    "arch": "aarch64",
+    "os": "darwin",
+    "vendor": "apple",
+    "standalone": false
+  },
+  "runtime": {
+    "deno": "2.9.6",
+    "v8": "15.0.245.2-rusty",
+    "typescript": "6.0.3"
+  },
+  "hardwareConcurrency": 12,
+  "sourceRevision": "3048fdad64b30f5ba35423bacb5197f5a347e228",
+  "stemlibRevision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+  "corpus": "test/fixture.json",
+  "corpusSha256": "cc6f0eb3a2e52b0c6d6c3784d95d01ab3e7c1c824df7e38b6b9b96adcd1539c2",
+  "uniqueWords": 24,
+  "iterations": 20,
+  "warmupIterations": 2,
+  "generationSmallLemma": "lo/gos",
+  "generationMaximalLemma": "i(/hmi",
+  "generationIndexSha256": "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6",
+  "measurements": [
+    {
+      "engine": "ffi",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 327.25079099999994,
+      "operationsPerSecond": 1466.764980256381,
+      "meanMicroseconds": 681.7724812499998,
+      "startupMs": 2723.818625,
+      "results": 740,
+      "peakRssBytes": 64815104,
+      "rssGrowthBytes": 23511040
+    },
+    {
+      "engine": "ffi",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 2,
+      "operations": 480,
+      "durationMs": 207.43320900000026,
+      "operationsPerSecond": 2313.9978517133163,
+      "meanMicroseconds": 432.1525187500005,
+      "startupMs": 1.5513750000000073,
+      "results": 740,
+      "peakRssBytes": 66600960,
+      "rssGrowthBytes": 1736704
+    },
+    {
+      "engine": "ffi",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 4,
+      "operations": 480,
+      "durationMs": 139.00791600000002,
+      "operationsPerSecond": 3453.0407606427243,
+      "meanMicroseconds": 289.59982500000007,
+      "startupMs": 1.71487500000012,
+      "results": 740,
+      "peakRssBytes": 70025216,
+      "rssGrowthBytes": 3424256
+    },
+    {
+      "engine": "cruncher-persistent",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 313.5901249999997,
+      "operationsPerSecond": 1530.6604441067793,
+      "meanMicroseconds": 653.312760416666,
+      "startupMs": null,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 39.8555409999999,
+      "operationsPerSecond": 250.90614125649492,
+      "meanMicroseconds": 3985.5540999999903,
+      "startupMs": 3.98555409999999,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 2.824916999999914,
+      "operationsPerSecond": 7079.854027569875,
+      "meanMicroseconds": 141.2458499999957,
+      "startupMs": 1.3387500000003456,
+      "results": 360,
+      "peakRssBytes": 84197376,
+      "rssGrowthBytes": 13074432
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 149.19645900000023,
+      "operationsPerSecond": 134.05143884815638,
+      "meanMicroseconds": 7459.822950000012,
+      "startupMs": 1.250833000000057,
+      "results": 58360,
+      "peakRssBytes": 151502848,
+      "rssGrowthBytes": 67305472
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 1.5013330000001588,
+      "operationsPerSecond": 26642.989929613064,
+      "meanMicroseconds": 37.53332500000397,
+      "startupMs": 1.7640840000003664,
+      "results": 720,
+      "peakRssBytes": 163528704,
+      "rssGrowthBytes": 12025856
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 227.71312500000022,
+      "operationsPerSecond": 175.65961557990985,
+      "meanMicroseconds": 5692.8281250000055,
+      "startupMs": 1.4034579999997732,
+      "results": 116720,
+      "peakRssBytes": 234569728,
+      "rssGrowthBytes": 71041024
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 3.7979999999997744,
+      "operationsPerSecond": 21063.71774618345,
+      "meanMicroseconds": 47.47499999999718,
+      "startupMs": 2.033249999999498,
+      "results": 1440,
+      "peakRssBytes": 258441216,
+      "rssGrowthBytes": 23871488
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 443.0560000000005,
+      "operationsPerSecond": 180.56408219277,
+      "meanMicroseconds": 5538.200000000006,
+      "startupMs": 1.7064999999993233,
+      "results": 233440,
+      "peakRssBytes": 298729472,
+      "rssGrowthBytes": 40288256
+    },
+    {
+      "engine": "generation-small-cold",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 148.21054100000038,
+      "operationsPerSecond": 67.47158422422852,
+      "meanMicroseconds": 14821.054100000038,
+      "startupMs": 14.821054100000037,
+      "results": 180,
+      "peakRssBytes": 298991616,
+      "rssGrowthBytes": 262144
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 230.57066600000053,
+      "operationsPerSecond": 43.37065149475683,
+      "meanMicroseconds": 23057.066600000053,
+      "startupMs": 23.057066600000052,
+      "results": 29180,
+      "peakRssBytes": 299220992,
+      "rssGrowthBytes": 229376
+    }
+  ],
+  "comparison": [
+    {
+      "engine": "ffi",
+      "contexts": 1,
+      "throughputChangePercent": -3.5113232163280217,
+      "meanLatencyChangePercent": 3.639103917033082,
+      "peakRssChangePercent": 6.458557588805158,
+      "rssGrowthChangePercent": -4.777704047777043
+    },
+    {
+      "engine": "ffi",
+      "contexts": 2,
+      "throughputChangePercent": 2.059056030897888,
+      "meanLatencyChangePercent": -2.017514281412258,
+      "peakRssChangePercent": 7.824933687002655,
+      "rssGrowthChangePercent": 107.84313725490198
+    },
+    {
+      "engine": "ffi",
+      "contexts": 4,
+      "throughputChangePercent": -2.7271223892025853,
+      "meanLatencyChangePercent": 2.803579431580294,
+      "peakRssChangePercent": 7.386934673366841,
+      "rssGrowthChangePercent": -0.4761904761904745
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "throughputChangePercent": -0.004172325260476395,
+      "meanLatencyChangePercent": 0.0041724993506964125,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "throughputChangePercent": -6.410649400041912,
+      "meanLatencyChangePercent": 6.8497637380174226,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 1,
+      "throughputChangePercent": -5.9278909787403355,
+      "meanLatencyChangePercent": 6.3014330606754765,
+      "peakRssChangePercent": 6.046223689640939,
+      "rssGrowthChangePercent": 1.3977128335451061
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 1,
+      "throughputChangePercent": 0.13575456237882033,
+      "meanLatencyChangePercent": -0.13557051921372354,
+      "peakRssChangePercent": 2.244582043343657,
+      "rssGrowthChangePercent": -2.1438780371605515
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 2,
+      "throughputChangePercent": 2.891896734425914,
+      "meanLatencyChangePercent": -2.8106166046196757,
+      "peakRssChangePercent": 2.0865296103099062,
+      "rssGrowthChangePercent": 0.13642564802183177
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 2,
+      "throughputChangePercent": 1.8275367306998413,
+      "meanLatencyChangePercent": -1.7947372482682078,
+      "peakRssChangePercent": 0.7175518818149929,
+      "rssGrowthChangePercent": -2.2983325822442557
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 4,
+      "throughputChangePercent": -3.8342548709758617,
+      "meanLatencyChangePercent": 3.9871316608959706,
+      "peakRssChangePercent": 0.6636885768985357,
+      "rssGrowthChangePercent": 0.13745704467353903
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 4,
+      "throughputChangePercent": -0.940776335271476,
+      "meanLatencyChangePercent": 0.9497109915332924,
+      "peakRssChangePercent": 12.28599581229215,
+      "rssGrowthChangePercent": 332.9225352112676
+    },
+    {
+      "engine": "generation-small-cold",
+      "contexts": 0,
+      "throughputChangePercent": -1.0052699288102485,
+      "meanLatencyChangePercent": 1.015478226050348,
+      "peakRssChangePercent": 12.28080969667138,
+      "rssGrowthChangePercent": 6.666666666666665
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "contexts": 0,
+      "throughputChangePercent": 0.27206062717415325,
+      "meanLatencyChangePercent": -0.27132246557264317,
+      "peakRssChangePercent": 12.26333907056798,
+      "rssGrowthChangePercent": -6.666666666666665
+    }
+  ]
+}

@@ -94,11 +94,11 @@ candidate with 0.3.1 on the same controlled Apple Silicon host. The measured
 analysis and generation paths, corpus, stemlib revision, and generation-index
 digest are unchanged; the release decision records the accepted comparison.
 
-The 0.4.0 candidate must be measured from its exact finalized source revision
-against the accepted 0.3.2 report on the same controlled host. Its report is
-not accepted evidence until the comparison has been reviewed, copied to
-`bench/release-evidence/benchmark-0.4.0.json`, and accompanied by its SHA-256
-sidecar and an updated release decision.
+The accepted 0.4.0 report is retained at
+[`bench/release-evidence/benchmark-0.4.0.json`](../bench/release-evidence/benchmark-0.4.0.json)
+with its companion SHA-256 file. It measures the finalized stemlib-production
+candidate against 0.3.2 on the same controlled Apple Silicon host. The release
+decision records the reviewed timing and process-memory comparison.
 
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib

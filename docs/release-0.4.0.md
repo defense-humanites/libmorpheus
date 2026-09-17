@@ -2,13 +2,13 @@
 
 # Release decision: 0.4.0
 
-Status: candidate prepared; benchmark and platform qualification pending.
+Status: benchmark accepted; platform qualification pending.
 
 - Project version: **0.4.0**
 - C ABI: **2**
 - SONAME major: **1**
 - Previous release tag: `v0.3.2`
-- Benchmark evidence: **pending**
+- Benchmark evidence: **accepted**
 
 ## Version and ABI rationale
 
@@ -68,31 +68,48 @@ does not make the historical in-memory `.out` serialization portable, promote
 quarantined utilities, or turn checked-in and external stemlibs into native
 release assets.
 
-## Benchmark plan
+## Benchmark evidence
 
-The accepted 0.3.2 schema 2 report is the comparison baseline. A new 0.4.0
-report must be produced on the same controlled Apple Silicon host from the
-exact finalized candidate commit with the pinned Alpheios revision and
-canonical generation index. The result must pass `bench/validate.ts`, retain
-all thirteen required analysis and generation configurations, and receive an
-explicit regression review before its JSON and SHA-256 sidecar are committed
-as accepted evidence.
+The accepted schema 2 report was produced on Apple Silicon from
+`3048fdad64b30f5ba35423bacb5197f5a347e228` with Deno 2.9.6, Apple Clang 21,
+the pinned Alpheios revision and the canonical generation-index digest. Its
+SHA-256 is
+`1ad54b590a1a30be3ffb9c79d52f4c58944d12edcb1d92c527d0fb845a4e3793`.
+The validator accepts all thirteen required configurations and identities; the
+embedded comparison reproduces exactly from the accepted 0.3.2 report. The
+compiler remains Apple Clang 21 but advances from build 2100.1.1.101 to
+2100.3.34.2, which is retained verbatim in the report identity.
 
-The evidence-finalization commit may update only the benchmark evidence,
-release decision, changelog and qualification metadata. Any subsequent native
-or stemlib-production change invalidates the measurement and requires a new
+Compared with 0.3.2, analysis FFI throughput changes by -3.5%, +2.1% and
+-2.7% across one, two and four contexts. Persistent `cruncher` is unchanged;
+cold `cruncher` is 6.4% slower. Small warm generation changes by -5.9%, +2.9%
+and -3.8%, while maximal warm generation changes by +0.1%, +1.8% and -0.9%.
+Both cold generation workloads remain within 1.1% of the baseline. These
+timing variations are accepted as normal measurement noise for unchanged
+native analysis and generation paths.
+
+Peak process RSS is 0.7% to 12.3% higher. Most per-workload RSS growth is
+stable or lower; maximal generation with four contexts touches approximately
+31 MiB more and raises the cumulative high-water mark inherited by the two
+following cold measurements. Returned records, corpus, generation index and
+runtime paths are unchanged, and the report measures the whole Deno process
+rather than isolated native allocations. The increase is recorded and
+accepted as allocator and high-water-mark variability rather than evidence of
+a functional regression.
+
+The evidence-finalization commit changes only the benchmark evidence, release
+decision, changelog and qualification metadata. Any subsequent native or
+stemlib-production change invalidates the measurement and requires a new
 report.
 
 ## Remaining gates
 
 1. Require the complete Linux CI, including stemlib reconstruction,
    sanitizers, signedness builds, bindings, fixtures and release metadata, to
-   pass on the candidate commit.
-2. Produce and review the 0.4.0 benchmark against accepted 0.3.2 evidence;
-   update this decision to record its revision, digest and accepted comparison.
-3. Manually dispatch `Platform and release qualification` for the exact
+   pass on the benchmark-finalized commit.
+2. Manually dispatch `Platform and release qualification` for the exact
    benchmark-finalized commit with package artifacts enabled; inspect all
    three data-free native archives and checksums.
-4. Tag that qualified commit as `v0.4.0` only after explicit authorization.
+3. Tag that qualified commit as `v0.4.0` only after explicit authorization.
    Require the tag workflows to rebuild and publish the native assets and
    accepted benchmark evidence.

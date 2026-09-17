@@ -239,9 +239,11 @@ endif()
 if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.0")
   foreach(expected_minor_release_value IN ITEMS
           "Previous release tag: `v0.3.2`"
-          "Benchmark evidence: **pending**"
+          "Benchmark evidence: **accepted**"
           "public C declarations and symbol set remain identical to 0.3.2"
           "`morpheus_stemlib_production`"
+          "3048fdad64b30f5ba35423bacb5197f5a347e228"
+          "1ad54b590a1a30be3ffb9c79d52f4c58944d12edcb1d92c527d0fb845a4e3793"
           "Tag that qualified commit as `v0.4.0` only after explicit authorization")
     string(FIND "${release_decision}" "${expected_minor_release_value}"
                 minor_release_value_at)
@@ -250,13 +252,19 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.0")
         "release-0.4.0.md is missing: ${expected_minor_release_value}")
     endif()
   endforeach()
-  foreach(pending_benchmark_path IN ITEMS
-          "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.0.json"
-          "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.0.json.sha256")
-    if(EXISTS "${pending_benchmark_path}")
-      message(FATAL_ERROR
-        "Pending 0.4.0 benchmark evidence must not be committed before acceptance: "
-        "${pending_benchmark_path}")
-    endif()
-  endforeach()
+  set(benchmark_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.0.json")
+  set(benchmark_checksum
+      "1ad54b590a1a30be3ffb9c79d52f4c58944d12edcb1d92c527d0fb845a4e3793")
+  if(NOT EXISTS "${benchmark_path}" OR
+     NOT EXISTS "${benchmark_path}.sha256")
+    message(FATAL_ERROR "Accepted 0.4.0 benchmark evidence is missing")
+  endif()
+  file(SHA256 "${benchmark_path}" actual_benchmark_checksum)
+  file(READ "${benchmark_path}.sha256" recorded_benchmark_checksum)
+  if(NOT actual_benchmark_checksum STREQUAL benchmark_checksum OR
+     NOT recorded_benchmark_checksum MATCHES
+       "^${benchmark_checksum}  benchmark-0.4.0.json")
+    message(FATAL_ERROR "Accepted 0.4.0 benchmark digest differs")
+  endif()
 endif()

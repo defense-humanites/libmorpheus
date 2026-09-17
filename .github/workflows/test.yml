@@ -240,13 +240,13 @@ jobs:
         run: |
           (cd bench/release-evidence && sha256sum -c \
             benchmark-0.3.0.json.sha256 benchmark-0.3.1.json.sha256 \
-            benchmark-0.3.2.json.sha256)
+            benchmark-0.3.2.json.sha256 benchmark-0.4.0.json.sha256)
           deno run --allow-read bench/validate.ts \
-            bench/release-evidence/benchmark-0.3.2.json \
+            bench/release-evidence/benchmark-0.4.0.json \
             --label release-candidate \
-            --revision 81aac2dacf454a692fa83eecd98ade672209027f \
+            --revision 3048fdad64b30f5ba35423bacb5197f5a347e228 \
             --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
-            --compiler 'Apple clang version 21.0.0 (clang-2100.1.1.101)'
+            --compiler 'Apple clang version 21.0.0 (clang-2100.3.34.2)'
 
       - name: Acquire and verify pinned Deno datasets
         run: |

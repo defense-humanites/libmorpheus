@@ -7,7 +7,7 @@ Historical standalone utilities are outside the release contract. Stemlib data
 changes are recorded separately because the native installation does not ship
 the corpus.
 
-## [Unreleased]
+## [0.4.0] - 2026-09-17
 
 Target project version: **0.4.0**. C ABI: **2**. Shared-library SONAME: **1**.
 
