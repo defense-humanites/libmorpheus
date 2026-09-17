@@ -7,6 +7,16 @@ Historical standalone utilities are outside the release contract. Stemlib data
 changes are recorded separately because the native installation does not ship
 the corpus.
 
+## [Unreleased]
+
+### Changed
+
+- Stemlib production no longer requires Perl. The sole active Perl transform,
+  Greek nominal entity constraints, now has a byte-identical MPL-licensed
+  Python implementation; the original script remains a checksum-pinned
+  historical reference. The reference qualification profile now requires only
+  GCC 14 and Python 3.12 in addition to its Ubuntu 24.04 x86-64 platform.
+
 ## [0.4.0] - 2026-09-17
 
 Target project version: **0.4.0**. C ABI: **2**. Shared-library SONAME: **1**.

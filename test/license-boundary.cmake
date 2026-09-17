@@ -170,6 +170,8 @@ foreach(mpl_file IN ITEMS
         test/stemlib-binary-baseline-exceptions.tsv
         test/stemlib-lexical-baseline-exceptions.tsv
         tools/stemlib-lexical-corrections.tsv
+        tools/stemlib-lexical-manifest.tsv
+        tools/stemlib_constraints.py
         tools/gener-source-preparer.c
         tools/gener-corpus-manifest.tsv
         tools/gener-corpus-exceptions.tsv

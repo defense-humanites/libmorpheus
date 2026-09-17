@@ -213,9 +213,9 @@ each dataset.
 ### Rebuild and qualify the stemlibs
 
 The source checkout can reconstruct complete Greek and Latin stemlibs through
-an explicit, opt-in production graph. Python 3 and Perl are required in
-addition to the native build requirements. Configure the internal producers,
-then invoke the aggregate target:
+an explicit, opt-in production graph. Python 3 is required in addition to the
+native build requirements; Perl is not required. Configure the internal
+producers, then invoke the aggregate target:
 
 ```sh
 cmake --preset dev -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
@@ -238,12 +238,12 @@ invocations delete and recreate only the corresponding build-tree stage.
 
 Portable developer builds record the local compiler and tool versions. The
 reference qualification is deliberately stricter and fails configuration
-unless it runs on Ubuntu 24.04 x86-64 with GCC 14, Python 3.12, and Perl 5.38:
+unless it runs on Ubuntu 24.04 x86-64 with GCC 14 and Python 3.12:
 
 ```sh
 CC=gcc-14 cmake --preset dev \
   -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON \
-  -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
+  -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12
 cmake --build --preset dev --target morpheus_stemlib_production
 ctest --preset dev
 ```

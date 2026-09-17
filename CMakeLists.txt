@@ -91,7 +91,7 @@ set(
 )
 set_property(
   CACHE MORPHEUS_STEMLIB_QUALIFICATION_PROFILE PROPERTY STRINGS
-  portable github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
+  portable github-ubuntu-24.04-gcc-14-python-3.12
 )
 option(
   MORPHEUS_ENABLE_SANITIZERS
@@ -571,20 +571,18 @@ endif()
 
 if(MORPHEUS_BUILD_STEMLIB_TOOLS)
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
-  find_package(Perl REQUIRED)
   if(MORPHEUS_STEMLIB_QUALIFICATION_PROFILE STREQUAL
-     "github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38")
+     "github-ubuntu-24.04-gcc-14-python-3.12")
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
        NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$" OR
        NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
        NOT CMAKE_C_COMPILER_VERSION MATCHES "^14[.]" OR
-       NOT Python3_VERSION MATCHES "^3[.]12([.]|$)" OR
-       NOT PERL_VERSION_STRING MATCHES "^5[.]38([.]|$)")
+       NOT Python3_VERSION MATCHES "^3[.]12([.]|$)")
       message(FATAL_ERROR
         "stemlib qualification profile mismatch: "
         "system=${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}, "
         "compiler=${CMAKE_C_COMPILER_ID}/${CMAKE_C_COMPILER_VERSION}, "
-        "python=${Python3_VERSION}, perl=${PERL_VERSION_STRING}")
+        "python=${Python3_VERSION}")
     endif()
   elseif(NOT MORPHEUS_STEMLIB_QUALIFICATION_PROFILE STREQUAL "portable")
     message(FATAL_ERROR
@@ -650,7 +648,6 @@ if(MORPHEUS_BUILD_STEMLIB_TOOLS)
         "-DMORPHEUS_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}"
         "-DMORPHEUS_QUALIFICATION_PROFILE=${MORPHEUS_STEMLIB_QUALIFICATION_PROFILE}"
         "-DMORPHEUS_PYTHON=${Python3_EXECUTABLE}"
-        "-DMORPHEUS_PERL=${PERL_EXECUTABLE}"
         -P "${PROJECT_SOURCE_DIR}/tools/build-stemlib-distribution.cmake"
       DEPENDS ${morpheus_stemlib_ending_tools} ${morpheus_stemlib_lexical_tools}
       VERBATIM
@@ -720,7 +717,7 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
   add_test(NAME stemlib_lexical_build
     COMMAND ${Python3_EXECUTABLE}
       ${PROJECT_SOURCE_DIR}/test/stemlib-lexical-build.py
-      ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} ${PERL_EXECUTABLE})
+      ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
   add_test(NAME stemlib_qualification_junit
     COMMAND ${Python3_EXECUTABLE}
       ${PROJECT_SOURCE_DIR}/test/stemlib-qualification-junit.py

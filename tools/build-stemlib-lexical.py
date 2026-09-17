@@ -11,9 +11,10 @@ import json
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import sys
+
+import stemlib_constraints
 
 
 def digest(path):
@@ -116,7 +117,7 @@ def build(args):
     role_by_input = {}
     irregular_roles = {"irregular-nominal-source", "irregular-verb-source",
                        "irregular-nominal-baseline", "irregular-verb-baseline"}
-    roles = {"nominal", "verb", "constraints", "constraint-tool", "assembly-baseline",
+    roles = {"nominal", "verb", "constraints", "constraint-reference", "assembly-baseline",
              "unavailable", "excluded", *irregular_roles}
     for row in args.manifest.read_text().splitlines():
         if not row or row.startswith("#"):
@@ -157,7 +158,7 @@ def build(args):
     work.mkdir()  # refuse reuse, including failed attempts
     (root / "steminds").mkdir()
     for role, name, expected in rows:
-        if role in {"assembly-baseline", "unavailable", "excluded",
+        if role in {"assembly-baseline", "constraint-reference", "unavailable", "excluded",
                     "irregular-nominal-baseline", "irregular-verb-baseline"}:
             continue
         target = root / name
@@ -244,11 +245,9 @@ def build(args):
     }
     if args.corrections:
         provenance["sha256"]["lexical_corrections"] = digest(args.corrections)
-    if any(role == "constraint-tool" for role, _, _ in rows):
-        perl_path = shutil.which(args.perl)
-        if perl_path is None:
-            raise ValueError("constraint interpreter unavailable: " + args.perl)
-        provenance["sha256"]["perl"] = digest(Path(perl_path))
+    if any(role == "constraints" for role, _, _ in rows):
+        provenance["sha256"]["constraint_transform"] = digest(
+            Path(stemlib_constraints.__file__))
     (work / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n")
     options = ["-L"] if language == "Latin" else []
     report = {"language": language, "producers": {}, "baselines": {}}
@@ -282,14 +281,25 @@ def build(args):
 
     nominal = [root / name for role, name, _ in rows
                if role in {"nominal", "irregular-nominal-baseline"}]
-    constraint_tools = [root / name for role, name, _ in rows if role == "constraint-tool"]
+    constraints = [root / name for role, name, _ in rows if role == "constraints"]
+    constraint_references = [name for role, name, _ in rows if role == "constraint-reference"]
     nominal_input = work / "nominal.input"
     if not irregular_ready:
         prepared = False
-    elif constraint_tools:
-        if len(constraint_tools) != 1:
-            raise ValueError("exactly one constraint tool is supported")
-        prepared = run("constraints", [args.perl, str(constraint_tools[0]), *map(str, nominal)], nominal_input)
+    elif constraints:
+        if len(constraints) != 1 or len(constraint_references) != 1:
+            raise ValueError("exactly one constraint input and reference are required")
+        nominal_input.write_bytes(
+            stemlib_constraints.apply_constraints(constraints[0], nominal))
+        (work / "constraints.log").write_text("")
+        report["producers"]["constraints"] = {
+            "exit_code": 0,
+            "implementation": "python",
+            "reference": constraint_references[0],
+        }
+        prepared = True
+    elif constraint_references:
+        raise ValueError("constraint reference has no constraint input")
     else:
         nominal_input.write_bytes(b"".join(path.read_bytes() for path in nominal))
         prepared = True
@@ -405,7 +415,6 @@ if __name__ == "__main__":
     parser.add_argument("--corrections", type=Path)
     parser.add_argument("--language", choices=["Greek", "Latin"], required=True)
     parser.add_argument("--tools", type=lambda value: Path(value).resolve(), required=True)
-    parser.add_argument("--perl", default="perl")
     args = parser.parse_args()
     try:
         raise SystemExit(build(args))

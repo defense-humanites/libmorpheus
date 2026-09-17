@@ -402,12 +402,38 @@ deterministic CI report records both digests for every path. This keeps the Alph
 visible without conflating its different source snapshot with the Perseids
 baseline used to review reconstruction changes.
 
+### Perl dependency audit
+
+The restored production graph had one active Perl invocation. The other Perl
+files and commands belong only to inherited makefiles or excluded source
+material:
+
+| Historical dependency | Restored production status |
+| --- | --- |
+| `Greek/addconstraints.pl` | Formerly executed for Greek nominal preparation; now retained only as a checksum-pinned `constraint-reference`. |
+| `Greek/getentities.pl` | Referenced by the inherited Greek and Latin makefiles; outside the selected runtime-output graph. |
+| `Greek/stemsrc/grabmorph.pl` | Explicitly classified as `excluded` in the lexical manifest. |
+| `Latin/stemsrc/latpn.pl` | Explicitly classified as `excluded` in the lexical manifest. |
+| Latin perfect-stem Perl one-liner | Already implemented as the same byte regular-expression substitution in the lexical Python recipe. |
+
+`tools/stemlib_constraints.py` reproduces the remaining active transformation
+with C-locale byte semantics. Against the complete corrected Greek nominal
+input, both implementations produce 5,244,001 bytes with SHA-256
+`6868e4da701533a9b07f45895626cc85ae578aae705986a525fddc68b1f41e94`.
+The qualification test pins this digest as well as every downstream lexical
+output. The implementation remains MPL-2.0, matching the inherited stemlib
+logic, while the AGPL orchestration imports it without changing that boundary.
+
 The reference qualification environment is now an explicit Ubuntu 24.04
 x86-64 profile rather than the moving `ubuntu-latest` alias. Configuration
-fails closed unless GCC 14, Python 3.12 and Perl 5.38 are selected. The profile
-is recorded in table provenance, lexical provenance and the aggregate receipt;
-the exact executable versions and hashes remain attached to each run. Portable
-developer builds retain a separate default profile.
+fails closed unless GCC 14 and Python 3.12 are selected. The only active Perl
+step, Greek nominal constraint expansion, has been translated into the
+MPL-licensed `tools/stemlib_constraints.py`; its 5,244,001-byte complete-corpus
+output is byte-identical to the checksum-pinned historical script. Perl is no
+longer configured, invoked or recorded in provenance. The profile is recorded
+in table provenance, lexical provenance and the aggregate receipt; the exact
+executable versions and hashes remain attached to each run. Portable developer
+builds retain a separate default profile.
 
 The reconstruction is now exposed as the opt-in
 `morpheus_stemlib_production` CMake target. It creates fresh Greek and Latin

@@ -34,7 +34,7 @@ jobs:
         run: >-
           cmake --preset dev
           -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
-          -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38
+          -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12
 
       - name: Build
         run: cmake --build --preset dev

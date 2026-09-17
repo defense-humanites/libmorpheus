@@ -9,7 +9,6 @@ import subprocess
 import sys
 
 source, binary = map(lambda p: Path(p).resolve(), sys.argv[1:3])
-perl = sys.argv[3] if len(sys.argv) > 3 else "perl"
 alpheios = source / "vendor/alpheios-morpheus/dist/stemlib/Greek"
 work = binary / "test-stemlib-lexical-build"
 if work.exists():
@@ -53,7 +52,7 @@ for language in ["Greek", "Latin"]:
             command = [sys.executable, source / "tools/build-stemlib-lexical.py",
                        "--stage", stage, "--source", source / ("stemlib" if corpus else "test/stemlib-lexical"),
                        "--manifest", source / ("tools/stemlib-lexical-manifest.tsv" if corpus else "test/stemlib-lexical/inputs.tsv"),
-                       "--language", language, "--tools", binary, "--perl", perl]
+                       "--language", language, "--tools", binary]
             if corpus:
                 command += ["--corrections", source / "tools/stemlib-lexical-corrections.tsv"]
             run(command)
@@ -64,6 +63,7 @@ for language in ["Greek", "Latin"]:
             assert comparison_receipt.exists()
             provenance = json.loads((stage / language / "lexical/provenance.json").read_text())
             assert provenance["schema"] == 2
+            assert "perl" not in provenance["sha256"]
             # Relocating a clean build must not change its provenance. Keep
             # fixtures and full corpora independently pinned.
             if pass_name == "first":
@@ -125,6 +125,17 @@ for language in ["Greek", "Latin"]:
                     assert len(new_lines - old_lines) == 14
                     assert report["baselines"]["Latin/lexical/oddkeys"]["comparison"] == "identical"
                 else:
+                    assert hashlib.sha256(
+                        (stage / "Greek/lexical/nominal.input").read_bytes()
+                    ).hexdigest() == "6868e4da701533a9b07f45895626cc85ae578aae705986a525fddc68b1f41e94"
+                    assert report["producers"]["constraints"] == {
+                        "exit_code": 0,
+                        "implementation": "python",
+                        "reference": "addconstraints.pl",
+                    }
+                    assert not (stage / "Greek/addconstraints.pl").exists()
+                    assert provenance["sha256"]["constraint_transform"] == hashlib.sha256(
+                        (source / "tools/stemlib_constraints.py").read_bytes()).hexdigest()
                     assert report["baselines"]["Greek/stemsrc/vbs.irreg"]["comparison"] == "identical"
                     old_lines = set((source / "stemlib/Greek/stemsrc/nom.irreg").read_text().splitlines())
                     new_lines = set((stage / "Greek/stemsrc/nom.irreg").read_text().splitlines())
@@ -266,7 +277,7 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_provenance_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", source / "tools/stemlib-lexical-corrections.tsv",
-     "--language", "Greek", "--tools", binary, "--perl", perl], 1)
+     "--language", "Greek", "--tools", binary], 1)
 assert not (bad_provenance_stage / "Greek/lexical").exists()
 assert not (bad_provenance_stage / "Greek/steminds").exists()
 assert not (bad_provenance_stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").exists()
@@ -285,7 +296,7 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", bad_corrections, "--language", "Greek",
-     "--tools", binary, "--perl", perl], 1)
+     "--tools", binary], 1)
 assert not list((bad_stage / "Greek/steminds").iterdir())
 assert not (bad_stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv").exists()
 assert not (bad_stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").exists()
@@ -306,7 +317,7 @@ run([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_expansion_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", bad_expansion_corrections, "--language", "Greek",
-     "--tools", binary, "--perl", perl], 1)
+     "--tools", binary], 1)
 bad_report = json.loads(
     (bad_expansion_stage / "Greek/lexical/comparison.json").read_text())
 assert not bad_report["complete"]

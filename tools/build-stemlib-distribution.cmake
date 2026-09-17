@@ -15,8 +15,7 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
                           MORPHEUS_SOURCE_REVISION MORPHEUS_C_COMPILER
                           MORPHEUS_C_COMPILER_ID MORPHEUS_C_COMPILER_VERSION
                           MORPHEUS_SYSTEM_NAME MORPHEUS_SYSTEM_PROCESSOR
-                          MORPHEUS_QUALIFICATION_PROFILE MORPHEUS_PYTHON
-                          MORPHEUS_PERL)
+                          MORPHEUS_QUALIFICATION_PROFILE MORPHEUS_PYTHON)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -66,7 +65,6 @@ execute_process(
           --corrections "${MORPHEUS_STEMLIB_LEXICAL_CORRECTIONS}"
           --language "${MORPHEUS_STEMLIB_LANGUAGE}"
           --tools "${MORPHEUS_STEMLIB_TOOLS_DIR}"
-          --perl "${MORPHEUS_PERL}"
   RESULT_VARIABLE lexical_result
   OUTPUT_VARIABLE lexical_output
   ERROR_VARIABLE lexical_error

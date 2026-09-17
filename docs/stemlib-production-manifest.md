@@ -110,15 +110,19 @@ Latin `stemsrc/vbs.mpi` as `unavailable`. The prepared `nom.irreg` and
 
 The lexical manifest has four tab-separated fields: `language`, `role`, `path`,
 and `sha256`. In addition to `nominal`, `verb`, `constraints`,
-`constraint-tool`, `assembly-baseline`, `excluded`, and `unavailable`, four
+`constraint-reference`, `assembly-baseline`, `excluded`, and `unavailable`, four
 irregular source/baseline roles identify exactly one nominal and one verbal pair
 per language. Nominal and verb rows, including each irregular baseline's
-position, define concatenation order. Greek nominal preparation uses the pinned
-`addconstraints.pl` and entity-name input. The historical Latin perfect-stem
-substitution is retained. Although `vbs.mpi` is absent, the available ordered
-inputs reproduce the same `conjfile` lemma sequence and per-lemma record
-multisets; the recipe verifies that notice-level equivalence before continuing.
-An inventory, digest, baseline or unavailable-file change fails validation.
+position, define concatenation order. Greek nominal preparation applies the
+entity-name input through the MPL-licensed Python implementation in
+`tools/stemlib_constraints.py`. The pinned `addconstraints.pl` remains a
+checksum-verified `constraint-reference`, but is not executed or copied into
+the stage. The Python output is pinned to the exact 5,244,001-byte historical
+output digest. The historical Latin perfect-stem substitution is retained.
+Although `vbs.mpi` is absent, the available ordered inputs reproduce the same
+`conjfile` lemma sequence and per-lemma record multisets; the recipe verifies
+that notice-level equivalence before continuing. An inventory, digest,
+baseline or unavailable-file change fails validation.
 
 Configure the internal tools and build both complete distributions with:
 
@@ -130,11 +134,11 @@ cmake --build --preset dev --target morpheus_stemlib_production
 The opt-in target deletes only its two prior build-tree destinations, then
 creates fresh `stemlib-production/greek` and `stemlib-production/latin` stages.
 The language-specific targets remain available independently. The orchestrator
-and lower-level recipes reject direct reuse of an existing stage. Python 3 and
-Perl are build-time dependencies only. The recipe verifies staged table inputs
-and outputs, copies and verifies selected lexical sources, fixes the locale,
-timezone and `MORPHLIB`, and invokes `indexnoms`, `do_conj`, and `indexvbs` with
-explicit paths after two `buildword` expansions.
+and lower-level recipes reject direct reuse of an existing stage. Python 3 is a
+build-time dependency; Perl is not required. The recipe verifies staged table
+inputs and outputs, copies and verifies selected lexical sources, fixes the
+locale, timezone and `MORPHLIB`, and invokes `indexnoms`, `do_conj`, and
+`indexvbs` with explicit paths after two `buildword` expansions.
 `lexical/inputs.tsv`, per-producer diagnostics
 and `lexical/comparison.json` remain available when a corpus blocks production.
 A sorted `MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv` is also written after every
@@ -181,9 +185,9 @@ recipes, the top-level distribution orchestrator, four producer executables
 and CMake executable. Invalid metadata is rejected before staging.
 
 The reference CI qualification uses the explicit
-`github-ubuntu-24.04-gcc-14-python-3.12-perl-5.38` profile. Configuration fails
-closed unless the runner is Linux x86-64 and the configured compiler and
-interpreters have those major/minor versions. Local and portability builds use
+`github-ubuntu-24.04-gcc-14-python-3.12` profile. Configuration fails closed
+unless the runner is Linux x86-64 and the configured compiler and Python
+interpreter have those major/minor versions. Local and portability builds use
 the `portable` profile by default; both profiles are recorded in table, lexical
 and aggregate production provenance.
 
@@ -191,12 +195,12 @@ The lexical recipe requires this record and writes schema 2
 `lexical/provenance.json` before invoking producers. It verifies and carries
 forward the source/toolchain identity, then identifies the lexical manifest,
 staged input and table-output receipts, table provenance, recipe, four native
-tools, Python executable/version and, when used, the Perl executable. Neither
-record contains absolute build paths or timestamps, so two clean builds with
-the same inputs and executables can compare them directly. Records survive
-corpus failures and are not success receipts. They do not identify every
-dynamic library or the complete operating-system environment used to build and
-run the executables.
+tools, Python executable/version and the Python constraint transformation when
+used. Neither record contains absolute build paths or timestamps, so two clean
+builds with the same inputs and executables can compare them directly. Records
+survive corpus failures and are not success receipts. They do not identify
+every dynamic library or the complete operating-system environment used to
+build and run the executables.
 
 The restored `do_conj` uses the historical binary derivation reader. Short mode
 expands the implicit present stem of regular derivations while preserving the

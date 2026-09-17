@@ -45,6 +45,8 @@ The following remain MPL-2.0 even where the current path was created locally:
   engine;
 - the internal generation normalizer under `src/bridge/`, which translates
   inherited generator records and preserves their historical distinctions;
+- `tools/stemlib_constraints.py`, which is a byte-compatible translation of
+  the inherited Greek nominal constraint script;
 - inherited workflow, container, README, and repository configuration files;
 - `test/fixture.json`, `test/alpheios-fixture.json`, `test/gener-fixture.tsv`,
   the generation-index and generation-source fixtures, and the pinned Alpheios
