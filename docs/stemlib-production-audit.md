@@ -9,27 +9,32 @@ repository. It covers the compiled analysis stemlibs, not the separate
 
 ## Conclusion
 
-`libmorpheus` can consume and integrity-check pinned stemlib trees, but it does
-not yet provide a supported stemlib compiler. Most historical sources and build
-drivers are present, and Alpheios demonstrates that the Greek pipeline still
-runs on Linux. Some referenced Latin inputs are absent from every known commit.
-Neither the inherited makefiles nor the Alpheios automation is a hermetic,
-fail-closed, byte-reproducible build.
+`libmorpheus` now reconstructs the selected Greek and Latin runtime stemlibs
+through an internal, opt-in CMake production graph. Its ordered manifests,
+isolated staging, fail-closed producers, receipts and two-build comparisons are
+qualified in CI. The compiler remains internal infrastructure: it is not
+installed, its output is not included in release archives, and redistribution
+of the corpus remains a separate decision.
+
+The inherited makefiles and Alpheios automation are still neither hermetic nor
+fail-closed. Some referenced Latin inputs are absent from every known commit;
+the restored graph records those gaps explicitly and accepts output only after
+the documented baseline-equivalence and correction checks.
 
 The two production baselines have different status:
 
 | Baseline | Runtime path | Production status |
 | --- | --- | --- |
-| Perseids Greek and Latin | `stemlib/` | Compiled snapshot introduced by commit `55f6ea6359a341d81fd0e6dc33f754f68119602f` in 2018 and unchanged since; no current producer runs in this repository. |
-| Alpheios Greek | `vendor/alpheios-morpheus/dist/stemlib` | Output committed by the Alpheios stemlib workflow and pinned here at `4632415fe93c85e9fdca47a0c5a13f31385f0023`; this is the Greek reference dataset. |
+| Perseids Greek and Latin | `stemlib/` | Compiled snapshot introduced by commit `55f6ea6359a341d81fd0e6dc33f754f68119602f` in 2018; now the checked-in comparison baseline for the restored production graph. |
+| Alpheios Greek | `vendor/alpheios-morpheus/dist/stemlib` | Output committed by the Alpheios stemlib workflow and pinned here at `4632415fe93c85e9fdca47a0c5a13f31385f0023`; retained as a separate Greek reference dataset. |
 
-Restoring reproducible production is therefore a distinct future task. It must
-not be treated as a side effect of building the native runtime.
+Publishing reconstructed stemlibs remains a distinct future task. It must not
+be treated as a side effect of building or releasing the native runtime.
 
 ## Data layers
 
-The historical tree mixes inputs, intermediates and runtime outputs. A future
-build must model them as separate stages:
+The historical tree mixes inputs, intermediates and runtime outputs. The
+restored build models them as separate stages:
 
 | Layer | Principal paths | Role |
 | --- | --- | --- |
@@ -64,14 +69,16 @@ The inherited chain is split across several directories:
 | Build nominal and verbal indexes | `indexnoms`, `indexvbs` | `src/gkdict/indexnoms.main.c`, `src/gkdict/indexvbs.main.c` |
 | Orchestrate one language | all of the above | `stemlib/Greek/makefile`, `stemlib/Latin/makefile` |
 
-The modern CMake build compiles the reusable libraries and runtime but exposes
-none of these eight historical producer programs as targets. A normal CMake
-build therefore cannot rebuild a stemlib. The legacy route first installs the
-programs into `bin/`, appends that directory to `PATH`, then invokes each
-language makefile twice.
+The modern CMake build exposes restored versions of these eight producers only
+when `MORPHEUS_BUILD_STEMLIB_TOOLS=ON`; they remain uninstalled internal
+targets. The `morpheus_stemlib_production` target drives them through explicit
+paths and one dependency pass. The legacy route instead installs programs into
+`bin/`, appends that directory to `PATH`, then invokes each language makefile
+twice.
 
-Alpheios is the only observed active producer. At the pinned revision its
-GitHub workflow uses Ubuntu 22.04, `build-essential`, `flex-old`, and
+Among inherited external workflows, Alpheios is the only observed active
+producer. At the pinned revision its GitHub workflow uses Ubuntu 22.04,
+`build-essential`, `flex-old`, and
 `CFLAGS='-std=gnu89 -fcommon'`; `build_stemlib.sh` invokes the Greek makefile
 twice and overlays selected output directories into `dist/stemlib/Greek`.
 

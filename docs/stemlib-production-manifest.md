@@ -176,6 +176,13 @@ the report, receipts, provenance and comparison tables as one revision-named
 artifact for 30 days. Stale evidence is rejected when its recorded revision and
 tracked dirty state do not match the source tree being qualified.
 
+CI invokes the complete production target with an empty `PATH`, while all
+qualified producers, CMake and Python are supplied by explicit absolute paths.
+The lexical CTest applies the same restriction to its fixture, complete-corpus
+and fail-closed recipe invocations. This makes the absence of a Perl or ambient
+shell-tool dependency an executed qualification property rather than a source
+inspection assumption.
+
 `MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 4 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <endtags.h>
@@ -54,7 +55,8 @@ main(void)
 
 	morpheus_runtime_context_activate(greek);
 	{
-		FILE *output = tmpfile();
+		const char *output_path = "morpheus-dictionary-context.tmp";
+		FILE *output = fopen(output_path,"w+");
 
 		assert(output);
 		assert(prntlemmentry("zzzzzzzz",NULL,output) == -1);
@@ -90,7 +92,8 @@ main(void)
 		assert(morpheus_runtime_context_error(greek) ==
 		       MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		morpheus_runtime_context_clear_error(greek);
-		fclose(output);
+		assert(fclose(output) == 0);
+		assert(remove(output_path) == 0);
 	}
 
 	morpheus_runtime_context_activate(previous);

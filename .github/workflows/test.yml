@@ -41,7 +41,8 @@ jobs:
 
       - name: Build qualified stemlib distributions
         run: |
-          cmake --build --preset dev --target morpheus_stemlib_production
+          cmake_bin="$(command -v cmake)"
+          env PATH= "$cmake_bin" --build --preset dev --target morpheus_stemlib_production
           test -f build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
           test -f build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
           cmake -E sha256sum \

@@ -173,7 +173,7 @@ int main(void)
     int created=0;
     int written;
 
-    if(!temporary_base || !*temporary_base) temporary_base="/tmp";
+    if(!temporary_base || !*temporary_base) temporary_base=".";
     for(attempt=0;attempt<100;attempt++) {
       written=snprintf(temporary,sizeof temporary,
                        "%s/morpheus-index-%ld-%u",temporary_base,

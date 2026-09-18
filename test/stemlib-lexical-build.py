@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Qualify clean fixture output, corpus blockers, and rejected tool invocations."""
+import fcntl
 import hashlib
 import json
 import os
@@ -10,10 +11,17 @@ import sys
 
 source, binary = map(lambda p: Path(p).resolve(), sys.argv[1:3])
 alpheios = source / "vendor/alpheios-morpheus/dist/stemlib/Greek"
-work = binary / "test-stemlib-lexical-build"
+published_work = binary / "test-stemlib-lexical-build"
+work = binary / (".test-stemlib-lexical-build-" + str(os.getpid()))
+workspace_lock = (binary / "test-stemlib-table-build.lock").open("a+")
+fcntl.flock(workspace_lock, fcntl.LOCK_EX)
 if work.exists():
     shutil.rmtree(work)
 work.mkdir()
+no_perl_path = work / "path-without-perl"
+no_perl_path.mkdir()
+lexical_env = dict(os.environ, PATH=str(no_perl_path))
+assert shutil.which("perl", path=lexical_env["PATH"]) is None
 expected = [row for row in (source / "test/stemlib-lexical/outputs.tsv").read_text().splitlines() if row and not row.startswith("#")]
 baseline_exceptions = {
     row.split("\t")[0]
@@ -27,6 +35,11 @@ def run(command, expected_code=0, **kwargs):
     if result.returncode != expected_code:
         raise AssertionError((command, result.returncode, result.stdout.decode(errors="replace"), result.stderr.decode(errors="replace")))
     return result
+
+
+def run_lexical(command, expected_code=0):
+    """Run the lexical recipe with no executable, including Perl, on PATH."""
+    return run(command, expected_code, env=lexical_env)
 
 
 alpheios_revision = run(
@@ -55,7 +68,7 @@ for language in ["Greek", "Latin"]:
                        "--language", language, "--tools", binary]
             if corpus:
                 command += ["--corrections", source / "tools/stemlib-lexical-corrections.tsv"]
-            run(command)
+            run_lexical(command)
             receipt = stage / "MORPHEUS-STEMLIB-LEXICAL-OUTPUTS.tsv"
             production_receipt = stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json"
             report = json.loads((stage / language / "lexical/comparison.json").read_text())
@@ -157,7 +170,7 @@ for language in ["Greek", "Latin"]:
                 corpus_comparison_receipts.append(comparison_receipt.read_bytes())
                 production_bytes = production_receipt.read_bytes()
                 corpus_production_receipts.append(production_bytes)
-                run(command, 1)  # no overlay, even after success
+                run_lexical(command, 1)  # no overlay, even after success
                 assert production_receipt.read_bytes() == production_bytes
             else:
                 rows = [row for row in receipt.read_text().splitlines() if row and not row.startswith("#")]
@@ -169,7 +182,7 @@ for language in ["Greek", "Latin"]:
                 comparison_receipts.append(comparison_receipt.read_bytes())
                 production_bytes = production_receipt.read_bytes()
                 production_receipts.append(production_bytes)
-                run(command, 1)  # no overlay, even after success
+                run_lexical(command, 1)  # no overlay, even after success
                 assert production_receipt.read_bytes() == production_bytes
             production = json.loads(production_receipt.read_text())
             assert production["schema"] == 2 and production["language"] == language
@@ -273,7 +286,7 @@ shutil.copytree(binary / "test-stemlib-table-build/Greek-first", bad_provenance_
 table_provenance = bad_provenance_stage / "MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv"
 table_provenance.write_text(
     table_provenance.read_text().replace("schema\t4\n", "schema\t1\n"))
-run([sys.executable, source / "tools/build-stemlib-lexical.py",
+run_lexical([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_provenance_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", source / "tools/stemlib-lexical-corrections.tsv",
@@ -292,7 +305,7 @@ fields = correction_lines[first_correction].split("\t")
 fields[3] = "0" * 64
 correction_lines[first_correction] = "\t".join(fields)
 bad_corrections.write_text("\n".join(correction_lines) + "\n")
-run([sys.executable, source / "tools/build-stemlib-lexical.py",
+run_lexical([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", bad_corrections, "--language", "Greek",
@@ -313,7 +326,7 @@ fields = correction_lines[bad_expansion].split("\t")
 fields[4] = json.dumps("@  fut")
 correction_lines[bad_expansion] = "\t".join(fields)
 bad_expansion_corrections.write_text("\n".join(correction_lines) + "\n")
-run([sys.executable, source / "tools/build-stemlib-lexical.py",
+run_lexical([sys.executable, source / "tools/build-stemlib-lexical.py",
      "--stage", bad_expansion_stage, "--source", source / "stemlib",
      "--manifest", source / "tools/stemlib-lexical-manifest.tsv",
      "--corrections", bad_expansion_corrections, "--language", "Greek",
@@ -394,4 +407,7 @@ assert "missing_nominal_type" in audit["failures"][0]["diagnostics"]
 original = audit_output.read_bytes()
 run(audit_command, 2)
 assert audit_output.read_bytes() == original
+if published_work.exists():
+    shutil.rmtree(published_work)
+work.rename(published_work)
 print("Greek/Latin fixture and complete-corpus receipts match independent clean builds.")

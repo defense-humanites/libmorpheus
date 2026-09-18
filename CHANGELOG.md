@@ -16,6 +16,12 @@ the corpus.
   Python implementation; the original script remains a checksum-pinned
   historical reference. The reference qualification profile now requires only
   GCC 14 and Python 3.12 in addition to its Ubuntu 24.04 x86-64 platform.
+- Stemlib lexical qualification now runs with an empty executable search path,
+  proving that no ambient Perl or shell utility is used. Two context tests use
+  build-local named streams instead of relying on a writable system temporary
+  directory, and the runtime-error fixture likewise falls back to its test
+  working directory. Table and lexical qualification serialize access to their
+  shared evidence workspace so concurrent CTest runs cannot corrupt a build.
 
 ## [0.4.0] - 2026-09-17
 

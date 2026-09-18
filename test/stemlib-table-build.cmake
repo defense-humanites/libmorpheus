@@ -18,6 +18,13 @@ foreach(required IN ITEMS MORPHEUS_STEMLIB_ROOT MORPHEUS_STEMLIB_MANIFEST
   endif()
 endforeach()
 
+file(LOCK "${MORPHEUS_WORK_DIR}.lock" GUARD PROCESS TIMEOUT 600
+     RESULT_VARIABLE workspace_lock_result)
+if(NOT workspace_lock_result EQUAL 0)
+  message(FATAL_ERROR
+          "could not lock the stemlib qualification workspace: "
+          "${workspace_lock_result}")
+endif()
 file(REMOVE_RECURSE "${MORPHEUS_WORK_DIR}")
 file(MAKE_DIRECTORY "${MORPHEUS_WORK_DIR}")
 

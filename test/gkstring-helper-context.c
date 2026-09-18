@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -528,12 +529,14 @@ main(void)
 		morpheus_runtime_context_clear_error(context);
 	}
 	{
-		FILE *temporary = tmpfile();
+		const char *temporary_path = "morpheus-gkstring-helper-context.tmp";
+		FILE *temporary = fopen(temporary_path,"w+");
 		void *allocation = malloc(1);
 
 		assert(temporary);
 		assert(allocation);
 		xFclose(temporary);
+		assert(remove(temporary_path) == 0);
 		xFclose(NULL);
 		assert(!xFree(allocation,NULL));
 		assert(xFree(NULL,NULL) == -1);
