@@ -117,7 +117,7 @@ def build(args):
     role_by_input = {}
     irregular_roles = {"irregular-nominal-source", "irregular-verb-source",
                        "irregular-nominal-baseline", "irregular-verb-baseline"}
-    roles = {"nominal", "verb", "constraints", "constraint-reference", "assembly-baseline",
+    roles = {"nominal", "verb", "runtime", "constraints", "constraint-reference", "assembly-baseline",
              "unavailable", "excluded", *irregular_roles}
     for row in args.manifest.read_text().splitlines():
         if not row or row.startswith("#"):

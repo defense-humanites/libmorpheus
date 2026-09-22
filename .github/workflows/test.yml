@@ -39,12 +39,26 @@ jobs:
       - name: Build
         run: cmake --build --preset dev
 
-      - name: Build qualified stemlib distributions
+      - name: Build qualified stemlib distributions and internal runtime artifacts
         run: |
           cmake_bin="$(command -v cmake)"
-          env PATH= "$cmake_bin" --build --preset dev --target morpheus_stemlib_production
+          env PATH= "$cmake_bin" --build --preset dev --target morpheus_stemlib_runtime_artifacts
           test -f build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
           test -f build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json
+          for language in greek latin; do
+            archive="build/dev/stemlib-runtime-artifacts/morpheus-stemlib-$language.tar.gz"
+            test -f "$archive"
+            test -f "$archive.sha256"
+            test -f "$archive.receipt.json"
+          done
+          cmake \
+            -DMORPHEUS_GREEK_ARCHIVE="$PWD/build/dev/stemlib-runtime-artifacts/morpheus-stemlib-greek.tar.gz" \
+            -DMORPHEUS_LATIN_ARCHIVE="$PWD/build/dev/stemlib-runtime-artifacts/morpheus-stemlib-latin.tar.gz" \
+            -DMORPHEUS_CRUNCHER="$PWD/build/dev/cruncher" \
+            -DMORPHEUS_FIXTURES="$PWD/test/fixture.json" \
+            -DMORPHEUS_FIXTURE_RUNNER="$PWD/test/test-fixtures.cmake" \
+            -DMORPHEUS_WORK_DIR="$PWD/build/dev/stemlib-runtime-smoke" \
+            -P test/stemlib-runtime-artifacts.cmake
           cmake -E sha256sum \
             build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
             build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json \
@@ -80,6 +94,9 @@ jobs:
             build/dev/stemlib-production/*/MORPHEUS-STEMLIB-LEXICAL-COMPARISON.tsv
             build/dev/stemlib-production/*/MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv
             build/dev/stemlib-production/*/*/lexical/provenance.json
+            build/dev/stemlib-runtime-artifacts/*.receipt.json
+            build/dev/stemlib-runtime-artifacts/*.sha256
+            build/dev/stemlib-runtime-smoke/MORPHEUS-STEMLIB-RUNTIME-SMOKE.json
             build/dev/test-stemlib-table-build/baseline-summary.tsv
             build/dev/test-stemlib-table-build/baseline-differences.tsv
             build/dev/test-stemlib-lexical-build/alpheios-reference-comparison.tsv

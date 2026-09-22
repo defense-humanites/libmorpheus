@@ -664,6 +664,36 @@ if(MORPHEUS_BUILD_STEMLIB_TOOLS)
     morpheus_stemlib_production
     DEPENDS morpheus_stemlib_production_greek morpheus_stemlib_production_latin
   )
+  set(morpheus_stemlib_runtime_artifact_dir
+      "${PROJECT_BINARY_DIR}/stemlib-runtime-artifacts")
+  function(add_stemlib_runtime_artifact_target target_name language stage_name
+           production_target)
+    set(archive
+        "${morpheus_stemlib_runtime_artifact_dir}/morpheus-stemlib-${stage_name}.tar.gz")
+    add_custom_target(
+      ${target_name}
+      COMMAND "${CMAKE_COMMAND}" -E rm -f "${archive}" "${archive}.sha256"
+              "${archive}.receipt.json"
+      COMMAND "${Python3_EXECUTABLE}"
+              "${PROJECT_SOURCE_DIR}/tools/package-stemlib-runtime.py"
+              --stage "${PROJECT_BINARY_DIR}/stemlib-production/${stage_name}"
+              --language "${language}"
+              --output "${archive}"
+      DEPENDS ${production_target}
+      VERBATIM
+    )
+  endfunction()
+  add_stemlib_runtime_artifact_target(
+    morpheus_stemlib_runtime_artifact_greek Greek greek
+    morpheus_stemlib_production_greek)
+  add_stemlib_runtime_artifact_target(
+    morpheus_stemlib_runtime_artifact_latin Latin latin
+    morpheus_stemlib_production_latin)
+  add_custom_target(
+    morpheus_stemlib_runtime_artifacts
+    DEPENDS morpheus_stemlib_runtime_artifact_greek
+            morpheus_stemlib_runtime_artifact_latin
+  )
 endif()
 
 if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
@@ -723,6 +753,11 @@ if(BUILD_TESTING AND MORPHEUS_BUILD_STEMLIB_TOOLS)
       ${PROJECT_SOURCE_DIR}/test/stemlib-qualification-junit.py
       ${PROJECT_SOURCE_DIR}
       ${PROJECT_BINARY_DIR}/test-stemlib-qualification-junit)
+  add_test(NAME stemlib_runtime_artifact
+    COMMAND ${Python3_EXECUTABLE}
+      ${PROJECT_SOURCE_DIR}/test/stemlib-runtime-artifact.py
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_BINARY_DIR}/test-stemlib-runtime-artifact)
   set_tests_properties(stemlib_table_build PROPERTIES FIXTURES_SETUP stemlib_tables)
   set_tests_properties(stemlib_lexical_build PROPERTIES
     FIXTURES_REQUIRED stemlib_tables TIMEOUT 120)

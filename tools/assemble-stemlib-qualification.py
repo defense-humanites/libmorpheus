@@ -24,6 +24,7 @@ REQUIRED_RUNTIME_TESTS = frozenset({
     "public_request_options",
     "public_result",
     "stemlib_qualification_junit",
+    "stemlib_runtime_artifact",
 })
 
 
@@ -94,6 +95,7 @@ def build(source, build_root, ctest_junit, output):
     table_root = build_root / "test-stemlib-table-build"
     lexical_root = build_root / "test-stemlib-lexical-build"
     production_root = build_root / "stemlib-production"
+    artifact_root = build_root / "stemlib-runtime-artifacts"
 
     runtime_ctest = ctest_result(ctest_junit)
 
@@ -215,6 +217,44 @@ def build(source, build_root, ctest_junit, output):
             "text_or_index_baseline_differences": 0,
         }
 
+    smoke = json.loads((build_root / "stemlib-runtime-smoke" /
+                        "MORPHEUS-STEMLIB-RUNTIME-SMOKE.json").read_text())
+    require(smoke == {"fixtures": 94, "languages": ["Greek", "Latin"],
+                      "schema": 1, "status": "passed"},
+            "runtime artifact smoke receipt is invalid")
+    runtime_artifacts = {}
+    for language in ["Greek", "Latin"]:
+        stem = f"morpheus-stemlib-{language.lower()}.tar.gz"
+        archive = artifact_root / stem
+        runtime_receipt_path = Path(str(archive) + ".receipt.json")
+        sidecar = Path(str(archive) + ".sha256")
+        runtime_receipt = json.loads(runtime_receipt_path.read_text())
+        payload = runtime_receipt.get("payload", [])
+        payload_paths = [item.get("path") for item in payload]
+        require(runtime_receipt.get("schema") == 1 and
+                runtime_receipt.get("artifact") == "internal-runtime-qualification" and
+                runtime_receipt.get("language") == language and
+                runtime_receipt.get("redistribution") == "not-qualified" and
+                payload_paths == sorted(payload_paths) and
+                len(payload_paths) == len(set(payload_paths)),
+                language + " runtime artifact receipt is invalid")
+        require(f"{language}/stemsrc/vbs.cmp.ml" in payload_paths and
+                (language != "Greek" or
+                 "Greek/stemsrc/lemlist" in payload_paths),
+                language + " runtime artifact lacks lazy runtime inputs")
+        require(runtime_receipt.get("production_receipt_sha256") ==
+                languages[language]["production_receipt_sha256"],
+                language + " runtime artifact has stale production provenance")
+        archive_hash = digest(archive)
+        require(sidecar.read_text() == f"{archive_hash}  {stem}\n",
+                language + " runtime artifact checksum is invalid")
+        runtime_artifacts[language] = {
+            "archive_sha256": archive_hash,
+            "payload_files": len(payload),
+            "receipt_sha256": digest(runtime_receipt_path),
+            "redistribution": "not-qualified",
+        }
+
     report = {
         "schema": 1,
         "status": "qualified",
@@ -224,8 +264,10 @@ def build(source, build_root, ctest_junit, output):
         "checks": {
             "independent_ctest_builds_identical": True,
             "production_target_matches_ctest": True,
+            "runtime_artifact_fixtures_passed": True,
         },
         "languages": languages,
+        "runtime_artifacts": runtime_artifacts,
         "runtime_ctest": runtime_ctest,
         "references": {
             "alpheios": {

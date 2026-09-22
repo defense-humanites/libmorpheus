@@ -261,6 +261,20 @@ not installed, its outputs are not included in native or binding packages, and
 successful reconstruction does not grant permission to redistribute the
 linguistic datasets.
 
+For deployment-shape qualification, a second opt-in target filters each fresh
+stage down to the files read by the runtime and writes deterministic archives,
+SHA-256 sidecars, and schema-1 runtime receipts:
+
+```sh
+cmake --build --preset dev --target morpheus_stemlib_runtime_artifacts
+```
+
+The results are written below `build/dev/stemlib-runtime-artifacts/`. They are
+internal test artifacts: CI exercises the complete Greek and Latin fixture
+suite after extraction but retains only their receipts and checksums, not the
+archives. The target does not make the datasets release assets or establish a
+redistribution right.
+
 ## Alpine container images
 
 We provide two Alpine container images to facilitate the use of the library.

@@ -183,6 +183,30 @@ and fail-closed recipe invocations. This makes the absence of a Perl or ambient
 shell-tool dependency an executed qualification property rather than a source
 inspection assumption.
 
+## Internal runtime artifacts
+
+`morpheus_stemlib_runtime_artifacts` depends on fresh Greek and Latin
+production stages and creates one deterministic gzip-compressed tar archive per
+language. The packager verifies every selected byte against the schema-2
+production receipt. It retains the generated binary tables and indexes,
+derivation ASCII tables needed by generation, rule inputs, rebuilt irregular
+stems, and the lazily loaded `vbs.cmp.ml` and Greek `lemlist` runtime inputs. It
+does not retain table sources, editable ending ASCII, logs, or lexical assembly
+intermediates.
+
+Each archive contains the exact production receipt and a schema-1 runtime
+receipt. The latter records the production-receipt digest and every payload
+path, role and digest, and marks redistribution as `not-qualified`. Header
+timestamps, owners and modes are normalized; an external receipt and SHA-256
+sidecar accompany each archive. The packager rejects unsafe paths, changed or
+non-regular members, missing runtime requirements and existing destinations.
+
+CI builds the target with an empty `PATH`, extracts both archives, and runs all
+Greek and Latin legacy fixtures against the combined runtime roots. It retains
+the small receipts and checksum sidecars as qualification evidence, but does
+not upload the linguistic archives. Publishing them remains blocked on a
+separate provenance and redistribution decision.
+
 `MORPHEUS-STEMLIB-TABLE-PROVENANCE.tsv` schema 4 records the configured Git
 revision (or `unavailable` outside a Git checkout), marks tracked modifications
 with `+dirty`, and identifies the compiler by name, CMake ID, version and
