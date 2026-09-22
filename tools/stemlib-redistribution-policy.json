@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "state": "review-required",
+  "decision_record": null,
+  "datasets": [
+    {
+      "id": "perseids-tools",
+      "local_root": "stemlib",
+      "source_repository": "https://github.com/perseids-tools/morpheus.git",
+      "source_revision": "ab6898ffed335fc6169fa02c9940657a9b5a78e0",
+      "selected_tree": "5dcaeb87f8d65f6ee0cde88abfc860b82faab046",
+      "redistribution": "not-qualified",
+      "license_evidence": [
+        {
+          "path": "LICENSE",
+          "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+        }
+      ]
+    },
+    {
+      "id": "alpheios-project",
+      "local_root": "vendor/alpheios-morpheus/dist/stemlib",
+      "source_repository": "https://github.com/alpheios-project/morpheus.git",
+      "source_revision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+      "selected_tree": "ccbe43e3f99b827bf8ea1fe9eec102edd49d6c93",
+      "redistribution": "not-qualified",
+      "license_evidence": [
+        {
+          "path": "vendor/alpheios-morpheus/LICENSE",
+          "sha256": "f27c9386a3a6dcad6e733e951aadb7dd548fcdde7518de82f60ac6ed5da67951"
+        },
+        {
+          "path": "vendor/alpheios-morpheus/dist/bin/platform/license.txt",
+          "sha256": "d6dcf861309295fb330ee776475df55fc33dd5b370974e6837e9386da47edd71"
+        }
+      ]
+    }
+  ],
+  "publication": {
+    "github_release_assets": false,
+    "native_packages": false,
+    "binding_packages": false,
+    "container_images": false,
+    "ci_payload_artifacts": false
+  },
+  "permitted_operations": {
+    "local_reconstruction": true,
+    "local_runtime_packaging": true,
+    "direct_acquisition_from_upstream": true,
+    "receipt_and_checksum_publication": true
+  }
+}

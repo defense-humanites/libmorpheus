@@ -211,6 +211,17 @@ if(node_package_spdx_at EQUAL -1)
           "AGPL SPDX sidecar missing for bindings/js/node/package.json")
 endif()
 
+file(READ
+     "${MORPHEUS_SOURCE_DIR}/tools/stemlib-redistribution-policy.json.license"
+     stemlib_policy_license)
+string(FIND "${stemlib_policy_license}"
+       "SPDX-License-Identifier: AGPL-3.0-or-later"
+       stemlib_policy_spdx_at)
+if(stemlib_policy_spdx_at EQUAL -1)
+  message(FATAL_ERROR
+          "AGPL SPDX sidecar missing for stemlib redistribution policy")
+endif()
+
 foreach(platform IN ITEMS
     darwin-arm64 linux-arm64-gnu linux-x64-gnu)
   file(READ

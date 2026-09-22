@@ -50,6 +50,13 @@ if(BUILD_TESTING)
       -P "${PROJECT_SOURCE_DIR}/test/license-boundary.cmake"
   )
   add_test(
+    NAME stemlib_redistribution_policy
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+      -P "${PROJECT_SOURCE_DIR}/test/stemlib-redistribution-policy.cmake"
+  )
+  add_test(
     NAME jsr_package_metadata
     COMMAND
       "${CMAKE_COMMAND}"

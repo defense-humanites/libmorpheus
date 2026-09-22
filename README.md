@@ -273,7 +273,10 @@ The results are written below `build/dev/stemlib-runtime-artifacts/`. They are
 internal test artifacts: CI exercises the complete Greek and Latin fixture
 suite after extraction but retains only their receipts and checksums, not the
 archives. The target does not make the datasets release assets or establish a
-redistribution right.
+redistribution right. The
+[redistribution gate](docs/stemlib-redistribution.md) records the exact data
+trees and licensing evidence and keeps every payload publication channel
+closed pending an explicit review.
 
 ## Alpine container images
 

@@ -121,5 +121,10 @@ package, or downloadable release assets. Review the
 prepared directory. The local preparation workflow does not change the MPL/AGPL
 code boundary described in the [licensing guide](licensing.md).
 
+The machine-checked [stemlib redistribution gate](stemlib-redistribution.md)
+records the exact datasets and notices used by this project. Its current
+`review-required` state prevents these internal archives from becoming release,
+package, container, or retained CI payloads without a separate decision.
+
 See the [stem-library inventory](stem-libraries.md) for upstream repositories
 and the language coverage of the three principal datasets.
