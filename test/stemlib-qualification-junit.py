@@ -58,6 +58,18 @@ missing_path = work / "missing.xml"
 write_suite(missing_path, required[:-1])
 rejects(missing_path, "required runtime qualification tests are missing")
 
+for name in (
+    "stemlib_ending_tools_fail_closed",
+    "stemlib_lexical_build",
+    "stemlib_lexical_tools_fail_closed",
+    "stemlib_source_manifest",
+    "stemlib_source_staging",
+    "stemlib_table_build",
+):
+    write_suite(missing_path, [required_name for required_name in required
+                               if required_name != name])
+    rejects(missing_path, "required runtime qualification tests are missing")
+
 duplicate_path = work / "duplicate.xml"
 write_suite(duplicate_path, required + [required[0]])
 rejects(duplicate_path, "invalid or duplicate CTest case")

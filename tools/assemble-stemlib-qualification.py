@@ -24,8 +24,14 @@ REQUIRED_RUNTIME_TESTS = frozenset({
     "public_request_options",
     "public_result",
     "stemlib_binary_equivalence",
+    "stemlib_ending_tools_fail_closed",
+    "stemlib_lexical_build",
+    "stemlib_lexical_tools_fail_closed",
     "stemlib_qualification_junit",
     "stemlib_runtime_artifact",
+    "stemlib_source_manifest",
+    "stemlib_source_staging",
+    "stemlib_table_build",
 })
 
 

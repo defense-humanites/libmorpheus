@@ -179,9 +179,11 @@ validates and emits `stemlib-qualification.json`. This schema 1 report binds the
 common source revision, qualification profile and execution model to both
 language receipts and to CTest's JUnit result. It requires the public API,
 null-handling, analysis, dialect, fixture and generation cases named by the
-restoration acceptance criteria, rejects any failed, skipped or disabled test,
-and records the complete executed test count without copying nondeterministic
-JUnit timings into the report. It also records table and lexical output counts,
+restoration acceptance criteria, plus the source manifest, staging, table and
+lexical construction and both fail-closed tool checks. It rejects any failed,
+skipped or disabled test and records the complete executed test count without
+copying nondeterministic JUnit timings into the report. It also records table
+and lexical output counts,
 the 228 semantically identical binary files, the single reviewed semantic
 exception, the Perseids difference-manifest hashes and the complete pinned
 Alpheios comparison summary. It is written only when the independent CTest receipts
