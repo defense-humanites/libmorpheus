@@ -143,6 +143,13 @@ static int load_semantic_exceptions(const char *path)
 		if(!parse_unsigned(fields[3],&exception->baseline_value) ||
 		   !parse_unsigned(fields[4],&exception->generated_value) ||
 		   strcmp(fields[5],"duplicate-registry-value") != 0) goto invalid;
+		/* Only this reviewed historical registry choice may diverge. */
+		if(strcmp(exception->path,"Latin/endtables/out/er_eris.out") != 0 ||
+		   exception->first_record != 0U ||
+		   exception->last_record != 11U ||
+		   exception->field != FIELD_STEM_TYPE ||
+		   exception->baseline_value != 4377U ||
+		   exception->generated_value != 4388U) goto invalid;
 		semantic_exception_count++;
 	}
 	input_failed = ferror(input);

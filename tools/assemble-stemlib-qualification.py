@@ -143,7 +143,10 @@ def build(source, build_root, ctest_junit, output):
     semantic_exception_path = (
         source / "test/stemlib-binary-semantic-exceptions.tsv")
     semantic_exceptions = rows(semantic_exception_path)
-    require(len(semantic_exceptions) == 1 and
+    require(semantic_exceptions == [[
+                "Latin/endtables/out/er_eris.out", "0-11", "stem-type",
+                "4377", "4388", "duplicate-registry-value",
+            ]] and
             [row[0] for row in semantic_exceptions] == [
                 row[0] for row in semantic_rows
                 if row[4] == "reviewed-semantic-exception"

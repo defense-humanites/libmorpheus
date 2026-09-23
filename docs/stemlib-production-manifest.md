@@ -109,7 +109,9 @@ name and class; their exact range and values are pinned in
 `test/stemlib-binary-semantic-exceptions.tsv`. Every other field, including
 ending text, grammatical form, dialect, region, morphology flags and domains,
 must match. CI retains `binary-semantic-comparison.tsv` and rejects any unlisted
-semantic difference.
+semantic difference. The comparator and qualification assembler both require
+the exact `er_eris.out` path, record range, field and numeric values; changing
+the exception manifest alone cannot authorize a different discrepancy.
 
 ## Lexical production and qualification
 
