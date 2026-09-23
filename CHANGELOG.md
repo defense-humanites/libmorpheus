@@ -17,7 +17,8 @@ the corpus.
   definition, removing the six `illw.out` differences. Of the 229 files, 228
   are semantically identical; the twelve historical `er_eris.out` numeric-ID
   differences remain pinned separately. Any other decoded difference fails
-  qualification.
+  qualification. The checked-in Deno and Node WebAssembly preparers are
+  regenerated from the same deterministic lookup implementation.
 - Stemlib production no longer requires Perl. The sole active Perl transform,
   Greek nominal entity constraints, now has a byte-identical MPL-licensed
   Python implementation; the original script remains a checksum-pinned
