@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 import hashlib
+import importlib.util
+import io
 import json
 from pathlib import Path
 import subprocess
@@ -104,6 +106,44 @@ with tarfile.open(first, "r:gz") as archive:
     assert "morpheus-stemlib-greek/Greek/steminds/nomind" in names
     assert all(member.mtime == 0 and member.uid == 0 and member.gid == 0
                for member in archive.getmembers())
+
+# Independently check the assembled qualification's archive-to-receipt gate.
+spec = importlib.util.spec_from_file_location(
+    "stemlib_qualification", source / "tools/assemble-stemlib-qualification.py")
+qualification = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(qualification)
+production_bytes = (stage / "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json").read_bytes()
+receipt_bytes = Path(str(first) + ".receipt.json").read_bytes()
+assert first_receipt["payload"] == qualification.runtime_payload(
+    json.loads(production_bytes), "Greek")
+qualification.verify_runtime_archive(
+    first, "Greek", receipt_bytes, production_bytes, first_receipt["payload"])
+
+corrupted = work / "corrupted.tar.gz"
+target_member = "morpheus-stemlib-greek/Greek/endtables/out/noun.out"
+with tarfile.open(first, "r:gz") as original, tarfile.open(corrupted, "w:gz") as changed:
+    for member in original.getmembers():
+        data = original.extractfile(member).read()
+        if member.name == target_member:
+            data = b"corrupted\n"
+            member.size = len(data)
+        changed.addfile(member, io.BytesIO(data))
+try:
+    qualification.verify_runtime_archive(
+        corrupted, "Greek", receipt_bytes, production_bytes, first_receipt["payload"])
+except ValueError as error:
+    assert str(error) == "Greek runtime archive payload digest differs"
+else:
+    raise AssertionError("a changed archive payload was accepted")
+
+try:
+    qualification.verify_runtime_archive(
+        first, "Greek", receipt_bytes + b" ", production_bytes,
+        first_receipt["payload"])
+except ValueError as error:
+    assert str(error) == "Greek embedded runtime receipt differs"
+else:
+    raise AssertionError("a changed external runtime receipt was accepted")
 
 # Existing destinations and modified inputs must fail without replacement.
 before = first.read_bytes()

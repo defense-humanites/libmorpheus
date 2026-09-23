@@ -5,8 +5,9 @@ import argparse
 from collections import Counter
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import subprocess
+import tarfile
 import xml.etree.ElementTree as ET
 
 
@@ -57,6 +58,70 @@ def comparison_counts(path):
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def runtime_payload(production, language):
+    selected = {}
+
+    def add(path, sha256, source):
+        relative = PurePosixPath(path)
+        require(path == str(relative) and not relative.is_absolute() and
+                ".." not in relative.parts and
+                path.startswith(language + "/") and
+                len(sha256) == 64 and
+                all(character in "0123456789abcdef" for character in sha256) and
+                path not in selected,
+                language + " production receipt has an invalid runtime member")
+        selected[path] = {"path": path, "sha256": sha256, "source": source}
+
+    for item in production["inputs"]["table"]:
+        if item["kind"] == "rule":
+            add(language + "/" + item["path"], item["sha256"], "rule-input")
+    for item in production["inputs"]["lexical"]:
+        if item["role"] == "runtime":
+            add(language + "/" + item["path"], item["sha256"], "runtime-input")
+    for group in ("table", "lexical"):
+        for item in production["outputs"][group]:
+            path = item["path"]
+            require(path.startswith(language + "/"),
+                    language + " production output is outside its language")
+            relative = path[len(language) + 1:]
+            if (relative.startswith(("endtables/out/", "endtables/indices/",
+                                    "derivs/out/", "derivs/indices/",
+                                    "derivs/ascii/", "steminds/")) or
+                    relative in ("stemsrc/nom.irreg", "stemsrc/vbs.irreg")):
+                add(path, item["sha256"], group + "-output")
+    return [selected[path] for path in sorted(selected)]
+
+
+def verify_runtime_archive(archive_path, language, runtime_bytes,
+                           production_bytes, payload):
+    root = "morpheus-stemlib-" + language.lower() + "/"
+    metadata = {
+        root + "MORPHEUS-STEMLIB-RUNTIME-RECEIPT.json": runtime_bytes,
+        root + "MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json": production_bytes,
+    }
+    expected = sorted(metadata.keys() | {root + item["path"] for item in payload})
+    hashes = {root + item["path"]: item["sha256"] for item in payload}
+    with tarfile.open(archive_path, "r:gz") as archive:
+        members = archive.getmembers()
+        require([member.name for member in members] == expected,
+                language + " runtime archive member list differs from its receipt")
+        for member in members:
+            require(member.isfile() and member.mode == 0o644 and
+                    member.mtime == 0 and member.uid == 0 and member.gid == 0 and
+                    member.uname == "" and member.gname == "",
+                    language + " runtime archive has an invalid member header")
+            extracted = archive.extractfile(member)
+            require(extracted is not None,
+                    language + " runtime archive member is unreadable")
+            data = extracted.read()
+            if member.name in metadata:
+                require(data == metadata[member.name],
+                        language + " embedded runtime receipt differs")
+            else:
+                require(hashlib.sha256(data).hexdigest() == hashes[member.name],
+                        language + " runtime archive payload digest differs")
 
 
 def current_revision(source):
@@ -192,6 +257,7 @@ def build(source, build_root, ctest_junit, output):
     }, "unexpected production target receipt hash")
 
     languages = {}
+    production_receipts = {}
     common_revision = None
     common_profile = None
     common_model = None
@@ -210,6 +276,7 @@ def build(source, build_root, ctest_junit, output):
         require(receipts[0].read_bytes() == receipts[2].read_bytes(),
                 language + " target receipt differs from CTest qualification")
         receipt = json.loads(receipts[0].read_text())
+        production_receipts[language] = receipts[2].read_bytes()
         require(receipt.get("schema") == 2 and receipt.get("language") == language,
                 language + " production receipt is invalid")
         require(len(receipt["outputs"]["table"]) == int(expected_summary[language][0]),
@@ -261,12 +328,15 @@ def build(source, build_root, ctest_junit, output):
         archive = artifact_root / stem
         runtime_receipt_path = Path(str(archive) + ".receipt.json")
         sidecar = Path(str(archive) + ".sha256")
-        runtime_receipt = json.loads(runtime_receipt_path.read_text())
+        runtime_bytes = runtime_receipt_path.read_bytes()
+        runtime_receipt = json.loads(runtime_bytes)
         payload = runtime_receipt.get("payload", [])
         payload_paths = [item.get("path") for item in payload]
         require(runtime_receipt.get("schema") == 1 and
                 runtime_receipt.get("artifact") == "internal-runtime-qualification" and
                 runtime_receipt.get("language") == language and
+                runtime_receipt.get("runtime_root") ==
+                f"morpheus-stemlib-{language.lower()}" and
                 runtime_receipt.get("redistribution") == "not-qualified" and
                 payload_paths == sorted(payload_paths) and
                 len(payload_paths) == len(set(payload_paths)),
@@ -278,9 +348,15 @@ def build(source, build_root, ctest_junit, output):
         require(runtime_receipt.get("production_receipt_sha256") ==
                 languages[language]["production_receipt_sha256"],
                 language + " runtime artifact has stale production provenance")
+        expected_payload = runtime_payload(
+            json.loads(production_receipts[language]), language)
+        require(payload == expected_payload,
+                language + " runtime payload differs from production receipt")
         archive_hash = digest(archive)
         require(sidecar.read_text() == f"{archive_hash}  {stem}\n",
                 language + " runtime artifact checksum is invalid")
+        verify_runtime_archive(archive, language, runtime_bytes,
+                               production_receipts[language], payload)
         runtime_artifacts[language] = {
             "archive_sha256": archive_hash,
             "payload_files": len(payload),
@@ -297,6 +373,7 @@ def build(source, build_root, ctest_junit, output):
         "checks": {
             "independent_ctest_builds_identical": True,
             "production_target_matches_ctest": True,
+            "runtime_archive_contents_verified": True,
             "runtime_artifact_fixtures_passed": True,
         },
         "languages": languages,
@@ -343,7 +420,8 @@ if __name__ == "__main__":
     try:
         build(arguments.source, arguments.build, arguments.ctest_junit,
               arguments.output)
-    except (IndexError, KeyError, OSError, ValueError, ET.ParseError,
+    except (IndexError, KeyError, OSError, ValueError, TypeError, EOFError,
+            tarfile.TarError, ET.ParseError,
             json.JSONDecodeError,
             subprocess.CalledProcessError) as error:
         parser.exit(1, f"stemlib qualification: {error}\n")

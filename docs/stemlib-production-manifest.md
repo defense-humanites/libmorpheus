@@ -217,6 +217,10 @@ path, role and digest, and marks redistribution as `not-qualified`. Header
 timestamps, owners and modes are normalized; an external receipt and SHA-256
 sidecar accompany each archive. The packager rejects unsafe paths, changed or
 non-regular members, missing runtime requirements and existing destinations.
+The qualification assembler independently compares the selected payload to the
+production receipt, checks the external receipts against the embedded bytes,
+and verifies every archive member, digest and normalized header before issuing
+its aggregate report.
 
 CI builds the target with an empty `PATH`, extracts both archives, and runs all
 Greek and Latin legacy fixtures against the combined runtime roots. It retains
