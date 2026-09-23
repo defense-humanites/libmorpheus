@@ -147,7 +147,7 @@ static int load_semantic_exceptions(const char *path)
 	}
 	input_failed = ferror(input);
 	if(fclose(input) != 0) input_failed = 1;
-	if(input_failed || semantic_exception_count != 2)
+	if(input_failed || semantic_exception_count != 1)
 		return(0);
 	return(1);
 

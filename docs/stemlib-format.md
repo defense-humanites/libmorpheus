@@ -56,7 +56,9 @@ Apple Silicon CI targets.
 The complete production qualification additionally decodes all 229 regenerated
 `.out` files whose bytes differ from the checked-in Perseids snapshots. It
 compares every semantic field of every record and emits a deterministic report.
-There are 227 semantically identical files; the remaining `illw.out` and
-`er_eris.out` differences select alternate numeric values from duplicate rule
-registry names. Their exact 18 record-level differences are separately pinned,
-and any other semantic change fails qualification.
+There are 228 semantically identical files. Morphology keys with duplicate rule
+registry names resolve deterministically to the last registered definition,
+which matches the checked-in `illw.out` value. The remaining twelve
+`er_eris.out` records use the same duplicated symbolic name and class but a
+different numeric ID; this single historical exception is pinned separately.
+Any other semantic change fails qualification.

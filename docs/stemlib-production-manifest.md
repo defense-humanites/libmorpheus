@@ -100,15 +100,16 @@ zero textual or index differences. Their complete sorted path set is pinned in
 duplicated, reordered, malformed, or reclassified exception.
 
 Every one of those 229 binary differences is also decoded through the runtime
-reader and compared record by record. Of these, 227 have identical decoded
-content. Two tables retain reviewed duplicate-registry choices: all six
-`illw.out` records select derivation value `037` rather than the baseline's
-`041`, and all twelve `er_eris.out` records select stem value `044` rather than
-the baseline's `031`. Their exact record ranges and values are pinned in
+reader and compared record by record. Equal morphology registry names are
+ordered by definition order and resolve to the last definition deterministically
+across C libraries. This makes `illw.out` match the historical table and leaves
+228 files with identical decoded content. The remaining twelve `er_eris.out`
+records differ only in the numeric ID attached to the same duplicated symbolic
+name and class; their exact range and values are pinned in
 `test/stemlib-binary-semantic-exceptions.tsv`. Every other field, including
 ending text, grammatical form, dialect, region, morphology flags and domains,
-must match. CI retains the deterministic `binary-semantic-comparison.tsv` and
-rejects any unlisted semantic difference.
+must match. CI retains `binary-semantic-comparison.tsv` and rejects any unlisted
+semantic difference.
 
 ## Lexical production and qualification
 
@@ -179,8 +180,9 @@ null-handling, analysis, dialect, fixture and generation cases named by the
 restoration acceptance criteria, rejects any failed, skipped or disabled test,
 and records the complete executed test count without copying nondeterministic
 JUnit timings into the report. It also records table and lexical output counts,
-reviewed Perseids difference-manifest hashes and the complete pinned Alpheios
-comparison summary. It is written only when the independent CTest receipts
+the 228 semantically identical binary files, the single reviewed semantic
+exception, the Perseids difference-manifest hashes and the complete pinned
+Alpheios comparison summary. It is written only when the independent CTest receipts
 match each other, both match the production target, and all comparison counts and
 exception sets retain their reviewed values. CI preserves
 the report, receipts, provenance and comparison tables as one revision-named

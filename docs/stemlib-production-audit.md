@@ -372,13 +372,13 @@ The complete sorted path set is pinned in
 reviewed exception set.
 
 Qualification now decodes every record in those 229 pairs through the runtime
-reader. It establishes that 227 files are semantically identical despite their
-different serialization widths. The remaining two files contain exactly 18
-reviewed field differences: six `illw.out` derivation values and twelve
-`er_eris.out` stem values select alternate entries with duplicate registry
-names. Their record ranges and numeric values are pinned in
-`test/stemlib-binary-semantic-exceptions.tsv`; any other decoded difference is
-fatal and the complete comparison report is retained as CI evidence.
+reader. Morphology key lookup now orders equal names by registry definition
+order and selects the last definition, rather than inheriting an unspecified
+`qsort` choice. This matches the historical `illw.out` value and leaves 228
+files semantically identical. The twelve `er_eris.out` records retain one
+explicit historical numeric-ID exception: both IDs map to the same duplicated
+symbolic name and class. Its exact range and values remain pinned; any other
+decoded difference is fatal and the complete report is retained as CI evidence.
 
 The subsequent lexical tranche restores `do_conj` as an internal MPL C17 target
 and connects all three lexical producers to a separate ordered source manifest
@@ -460,7 +460,8 @@ hashed in table provenance; CI invokes the target directly.
 CI finally assembles a deterministic machine-readable qualification report
 that cross-checks the two independent CTest builds against the public CMake
 target, the 229 reviewed Perseids binary exceptions, the twelve reviewed
-lexical differences, and all 146 selected Alpheios comparison paths. The report
+lexical differences, the decoded 228-to-one semantic split, and all 146 selected
+Alpheios comparison paths. The report
 and its supporting receipts, provenance and comparison tables are retained
 together as a revision-named CI artifact. Its final gate also parses the full
 CTest JUnit result and requires the named public API, null-handling,

@@ -48,6 +48,15 @@ int main(void)
 	assert(is_prvb_morphflag(DISSIMILATION));
 	assert(is_rawpreverb("trans"));
 	assert(GetStemNum("a_ae"));
+	assert(!strcmp(NameOfStemtype((Stemtype)(031|NOUNSTEM|DECL3)),
+	               "er_eris"));
+	assert(!strcmp(NameOfStemtype((Stemtype)(044|NOUNSTEM|DECL3)),
+	               "er_eris"));
+	assert(GetStemNum("er_eris") == (Stemtype)(044|NOUNSTEM|DECL3));
+	assert(GetStemNum("demonstr") ==
+	       (Stemtype)(06|INDECL|NOUNSTEM|DECL1));
+	assert(GetStemNum("interrog") ==
+	       (Stemtype)(016|INDECL|NOUNSTEM|DECL3));
 	set_roman();
 	beta2smarta("a",converted);
 	assert(!strcmp(converted,"A"));
@@ -56,6 +65,11 @@ int main(void)
 	set_lang(GREEK);
 	assert(is_rawpreverb("upo"));
 	assert(GetStemNum("os_ou"));
+	assert(!strcmp(NameOfDerivtype((Derivtype)(037|VERBSTEM|REG_CONJ)),
+	               "illw"));
+	assert(!strcmp(NameOfDerivtype((Derivtype)(041|VERBSTEM|REG_CONJ)),
+	               "illw"));
+	assert(GetStemNum("illw") == (Stemtype)(041|VERBSTEM|REG_CONJ));
 	set_lang(ITALIAN);
 	assert(morpheus_runtime_context_language(latin) == ITALIAN);
 

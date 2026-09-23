@@ -12,10 +12,12 @@ the corpus.
 ### Changed
 
 - All 229 reviewed binary stem-table differences are now decoded and compared
-  record by record with their checked-in Perseids baselines. Of these, 227 are
-  semantically identical; the 18 records in `illw.out` and `er_eris.out` that
-  select alternate values from duplicate registries are pinned separately.
-  Any other decoded difference fails qualification.
+  record by record with their checked-in Perseids baselines. Duplicate
+  morphology registry names now resolve deterministically to their last
+  definition, removing the six `illw.out` differences. Of the 229 files, 228
+  are semantically identical; the twelve historical `er_eris.out` numeric-ID
+  differences remain pinned separately. Any other decoded difference fails
+  qualification.
 - Stemlib production no longer requires Perl. The sole active Perl transform,
   Greek nominal entity constraints, now has a byte-identical MPL-licensed
   Python implementation; the original script remains a checksum-pinned

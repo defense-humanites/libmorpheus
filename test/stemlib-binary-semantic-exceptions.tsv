@@ -1,4 +1,3 @@
 # SPDX-License-Identifier: MPL-2.0
 # path	records	field	baseline_value	generated_value	reason
-Greek/derivs/out/illw.out	0-5	derivation-type	786465	786463	duplicate-registry-value
 Latin/endtables/out/er_eris.out	0-11	stem-type	4377	4388	duplicate-registry-value

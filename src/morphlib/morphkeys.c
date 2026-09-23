@@ -33,6 +33,7 @@ static int GetGkFlag(char *, gk_string *, char *, char *, char *);
 static char *p_eq_morph_keys(long, const Morph_args *);
 static void clear_morph_key_state(morpheus_runtime_context *);
 static int next_table_field(const char **, char *, size_t);
+static size_t morph_key_definition_order(const Morph_args *);
 #define KEY_CONTEXT (morpheus_runtime_context_current())
 #define keys_inited (KEY_CONTEXT->morph_keys_initialized && \
 	KEY_CONTEXT->morph_key_language == cur_lang())
@@ -506,6 +507,9 @@ MatchMorphKey(char *field)
 
 		return(NULL);
 	}
+	while(rval+1 < nkeys &&
+	      strcmp(field,key_table[rval+1]->morph_key) == 0)
+		rval++;
 	return(*(key_table+rval));
 }
 
@@ -795,10 +799,37 @@ int
 keycomp1(const void *k1, const void *k2)
 {
 	const Morph_args *const *m1, *const *m2;
+	int name_comparison;
+	size_t order1, order2;
 
 	m1 = (const Morph_args *const *) k1;
 	m2 = (const Morph_args *const *) k2;
-	return(strcmp( (*m1)->morph_key, (*m2)->morph_key ));
+	name_comparison = strcmp((*m1)->morph_key,(*m2)->morph_key);
+	if(name_comparison) return(name_comparison);
+	order1 = morph_key_definition_order(*m1);
+	order2 = morph_key_definition_order(*m2);
+	return((order1 > order2) - (order1 < order2));
+}
+
+static size_t
+morph_key_definition_order(const Morph_args *target)
+{
+	const Morph_args *arrays[] = {
+		arg_stemtype, arg_derivtype, arg_domain, arg_degree, arg_person,
+		arg_gender, arg_case, arg_number, arg_tense, arg_voice, arg_mood,
+		arg_dialect, arg_geogregion, arg_morphflags
+	};
+	size_t array_index;
+	size_t order = 0;
+	const Morph_args *entry;
+
+	for(array_index=0;array_index<LENGTH_OF(arrays);array_index++) {
+		for(entry=arrays[array_index];entry && entry->morph_key[0];entry++) {
+			if(entry == target) return(order);
+			order++;
+		}
+	}
+	return(SIZE_MAX);
 }
 
 int

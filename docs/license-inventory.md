@@ -58,7 +58,7 @@ The following remain MPL-2.0 even where the current path was created locally:
 - `tools/gener-corpus-exceptions.tsv`, which records qualified anomalies in
   those inherited inputs;
 - the stemlib binary and semantic exception manifests, which record inherited
-  baseline differences and duplicate registry choices;
+  serialization differences and the remaining duplicate registry choice;
 - `tools/gener-derivation-manifest.tsv` and the generation-derivation fixtures,
   which record and exercise inherited rule data and behavior.
 

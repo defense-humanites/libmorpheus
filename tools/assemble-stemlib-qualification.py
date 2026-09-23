@@ -137,13 +137,13 @@ def build(source, build_root, ctest_junit, output):
         "binary baseline differences are not semantically equivalent")
     semantic_counts = Counter(row[4] for row in semantic_rows)
     require(semantic_counts == Counter({
-        "semantic-identical": 227,
-        "reviewed-semantic-exception": 2,
+        "semantic-identical": 228,
+        "reviewed-semantic-exception": 1,
     }), "unexpected binary semantic comparison summary")
     semantic_exception_path = (
         source / "test/stemlib-binary-semantic-exceptions.tsv")
     semantic_exceptions = rows(semantic_exception_path)
-    require(len(semantic_exceptions) == 2 and
+    require(len(semantic_exceptions) == 1 and
             [row[0] for row in semantic_exceptions] == [
                 row[0] for row in semantic_rows
                 if row[4] == "reviewed-semantic-exception"
@@ -304,6 +304,9 @@ def build(source, build_root, ctest_junit, output):
                 "binary_differences": len(difference_rows) - 1,
                 "difference_report_sha256": digest(difference_path),
                 "semantic_equivalences": len(semantic_rows),
+                "semantic_identical_files": semantic_counts["semantic-identical"],
+                "reviewed_semantic_exception_files":
+                    semantic_counts["reviewed-semantic-exception"],
                 "semantic_report_sha256": digest(semantic_path),
                 "semantic_exception_manifest_sha256": digest(
                     semantic_exception_path),
