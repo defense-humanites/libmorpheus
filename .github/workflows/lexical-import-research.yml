@@ -43,6 +43,7 @@ jobs:
       - name: Partition Latin headers using TEI evidence
         run: |
           python3 test/partition-lexical-latin.py
+          python3 test/audit-lexical-stems.py
           python3 tools/partition-lexical-latin.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \

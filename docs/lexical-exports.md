@@ -119,7 +119,9 @@ runs both Latin chains in an ephemeral runner. It uploads no artifacts and
 prints only aggregate counts and SHA-256 digests. `tools/audit-lexical-stems.py`
 compares exact colon-tagged stem records by lemma as multisets, preserving
 duplicate records. It does not use an edit-distance or normalized-spelling
-threshold to declare stem equivalence.
+threshold to declare stem equivalence. Its schema 2 diagnostic also counts
+shared lemmes with no common stem line, those with partial overlap, and
+unmatched records by tag. It prints only aggregate counts and digests.
 
 The original Latin makefile requires an untracked `vtags` file to select
 verbal records and exclude them from the nominal chain. No `vtags` file is
@@ -211,3 +213,23 @@ source lexicon or a complete stemlib rebuild. The dictionary probe, historical
 hand edits and unreviewed spelling differences remain material. The committed
 Greek stem sources stay untouched pending per-lemma review, analyzer fixtures
 and the separate rights decision.
+
+### Shape of the remaining differences
+
+[An aggregate-only follow-up run](https://github.com/defense-humanites/libmorpheus/actions/runs/36178088608)
+classifies each shared lemma by exact stem multiset equality, disjoint stem
+lines, or partial overlap. All shared lemmes in these four trials have at
+least one stem line on both sides.
+
+| Trial against curated witness | Exact | No identical stem line | Partial overlap |
+| --- | ---: | ---: | ---: |
+| Greek nominal | 28,345 | 16,271 | 57 |
+| Greek verbal | 10,116 | 4,927 | 23 |
+| Partitioned Latin nominal | 31,270 | 529 | 1,154 |
+| Partitioned Latin verbal | 6,056 | 15 | 185 |
+
+For Greek, nearly every unequal shared lemma has no exact stem line in common;
+for Latin, unequal shared lemmes more often retain at least one. The comparison
+does not identify whether a Greek difference comes from a spelling, quantity,
+paradigm, source-edition change or later hand edit. The next review must inspect
+those causes without treating normalized spellings as equivalent stems.
