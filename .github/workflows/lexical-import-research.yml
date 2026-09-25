@@ -140,3 +140,125 @@ jobs:
           python3 tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-partition/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
+
+  greek-header-filters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install historical lexer dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flex libfl-dev
+
+      - name: Fetch pinned LSJ TEI chunks
+        run: |
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
+          git -C "$RUNNER_TEMP/lexica" sparse-checkout set \
+            CTS_XML_TEI/perseus/pdllex/grc/lsj
+          git -C "$RUNNER_TEMP/lexica" checkout \
+            56061ca127f4a2844980baffc5f2b6d1332897b3
+
+      - name: Stage Greek candidate outside the source tree
+        run: |
+          python3 -m venv "$RUNNER_TEMP/lexical-python"
+          "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
+          "$RUNNER_TEMP/lexical-python/bin/python" \
+            test/reconstruct-lexical-exports.py
+          "$RUNNER_TEMP/lexical-python/bin/python" \
+            tools/reconstruct-lexical-exports.py \
+            --language Greek \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/lexical-stage"
+
+      - name: Exercise Greek quantity and header split filters
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/legacy-filters"
+          for scanner in setquant splitlems; do
+            flex -o "$RUNNER_TEMP/legacy-filters/$scanner.c" \
+              "src/gkdict/$scanner.l"
+            gcc -std=gnu89 -w -Isrc/includes \
+              -o "$RUNNER_TEMP/legacy-filters/$scanner" \
+              "$RUNNER_TEMP/legacy-filters/$scanner.c" -lfl
+          done
+          ulimit -c 0
+          sed 's/-//' "$RUNNER_TEMP/lexical-stage/Greek.lemmata" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/setquant" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.split"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'lexical-stage'
+          report = json.loads((stage / 'Greek.report.json').read_text())
+          split = stage / 'Greek.split'
+          with split.open('rb') as source:
+              rows = sum(1 for _ in source)
+          assert rows >= report['projected_rows']
+          print(json.dumps({'projected_rows': report['projected_rows'],
+                            'split_rows': rows,
+                            'split_sha256': hashlib.sha256(split.read_bytes()).hexdigest()},
+                           sort_keys=True))
+          PY
+
+      - name: Build legacy Greek dictionary filters against current libraries
+        run: |
+          cmake -S . -B "$RUNNER_TEMP/legacy-build" -G Ninja \
+            -DBUILD_TESTING=OFF -DMORPHEUS_BUILD_CRUNCHER=OFF
+          cmake --build "$RUNNER_TEMP/legacy-build" --target \
+            morpheus_gkends morpheus_morphlib morpheus_greeklib
+          for program in newlems newlems2; do
+            gcc -std=gnu89 -w -Isrc/includes \
+              -o "$RUNNER_TEMP/legacy-filters/$program" \
+              "src/gkdict/$program.c" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_gkends.a" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_morphlib.a" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_greeklib.a" -lm
+          done
+
+      - name: Audit Greek importer outputs against curated witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          cd stemlib/Greek
+          export MORPHLIB="$PWD/.."
+          test -s "$MORPHLIB/Greek/stemsrc/lemlist"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
+            < "$RUNNER_TEMP/lexical-stage/Greek.split" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.checked"
+          python3 - <<'PY'
+          import json
+          import os
+          from collections import Counter
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'lexical-stage'
+          with (stage / 'Greek.checked').open('rb') as source:
+              counts = Counter('0' if line.startswith(b'0 ') else
+                               '1' if line.startswith(b'1 ') else 'other'
+                               for line in source)
+          assert counts['0'] > 0 and counts['1'] > 0 and counts['other'] == 0
+          print(json.dumps({'dictionary_probe_prefixes': dict(sorted(counts.items()))},
+                           sort_keys=True))
+          PY
+          grep -Fv '1 ' "$RUNNER_TEMP/lexical-stage/Greek.checked" \
+            | grep -Fv ': ' \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/newlems2" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.morph"
+          grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.morph" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic"
+          cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic"
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
+            --baseline stemsrc/lsj.nom
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
+            --baseline stemsrc/lsj.vbs

@@ -43,11 +43,12 @@ or unsupported keys stay in the header records but cannot enter `lemmata`.
 No dictionary definitions are exported. The projected stream has **not** been
 accepted as a production input to the legacy stem importers.
 
-For Latin, the first token of each pseudo-TEI record is the first projected
-`<orth>` spelling, including quantity marks and any homograph suffix. That
-first field is omitted from the following pseudo-TEI fragments, since the
-historical `latnom` and `latvb` filters use the leading spelling as the stem
-base and treat later `<orth>` fields as alternates. The TEI `key` remains in
+For both languages, the first token of each pseudo-TEI record is the first
+projected `<orth>` spelling, including quantity marks and any homograph suffix.
+That first field is omitted from the following pseudo-TEI fragments: the
+Latin filters use the leading spelling as the stem base and treat later
+`<orth>` fields as alternates; the Greek `newlems2` importer expects a `<gen>`
+or `<itype>` field after the spelling. The TEI `key` remains in
 the header record and supplies the candidate lemma identifier; it is not a
 substitute for the quantified spelling. The other ordered fields remain
 available for review. Entries with a complex first orthography still need
@@ -72,6 +73,14 @@ much larger number of stem records per lemma all affect the comparison. Each
 skipped entry is individually recorded. Neither these provisional exports nor
 new stem indexes are part of the production receipt, release archives or
 redistribution policy.
+
+The first Greek projection repeated the first `<orth>` after the leading TEI
+key. A later importer-oriented projection uses the first `<orth>` as the
+leading spelling and omits that repeated field. It projects 116,133 of
+116,497 LSJ entries; 38 additional entries with complex first orthographies
+are skipped, and the exact distinct-lemma overlap changes from 62,113 to
+62,112 of 67,349 curated Greek lemmes. Both projection reports preserve the
+entry-level reasons, and neither is a recovered historical export.
 
 For Latin, an additional diagnostic pairs a projected first `<orth>` with the
 raw headword **immediately preceding** `:le:` in `ls.nom`, when such a line
@@ -174,3 +183,31 @@ classification problem; it does not justify a corpus replacement. Remaining
 work includes reviewing false classifications, entries with no usable TEI
 signal, differences between projected and historical header syntax, and
 individual stem mismatches before analyzer-level checks.
+
+## Isolated Greek importer experiment
+
+The same [research workflow](../.github/workflows/lexical-import-research.yml)
+also fetches all 27 pinned LSJ chunks. It runs the makefile's `sed`,
+`setquant`, `splitlems`, `newlems` and `newlems2` chain against the new
+first-orth projection in an ephemeral runner. The 116,133 projected records
+produce 118,363 split lines. The dictionary probe in `newlems` reads the
+committed `stemlib/Greek/stemsrc/lemlist`, so its decisions depend on a
+pre-existing curated inventory. The job explicitly sets `MORPHLIB` and checks
+that both accepted and excluded probe results occur: otherwise `newlems` may
+quietly treat a missing dictionary as an empty one. No candidate records are
+uploaded or logged. In the guarded run, the probe marked 90,403 split lines
+for further processing and 27,960 as already present in that dictionary.
+
+In [the successful dictionary-backed trial](https://github.com/defense-humanites/libmorpheus/actions/runs/36131613333),
+the exact stem multiset comparisons were:
+
+| Diagnostic producer | Candidate / reference distinct lemmes | Shared lemmes | Identical record multisets among shared lemmes | Exact shared records with multiplicity |
+| --- | ---: | ---: | ---: | ---: |
+| Greek `newlems2` nominal output against `lsj.nom` | 46,674 / 51,448 | 44,673 | 28,345 | 28,406 |
+| Greek `newlems2` verbal output against `lsj.vbs` | 15,644 / 15,901 | 15,066 | 10,116 | 10,139 |
+
+These counts describe an importer trial, not independent validation of the
+source lexicon or a complete stemlib rebuild. The dictionary probe, historical
+hand edits and unreviewed spelling differences remain material. The committed
+Greek stem sources stay untouched pending per-lemma review, analyzer fixtures
+and the separate rights decision.
