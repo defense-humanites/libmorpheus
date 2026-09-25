@@ -40,6 +40,14 @@ jobs:
             --lexica "$RUNNER_TEMP/lexica" \
             --output "$RUNNER_TEMP/lexical-stage"
 
+      - name: Partition Latin headers using TEI evidence
+        run: |
+          python3 test/partition-lexical-latin.py
+          python3 tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            --output "$RUNNER_TEMP/lexical-partition"
+
       - name: Build historical header and nominal filters in isolation
         run: |
           mkdir "$RUNNER_TEMP/legacy-filters"
@@ -107,4 +115,28 @@ jobs:
             --baseline stemlib/Latin/stemsrc/ls.nom
           python3 tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic" \
+            --baseline stemlib/Latin/stemsrc/vbs.latin
+
+      - name: Exercise the experimental partition through historical filters
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/lexical-partition/nominal.lemmata" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+            > "$RUNNER_TEMP/lexical-partition/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/lexical-partition/verbal.lemmata" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+            > "$RUNNER_TEMP/lexical-partition/verbal.stems"
+          python3 tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-partition/nominal.stems" \
+            --baseline stemlib/Latin/stemsrc/ls.nom
+          python3 tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-partition/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin

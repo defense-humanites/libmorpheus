@@ -87,9 +87,10 @@ headword spelling alone; it does not validate stem records or morphology.
 
 1. Review the unprojectable entries and candidate headword mapping against
    the old lexer rules; preserve evidence for every change to the projection.
-2. Establish and review a replacement for the missing Latin `vtags` selector,
-   then rerun the isolated importers on correctly partitioned inputs and
-   compare stems with all four curated snapshots. Do not overwrite them.
+2. Review the experimental Latin header partition against source entries and
+   historical importer behavior; establish a defensible replacement for the
+   missing `vtags` selector and compare stems with all four curated snapshots.
+   Do not overwrite them.
 3. Compare analyzer behavior with fixtures and the archived 2007 Hopper
    morphology oracles before proposing any corpus migration.
 4. Obtain the separate corpus-specific rights and notices decision described
@@ -113,10 +114,11 @@ threshold to declare stem equivalence.
 
 The original Latin makefile requires an untracked `vtags` file to select
 verbal records and exclude them from the nominal chain. No `vtags` file is
-available in this checkout. Both diagnostic chains therefore received the
-whole candidate stream. The nominal run also omitted the makefile's separate
-filter for `<pos>P. a.</pos>`. These measurements are **not** a reconstruction
-of the historical partition or evidence that the remaining stems are correct.
+available in this checkout. The first two diagnostic chains below received
+the whole candidate stream. The nominal run also omitted the makefile's
+separate filter for `<pos>P. a.</pos>`. These measurements are **not** a
+reconstruction of the historical partition or evidence that the remaining
+stems are correct.
 
 On [the successful full-corpus research run](https://github.com/defense-humanites/libmorpheus/actions/runs/36124653236),
 the 51,460 Latin candidate rows passed through `splitlems`, `fixhesc` and
@@ -135,3 +137,40 @@ remaining differences require a reviewed `vtags` replacement, separation of
 nominal and verbal inputs, and per-lemma comparison before any stem source is
 changed. The curated files remain untouched and redistribution remains gated
 by [the corpus-specific rights review](stemlib-redistribution.md).
+
+### Experimental TEI header partition
+
+`tools/partition-lexical-latin.py` makes a provisional, reproducible selection
+using only projected TEI header fields: a verbal `<pos>` or a final conjugation
+number/infinitive in `<itype>` selects a verbal entry; `<pos>P. a.</pos>`
+selects a separate participial exclusion; all other projected entries go to
+the nominal trial. It reads the header and candidate streams in order and
+refuses mismatched headwords. The committed curated snapshots do **not**
+participate in selection. Output is private, outside the repository, with
+counts and digests in the stage report; it is neither the original `vtags`
+file nor a production classifier.
+
+For the pinned Latin TEI this puts 43,887 projected rows in the nominal
+trial, 6,811 in the verbal trial and 762 in the participial exclusion; 136
+entries cannot be projected. A separate check against the curated lemma
+inventories shows 6,240 projected entries assigned to the verbal trial whose
+lemma occurs only in `vbs.latin`, but 429 projected entries whose lemma occurs
+only in that verbal witness remain in the nominal trial. Five assigned verbal
+entries occur in both witnesses; four occur only in `ls.nom`. This overlap
+check identifies limitations and does not supply classification labels.
+
+In [the isolated partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36126908468),
+the historical filter chains consumed their respective trial streams and
+produced these exact comparisons:
+
+| Diagnostic producer | Candidate / reference distinct lemmes | Shared lemmes | Identical record multisets among shared lemmes | Exact shared records with multiplicity |
+| --- | ---: | ---: | ---: | ---: |
+| Partitioned `latnom` against `ls.nom` | 37,366 / 40,408 | 32,953 | 31,270 | 34,967 |
+| Partitioned `latvb` against `vbs.latin` | 6,542 / 6,773 | 6,256 | 6,056 | 9,197 |
+
+Both exact-group counts are lower than in the unpartitioned diagnostics. The
+selector thus demonstrates the importer plumbing and isolates a concrete
+classification problem; it does not justify a corpus replacement. Remaining
+work includes reviewing false classifications, entries with no usable TEI
+signal, differences between projected and historical header syntax, and
+individual stem mismatches before analyzer-level checks.
