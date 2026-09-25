@@ -163,9 +163,10 @@ jobs:
 
       - name: Stage Greek candidate outside the source tree
         run: |
-          python3 test/reconstruct-lexical-exports.py
           python3 -m venv "$RUNNER_TEMP/lexical-python"
           "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
+          "$RUNNER_TEMP/lexical-python/bin/python" \
+            test/reconstruct-lexical-exports.py
           "$RUNNER_TEMP/lexical-python/bin/python" \
             tools/reconstruct-lexical-exports.py \
             --language Greek \
