@@ -66,23 +66,33 @@ class ComparisonTest(unittest.TestCase):
             candidate = Path(directory) / "candidate"
             baseline = Path(directory) / "baseline"
             candidate.write_text(":le:quantity\n:no:a_^ os_ou\n"
+                                 ":le:reference_quantity\n:no:a os_ou\n"
+                                 ":le:both_quantified\n:no:a^_ os_ou\n"
                                  ":le:diacritics\n:no:a)/ os_ou\n"
                                  ":le:stem\n:de:a) azw\n"
                                  ":le:labels\n:no:a os_ou\n"
                                  ":le:duplicate\n:no:a_^ os_ou\n:no:a_^ os_ou\n",
                                  encoding="utf-8")
             baseline.write_text(":le:quantity\n:no:a os_ou\n"
+                                ":le:reference_quantity\n:no:a_ os_ou\n"
+                                ":le:both_quantified\n:no:a__ os_ou\n"
                                 ":le:diacritics\n:no:a( os_ou\n"
                                 ":le:stem\n:de:b) azw\n"
                                 ":le:labels\n:no:b as_ou\n"
                                 ":le:duplicate\n:no:a os_ou\n",
                                 encoding="utf-8")
             result = audit.compare(candidate, baseline, greek_spelling=True)
-            self.assertEqual(result["shared_lemma_outcomes"]["disjoint_stems"], 5)
+            self.assertEqual(result["shared_lemma_outcomes"]["disjoint_stems"], 7)
             self.assertEqual(result["disjoint_greek_spelling_diagnostic"], {
-                "quantity_marks_only": 1, "beta_code_diacritics": 1,
+                "quantity_marks_only": 3, "beta_code_diacritics": 1,
                 "same_tags_and_labels": 1, "same_labels_different_multiplicity": 1,
                 "different_tags_or_labels": 1,
+            })
+            self.assertEqual(result["quantity_only_difference_direction"], {
+                "lemma_mark_presence": {"candidate_only": 1, "reference_only": 1,
+                                        "both": 1, "neither": 0},
+                "stem_mark_counts": {"candidate_short": 2, "candidate_long": 2,
+                                     "reference_short": 0, "reference_long": 3},
             })
             self.assertNotIn("disjoint_greek_spelling_diagnostic",
                              audit.compare(candidate, baseline))

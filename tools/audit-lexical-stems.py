@@ -37,6 +37,15 @@ def diagnostic_group(group, removed="", retain_stem=True):
     return transformed
 
 
+def quantity_marks(group):
+    counts = Counter()
+    for line, multiplicity in group.items():
+        stem = re.match(r"\S*", line[4:]).group()
+        for mark in "^_":
+            counts[mark] += stem.count(mark) * multiplicity
+    return counts
+
+
 def read_stems(path):
     groups = defaultdict(Counter)
     entries = 0
@@ -75,6 +84,8 @@ def compare(candidate, baseline, greek_spelling=False):
     candidate_excess = Counter()
     reference_excess = Counter()
     spelling = Counter()
+    quantity_presence = Counter()
+    quantity_totals = Counter()
     intersecting = 0
     for key in common:
         left, right = produced[key], reference[key]
@@ -95,6 +106,14 @@ def compare(candidate, baseline, greek_spelling=False):
             if greek_spelling:
                 if diagnostic_group(left, "^_") == diagnostic_group(right, "^_"):
                     spelling["quantity_marks_only"] += 1
+                    left_marks, right_marks = quantity_marks(left), quantity_marks(right)
+                    presence = ("both" if sum(left_marks.values()) and sum(right_marks.values()) else
+                                "candidate_only" if sum(left_marks.values()) else
+                                "reference_only" if sum(right_marks.values()) else "neither")
+                    quantity_presence[presence] += 1
+                    for mark, label in (("^", "short"), ("_", "long")):
+                        quantity_totals[f"candidate_{label}"] += left_marks[mark]
+                        quantity_totals[f"reference_{label}"] += right_marks[mark]
                 elif diagnostic_group(left, GREEK_DIACRITICS) == diagnostic_group(right, GREEK_DIACRITICS):
                     spelling["beta_code_diacritics"] += 1
                 elif diagnostic_group(left, retain_stem=False) == diagnostic_group(right, retain_stem=False):
@@ -127,6 +146,12 @@ def compare(candidate, baseline, greek_spelling=False):
             name: spelling[name] for name in ("quantity_marks_only", "beta_code_diacritics",
                                             "same_tags_and_labels", "same_labels_different_multiplicity",
                                             "different_tags_or_labels")}
+        report["quantity_only_difference_direction"] = {
+            "lemma_mark_presence": {name: quantity_presence[name] for name in
+                                    ("candidate_only", "reference_only", "both", "neither")},
+            "stem_mark_counts": {name: quantity_totals[name] for name in
+                                 ("candidate_short", "candidate_long", "reference_short", "reference_long")},
+        }
     return report
 
 
