@@ -40,10 +40,10 @@ jobs:
             --lexica "$RUNNER_TEMP/lexica" \
             --output "$RUNNER_TEMP/lexical-stage"
 
-      - name: Build three historical header filters in isolation
+      - name: Build historical header and nominal filters in isolation
         run: |
           mkdir "$RUNNER_TEMP/legacy-filters"
-          for scanner in splitlems fixhesc fixgend; do
+          for scanner in splitlems fixhesc fixgend latnom; do
             flex -o "$RUNNER_TEMP/legacy-filters/$scanner.c" \
               "src/gkdict/$scanner.l"
             gcc -std=gnu89 -w \
@@ -63,6 +63,12 @@ jobs:
             < "$RUNNER_TEMP/lexical-stage/Latin.split" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
             > "$RUNNER_TEMP/lexical-stage/Latin.filtered"
+          # vtags, which historically separated verbs from nouns, is absent.
+          # Feed the unpartitioned stream only as a diagnostic; do not label
+          # this output a reconstructed nominal corpus.
+          timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+            < "$RUNNER_TEMP/lexical-stage/Latin.filtered" \
+            > "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic"
           python3 - <<'PY'
           import json
           import os
@@ -78,5 +84,13 @@ jobs:
                   counts[name] = sum(1 for _ in source)
               assert path.stat().st_size > 0
           assert counts['Latin.split'] >= rows
-          print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts}, sort_keys=True))
+          nominal = stage / 'Latin.nominal-diagnostic'
+          tags = {':le:': 0, ':no:': 0, ':aj:': 0, ':wd:': 0}
+          with nominal.open('rb') as source:
+              for line in source:
+                  for tag in tags:
+                      if line.startswith(tag.encode()):
+                          tags[tag] += 1
+          print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts,
+                            'unpartitioned_nominal_diagnostic': tags}, sort_keys=True))
           PY
