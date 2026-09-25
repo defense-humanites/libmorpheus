@@ -230,9 +230,25 @@ jobs:
           ulimit -c 0
           cd stemlib/Greek
           export MORPHLIB="$PWD/.."
+          test -s "$MORPHLIB/Greek/stemsrc/lemlist"
           timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
             < "$RUNNER_TEMP/lexical-stage/Greek.split" \
             > "$RUNNER_TEMP/lexical-stage/Greek.checked"
+          python3 - <<'PY'
+          import json
+          import os
+          from collections import Counter
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'lexical-stage'
+          with (stage / 'Greek.checked').open('rb') as source:
+              counts = Counter('0' if line.startswith(b'0 ') else
+                               '1' if line.startswith(b'1 ') else 'other'
+                               for line in source)
+          assert counts['0'] > 0 and counts['1'] > 0 and counts['other'] == 0
+          print(json.dumps({'dictionary_probe_prefixes': dict(sorted(counts.items()))},
+                           sort_keys=True))
+          PY
           grep -Fv '1 ' "$RUNNER_TEMP/lexical-stage/Greek.checked" \
             | grep -Fv ': ' \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/newlems2" \
