@@ -207,3 +207,41 @@ jobs:
                             'split_sha256': hashlib.sha256(split.read_bytes()).hexdigest()},
                            sort_keys=True))
           PY
+
+      - name: Build legacy Greek dictionary filters against current libraries
+        run: |
+          cmake -S . -B "$RUNNER_TEMP/legacy-build" -G Ninja \
+            -DBUILD_TESTING=OFF -DMORPHEUS_BUILD_CRUNCHER=OFF
+          cmake --build "$RUNNER_TEMP/legacy-build" --target \
+            morpheus_gkends morpheus_morphlib morpheus_greeklib
+          for program in newlems newlems2; do
+            gcc -std=gnu89 -w -Isrc/includes \
+              -o "$RUNNER_TEMP/legacy-filters/$program" \
+              "src/gkdict/$program.c" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_gkends.a" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_morphlib.a" \
+              "$RUNNER_TEMP/legacy-build/libmorpheus_greeklib.a" -lm
+          done
+
+      - name: Audit Greek importer outputs against curated witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          cd stemlib/Greek
+          timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
+            < "$RUNNER_TEMP/lexical-stage/Greek.split" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.checked"
+          grep -Fv '1 ' "$RUNNER_TEMP/lexical-stage/Greek.checked" \
+            | grep -Fv ': ' \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/newlems2" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.morph"
+          grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.morph" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic"
+          cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic"
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
+            --baseline stemsrc/lsj.nom
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
+            --baseline stemsrc/lsj.vbs
