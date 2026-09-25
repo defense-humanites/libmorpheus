@@ -265,3 +265,49 @@ jobs:
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
+
+      - name: Probe Greek first-token quantity without changing the candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'lexical-stage'
+          changed = 0
+          with (stage / 'Greek.split').open('rb') as source, \
+               (stage / 'Greek.no-first-quantity.split').open('wb') as target:
+              for raw in source:
+                  match = re.match(rb'\S+', raw)
+                  if not match:
+                      target.write(raw)
+                      continue
+                  head = match.group()
+                  bare = head.translate(None, b'^_')
+                  changed += bare != head
+                  target.write(bare + raw[len(head):])
+          assert changed > 0
+          print(json.dumps({'split_rows_with_first-token_quantity_removed': changed}))
+          PY
+          cd stemlib/Greek
+          export MORPHLIB="$PWD/.."
+          timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
+            < "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.split" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.checked"
+          grep -Fv '1 ' "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.checked" \
+            | grep -Fv ': ' \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/newlems2" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.morph"
+          grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.morph" \
+            > "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal"
+          cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal"
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
+            --baseline stemsrc/lsj.nom
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
+            --baseline stemsrc/lsj.vbs
