@@ -1,0 +1,82 @@
+name: Lexical importer research
+
+on:
+  push:
+    branches:
+      - research/lexical-import
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  latin-header-filters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install historical lexer dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flex libfl-dev
+
+      - name: Fetch pinned Lewis and Short TEI file
+        run: |
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
+          git -C "$RUNNER_TEMP/lexica" sparse-checkout set --no-cone \
+            '/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml'
+          git -C "$RUNNER_TEMP/lexica" checkout \
+            56061ca127f4a2844980baffc5f2b6d1332897b3
+
+      - name: Prepare candidate input outside the source tree
+        run: |
+          python3 -m venv "$RUNNER_TEMP/lexical-python"
+          "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
+          "$RUNNER_TEMP/lexical-python/bin/python" \
+            tools/reconstruct-lexical-exports.py \
+            --language Latin \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/lexical-stage"
+
+      - name: Build three historical header filters in isolation
+        run: |
+          mkdir "$RUNNER_TEMP/legacy-filters"
+          for scanner in splitlems fixhesc fixgend; do
+            flex -o "$RUNNER_TEMP/legacy-filters/$scanner.c" \
+              "src/gkdict/$scanner.l"
+            gcc -std=gnu89 -w \
+              -o "$RUNNER_TEMP/legacy-filters/$scanner" \
+              "$RUNNER_TEMP/legacy-filters/$scanner.c" -lfl
+          done
+
+      - name: Exercise the complete candidate header stream
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            > "$RUNNER_TEMP/lexical-stage/Latin.split"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+            < "$RUNNER_TEMP/lexical-stage/Latin.split" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+            > "$RUNNER_TEMP/lexical-stage/Latin.filtered"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'lexical-stage'
+          report = json.loads((stage / 'Latin.report.json').read_text())
+          rows = report['projected_rows']
+          counts = {}
+          for name in ('Latin.split', 'Latin.filtered'):
+              path = stage / name
+              with path.open('rb') as source:
+                  counts[name] = sum(1 for _ in source)
+              assert path.stat().st_size > 0
+          assert counts['Latin.split'] >= rows
+          print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts}, sort_keys=True))
+          PY
