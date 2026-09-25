@@ -311,3 +311,11 @@ jobs:
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
+            --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
+            --baseline stemsrc/lsj.nom
+          python3 ../../tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
+            --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
+            --baseline stemsrc/lsj.vbs

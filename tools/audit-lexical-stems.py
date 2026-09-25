@@ -155,16 +155,54 @@ def compare(candidate, baseline, greek_spelling=False):
     return report
 
 
+def compare_variants(candidate, alternate, baseline):
+    original, original_meta = read_stems(candidate)
+    variant, variant_meta = read_stems(alternate)
+    reference, reference_meta = read_stems(baseline)
+    compared = reference.keys() & (original.keys() | variant.keys())
+    transitions = Counter()
+    for key in compared:
+        was_exact = key in original and original[key] == reference[key]
+        now_exact = key in variant and variant[key] == reference[key]
+        if was_exact and now_exact:
+            transitions["both_exact"] += 1
+        elif was_exact:
+            transitions["original_only_exact"] += 1
+        elif now_exact:
+            transitions["alternate_only_exact"] += 1
+        else:
+            transitions["neither_exact"] += 1
+    return {"schema": 1,
+            "scope": "diagnostic exact-multiset transition; no lexical equivalence inferred",
+            "input_sha256": {"original": original_meta["sha256"],
+                             "alternate": variant_meta["sha256"],
+                             "reference": reference_meta["sha256"]},
+            "reference_lemmas_in_either_candidate": len(compared),
+            "exact_transitions": {name: transitions[name] for name in
+                                  ("both_exact", "original_only_exact",
+                                   "alternate_only_exact", "neither_exact")}}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", required=True, type=Path)
     parser.add_argument("--baseline", required=True, type=Path)
     parser.add_argument("--greek-spelling-diagnostic", action="store_true",
                         help="count spelling-only signatures at disjoint Greek lemmes; never equate them")
+    parser.add_argument("--alternate-candidate", type=Path,
+                        help="compare exact-match gains and losses for an isolated alternative")
     args = parser.parse_args()
-    if args.candidate.resolve() == args.baseline.resolve():
-        parser.error("candidate and baseline must be different files")
-    print(json.dumps(compare(args.candidate, args.baseline, args.greek_spelling_diagnostic), sort_keys=True))
+    paths = [args.candidate, args.baseline]
+    if args.alternate_candidate:
+        paths.append(args.alternate_candidate)
+    if len({path.resolve() for path in paths}) != len(paths):
+        parser.error("candidate, alternate and baseline must be different files")
+    if args.alternate_candidate and args.greek_spelling_diagnostic:
+        parser.error("Greek spelling diagnostics cannot be combined with an alternate candidate")
+    report = (compare_variants(args.candidate, args.alternate_candidate, args.baseline)
+              if args.alternate_candidate else
+              compare(args.candidate, args.baseline, args.greek_spelling_diagnostic))
+    print(json.dumps(report, sort_keys=True))
 
 
 if __name__ == "__main__":

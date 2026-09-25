@@ -97,6 +97,24 @@ class ComparisonTest(unittest.TestCase):
             self.assertNotIn("disjoint_greek_spelling_diagnostic",
                              audit.compare(candidate, baseline))
 
+    def test_alternative_reports_exact_gains_and_losses(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            alternate = Path(directory) / "alternate"
+            baseline = Path(directory) / "baseline"
+            candidate.write_text(":le:alpha\n:no:x\n:le:beta\n:no:q\n"
+                                 ":le:gamma\n:no:z\n", encoding="utf-8")
+            alternate.write_text(":le:alpha\n:no:q\n:le:beta\n:no:y\n"
+                                 ":le:gamma\n:no:z\n:le:delta\n:no:q\n", encoding="utf-8")
+            baseline.write_text(":le:alpha\n:no:x\n:le:beta\n:no:y\n"
+                                ":le:gamma\n:no:z\n:le:delta\n:no:w\n", encoding="utf-8")
+            result = audit.compare_variants(candidate, alternate, baseline)
+            self.assertEqual(result["reference_lemmas_in_either_candidate"], 4)
+            self.assertEqual(result["exact_transitions"], {
+                "both_exact": 1, "original_only_exact": 1,
+                "alternate_only_exact": 1, "neither_exact": 1,
+            })
+
 
 if __name__ == "__main__":
     unittest.main()
