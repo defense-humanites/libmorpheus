@@ -229,6 +229,7 @@ jobs:
           set -euo pipefail
           ulimit -c 0
           cd stemlib/Greek
+          export MORPHLIB="$PWD/.."
           timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
             < "$RUNNER_TEMP/lexical-stage/Greek.split" \
             > "$RUNNER_TEMP/lexical-stage/Greek.checked"
