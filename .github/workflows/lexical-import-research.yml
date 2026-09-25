@@ -94,3 +94,6 @@ jobs:
           print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts,
                             'unpartitioned_nominal_diagnostic': tags}, sort_keys=True))
           PY
+          python3 tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic" \
+            --baseline stemlib/Latin/stemsrc/ls.nom
