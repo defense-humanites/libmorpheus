@@ -50,16 +50,44 @@ def compare(candidate, baseline):
     produced, produced_meta = read_stems(candidate)
     reference, reference_meta = read_stems(baseline)
     common = produced.keys() & reference.keys()
-    equal = sum(produced[key] == reference[key] for key in common)
-    intersecting = sum(sum((produced[key] & reference[key]).values()) for key in common)
-    return {"schema": 1,
+    outcomes = Counter()
+    candidate_excess = Counter()
+    reference_excess = Counter()
+    intersecting = 0
+    for key in common:
+        left, right = produced[key], reference[key]
+        shared = left & right
+        intersecting += sum(shared.values())
+        for line, count in (left - right).items():
+            candidate_excess[line[:4]] += count
+        for line, count in (right - left).items():
+            reference_excess[line[:4]] += count
+        if left == right:
+            outcomes["exact"] += 1
+        elif not left:
+            outcomes["candidate_without_stems"] += 1
+        elif not right:
+            outcomes["reference_without_stems"] += 1
+        elif not shared:
+            outcomes["disjoint_stems"] += 1
+        else:
+            outcomes["partial_overlap"] += 1
+    for name in ("exact", "candidate_without_stems", "reference_without_stems",
+                 "disjoint_stems", "partial_overlap"):
+        outcomes[name] += 0
+    return {"schema": 2,
             "scope": "diagnostic; compare exact records, not analyzer behavior",
             "candidate": produced_meta, "reference": reference_meta,
             "common_lemmas": len(common),
-            "equal_record_multisets_at_common_lemmas": equal,
+            "equal_record_multisets_at_common_lemmas": outcomes["exact"],
             "exact_shared_stem_records_with_multiplicity": intersecting,
             "candidate_only_lemmas": len(produced.keys() - reference.keys()),
-            "reference_only_lemmas": len(reference.keys() - produced.keys())}
+            "reference_only_lemmas": len(reference.keys() - produced.keys()),
+            "shared_lemma_outcomes": dict(sorted(outcomes.items())),
+            "unmatched_stem_records_at_shared_lemmas": {
+                "candidate_by_tag": {tag: candidate_excess[tag] for tag in STEM_TAGS},
+                "reference_by_tag": {tag: reference_excess[tag] for tag in STEM_TAGS},
+            }}
 
 
 def main():
