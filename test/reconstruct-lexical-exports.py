@@ -25,8 +25,8 @@ class LexicalProjectionTest(unittest.TestCase):
         )
         record, line = exports.project(entry, "Latin")
         self.assertEqual(record["lemma"], "abactus#2")
-        self.assertEqual(line, "abactus#2 \t<orth>a^bactus</orth>\t"
-                         "<orth type=alt>a_bactus</orth>\t<itype>u_s</itype>\t<gen>m.</gen>")
+        self.assertEqual(line, "a^bactus#2 \t<orth type=alt>a_bactus</orth>\t"
+                         "<itype>u_s</itype>\t<gen>m.</gen>")
 
     def test_unsupported_character_is_retained_in_ir_but_not_projected(self):
         entry = etree.fromstring('<entryFree key="Aba"><orth>Aba</orth><gen>ἡ</gen></entryFree>')
@@ -41,7 +41,8 @@ class LexicalProjectionTest(unittest.TestCase):
         record, line = exports.project(entry, "Latin")
         self.assertIsNone(record["projection_error"])
         self.assertEqual(record["fields"][0]["value"], "Abdalonўmus")
-        self.assertIn("<orth>Abdalony^mus</orth>", line)
+        self.assertTrue(line.startswith("Abdalony^mus \t<itype>i</itype>"))
+        self.assertNotIn("<orth>", line)
 
     def test_unknown_entity_is_not_silently_discarded(self):
         parser = etree.XMLParser(resolve_entities=False, load_dtd=False, no_network=True)

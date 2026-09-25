@@ -99,7 +99,20 @@ def project(entry, language):
                            "projection": value})
     if not any(field["name"] == "orth" for field in fields):
         reason = reason or "missing-orth"
+    first_orth = next((field for field in fields if field["name"] == "orth"), None)
+    headword = lemma
+    if language == "Latin" and not reason:
+        # In the original stream the inflected/quantified first orthography
+        # is the leading token. The TEI key identifies the lemma but has no
+        # vowel quantities. Repeating the first orth as a field also invents
+        # an extra alternate stem in latnom's orth table.
+        headword = first_orth["projection"].split()[0].strip(",;:")
+        if not KEY_PATTERN["Latin"].fullmatch(headword):
+            reason = "unsupported-headword"
+        elif re.search(r"#[1-9]$", lemma):
+            headword += lemma[-2:]
     record = {"schema": 1, "source_key": key, "lemma": lemma if not reason else None,
+              "headword": headword if not reason else None,
               "fields": fields, "projection_error": reason}
     if reason:
         return record, None
@@ -107,12 +120,14 @@ def project(entry, language):
     # This projection is a comparison artifact, not a claim of byte identity.
     fragments = []
     for field in fields:
+        if language == "Latin" and field is first_orth:
+            continue
         name = field["name"]
         # The historical filters only recognize this precise alt spelling.
         tag = "<orth type=alt>" if name == "orth" and field["type"] == "alt" else f"<{name}>"
         value = field["projection"].replace("&", "&amp;").replace("<", "&lt;")
         fragments.append(f"{tag}{value}</{name}>")
-    return record, lemma + " \t" + "\t".join(fragments)
+    return record, headword + " \t" + "\t".join(fragments)
 
 
 def baseline_lemmas(repo, language):
