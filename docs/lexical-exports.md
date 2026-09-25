@@ -30,7 +30,7 @@ python3 tools/reconstruct-lexical-exports.py --lexica /private/lexica --output /
 The output for each language consists of `headers.jsonl` (schema 1 header
 records including unprojectable entries), `lemmata` (a pseudo-TEI comparison
 stream), `skipped.tsv` (entry identifiers and reasons) and `report.json`
-(input and output SHA-256, entry counts and exact lemma overlap). The header
+(schema 2: input and output SHA-256, entry counts and exact lemma overlap). The header
 record retains the source key, entry ID, ordered direct child fields before
 the first `<sense>`, their original text and a candidate Latin quantity
 projection (`ā` → `a_`, `ă` → `a^`, `ï` → `i+`). Numbered source keys receive a
@@ -39,12 +39,18 @@ or unsupported keys stay in the header records but cannot enter `lemmata`.
 No dictionary definitions are exported. The projected stream has **not** been
 validated as input to the legacy stem importers.
 
+The archival Latin TEI also contains `ў` (U+045E) in headwords such as
+`Abdalonўmus`, `ăbўla` and `Alcўŏnē`. The corresponding curated `ls.nom`
+headwords read `Abdalony^mus`, `A^by^la` and `Alcy^o^ne_`; this witnesses an
+explicit `ў` → `y^` conversion for this edition. Other unsupported characters
+remain unprojectable rather than being silently discarded.
+
 Initial run at that revision:
 
 | Source | TEI entries | Projected rows | Reasons for unprojectable entries | Exact overlap with distinct committed `:le:` lemmas |
 | --- | ---: | ---: | --- | ---: |
 | LSJ Greek | 116,497 | 116,171 | 321 keys; 5 characters | 62,113 / 67,349 |
-| Lewis & Short Latin | 51,596 | 50,308 | 106 keys; 1,182 characters | 39,656 / 47,175 |
+| Lewis & Short Latin | 51,596 | 51,460 | 106 keys; 30 characters | 40,608 / 47,175 |
 
 The overlap is a **headword diagnostic**, not a coverage or equivalence
 claim: homograph numbering, accents, subsequent manual corrections, and the
@@ -52,6 +58,16 @@ much larger number of stem records per lemma all affect the comparison. Each
 skipped entry is individually recorded. Neither these provisional exports nor
 new stem indexes are part of the production receipt, release archives or
 redistribution policy.
+
+For Latin, an additional diagnostic pairs a projected first `<orth>` with the
+raw headword **immediately preceding** `:le:` in `ls.nom`, when such a line
+exists. Of 40,327 distinct curated lemmes with that adjacent line, 33,876
+also have a projected header. Their first orthography matches exactly for
+31,148 lemmes. It matches for 33,530 after ignoring case, trailing homograph
+number and quantity/diaeresis marks. The remaining 346 include compound
+hyphenation, multiple forms in one orthographic field and real differences
+between editions. `report.json` records examples. This comparison concerns
+headword spelling alone; it does not validate stem records or morphology.
 
 ## Next validation gates
 

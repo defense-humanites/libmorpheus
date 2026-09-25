@@ -11,7 +11,6 @@ import hashlib
 import json
 import re
 import subprocess
-import sys
 import unicodedata
 from pathlib import Path
 
@@ -50,6 +49,13 @@ def normalize(value, language):
         return value if value.isascii() else None
     result = []
     for char in value:
+        # The archival Latin TEI uses CYRILLIC SMALL LETTER SHORT U in place
+        # of short y. Curated ls.nom witnesses include Abdalony^mus, A^by^la
+        # and Alcy^o^ne_ for those same TEI entry keys. Do not generalize
+        # other non-Latin characters without a similarly reviewable witness.
+        if char == "ў":
+            result.append("y^")
+            continue
         if char in "æÆœŒ":
             result.append({"æ": "ae", "Æ": "Ae", "œ": "oe", "Œ": "Oe"}[char])
             continue
@@ -119,6 +125,49 @@ def baseline_lemmas(repo, language):
     return found
 
 
+def latin_baseline_header_orths(path):
+    """Read only headwords immediately preceding a curated :le: record.
+
+    This is deliberately narrower than parsing all of ls.nom: earlier raw
+    dictionary lines are not necessarily associated with the next stem.
+    """
+    found = {}
+    preceding = None
+    with path.open(encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            line = line.rstrip("\r\n")
+            if line.startswith(":le:"):
+                if preceding is not None:
+                    found.setdefault(line[4:].strip(), set()).add(preceding)
+                preceding = None
+            elif line.startswith(":"):
+                preceding = None
+            elif line.strip():
+                preceding = line.split("\t", 1)[0].strip()
+    return found
+
+
+def latin_header_comparison(repo, candidates):
+    baseline = latin_baseline_header_orths(repo / "stemlib/Latin/stemsrc/ls.nom")
+    common = sorted(baseline.keys() & candidates.keys())
+    exact = {key for key in common if baseline[key] & candidates[key]}
+
+    def spelling(value):
+        return re.sub(r"#[1-9]$", "", value).casefold().replace("^", "").replace("_", "").replace("+", "")
+
+    normalized = {key for key in common if {spelling(v) for v in baseline[key]} &
+                  {spelling(v) for v in candidates[key]}}
+    return {"baseline_lemmas_with_adjacent_header": len(baseline),
+            "projected_lemmas_with_adjacent_header": len(common),
+            "exact_first_orth": len(exact),
+            "same_spelling_ignoring_case_homograph_and_quantity": len(normalized),
+            "unmatched_examples": [
+                {"lemma": key, "baseline": sorted(baseline[key])[:2],
+                 "projected": sorted(candidates[key])[:2]}
+                for key in common if key not in normalized
+            ][:20]}
+
+
 def sha256(path):
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -147,6 +196,7 @@ def run(lexica, repo, output):
     output.mkdir(parents=True)
     for language, files in sources.items():
         projected = set()
+        header_orths = {}
         reasons = {}
         count = 0
         with (output / f"{language}.headers.jsonl").open("w", encoding="utf-8") as ir, \
@@ -170,13 +220,18 @@ def run(lexica, repo, output):
                     else:
                         legacy.write(line + "\n")
                         projected.add(record["lemma"])
+                        if language == "Latin":
+                            first = next((field["projection"] for field in record["fields"]
+                                          if field["name"] == "orth"), None)
+                            if first:
+                                header_orths.setdefault(record["lemma"], set()).add(first)
                     entry.clear()
                     while entry.getprevious() is not None:
                         del entry.getparent()[0]
                 del parser
         baseline = baseline_lemmas(repo, language)
         report = {
-            "schema": 1,
+            "schema": 2,
             "status": "investigation-only; not a production or redistribution input",
             "source_repository": "PerseusDL/lexica", "source_revision": revision,
             "source_files": [{"path": f.relative_to(lexica).as_posix(), "sha256": sha256(f)} for f in files],
@@ -189,6 +244,8 @@ def run(lexica, repo, output):
             "baseline_only_examples": sorted(baseline - projected)[:20],
             "output_sha256": {name: sha256(output / f"{language}.{name}") for name in ("headers.jsonl", "lemmata", "skipped.tsv")},
         }
+        if language == "Latin":
+            report["curated_header_comparison"] = latin_header_comparison(repo, header_orths)
         (output / f"{language}.report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"{language}: {count} entries, {report['projected_rows']} projected, "
               f"{len(projected & baseline)}/{len(baseline)} baseline lemmas overlap")

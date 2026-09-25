@@ -4,6 +4,7 @@
 
 import importlib.util
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
 from lxml import etree
@@ -34,6 +35,14 @@ class LexicalProjectionTest(unittest.TestCase):
         self.assertEqual(record["projection_error"], "unsupported-character")
         self.assertEqual(record["fields"][1]["value"], "ἡ")
 
+    def test_latin_short_y_from_archival_tei(self):
+        entry = etree.fromstring('<entryFree key="Abdalonymus"><orth>Abdalonўmus</orth>'
+                                      '<itype>i</itype></entryFree>')
+        record, line = exports.project(entry, "Latin")
+        self.assertIsNone(record["projection_error"])
+        self.assertEqual(record["fields"][0]["value"], "Abdalonўmus")
+        self.assertIn("<orth>Abdalony^mus</orth>", line)
+
     def test_unknown_entity_is_not_silently_discarded(self):
         parser = etree.XMLParser(resolve_entities=False, load_dtd=False, no_network=True)
         entry = etree.fromstring(b'<!DOCTYPE entryFree [<!ENTITY x "value">]>'
@@ -41,6 +50,14 @@ class LexicalProjectionTest(unittest.TestCase):
         record, line = exports.project(entry, "Latin")
         self.assertIsNone(line)
         self.assertEqual(record["projection_error"], "unresolved-entity")
+
+    def test_curated_header_requires_immediately_adjacent_raw_line(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "ls.nom"
+            path.write_text("A^by^la\t\t\n:le:Abyla\n:no:A^by^l\ta_ae fem\n"
+                            ":le:other\nAbdalony^mus\t\n:le:Abdalonymus\n", encoding="utf-8")
+            self.assertEqual(exports.latin_baseline_header_orths(path),
+                             {"Abyla": {"A^by^la"}, "Abdalonymus": {"Abdalony^mus"}})
 
 
 if __name__ == "__main__":
