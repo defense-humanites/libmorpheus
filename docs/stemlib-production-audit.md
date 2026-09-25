@@ -253,6 +253,10 @@ stem sources. It should use this order:
 5. accept corpus changes only through a separately reviewed, attributed data
    upgrade.
 
+The first, isolated TEI header projection and its measured headword overlap
+are documented in [lexical-exports.md](lexical-exports.md). This investigation
+does not replace a production input or alter the release gate.
+
 ## Reproducibility blockers
 
 The following issues must be resolved before a regenerated tree can replace a
