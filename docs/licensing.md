@@ -56,6 +56,4 @@ file-level boundary. Source ancestry is recorded in
 [the provenance record](provenance.md); the current classification is recorded
 in [the license inventory](license-inventory.md).
 
-No file in this repository is relicensed from MPL-2.0 to CC BY-SA. Any future
-repository based on a separately accepted PerseusDL baseline requires its own
-provenance and licensing decision.
+No file in this repository is relicensed from MPL-2.0 to CC BY-SA.

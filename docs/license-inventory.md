@@ -72,9 +72,3 @@ notices on boundary files prevent their accidental inclusion in the AGPL set.
 The root `LICENSE-AGPL-3.0-or-later` mirrors the canonical text under
 `LICENSES/` solely for repository-level discovery and does not alter that
 default or any file classification.
-
-## Future PerseusDL-based repository
-
-This inventory makes no MPL-to-CC change. A future repository built from a
-separately accepted PerseusDL baseline will require a new inventory and must not
-infer its licensing from this one.
