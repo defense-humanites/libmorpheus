@@ -101,13 +101,14 @@ def project(entry, language):
         reason = reason or "missing-orth"
     first_orth = next((field for field in fields if field["name"] == "orth"), None)
     headword = lemma
-    if language == "Latin" and not reason:
+    if not reason:
         # In the original stream the inflected/quantified first orthography
         # is the leading token. The TEI key identifies the lemma but has no
-        # vowel quantities. Repeating the first orth as a field also invents
-        # an extra alternate stem in latnom's orth table.
+        # vowel quantities. Repeating the first orth as a field prevents
+        # newlems2 from seeing Greek gen/itype and invents an extra alternate
+        # stem in latnom's orth table.
         headword = first_orth["projection"].split()[0].strip(",;:")
-        if not KEY_PATTERN["Latin"].fullmatch(headword):
+        if not KEY_PATTERN[language].fullmatch(headword):
             reason = "unsupported-headword"
         elif re.search(r"#[1-9]$", lemma):
             headword += lemma[-2:]
@@ -120,7 +121,7 @@ def project(entry, language):
     # This projection is a comparison artifact, not a claim of byte identity.
     fragments = []
     for field in fields:
-        if language == "Latin" and field is first_orth:
+        if field is first_orth:
             continue
         name = field["name"]
         # The historical filters only recognize this precise alt spelling.

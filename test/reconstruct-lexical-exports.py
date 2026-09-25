@@ -28,6 +28,23 @@ class LexicalProjectionTest(unittest.TestCase):
         self.assertEqual(line, "a^bactus#2 \t<orth type=alt>a_bactus</orth>\t"
                          "<itype>u_s</itype>\t<gen>m.</gen>")
 
+    def test_greek_first_orth_precedes_gen_and_preserves_alternates(self):
+        entry = etree.fromstring(
+            '<entryFree key="logos2"><orth>lo/gos</orth>'
+            '<gen>o(</gen><orth type="alt">lo/gon</orth></entryFree>'
+        )
+        record, line = exports.project(entry, "Greek")
+        self.assertEqual(record["lemma"], "logos#2")
+        self.assertEqual(record["headword"], "lo/gos#2")
+        self.assertEqual(line, "lo/gos#2 \t<gen>o(</gen>\t<orth type=alt>lo/gon</orth>")
+
+    def test_greek_complex_first_orth_is_not_silently_truncated(self):
+        entry = etree.fromstring('<entryFree key="lego"><orth>le/gw,fw</orth>'
+                                 '<itype>e/</itype></entryFree>')
+        record, line = exports.project(entry, "Greek")
+        self.assertIsNone(line)
+        self.assertEqual(record["projection_error"], "unsupported-headword")
+
     def test_unsupported_character_is_retained_in_ir_but_not_projected(self):
         entry = etree.fromstring('<entryFree key="Aba"><orth>Aba</orth><gen>ἡ</gen></entryFree>')
         record, line = exports.project(entry, "Latin")
