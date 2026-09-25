@@ -233,3 +233,35 @@ for Latin, unequal shared lemmes more often retain at least one. The comparison
 does not identify whether a Greek difference comes from a spelling, quantity,
 paradigm, source-edition change or later hand edit. The next review must inspect
 those causes without treating normalized spellings as equivalent stems.
+
+### Greek quantity-mark trial
+
+The opt-in `--greek-spelling-diagnostic` compares additional signatures **only
+after** exact comparison has found no common stem line. It preserves each
+record's tag, morphology labels and multiplicity while removing `^` and `_`
+from the first stem token. A separate tier removes the other Beta Code
+diacritics; neither tier changes the exact-match counts or declares stem
+equivalence. In [the isolated trial](https://github.com/defense-humanites/libmorpheus/actions/runs/36179297779),
+16,110 of 16,271 disjoint nominal lemmes and 4,898 of 4,927 disjoint verbal
+lemmes have identical record multisets after removing just the two quantity
+marks. Of these, marks occur only on candidate stems for 14,692 nominal and
+4,867 verbal lemmes, only on the witnesses for 844 and 19, and on both sides
+for 574 and 12. The remaining disjoint groups need other explanations.
+
+The pinned TEI projection's first orthography contains `^` or `_` in 34,749
+Greek records; none of its projected header records has a separate `<quant>`
+field. A second private [workflow trial](https://github.com/defense-humanites/libmorpheus/actions/runs/36179903316)
+removed those marks from the first token of 35,263 split lines before
+`newlems`, leaving every other field intact. It then ran the same historical
+filters and exact multiset comparison:
+
+| Greek witness | Original exact groups | Quantity-suppressed exact groups | Newly exact | Previously exact lost |
+| --- | ---: | ---: | ---: | ---: |
+| `lsj.nom` | 28,345 | 43,123 | 14,779 | 1 |
+| `lsj.vbs` | 10,116 | 15,009 | 4,893 | 0 |
+
+This isolates a substantial quantity-notation difference between the TEI
+projection and committed stem snapshots. The variant is a diagnostic input,
+not a corrected LSJ export: quantities may matter to analysis, and the
+remaining differences and the one lost nominal match require entry-level
+review. Neither variant replaces the curated sources.

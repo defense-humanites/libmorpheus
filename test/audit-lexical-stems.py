@@ -61,6 +61,60 @@ class ComparisonTest(unittest.TestCase):
             self.assertEqual(differences["candidate_by_tag"][":de:"], 2)
             self.assertEqual(differences["reference_by_tag"][":de:"], 1)
 
+    def test_greek_spelling_probe_keeps_morphology_and_multiplicity(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            baseline = Path(directory) / "baseline"
+            candidate.write_text(":le:quantity\n:no:a_^ os_ou\n"
+                                 ":le:reference_quantity\n:no:a os_ou\n"
+                                 ":le:both_quantified\n:no:a^_ os_ou\n"
+                                 ":le:diacritics\n:no:a)/ os_ou\n"
+                                 ":le:stem\n:de:a) azw\n"
+                                 ":le:labels\n:no:a os_ou\n"
+                                 ":le:duplicate\n:no:a_^ os_ou\n:no:a_^ os_ou\n",
+                                 encoding="utf-8")
+            baseline.write_text(":le:quantity\n:no:a os_ou\n"
+                                ":le:reference_quantity\n:no:a_ os_ou\n"
+                                ":le:both_quantified\n:no:a__ os_ou\n"
+                                ":le:diacritics\n:no:a( os_ou\n"
+                                ":le:stem\n:de:b) azw\n"
+                                ":le:labels\n:no:b as_ou\n"
+                                ":le:duplicate\n:no:a os_ou\n",
+                                encoding="utf-8")
+            result = audit.compare(candidate, baseline, greek_spelling=True)
+            self.assertEqual(result["shared_lemma_outcomes"]["disjoint_stems"], 7)
+            self.assertEqual(result["disjoint_greek_spelling_diagnostic"], {
+                "quantity_marks_only": 3, "beta_code_diacritics": 1,
+                "same_tags_and_labels": 1, "same_labels_different_multiplicity": 1,
+                "different_tags_or_labels": 1,
+            })
+            self.assertEqual(result["quantity_only_difference_direction"], {
+                "lemma_mark_presence": {"candidate_only": 1, "reference_only": 1,
+                                        "both": 1, "neither": 0},
+                "stem_mark_counts": {"candidate_short": 2, "candidate_long": 2,
+                                     "reference_short": 0, "reference_long": 3},
+            })
+            self.assertNotIn("disjoint_greek_spelling_diagnostic",
+                             audit.compare(candidate, baseline))
+
+    def test_alternative_reports_exact_gains_and_losses(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            alternate = Path(directory) / "alternate"
+            baseline = Path(directory) / "baseline"
+            candidate.write_text(":le:alpha\n:no:x\n:le:beta\n:no:q\n"
+                                 ":le:gamma\n:no:z\n", encoding="utf-8")
+            alternate.write_text(":le:alpha\n:no:q\n:le:beta\n:no:y\n"
+                                 ":le:gamma\n:no:z\n:le:delta\n:no:q\n", encoding="utf-8")
+            baseline.write_text(":le:alpha\n:no:x\n:le:beta\n:no:y\n"
+                                ":le:gamma\n:no:z\n:le:delta\n:no:w\n", encoding="utf-8")
+            result = audit.compare_variants(candidate, alternate, baseline)
+            self.assertEqual(result["reference_lemmas_in_either_candidate"], 4)
+            self.assertEqual(result["exact_transitions"], {
+                "both_exact": 1, "original_only_exact": 1,
+                "alternate_only_exact": 1, "neither_exact": 1,
+            })
+
 
 if __name__ == "__main__":
     unittest.main()
