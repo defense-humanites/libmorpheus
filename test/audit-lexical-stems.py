@@ -61,6 +61,32 @@ class ComparisonTest(unittest.TestCase):
             self.assertEqual(differences["candidate_by_tag"][":de:"], 2)
             self.assertEqual(differences["reference_by_tag"][":de:"], 1)
 
+    def test_greek_spelling_probe_keeps_morphology_and_multiplicity(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            baseline = Path(directory) / "baseline"
+            candidate.write_text(":le:quantity\n:no:a_^ os_ou\n"
+                                 ":le:diacritics\n:no:a)/ os_ou\n"
+                                 ":le:stem\n:de:a) azw\n"
+                                 ":le:labels\n:no:a os_ou\n"
+                                 ":le:duplicate\n:no:a_^ os_ou\n:no:a_^ os_ou\n",
+                                 encoding="utf-8")
+            baseline.write_text(":le:quantity\n:no:a os_ou\n"
+                                ":le:diacritics\n:no:a( os_ou\n"
+                                ":le:stem\n:de:b) azw\n"
+                                ":le:labels\n:no:b as_ou\n"
+                                ":le:duplicate\n:no:a os_ou\n",
+                                encoding="utf-8")
+            result = audit.compare(candidate, baseline, greek_spelling=True)
+            self.assertEqual(result["shared_lemma_outcomes"]["disjoint_stems"], 5)
+            self.assertEqual(result["disjoint_greek_spelling_diagnostic"], {
+                "quantity_marks_only": 1, "beta_code_diacritics": 1,
+                "same_tags_and_labels": 1, "same_labels_different_multiplicity": 1,
+                "different_tags_or_labels": 1,
+            })
+            self.assertNotIn("disjoint_greek_spelling_diagnostic",
+                             audit.compare(candidate, baseline))
+
 
 if __name__ == "__main__":
     unittest.main()

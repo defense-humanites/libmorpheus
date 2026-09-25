@@ -11,9 +11,30 @@ from collections import Counter, defaultdict
 import hashlib
 import json
 from pathlib import Path
+import re
 
 
 STEM_TAGS = (":no:", ":aj:", ":wd:", ":vs:", ":de:", ":vb:")
+GREEK_DIACRITICS = r"\/=()+|'_^"
+
+
+def stem_signature(line, removed="", retain_stem=True):
+    """Keep the stem tag and morphology labels byte-for-byte for a diagnostic."""
+    payload = line[4:]
+    stem = re.match(r"\S*", payload).group()
+    labels = payload[len(stem):]
+    if retain_stem:
+        stem = stem.translate(str.maketrans("", "", removed))
+    else:
+        stem = ""
+    return line[:4] + stem + labels
+
+
+def diagnostic_group(group, removed="", retain_stem=True):
+    transformed = Counter()
+    for line, count in group.items():
+        transformed[stem_signature(line, removed, retain_stem)] += count
+    return transformed
 
 
 def read_stems(path):
@@ -46,13 +67,14 @@ def read_stems(path):
                     "stem_records": sum(sum(group.values()) for group in groups.values())}
 
 
-def compare(candidate, baseline):
+def compare(candidate, baseline, greek_spelling=False):
     produced, produced_meta = read_stems(candidate)
     reference, reference_meta = read_stems(baseline)
     common = produced.keys() & reference.keys()
     outcomes = Counter()
     candidate_excess = Counter()
     reference_excess = Counter()
+    spelling = Counter()
     intersecting = 0
     for key in common:
         left, right = produced[key], reference[key]
@@ -70,12 +92,24 @@ def compare(candidate, baseline):
             outcomes["reference_without_stems"] += 1
         elif not shared:
             outcomes["disjoint_stems"] += 1
+            if greek_spelling:
+                if diagnostic_group(left, "^_") == diagnostic_group(right, "^_"):
+                    spelling["quantity_marks_only"] += 1
+                elif diagnostic_group(left, GREEK_DIACRITICS) == diagnostic_group(right, GREEK_DIACRITICS):
+                    spelling["beta_code_diacritics"] += 1
+                elif diagnostic_group(left, retain_stem=False) == diagnostic_group(right, retain_stem=False):
+                    spelling["same_tags_and_labels"] += 1
+                elif (set(diagnostic_group(left, retain_stem=False)) ==
+                      set(diagnostic_group(right, retain_stem=False))):
+                    spelling["same_labels_different_multiplicity"] += 1
+                else:
+                    spelling["different_tags_or_labels"] += 1
         else:
             outcomes["partial_overlap"] += 1
     for name in ("exact", "candidate_without_stems", "reference_without_stems",
                  "disjoint_stems", "partial_overlap"):
         outcomes[name] += 0
-    return {"schema": 2,
+    report = {"schema": 3,
             "scope": "diagnostic; compare exact records, not analyzer behavior",
             "candidate": produced_meta, "reference": reference_meta,
             "common_lemmas": len(common),
@@ -88,16 +122,24 @@ def compare(candidate, baseline):
                 "candidate_by_tag": {tag: candidate_excess[tag] for tag in STEM_TAGS},
                 "reference_by_tag": {tag: reference_excess[tag] for tag in STEM_TAGS},
             }}
+    if greek_spelling:
+        report["disjoint_greek_spelling_diagnostic"] = {
+            name: spelling[name] for name in ("quantity_marks_only", "beta_code_diacritics",
+                                            "same_tags_and_labels", "same_labels_different_multiplicity",
+                                            "different_tags_or_labels")}
+    return report
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", required=True, type=Path)
     parser.add_argument("--baseline", required=True, type=Path)
+    parser.add_argument("--greek-spelling-diagnostic", action="store_true",
+                        help="count spelling-only signatures at disjoint Greek lemmes; never equate them")
     args = parser.parse_args()
     if args.candidate.resolve() == args.baseline.resolve():
         parser.error("candidate and baseline must be different files")
-    print(json.dumps(compare(args.candidate, args.baseline), sort_keys=True))
+    print(json.dumps(compare(args.candidate, args.baseline, args.greek_spelling_diagnostic), sort_keys=True))
 
 
 if __name__ == "__main__":
