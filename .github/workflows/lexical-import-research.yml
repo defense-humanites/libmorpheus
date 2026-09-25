@@ -43,7 +43,8 @@ jobs:
       - name: Build historical header and nominal filters in isolation
         run: |
           mkdir "$RUNNER_TEMP/legacy-filters"
-          for scanner in splitlems fixhesc fixgend latnom; do
+          for scanner in splitlems fixhesc fixgend latnom \
+            combitype splitlat conj1 latvb; do
             flex -o "$RUNNER_TEMP/legacy-filters/$scanner.c" \
               "src/gkdict/$scanner.l"
             gcc -std=gnu89 -w \
@@ -69,6 +70,13 @@ jobs:
           timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
             < "$RUNNER_TEMP/lexical-stage/Latin.filtered" \
             > "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic"
+          # The other original path likewise omits the missing vtags selector.
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+            > "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic"
           python3 - <<'PY'
           import json
           import os
@@ -97,3 +105,6 @@ jobs:
           python3 tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic" \
             --baseline stemlib/Latin/stemsrc/ls.nom
+          python3 tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic" \
+            --baseline stemlib/Latin/stemsrc/vbs.latin

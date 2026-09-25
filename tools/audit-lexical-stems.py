@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 
-STEM_TAGS = (":no:", ":aj:", ":wd:")
+STEM_TAGS = (":no:", ":aj:", ":wd:", ":vs:", ":de:", ":vb:")
 
 
 def read_stems(path):

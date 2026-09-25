@@ -30,6 +30,16 @@ class ComparisonTest(unittest.TestCase):
             self.assertEqual(result["reference_only_lemmas"], 1)
             self.assertEqual(result["candidate_only_lemmas"], 0)
 
+    def test_verb_derivation_tags_are_counted(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            baseline = Path(directory) / "baseline"
+            candidate.write_text(":le:amo\n:vs:am\tconj1\n:de:ama\tare_vb\n", encoding="utf-8")
+            baseline.write_text(":le:amo\n:de:ama\tare_vb\n:vs:am\tconj1\n", encoding="utf-8")
+            result = audit.compare(candidate, baseline)
+            self.assertEqual(result["equal_record_multisets_at_common_lemmas"], 1)
+            self.assertEqual(result["exact_shared_stem_records_with_multiplicity"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()
