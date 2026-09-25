@@ -99,7 +99,20 @@ def project(entry, language):
                            "projection": value})
     if not any(field["name"] == "orth" for field in fields):
         reason = reason or "missing-orth"
+    first_orth = next((field for field in fields if field["name"] == "orth"), None)
+    headword = lemma
+    if language == "Latin" and not reason:
+        # In the original stream the inflected/quantified first orthography
+        # is the leading token. The TEI key identifies the lemma but has no
+        # vowel quantities. Repeating the first orth as a field also invents
+        # an extra alternate stem in latnom's orth table.
+        headword = first_orth["projection"].split()[0].strip(",;:")
+        if not KEY_PATTERN["Latin"].fullmatch(headword):
+            reason = "unsupported-headword"
+        elif re.search(r"#[1-9]$", lemma):
+            headword += lemma[-2:]
     record = {"schema": 1, "source_key": key, "lemma": lemma if not reason else None,
+              "headword": headword if not reason else None,
               "fields": fields, "projection_error": reason}
     if reason:
         return record, None
@@ -107,12 +120,14 @@ def project(entry, language):
     # This projection is a comparison artifact, not a claim of byte identity.
     fragments = []
     for field in fields:
+        if language == "Latin" and field is first_orth:
+            continue
         name = field["name"]
         # The historical filters only recognize this precise alt spelling.
         tag = "<orth type=alt>" if name == "orth" and field["type"] == "alt" else f"<{name}>"
         value = field["projection"].replace("&", "&amp;").replace("<", "&lt;")
         fragments.append(f"{tag}{value}</{name}>")
-    return record, lemma + " \t" + "\t".join(fragments)
+    return record, headword + " \t" + "\t".join(fragments)
 
 
 def baseline_lemmas(repo, language):
@@ -176,7 +191,7 @@ def sha256(path):
     return digest.hexdigest()
 
 
-def run(lexica, repo, output):
+def run(lexica, repo, output, languages=("Greek", "Latin")):
     revision = subprocess.check_output(["git", "-C", str(lexica), "rev-parse", "HEAD"], text=True).strip()
     if revision != LEXICA_REVISION:
         raise ValueError(f"lexica revision {revision} differs from pinned {LEXICA_REVISION}")
@@ -188,7 +203,8 @@ def run(lexica, repo, output):
     if output.exists():
         raise ValueError(f"stage already exists: {output}")
     sources = {}
-    for language, (subdir, pattern) in SOURCE_DIRS.items():
+    for language in languages:
+        subdir, pattern = SOURCE_DIRS[language]
         files = sorted((lexica / "CTS_XML_TEI/perseus/pdllex" / subdir).glob(pattern), key=numbered_path)
         if not files or (language == "Latin" and len(files) != 1) or (language == "Greek" and len(files) != 27):
             raise ValueError(f"incomplete {language} TEI edition: {len(files)} files")
@@ -256,11 +272,14 @@ def main():
     parser.add_argument("--lexica", type=Path, required=True, help="local PerseusDL/lexica checkout at the pinned revision")
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--output", type=Path, required=True, help="fresh, private staging directory outside the source checkout")
+    parser.add_argument("--language", choices=("Greek", "Latin", "both"), default="both",
+                        help="project a single edition without downloading the other")
     args = parser.parse_args()
     if args.output.resolve().is_relative_to(args.repo.resolve()) or args.output.resolve().is_relative_to(args.lexica.resolve()):
         parser.error("output must be outside both source checkouts")
     try:
-        run(args.lexica, args.repo, args.output)
+        languages = ("Greek", "Latin") if args.language == "both" else (args.language,)
+        run(args.lexica, args.repo, args.output, languages)
     except (ValueError, OSError, etree.XMLSyntaxError) as exc:
         parser.error(str(exc))
 
