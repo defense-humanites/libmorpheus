@@ -14,7 +14,9 @@ from pathlib import Path
 import runpy
 
 
-read_stems = runpy.run_path(str(Path(__file__).with_name("audit-lexical-stems.py")))["read_stems"]
+stem_audit = runpy.run_path(str(Path(__file__).with_name("audit-lexical-stems.py")))
+read_stems = stem_audit["read_stems"]
+STEM_TAGS = tuple(tag.encode() for tag in stem_audit["STEM_TAGS"])
 
 
 def source_headers(path):
@@ -30,13 +32,19 @@ def source_headers(path):
     return headers, digest.hexdigest()
 
 
-def lemma_markers(path):
+def marker_locations(path):
     counts = Counter()
+    locations = defaultdict(lambda: defaultdict(set))
+    current = None
     with path.open("rb") as source:
         for line in source:
             if line.startswith(b":le:"):
-                counts[line[4:].decode("utf-8", errors="replace").strip()] += 1
-    return counts
+                current = line[4:].decode("utf-8", errors="replace").strip()
+                counts[current] += 1
+            elif current is not None and line.startswith(STEM_TAGS):
+                locations[current][line.decode("utf-8", errors="replace").rstrip("\r\n")].add(
+                    counts[current] - 1)
+    return counts, locations
 
 
 def audit(candidate, original, baseline, headers):
@@ -44,15 +52,16 @@ def audit(candidate, original, baseline, headers):
     previous, previous_meta = read_stems(original)
     reference, reference_meta = read_stems(baseline)
     source, source_digest = source_headers(headers)
-    candidate_markers = lemma_markers(candidate)
-    reference_markers = lemma_markers(baseline)
+    candidate_markers, candidate_locations = marker_locations(candidate)
+    reference_markers, reference_locations = marker_locations(baseline)
     counts = {"candidate": Counter(), "reference": Counter()}
     for lemma in produced.keys() & reference.keys():
         left, right = produced[lemma], reference[lemma]
         if not (left & right) or left == right:
             continue
-        for side, excess, opposite in (("candidate", left - right, right),
-                                       ("reference", right - left, left)):
+        for side, excess, opposite, locations in (
+                ("candidate", left - right, right, candidate_locations),
+                ("reference", right - left, left, reference_locations)):
             novel = {line: n for line, n in excess.items() if line not in opposite}
             if not novel:
                 continue
@@ -63,6 +72,10 @@ def audit(candidate, original, baseline, headers):
                 min(n, previous.get(lemma, {}).get(line, 0)) for line, n in novel.items())
             report["candidate_multiple_lemma_markers"] += candidate_markers[lemma] > 1
             report["reference_multiple_lemma_markers"] += reference_markers[lemma] > 1
+            for line in novel:
+                positions = locations[lemma][line]
+                report["novel_lines_in_later_marker"] += any(index > 0 for index in positions)
+                report["novel_lines_only_in_first_marker"] += positions == {0}
             entries = source.get(lemma, [])
             report["projected_key_matches_" + ("zero" if not entries else
                                                "one" if len(entries) == 1 else "multiple")] += 1
@@ -73,6 +86,7 @@ def audit(candidate, original, baseline, headers):
                     field["name"] == tag for fields in entries for field in fields)
     keys = ("lemma_groups", "novel_records", "records_in_original_candidate",
             "candidate_multiple_lemma_markers", "reference_multiple_lemma_markers",
+            "novel_lines_in_later_marker", "novel_lines_only_in_first_marker",
             "projected_key_matches_zero", "projected_key_matches_one",
             "projected_key_matches_multiple", "any_multiple_orth", "any_gen", "any_itype")
     return {"schema": 1, "scope": "aggregate diagnostic; projected key match is not provenance",

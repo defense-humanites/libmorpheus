@@ -39,6 +39,7 @@ class PartialNoveltyTest(unittest.TestCase):
             self.assertEqual(result["candidate"], {
                 "lemma_groups": 1, "novel_records": 1, "records_in_original_candidate": 1,
                 "candidate_multiple_lemma_markers": 0, "reference_multiple_lemma_markers": 0,
+                "novel_lines_in_later_marker": 0, "novel_lines_only_in_first_marker": 1,
                 "projected_key_matches_zero": 0, "projected_key_matches_one": 1,
                 "projected_key_matches_multiple": 0, "any_multiple_orth": 1,
                 "any_gen": 1, "any_itype": 0,
@@ -46,6 +47,7 @@ class PartialNoveltyTest(unittest.TestCase):
             self.assertEqual(result["reference"], {
                 "lemma_groups": 1, "novel_records": 1, "records_in_original_candidate": 1,
                 "candidate_multiple_lemma_markers": 0, "reference_multiple_lemma_markers": 1,
+                "novel_lines_in_later_marker": 1, "novel_lines_only_in_first_marker": 0,
                 "projected_key_matches_zero": 0, "projected_key_matches_one": 1,
                 "projected_key_matches_multiple": 0, "any_multiple_orth": 0,
                 "any_gen": 0, "any_itype": 1,
