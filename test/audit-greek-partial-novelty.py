@@ -26,7 +26,7 @@ class PartialNoveltyTest(unittest.TestCase):
             original.write_text(":le:alpha\n:no:common\n:no:new\n"
                                 ":le:beta\n:no:common\n:no:old\n", encoding="utf-8")
             baseline.write_text(":le:alpha\n:no:common\n"
-                                ":le:beta\n:no:common\n:no:old\n"
+                                ":le:beta\n:no:common\n:le:beta\n:no:old\n"
                                 ":le:gamma\n:no:common\n", encoding="utf-8")
             headers.write_text("".join(json.dumps(row) + "\n" for row in (
                 {"lemma": "alpha", "projection_error": None,
@@ -38,12 +38,14 @@ class PartialNoveltyTest(unittest.TestCase):
             result = audit(candidate, original, baseline, headers)["partial_novelty"]
             self.assertEqual(result["candidate"], {
                 "lemma_groups": 1, "novel_records": 1, "records_in_original_candidate": 1,
+                "candidate_multiple_lemma_markers": 0, "reference_multiple_lemma_markers": 0,
                 "projected_key_matches_zero": 0, "projected_key_matches_one": 1,
                 "projected_key_matches_multiple": 0, "any_multiple_orth": 1,
                 "any_gen": 1, "any_itype": 0,
             })
             self.assertEqual(result["reference"], {
                 "lemma_groups": 1, "novel_records": 1, "records_in_original_candidate": 1,
+                "candidate_multiple_lemma_markers": 0, "reference_multiple_lemma_markers": 1,
                 "projected_key_matches_zero": 0, "projected_key_matches_one": 1,
                 "projected_key_matches_multiple": 0, "any_multiple_orth": 0,
                 "any_gen": 0, "any_itype": 1,

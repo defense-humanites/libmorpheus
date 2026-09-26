@@ -30,11 +30,22 @@ def source_headers(path):
     return headers, digest.hexdigest()
 
 
+def lemma_markers(path):
+    counts = Counter()
+    with path.open("rb") as source:
+        for line in source:
+            if line.startswith(b":le:"):
+                counts[line[4:].decode("utf-8", errors="replace").strip()] += 1
+    return counts
+
+
 def audit(candidate, original, baseline, headers):
     produced, produced_meta = read_stems(candidate)
     previous, previous_meta = read_stems(original)
     reference, reference_meta = read_stems(baseline)
     source, source_digest = source_headers(headers)
+    candidate_markers = lemma_markers(candidate)
+    reference_markers = lemma_markers(baseline)
     counts = {"candidate": Counter(), "reference": Counter()}
     for lemma in produced.keys() & reference.keys():
         left, right = produced[lemma], reference[lemma]
@@ -50,6 +61,8 @@ def audit(candidate, original, baseline, headers):
             report["novel_records"] += sum(novel.values())
             report["records_in_original_candidate"] += sum(
                 min(n, previous.get(lemma, {}).get(line, 0)) for line, n in novel.items())
+            report["candidate_multiple_lemma_markers"] += candidate_markers[lemma] > 1
+            report["reference_multiple_lemma_markers"] += reference_markers[lemma] > 1
             entries = source.get(lemma, [])
             report["projected_key_matches_" + ("zero" if not entries else
                                                "one" if len(entries) == 1 else "multiple")] += 1
@@ -59,6 +72,7 @@ def audit(candidate, original, baseline, headers):
                 report["any_" + tag] += any(
                     field["name"] == tag for fields in entries for field in fields)
     keys = ("lemma_groups", "novel_records", "records_in_original_candidate",
+            "candidate_multiple_lemma_markers", "reference_multiple_lemma_markers",
             "projected_key_matches_zero", "projected_key_matches_one",
             "projected_key_matches_multiple", "any_multiple_orth", "any_gen", "any_itype")
     return {"schema": 1, "scope": "aggregate diagnostic; projected key match is not provenance",
