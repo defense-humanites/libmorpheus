@@ -33,17 +33,19 @@ class DisjointTriageTest(unittest.TestCase):
                                 ":le:diacritics\n:no:a( os_ou\n"
                                 ":le:multiplicity\n:no:xyz os_ou\n", encoding="utf-8")
             headers.write_text("".join(json.dumps(row) + "\n" for row in (
-                {"lemma": "stem", "projection_error": None,
+                {"lemma": "source_key", "headword": "ste^m", "projection_error": None,
                  "fields": [{"name": "orth"}, {"name": "orth"}, {"name": "gen"}]},
-                {"lemma": "tag", "projection_error": None,
+                {"lemma": "tag", "headword": "tag", "projection_error": None,
                  "fields": [{"name": "orth"}, {"name": "itype"}]},
-                {"lemma": "multiplicity", "projection_error": None,
+                {"lemma": "multiplicity", "headword": "multiplicity", "projection_error": None,
                  "fields": [{"name": "orth"}]},
             )), encoding="utf-8")
             result = audit(candidate, baseline, headers)
             groups = result["non_quantity_disjoint"]
             self.assertEqual(sum(row["lemma_groups"] for row in groups.values()), 5)
             self.assertEqual(groups["same_tags_and_labels"]["reference_multiple_lemma_markers"], 1)
+            self.assertEqual(groups["same_tags_and_labels"]["projected_key_matches_zero"], 1)
+            self.assertEqual(groups["same_tags_and_labels"]["key_miss_first_orth_match"], 1)
             self.assertEqual(groups["same_tags_and_labels"]["any_multiple_orth"], 1)
             self.assertEqual(groups["same_labels_different_multiplicity"]["lemma_groups"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["lemma_groups"], 1)
