@@ -334,3 +334,23 @@ entries and later curation are both possible explanations. The audit does not
 identify which explanation applies to any individual lemma. Review the 19
 additional nominal lines against their TEI headers and the curated witness
 privately before changing the importer or a snapshot.
+
+### Locating the 19 distinct nominal lines
+
+An [aggregate-only provenance probe](https://github.com/defense-humanites/libmorpheus/actions/runs/36263114376)
+examines just the 19 distinct lines in the quantity-suppressed trial. One is
+extra in the candidate and was already present in the original candidate;
+the other 18 occur only in the curated witness and in neither candidate. All
+19 lemmes have exactly one projected TEI header with the same key. This is a
+key match, not proof that a particular stem line came from that header.
+
+The candidate-only line occurs under a later `:le:` marker for its lemma;
+the candidate has multiple markers, whereas the witness has one. Of the 18
+witness-only lines, 17 lemmes have multiple `:le:` markers in the witness;
+16 lines occur in a later marker block. Two occur only in the first block,
+including the one lemma with a single witness marker. Eight matching TEI
+headers include `<gen>`, eleven include `<itype>` (one has both), and one has
+multiple `<orth>` fields. These counts prioritize a private comparison of
+the repeated marker blocks and the two first-block exceptions. They do not
+identify whether a difference arose from another source edition, a historical
+import step or later curation.

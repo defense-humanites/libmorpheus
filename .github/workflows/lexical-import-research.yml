@@ -313,6 +313,12 @@ jobs:
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
+          python3 ../../test/audit-greek-partial-novelty.py
+          python3 ../../tools/audit-greek-partial-novelty.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
+            --original-candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
+            --baseline stemsrc/lsj.nom \
+            --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
