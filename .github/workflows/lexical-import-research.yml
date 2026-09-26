@@ -307,10 +307,12 @@ jobs:
           cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal"
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
-            --baseline stemsrc/lsj.nom
+            --baseline stemsrc/lsj.nom \
+            --greek-spelling-diagnostic
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
-            --baseline stemsrc/lsj.vbs
+            --baseline stemsrc/lsj.vbs \
+            --greek-spelling-diagnostic
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
