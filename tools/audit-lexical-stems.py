@@ -46,6 +46,24 @@ def quantity_marks(group):
     return counts
 
 
+def spelling_difference(left, right):
+    """Classify unmatched multisets without treating normalized stems as equal."""
+    if not left:
+        return "reference_extra_only"
+    if not right:
+        return "candidate_extra_only"
+    if diagnostic_group(left, "^_") == diagnostic_group(right, "^_"):
+        return "quantity_marks_only"
+    if diagnostic_group(left, GREEK_DIACRITICS) == diagnostic_group(right, GREEK_DIACRITICS):
+        return "beta_code_diacritics"
+    if diagnostic_group(left, retain_stem=False) == diagnostic_group(right, retain_stem=False):
+        return "same_tags_and_labels"
+    if (set(diagnostic_group(left, retain_stem=False)) ==
+            set(diagnostic_group(right, retain_stem=False))):
+        return "same_labels_different_multiplicity"
+    return "different_tags_or_labels"
+
+
 def read_stems(path):
     groups = defaultdict(Counter)
     entries = 0
@@ -84,6 +102,7 @@ def compare(candidate, baseline, greek_spelling=False):
     candidate_excess = Counter()
     reference_excess = Counter()
     spelling = Counter()
+    partial_spelling = Counter()
     quantity_presence = Counter()
     quantity_totals = Counter()
     intersecting = 0
@@ -104,8 +123,9 @@ def compare(candidate, baseline, greek_spelling=False):
         elif not shared:
             outcomes["disjoint_stems"] += 1
             if greek_spelling:
-                if diagnostic_group(left, "^_") == diagnostic_group(right, "^_"):
-                    spelling["quantity_marks_only"] += 1
+                classification = spelling_difference(left, right)
+                spelling[classification] += 1
+                if classification == "quantity_marks_only":
                     left_marks, right_marks = quantity_marks(left), quantity_marks(right)
                     presence = ("both" if sum(left_marks.values()) and sum(right_marks.values()) else
                                 "candidate_only" if sum(left_marks.values()) else
@@ -114,21 +134,14 @@ def compare(candidate, baseline, greek_spelling=False):
                     for mark, label in (("^", "short"), ("_", "long")):
                         quantity_totals[f"candidate_{label}"] += left_marks[mark]
                         quantity_totals[f"reference_{label}"] += right_marks[mark]
-                elif diagnostic_group(left, GREEK_DIACRITICS) == diagnostic_group(right, GREEK_DIACRITICS):
-                    spelling["beta_code_diacritics"] += 1
-                elif diagnostic_group(left, retain_stem=False) == diagnostic_group(right, retain_stem=False):
-                    spelling["same_tags_and_labels"] += 1
-                elif (set(diagnostic_group(left, retain_stem=False)) ==
-                      set(diagnostic_group(right, retain_stem=False))):
-                    spelling["same_labels_different_multiplicity"] += 1
-                else:
-                    spelling["different_tags_or_labels"] += 1
         else:
             outcomes["partial_overlap"] += 1
+            if greek_spelling:
+                partial_spelling[spelling_difference(left - right, right - left)] += 1
     for name in ("exact", "candidate_without_stems", "reference_without_stems",
                  "disjoint_stems", "partial_overlap"):
         outcomes[name] += 0
-    report = {"schema": 3,
+    report = {"schema": 4,
             "scope": "diagnostic; compare exact records, not analyzer behavior",
             "candidate": produced_meta, "reference": reference_meta,
             "common_lemmas": len(common),
@@ -146,6 +159,11 @@ def compare(candidate, baseline, greek_spelling=False):
             name: spelling[name] for name in ("quantity_marks_only", "beta_code_diacritics",
                                             "same_tags_and_labels", "same_labels_different_multiplicity",
                                             "different_tags_or_labels")}
+        report["partial_greek_residual_diagnostic"] = {
+            name: partial_spelling[name] for name in
+            ("candidate_extra_only", "reference_extra_only", "quantity_marks_only",
+             "beta_code_diacritics", "same_tags_and_labels",
+             "same_labels_different_multiplicity", "different_tags_or_labels")}
         report["quantity_only_difference_direction"] = {
             "lemma_mark_presence": {name: quantity_presence[name] for name in
                                     ("candidate_only", "reference_only", "both", "neither")},
