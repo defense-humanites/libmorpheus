@@ -42,7 +42,7 @@ class DisjointTriageTest(unittest.TestCase):
                  "fields": [{"name": "orth", "projection": "multiplicity"}]},
                 {"lemma": "other", "headword": "other", "projection_error": None,
                  "fields": [{"name": "orth", "projection": "other"},
-                            {"name": "orth", "projection": "diacritics"}]},
+                            {"name": "orth", "projection": "diacritics", "type": "alt"}]},
             )), encoding="utf-8")
             split.write_text("stem\t<gen>x</gen>\n"
                              "diacritics\t<gen>x</gen>\n"
@@ -55,6 +55,8 @@ class DisjointTriageTest(unittest.TestCase):
             self.assertEqual(groups["same_tags_and_labels"]["key_miss_first_orth_match"], 1)
             self.assertEqual(groups["same_tags_and_labels"]["any_multiple_orth"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["key_and_first_orth_miss_any_orth_match"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["later_orth_type_alt"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["candidate_tags"][":no:"], 1)
             self.assertEqual(groups["different_tags_or_labels"]["no_header_orth_but_split_token_match"], 1)
             self.assertEqual(groups["same_labels_different_multiplicity"]["lemma_groups"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["lemma_groups"], 1)

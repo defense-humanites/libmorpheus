@@ -32,6 +32,7 @@ def audit(candidate, baseline, headers, split):
     source, source_digest = PARTIAL_AUDIT["source_headers"](headers)
     first_orth = defaultdict(list)
     all_orth = defaultdict(list)
+    later_orth_types = defaultdict(list)
     with headers.open(encoding="utf-8") as input_headers:
         for raw in input_headers:
             row = json.loads(raw)
@@ -39,10 +40,15 @@ def audit(candidate, baseline, headers, split):
                 continue
             spelling = legacy_lemma_spelling(row["headword"])
             first_orth[spelling].append(row["fields"])
+            orth_index = 0
             for field in row["fields"]:
                 if field["name"] == "orth":
                     token = field["projection"].split()[0].strip(",;:")
-                    all_orth[legacy_lemma_spelling(token)].append(row["fields"])
+                    normalized = legacy_lemma_spelling(token)
+                    all_orth[normalized].append(row["fields"])
+                    if orth_index > 0:
+                        later_orth_types[normalized].append(field.get("type"))
+                    orth_index += 1
     split_lemmas = Counter()
     split_digest = hashlib.sha256()
     with split.open("rb") as input_split:
@@ -64,6 +70,8 @@ def audit(candidate, baseline, headers, split):
             continue
         report = classes[kind]
         report["lemma_groups"] += 1
+        for tag in {line[:4] for line in left}:
+            report["candidate_tag_" + tag] += 1
         report["candidate_multiple_lemma_markers"] += candidate_markers[lemma] > 1
         report["reference_multiple_lemma_markers"] += reference_markers[lemma] > 1
         entries = source.get(lemma, [])
@@ -76,6 +84,11 @@ def audit(candidate, baseline, headers, split):
         if not entries:
             entries = first_orth[lemma]
         report["any_orth_match"] += bool(all_orth[lemma])
+        types = later_orth_types[lemma]
+        report["later_orth_match"] += bool(types)
+        report["later_orth_untyped"] += any(value is None for value in types)
+        report["later_orth_type_alt"] += any(value == "alt" for value in types)
+        report["later_orth_other_type"] += any(value not in (None, "alt") for value in types)
         report["split_token_match"] += bool(split_lemmas[lemma])
         report["key_and_first_orth_miss_any_orth_match"] += (
             not source.get(lemma) and not orth_count and bool(all_orth[lemma]))
@@ -104,13 +117,17 @@ def audit(candidate, baseline, headers, split):
             "any_orth_match", "split_token_match",
             "key_and_first_orth_miss_any_orth_match",
             "no_header_orth_but_split_token_match",
+            "later_orth_match", "later_orth_untyped",
+            "later_orth_type_alt", "later_orth_other_type",
             "any_multiple_orth", "any_gen", "any_itype")
     return {"schema": 1, "scope": "aggregate triage; no normalized stem equivalence",
             "input_sha256": {"candidate": produced_meta["sha256"],
                              "reference": reference_meta["sha256"],
                              "headers": source_digest, "split": split_digest.hexdigest()},
             "non_quantity_disjoint": {
-                name: {key: classes[name][key] for key in keys}
+                name: {**{key: classes[name][key] for key in keys},
+                       "candidate_tags": {tag: classes[name]["candidate_tag_" + tag]
+                                          for tag in STEM_AUDIT["STEM_TAGS"]}}
                 for name in ("beta_code_diacritics", "same_tags_and_labels",
                              "same_labels_different_multiplicity", "different_tags_or_labels")},
             "different_tags_or_labels": {
