@@ -265,3 +265,28 @@ projection and committed stem snapshots. The variant is a diagnostic input,
 not a corrected LSJ export: quantities may matter to analysis, and the
 remaining differences and the one lost nominal match require entry-level
 review. Neither variant replaces the curated sources.
+
+[A follow-up of the same private trial](https://github.com/defense-humanites/libmorpheus/actions/runs/36233955694)
+applied the spelling diagnostic to the quantity-suppressed outputs. Among
+shared lemmes, the nominal variant has 43,123 exact groups, 1,560 groups with
+no identical stem line, and 74 with partial overlap. The verbal variant has
+15,009 exact groups, 31 with no identical stem line, and 27 with partial
+overlap. The disjoint groups break down as follows; these are diagnostic
+signatures, not accepted equivalences:
+
+| Disjoint-group signature after suppressing first-token quantity | Nominal | Verbal |
+| --- | ---: | ---: |
+| Equal after removing remaining `^` and `_` | 1,410 | 31 |
+| Equal after removing other Beta Code diacritics as well | 12 | 0 |
+| Same tags and labels, different stem spelling | 87 | 0 |
+| Same tags and labels, different multiplicity | 1 | 0 |
+| Different tags or labels | 50 | 0 |
+
+Of the 1,410 nominal quantity-only groups, marks occur only in the curated
+witness for 1,307 lemmes, only in the variant for 60, and on both sides for
+43. All 31 verbal quantity-only groups have marks only in the witness.
+Suppressing the projected first-token marks therefore cannot make these
+groups exact. The 150 other disjoint nominal groups, the partial-overlap
+groups, and the changed lemma inventories still need entry-level review;
+quantity normalization alone does not explain them. Keep the variant private
+and retain both quantity-bearing curated snapshots for analyzer checks.
