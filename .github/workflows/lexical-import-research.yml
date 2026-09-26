@@ -319,6 +319,11 @@ jobs:
             --original-candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
+          python3 ../../test/audit-greek-disjoint-triage.py
+          python3 ../../tools/audit-greek-disjoint-triage.py \
+            --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
+            --baseline stemsrc/lsj.nom \
+            --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
