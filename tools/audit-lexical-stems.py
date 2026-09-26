@@ -103,6 +103,8 @@ def compare(candidate, baseline, greek_spelling=False):
     reference_excess = Counter()
     spelling = Counter()
     partial_spelling = Counter()
+    partial_residual_tags = {"candidate": Counter(), "reference": Counter()}
+    partial_residual_origin = {"candidate": Counter(), "reference": Counter()}
     quantity_presence = Counter()
     quantity_totals = Counter()
     intersecting = 0
@@ -138,10 +140,17 @@ def compare(candidate, baseline, greek_spelling=False):
             outcomes["partial_overlap"] += 1
             if greek_spelling:
                 partial_spelling[spelling_difference(left - right, right - left)] += 1
+                for side, residual, other in (
+                        ("candidate", left - right, right),
+                        ("reference", right - left, left)):
+                    for line, count in residual.items():
+                        partial_residual_tags[side][line[:4]] += count
+                        kind = "duplicate_shared_line" if line in other else "new_line"
+                        partial_residual_origin[side][kind] += count
     for name in ("exact", "candidate_without_stems", "reference_without_stems",
                  "disjoint_stems", "partial_overlap"):
         outcomes[name] += 0
-    report = {"schema": 4,
+    report = {"schema": 5,
             "scope": "diagnostic; compare exact records, not analyzer behavior",
             "candidate": produced_meta, "reference": reference_meta,
             "common_lemmas": len(common),
@@ -164,6 +173,11 @@ def compare(candidate, baseline, greek_spelling=False):
             ("candidate_extra_only", "reference_extra_only", "quantity_marks_only",
              "beta_code_diacritics", "same_tags_and_labels",
              "same_labels_different_multiplicity", "different_tags_or_labels")}
+        report["partial_greek_residual_records"] = {
+            side: {"by_tag": {tag: partial_residual_tags[side][tag] for tag in STEM_TAGS},
+                   "duplicate_shared_line": partial_residual_origin[side]["duplicate_shared_line"],
+                   "new_line": partial_residual_origin[side]["new_line"]}
+            for side in ("candidate", "reference")}
         report["quantity_only_difference_direction"] = {
             "lemma_mark_presence": {name: quantity_presence[name] for name in
                                     ("candidate_only", "reference_only", "both", "neither")},

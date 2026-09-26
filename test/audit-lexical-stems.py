@@ -104,6 +104,8 @@ class ComparisonTest(unittest.TestCase):
             examples = {
                 "candidate_extra": ([":no:common", ":no:extra"], [":no:common"]),
                 "reference_extra": ([":no:common"], [":no:common", ":no:extra"]),
+                "candidate_duplicate": ([":no:common", ":no:common"], [":no:common"]),
+                "reference_duplicate": ([":no:common"], [":no:common", ":no:common"]),
                 "quantity": ([":no:common", ":no:a^ os_ou"],
                              [":no:common", ":no:a os_ou"]),
                 "diacritics": ([":no:common", ":no:a)/ os_ou"],
@@ -120,13 +122,18 @@ class ComparisonTest(unittest.TestCase):
                                         "\n".join(records[index]) + "\n"
                                         for lemma, records in examples.items()), encoding="utf-8")
             result = audit.compare(candidate, baseline, greek_spelling=True)
-            self.assertEqual(result["shared_lemma_outcomes"]["partial_overlap"], 7)
+            self.assertEqual(result["shared_lemma_outcomes"]["partial_overlap"], 9)
             self.assertEqual(result["partial_greek_residual_diagnostic"], {
-                "candidate_extra_only": 1, "reference_extra_only": 1,
+                "candidate_extra_only": 2, "reference_extra_only": 2,
                 "quantity_marks_only": 1, "beta_code_diacritics": 1,
                 "same_tags_and_labels": 1, "same_labels_different_multiplicity": 1,
                 "different_tags_or_labels": 1,
             })
+            for side, novel in (("candidate", 7), ("reference", 6)):
+                residual = result["partial_greek_residual_records"][side]
+                self.assertEqual(residual["new_line"], novel)
+                self.assertEqual(residual["duplicate_shared_line"], 1)
+                self.assertEqual(residual["by_tag"][":no:"], novel + 1)
             self.assertNotIn("partial_greek_residual_diagnostic",
                              audit.compare(candidate, baseline))
 

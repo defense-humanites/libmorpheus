@@ -119,7 +119,7 @@ runs both Latin chains in an ephemeral runner. It uploads no artifacts and
 prints only aggregate counts and SHA-256 digests. `tools/audit-lexical-stems.py`
 compares exact colon-tagged stem records by lemma as multisets, preserving
 duplicate records. It does not use an edit-distance or normalized-spelling
-threshold to declare stem equivalence. Its schema 4 diagnostic also counts
+threshold to declare stem equivalence. Its schema 5 diagnostic also counts
 shared lemmes with no common stem line, those with partial overlap, and
 unmatched records by tag. It prints only aggregate counts and digests.
 
@@ -313,3 +313,24 @@ groups with residual lines on both sides after exact lines were subtracted:
 These groups require a review of missing or additional records rather than
 another spelling normalization. The counts are per lemma, not numbers of
 unmatched stem lines; they do not establish which side is correct.
+
+[A further aggregate audit](https://github.com/defense-humanites/libmorpheus/actions/runs/36237959564)
+counted the unmatched lines by tag and checked whether each repeats a line
+already shared by that lemma. In these trials every partial-overlap group has
+exactly **one** unmatched line:
+
+| Greek trial | Candidate: repeated / new lines | Witness: repeated / new lines | Residual tags |
+| --- | ---: | ---: | --- |
+| Original nominal | 6 / 2 | 35 / 14 | 49 `:no:`, 8 `:aj:` |
+| Original verbal | 3 / 0 | 20 / 0 | 23 `:de:` |
+| Quantity-suppressed nominal | 9 / 1 | 46 / 18 | 66 `:no:`, 8 `:aj:` |
+| Quantity-suppressed verbal | 3 / 0 | 24 / 0 | 27 `:de:` |
+
+For the quantity-suppressed variant, 82 of 101 partial-overlap groups therefore
+have only a multiplicity difference in an already shared stem line; the other
+19 have one additional nominal line. The historical `newlems2` filter emits
+one stem line per successful entry through `dump_entry`, so repeated source
+entries and later curation are both possible explanations. The audit does not
+identify which explanation applies to any individual lemma. Review the 19
+additional nominal lines against their TEI headers and the curated witness
+privately before changing the importer or a snapshot.
