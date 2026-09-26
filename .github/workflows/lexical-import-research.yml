@@ -323,7 +323,8 @@ jobs:
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
-            --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
+            --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl" \
+            --split "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.split"
           python3 ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \

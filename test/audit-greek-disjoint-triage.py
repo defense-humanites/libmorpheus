@@ -17,8 +17,8 @@ class DisjointTriageTest(unittest.TestCase):
     def test_non_quantity_groups_and_tag_change(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            candidate, baseline, headers = (root / name for name in
-                                            ("candidate", "baseline", "headers"))
+            candidate, baseline, headers, split = (root / name for name in
+                                                   ("candidate", "baseline", "headers", "split"))
             candidate.write_text(":le:quantity\n:no:a^ os_ou\n"
                                  ":le:stem\n:no:abc os_ou\n"
                                  ":le:tag\n:no:abc os_ou\n"
@@ -34,19 +34,28 @@ class DisjointTriageTest(unittest.TestCase):
                                 ":le:multiplicity\n:no:xyz os_ou\n", encoding="utf-8")
             headers.write_text("".join(json.dumps(row) + "\n" for row in (
                 {"lemma": "source_key", "headword": "ste^m", "projection_error": None,
-                 "fields": [{"name": "orth"}, {"name": "orth"}, {"name": "gen"}]},
+                 "fields": [{"name": "orth", "projection": "ste^m"},
+                            {"name": "orth", "projection": "alternate"}, {"name": "gen"}]},
                 {"lemma": "tag", "headword": "tag", "projection_error": None,
-                 "fields": [{"name": "orth"}, {"name": "itype"}]},
+                 "fields": [{"name": "orth", "projection": "tag"}, {"name": "itype"}]},
                 {"lemma": "multiplicity", "headword": "multiplicity", "projection_error": None,
-                 "fields": [{"name": "orth"}]},
+                 "fields": [{"name": "orth", "projection": "multiplicity"}]},
+                {"lemma": "other", "headword": "other", "projection_error": None,
+                 "fields": [{"name": "orth", "projection": "other"},
+                            {"name": "orth", "projection": "diacritics"}]},
             )), encoding="utf-8")
-            result = audit(candidate, baseline, headers)
+            split.write_text("stem\t<gen>x</gen>\n"
+                             "diacritics\t<gen>x</gen>\n"
+                             "labels\t<gen>x</gen>\n", encoding="utf-8")
+            result = audit(candidate, baseline, headers, split)
             groups = result["non_quantity_disjoint"]
             self.assertEqual(sum(row["lemma_groups"] for row in groups.values()), 5)
             self.assertEqual(groups["same_tags_and_labels"]["reference_multiple_lemma_markers"], 1)
             self.assertEqual(groups["same_tags_and_labels"]["projected_key_matches_zero"], 1)
             self.assertEqual(groups["same_tags_and_labels"]["key_miss_first_orth_match"], 1)
             self.assertEqual(groups["same_tags_and_labels"]["any_multiple_orth"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["key_and_first_orth_miss_any_orth_match"], 1)
+            self.assertEqual(groups["different_tags_or_labels"]["no_header_orth_but_split_token_match"], 1)
             self.assertEqual(groups["same_labels_different_multiplicity"]["lemma_groups"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["lemma_groups"], 1)
             self.assertEqual(result["different_tags_or_labels"], {
