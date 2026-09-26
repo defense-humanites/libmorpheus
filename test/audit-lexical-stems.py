@@ -97,6 +97,39 @@ class ComparisonTest(unittest.TestCase):
             self.assertNotIn("disjoint_greek_spelling_diagnostic",
                              audit.compare(candidate, baseline))
 
+    def test_partial_overlap_classifies_only_unmatched_records(self):
+        with TemporaryDirectory() as directory:
+            candidate = Path(directory) / "candidate"
+            baseline = Path(directory) / "baseline"
+            examples = {
+                "candidate_extra": ([":no:common", ":no:extra"], [":no:common"]),
+                "reference_extra": ([":no:common"], [":no:common", ":no:extra"]),
+                "quantity": ([":no:common", ":no:a^ os_ou"],
+                             [":no:common", ":no:a os_ou"]),
+                "diacritics": ([":no:common", ":no:a)/ os_ou"],
+                               [":no:common", ":no:a( os_ou"]),
+                "stem": ([":no:common", ":no:a os_ou"],
+                         [":no:common", ":no:b os_ou"]),
+                "multiplicity": ([":no:common", ":no:a os_ou", ":no:a os_ou"],
+                                 [":no:common", ":no:b os_ou"]),
+                "labels": ([":no:common", ":no:a os_ou"],
+                           [":no:common", ":no:b as_ou"]),
+            }
+            for path, index in ((candidate, 0), (baseline, 1)):
+                path.write_text("".join(":le:" + lemma + "\n" +
+                                        "\n".join(records[index]) + "\n"
+                                        for lemma, records in examples.items()), encoding="utf-8")
+            result = audit.compare(candidate, baseline, greek_spelling=True)
+            self.assertEqual(result["shared_lemma_outcomes"]["partial_overlap"], 7)
+            self.assertEqual(result["partial_greek_residual_diagnostic"], {
+                "candidate_extra_only": 1, "reference_extra_only": 1,
+                "quantity_marks_only": 1, "beta_code_diacritics": 1,
+                "same_tags_and_labels": 1, "same_labels_different_multiplicity": 1,
+                "different_tags_or_labels": 1,
+            })
+            self.assertNotIn("partial_greek_residual_diagnostic",
+                             audit.compare(candidate, baseline))
+
     def test_alternative_reports_exact_gains_and_losses(self):
         with TemporaryDirectory() as directory:
             candidate = Path(directory) / "candidate"

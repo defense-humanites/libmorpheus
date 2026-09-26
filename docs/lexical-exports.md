@@ -119,7 +119,7 @@ runs both Latin chains in an ephemeral runner. It uploads no artifacts and
 prints only aggregate counts and SHA-256 digests. `tools/audit-lexical-stems.py`
 compares exact colon-tagged stem records by lemma as multisets, preserving
 duplicate records. It does not use an edit-distance or normalized-spelling
-threshold to declare stem equivalence. Its schema 2 diagnostic also counts
+threshold to declare stem equivalence. Its schema 4 diagnostic also counts
 shared lemmes with no common stem line, those with partial overlap, and
 unmatched records by tag. It prints only aggregate counts and digests.
 
@@ -290,3 +290,26 @@ groups exact. The 150 other disjoint nominal groups, the partial-overlap
 groups, and the changed lemma inventories still need entry-level review;
 quantity normalization alone does not explain them. Keep the variant private
 and retain both quantity-bearing curated snapshots for analyzer checks.
+
+The spelling audit also classifies **unmatched records within partial-overlap
+groups** after subtracting exact shared lines. One-sided residuals are counted
+separately from pairs of residual multisets; the same quantity, Beta Code,
+stem, label and multiplicity signatures then apply to the latter. This keeps
+an already matching line from masking the cause of the remaining difference.
+The classification never changes exact-match totals or accepts normalized
+forms as equivalent stems.
+
+In [the isolated follow-up run](https://github.com/defense-humanites/libmorpheus/actions/runs/36234393322),
+every partial-overlap group had **one-sided** unmatched lines. There were no
+groups with residual lines on both sides after exact lines were subtracted:
+
+| Greek trial | Extra candidate lines only | Extra witness lines only | Both sides have unmatched lines |
+| --- | ---: | ---: | ---: |
+| Original nominal | 8 | 49 | 0 |
+| Original verbal | 3 | 20 | 0 |
+| Quantity-suppressed nominal | 10 | 64 | 0 |
+| Quantity-suppressed verbal | 3 | 24 | 0 |
+
+These groups require a review of missing or additional records rather than
+another spelling normalization. The counts are per lemma, not numbers of
+unmatched stem lines; they do not establish which side is correct.
