@@ -320,6 +320,7 @@ jobs:
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
           python3 ../../test/audit-greek-disjoint-triage.py
+          python3 ../../test/prepare-greek-lexical-review.py
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
