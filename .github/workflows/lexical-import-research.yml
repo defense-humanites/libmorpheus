@@ -191,6 +191,11 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/setquant" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
             > "$RUNNER_TEMP/lexical-stage/Greek.split"
+          python3 tools/split-greek-lexical-headers.py \
+            --input "$RUNNER_TEMP/lexical-stage/Greek.lemmata" \
+            --output "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
+          cmp -s "$RUNNER_TEMP/lexical-stage/Greek.split" \
+            "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
           python3 - <<'PY'
           import hashlib
           import json
@@ -321,6 +326,7 @@ jobs:
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
           python3 ../../test/audit-greek-disjoint-triage.py
           python3 ../../test/prepare-greek-lexical-review.py
+          python3 ../../test/split-greek-lexical-headers.py
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \

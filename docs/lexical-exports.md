@@ -408,6 +408,26 @@ replacing either curated witness.
 
 ### Private entry-level review
 
+The projected Greek stream can be split locally without `flex` when it has no
+`<quant>` field. `tools/split-greek-lexical-headers.py` reproduces the
+historical `sed 's/-//' | setquant | splitlems` output for that subset and
+refuses any other input with `<quant>`. It creates a private file outside the
+repository and prints only its row count and SHA-256. For the pinned LSJ
+projection, the local result has 118,363 lines and SHA-256
+`c5b91d3d16fe8ceec05ada90c6a74aa1ee4fafa42f996ffdc161115cbf8166ba`,
+identical to the `flex` output in CI. The research workflow compares both
+streams byte for byte on every run.
+
+The historical `greeklib.a`, `morphlib.a`, and `gkends.a` also build with
+their legacy makefiles using `gcc`, without CMake. In a private copy of
+`src/{includes,greeklib,morphlib,gkends,gkdict}`, building the three archives
+and the `newlems` and `newlems2` targets recreates the research filters.
+`newlems2.c` writes the verbal diagnostic to `/tmp/lsj.vbs`; a local build
+with no writable `/tmp` can change that path **in the private copy only**.
+Local nominal and verbal output SHA-256 values matched the CI audit for both
+the original and first-token-quantity-suppressed streams. No generated stem
+file is checked into the repository.
+
 `tools/prepare-greek-lexical-review.py` selects the 150 non-quantity disjoint
 nominal groups and the partial-overlap groups with a genuinely additional
 line. Given locally reproduced filter outputs, it writes the candidate and
@@ -431,3 +451,10 @@ repository, and creates the file with owner-only permissions. The JSONL rows
 contain source-derived lexical material; keep them private, never attach them
 to CI, and review each candidate/witness discrepancy before changing a
 curated snapshot or the importer. The tool cannot infer which side is correct.
+
+The local review selected 169 groups: 87 with matching tags and labels but
+different stems, 50 with different tags or labels, 12 with Beta Code
+diacritics beyond quantity, one with different multiplicity, and 19 partial
+overlaps with a distinct line. Among those 19, 18 have a witness-only line
+and one has a candidate-only line. These are review priorities, not automatic
+changes to the curated data.
