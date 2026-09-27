@@ -160,15 +160,16 @@ by [the corpus-specific rights review](stemlib-redistribution.md).
 
 `tools/partition-lexical-latin.py` makes a provisional, reproducible selection
 using only projected TEI header fields: a verbal `<pos>` or a final conjugation
-number/infinitive in `<itype>` selects a verbal entry; `<pos>P. a.</pos>`
-selects a separate participial exclusion; all other projected entries go to
-the nominal trial. It reads the header and candidate streams in order and
-refuses mismatched headwords. The committed curated snapshots do **not**
-participate in selection. Output is private, outside the repository, with
-counts and digests in the stage report; it is neither the original `vtags`
-file nor a production classifier.
+number/infinitive in `<itype>` selects a verbal entry. Exact `<itype>`
+values used as inputs by the historical `conj1` or `latvb` rules provide a
+second verbal signal; `<pos>P. a.</pos>` selects a separate participial
+exclusion. All other projected entries go to the nominal trial. It reads the
+header and candidate streams in order and refuses mismatched headwords. The
+committed curated snapshots do **not** participate in selection. Output is
+private, outside the repository, with counts and digests in the stage report;
+it is neither the original `vtags` file nor a production classifier.
 
-For the pinned Latin TEI this puts 43,887 projected rows in the nominal
+The initial classifier put 43,887 projected rows in the nominal
 trial, 6,811 in the verbal trial and 762 in the participial exclusion; 136
 entries cannot be projected. A separate check against the curated lemma
 inventories shows 6,240 projected entries assigned to the verbal trial whose
@@ -177,7 +178,8 @@ only in that verbal witness remain in the nominal trial. Five assigned verbal
 entries occur in both witnesses; four occur only in `ls.nom`. This overlap
 check identifies limitations and does not supply classification labels.
 
-An aggregate inventory audit (`tools/audit-latin-partition-gaps.py`) shows why
+An aggregate inventory audit of that initial partition
+(`tools/audit-latin-partition-gaps.py`) shows why
 the 429 verbal-only witness entries left in the nominal trial require more
 than a field-presence rule: 273 projected headers have only `<orth>`, and
 156 have `<orth>` and `<itype>` without a recognized conjugation signal.
@@ -185,7 +187,18 @@ The same two field profiles occur in 404 and 2,155 nominal-only witness
 entries, respectively. The audit counts projected source entries, including
 repeated lemmes, and never uses either witness to choose a partition.
 
-In [the isolated partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36126908468),
+A subsequent source-rule refinement selects 39 more verbal trial rows from
+exact historical `<itype>` literals: 24 match a `conj1` input rule and 15
+match `latvb` (including three with no lemma in either curated witness).
+Among the 39, 36 occur only in `vbs.latin` and none only in `ls.nom`.
+The revised partition has 43,848 nominal and 6,850 verbal rows; the
+verbal-only witness entries still assigned nominal fall from 429 to 393.
+Of those 393, 273 headers contain only `<orth>` and 120 have `<orth>`
+plus `<itype>`. This remains an inventory probe, not evidence of stem
+equivalence. The filter-output comparison table below belongs to the
+earlier partition and must be rerun for this revision.
+
+In [the earlier isolated partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36126908468),
 the historical filter chains consumed their respective trial streams and
 produced these exact comparisons:
 
@@ -496,8 +509,8 @@ complete for the pinned projection. They do not establish a replacement
 lexical corpus. The 169 selected Greek entry discrepancies still require
 individual lexical decisions; 1,410 other nominal and 31 verbal disjoint
 groups retain quantity differences, and the Latin trial lacks the historical
-`vtags` selector while 429 verbal-only witness entries land in its nominal
-partition. Analyzer regression fixtures and the 2007 Hopper oracles can
+`vtags` selector while 393 verbal-only witness entries still land in its
+revised nominal partition. Analyzer regression fixtures and the 2007 Hopper oracles can
 qualify a selected candidate corpus only after these choices are resolved
 and a complete private stemlib is built. Corpus publication also remains
 subject to the separate rights decision in

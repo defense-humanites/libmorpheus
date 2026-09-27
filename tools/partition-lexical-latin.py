@@ -20,6 +20,22 @@ import re
 VERBAL_ITYPE = re.compile(r"(?:^|,\s*)(?:[1-4]|a_re|e_re|e\^re|i_re|a_ri|i_ri)$")
 
 
+def historical_verb_types():
+    """Read exact verb-rule input literals, excluding output-only lexer text."""
+    source = Path(__file__).resolve().parents[1] / "src/gkdict"
+    conj = (source / "conj1.l").read_text(encoding="utf-8")
+    conj_inputs = set(re.findall(r'^"<itype>([^"\n]+)</itype>"', conj, re.MULTILINE))
+    verb = (source / "latvb.l").read_text(encoding="utf-8")
+    # The array feeds is_spectype; the other literals are tested by do_itype.
+    verb_rules = verb.split("char *spectypes[] = {", 1)[1].split("#define LENGTH_OF", 1)[0]
+    verb_rules = re.sub(r"/\*.*?\*/", "", verb_rules, flags=re.DOTALL)
+    verb_inputs = set(re.findall(r'"<itype>([^"\n]+)</itype>"', verb_rules))
+    return frozenset(conj_inputs | verb_inputs)
+
+
+HISTORICAL_VERB_TYPES = historical_verb_types()
+
+
 def classify(record):
     if record.get("projection_error"):
         return "skipped", "projection-error"
@@ -32,6 +48,8 @@ def classify(record):
         return "verbal", "conjugation-itype"
     if "P. a." in parts_of_speech:
         return "participial", "participial-pos"
+    if any(value in HISTORICAL_VERB_TYPES for value in types):
+        return "verbal", "historical-itype-literal"
     return "nominal", "no-verbal-header-evidence"
 
 

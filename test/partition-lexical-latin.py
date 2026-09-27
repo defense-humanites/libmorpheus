@@ -27,10 +27,13 @@ class PartitionTest(unittest.TestCase):
             (record("amo", "a^mo", [("pos", "v. a.")]), "verbal"),
             (record("curro", "curro", [("itype", "cu^curri, 3")]), "verbal"),
             (record("bonus", "bonus", [("itype", "a, um")]), "nominal"),
+            (record("edo", "e^do", [("itype", "cu_tus")]), "verbal"),
+            (record("lego", "lego", [("itype", "fe_ci, factum")]), "verbal"),
             (record("amatus", "ama_tus", [("pos", "P. a.")]), "participial"),
         ]
         for entry, expected in samples:
             self.assertEqual(partition.classify(entry)[0], expected)
+        self.assertEqual(partition.classify(samples[3][0])[1], "historical-itype-literal")
 
     def test_input_alignment_is_fail_closed(self):
         with TemporaryDirectory() as directory:
