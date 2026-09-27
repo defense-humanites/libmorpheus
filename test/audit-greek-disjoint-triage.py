@@ -70,8 +70,10 @@ class DisjointTriageTest(unittest.TestCase):
             self.assertEqual(groups["beta_code_diacritics"]["lemma_groups"], 1)
             self.assertEqual(result["different_tags_or_labels"], {
                 "same_tag_set_different_labels": 1, "different_tag_sets": 1,
+                "label_changes_by_tag": [{"tags": ":no:", "lemma_groups": 1}],
                 "tag_set_changes": [{"candidate_tags": ":no:", "reference_tags": ":aj:",
-                                     "lemma_groups": 1}],
+                                     "lemma_groups": 1, "any_gen": 0, "any_itype": 1,
+                                     "any_adv_pos": 0}],
             })
 
 

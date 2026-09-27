@@ -71,6 +71,8 @@ def audit(candidate, baseline, headers, split):
     reference_markers, _ = PARTIAL_AUDIT["marker_locations"](baseline)
     classes = defaultdict(Counter)
     tag_changes = Counter()
+    label_changes = Counter()
+    tag_change_fields = defaultdict(Counter)
     for lemma in produced.keys() & reference.keys():
         left, right = produced[lemma], reference[lemma]
         if not left or not right or left & right:
@@ -130,9 +132,18 @@ def audit(candidate, baseline, headers, split):
             reference_tags = tuple(sorted({line[:4] for line in right}))
             if candidate_tags == reference_tags:
                 report["same_tag_set_different_labels"] += 1
+                label_changes["+".join(candidate_tags)] += 1
             else:
                 report["different_tag_sets"] += 1
-                tag_changes[("+".join(candidate_tags), "+".join(reference_tags))] += 1
+                pair = ("+".join(candidate_tags), "+".join(reference_tags))
+                tag_changes[pair] += 1
+                fields = tag_change_fields[pair]
+                for name in ("gen", "itype"):
+                    fields["any_" + name] += any(
+                        field["name"] == name for record in entries for field in record)
+                fields["any_adv_pos"] += any(
+                    field["name"] == "pos" and field["projection"] == "Adv."
+                    for record in entries for field in record)
     keys = ("lemma_groups", "candidate_multiple_lemma_markers",
             "reference_multiple_lemma_markers", "projected_key_matches_zero",
             "projected_key_matches_one", "projected_key_matches_multiple",
@@ -160,8 +171,14 @@ def audit(candidate, baseline, headers, split):
             "different_tags_or_labels": {
                 "same_tag_set_different_labels": classes["different_tags_or_labels"]["same_tag_set_different_labels"],
                 "different_tag_sets": classes["different_tags_or_labels"]["different_tag_sets"],
+                "label_changes_by_tag": [
+                    {"tags": tags, "lemma_groups": count}
+                    for tags, count in sorted(label_changes.items())],
                 "tag_set_changes": [
-                    {"candidate_tags": left, "reference_tags": right, "lemma_groups": count}
+                    {"candidate_tags": left, "reference_tags": right, "lemma_groups": count,
+                     "any_gen": tag_change_fields[(left, right)]["any_gen"],
+                     "any_itype": tag_change_fields[(left, right)]["any_itype"],
+                     "any_adv_pos": tag_change_fields[(left, right)]["any_adv_pos"]}
                     for (left, right), count in sorted(tag_changes.items())]}}
 
 
