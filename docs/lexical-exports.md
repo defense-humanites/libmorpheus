@@ -178,8 +178,8 @@ only in that verbal witness remain in the nominal trial. Five assigned verbal
 entries occur in both witnesses; four occur only in `ls.nom`. This overlap
 check identifies limitations and does not supply classification labels.
 
-An aggregate inventory audit of that initial partition
-(`tools/audit-latin-partition-gaps.py`) shows why
+An aggregate inventory audit of that initial partition, before the
+source-rule refinement, shows why
 the 429 verbal-only witness entries left in the nominal trial require more
 than a field-presence rule: 273 projected headers have only `<orth>`, and
 156 have `<orth>` and `<itype>` without a recognized conjugation signal.
@@ -503,15 +503,17 @@ stage. Projecting one of these entries requires a defensible lemma and
 orthography decision; simply deleting unsupported syntax would discard
 source evidence.
 
-The importer trials, exact and spelling diagnostics, private Greek entry
-review, Latin partition inventory audit, and Latin headword diagnostic are
-complete for the pinned projection. They do not establish a replacement
-lexical corpus. The 169 selected Greek entry discrepancies still require
+The original importer trials, exact and spelling diagnostics, private Greek
+entry review, Latin partition inventory audit, and Latin headword diagnostic
+are complete for the pinned projection. The revised Latin partition still
+needs its historical filter-output comparison. None of these diagnostics
+establishes a replacement lexical corpus. The 169 selected Greek entry
+discrepancies still require
 individual lexical decisions; 1,410 other nominal and 31 verbal disjoint
 groups retain quantity differences, and the Latin trial lacks the historical
 `vtags` selector while 393 verbal-only witness entries still land in its
-revised nominal partition. Analyzer regression fixtures and the 2007 Hopper oracles can
-qualify a selected candidate corpus only after these choices are resolved
+revised nominal partition. Analyzer regression fixtures and the 2007 Hopper
+oracles can qualify a selected candidate corpus only after these choices are resolved
 and a complete private stemlib is built. Corpus publication also remains
 subject to the separate rights decision in
 [stemlib-redistribution.md](stemlib-redistribution.md).
