@@ -354,3 +354,30 @@ multiple `<orth>` fields. These counts prioritize a private comparison of
 the repeated marker blocks and the two first-block exceptions. They do not
 identify whether a difference arose from another source edition, a historical
 import step or later curation.
+
+### Triage of the other disjoint nominal groups
+
+[The isolated structural triage](https://github.com/defense-humanites/libmorpheus/actions/runs/36266412717)
+revisited the 150 disjoint nominal groups in the quantity-suppressed trial
+whose records do **not** become identical after removing `^` and `_`. It
+matched the candidate lemma against the TEI key, the first `<orth>`, every
+later `<orth>`, and the actual `splitlems` first-token stream. These are
+traceability probes, not proof that a source entry produced a given stem.
+
+| Signature | Groups | Structural finding |
+| --- | ---: | --- |
+| Other Beta Code diacritics only | 12 | All candidate records are adverbs (`:wd:`); no direct orthography or split-token match under the noun/verb lemma normalization. |
+| Same tags and labels, different stem | 87 | 81 lack a first-orth/key match but match a later, untyped `<orth>`; all 87 occur in the split stream. |
+| Same labels, different multiplicity | 1 | One key and first-orth match; the witness repeats its lemma marker. |
+| Different tags or labels | 50 | 26 change tag sets, 24 keep the tag set but change labels; 48 match the first orthography and 2 a later untyped one. All occur in the split stream. |
+
+Of the 26 tag-set changes, 22 compare a candidate `:no:` with witness `:aj:`,
+two the reverse, and two candidate `:wd:` with witness `:aj:`. The 12 adverb
+lemmes require a separate path: `newlems2` calls `standword` before emitting
+their `:le:` marker, unlike the `stripmetachars` path used by its nominal and
+adjectival `dump_entry`. An absent direct orthography match here is **not**
+evidence of a missing TEI entry. For the 81 later-orthography matches, the
+projection and `splitlems` do carry an alternate spelling; the stem mismatch
+still needs entry-level comparison with the curated witness. The 24
+same-tag-set label changes and 26 tag changes merit a separate morphological
+review. No normalized spelling is promoted to an exact stem match.
