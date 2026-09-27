@@ -170,6 +170,14 @@ only in that verbal witness remain in the nominal trial. Five assigned verbal
 entries occur in both witnesses; four occur only in `ls.nom`. This overlap
 check identifies limitations and does not supply classification labels.
 
+An aggregate inventory audit (`tools/audit-latin-partition-gaps.py`) shows why
+the 429 verbal-only witness entries left in the nominal trial require more
+than a field-presence rule: 273 projected headers have only `<orth>`, and
+156 have `<orth>` and `<itype>` without a recognized conjugation signal.
+The same two field profiles occur in 404 and 2,155 nominal-only witness
+entries, respectively. The audit counts projected source entries, including
+repeated lemmes, and never uses either witness to choose a partition.
+
 In [the isolated partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36126908468),
 the historical filter chains consumed their respective trial streams and
 produced these exact comparisons:
@@ -458,3 +466,9 @@ diacritics beyond quantity, one with different multiplicity, and 19 partial
 overlaps with a distinct line. Among those 19, 18 have a witness-only line
 and one has a candidate-only line. These are review priorities, not automatic
 changes to the curated data.
+
+A private trial changed the `do_simpnom` gender branch in the copied
+`newlems2.c` so a feminine `<gen>` could not be overwritten by its masculine
+fallback. It altered 18 nominal lines and reduced equal record multisets
+from 43,123 to 43,107 against the curated witness. That apparent code
+correction is therefore not included in the importer reconstruction.

@@ -43,11 +43,16 @@ jobs:
       - name: Partition Latin headers using TEI evidence
         run: |
           python3 test/partition-lexical-latin.py
+          python3 test/audit-latin-partition-gaps.py
           python3 test/audit-lexical-stems.py
           python3 tools/partition-lexical-latin.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
             --output "$RUNNER_TEMP/lexical-partition"
+          python3 tools/audit-latin-partition-gaps.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
 
       - name: Build historical header and nominal filters in isolation
         run: |
