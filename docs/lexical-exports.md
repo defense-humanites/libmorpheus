@@ -195,8 +195,7 @@ The revised partition has 43,848 nominal and 6,850 verbal rows; the
 verbal-only witness entries still assigned nominal fall from 429 to 393.
 Of those 393, 273 headers contain only `<orth>` and 120 have `<orth>`
 plus `<itype>`. This remains an inventory probe, not evidence of stem
-equivalence. The filter-output comparison table below belongs to the
-earlier partition and must be rerun for this revision.
+equivalence.
 
 In [the earlier isolated partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36126908468),
 the historical filter chains consumed their respective trial streams and
@@ -207,12 +206,25 @@ produced these exact comparisons:
 | Partitioned `latnom` against `ls.nom` | 37,366 / 40,408 | 32,953 | 31,270 | 34,967 |
 | Partitioned `latvb` against `vbs.latin` | 6,542 / 6,773 | 6,256 | 6,056 | 9,197 |
 
-Both exact-group counts are lower than in the unpartitioned diagnostics. The
-selector thus demonstrates the importer plumbing and isolates a concrete
-classification problem; it does not justify a corpus replacement. Remaining
-work includes reviewing false classifications, entries with no usable TEI
-signal, differences between projected and historical header syntax, and
-individual stem mismatches before analyzer-level checks.
+In [the revised partition run](https://github.com/defense-humanites/libmorpheus/actions/runs/36326369118)
+on `43d161f`, both historical filter jobs succeeded:
+
+| Diagnostic producer | Candidate / reference distinct lemmes | Shared lemmes | Identical record multisets among shared lemmes | Exact shared records with multiplicity |
+| --- | ---: | ---: | ---: | ---: |
+| Revised `latnom` against `ls.nom` | 37,366 / 40,408 | 32,953 | 31,270 | 34,967 |
+| Revised `latvb` against `vbs.latin` | 6,581 / 6,773 | 6,292 | 6,083 | 9,252 |
+
+The verbal refinement adds 39 candidate lemmes, 36 shared lemmes, 27 exact
+lemma groups and 55 exact shared records relative to the earlier trial. The
+nominal comparison counts are unchanged, but its diagnostic file digest
+changed (`ad11b97b...` to `6061cd1a...`); equal aggregate counts do not
+establish byte-for-byte equality. Both exact-group counts remain below the
+unpartitioned diagnostics. The selector demonstrates the importer plumbing
+and isolates a concrete classification problem; it does not justify a corpus
+replacement. Remaining work includes reviewing false classifications,
+entries with no usable TEI signal, differences between projected and
+historical header syntax, and individual stem mismatches before analyzer-level
+checks.
 
 ## Isolated Greek importer experiment
 
@@ -505,8 +517,8 @@ source evidence.
 
 The original importer trials, exact and spelling diagnostics, private Greek
 entry review, Latin partition inventory audit, and Latin headword diagnostic
-are complete for the pinned projection. The revised Latin partition still
-needs its historical filter-output comparison. None of these diagnostics
+are complete for the pinned projection, including the revised Latin
+historical filter-output comparison. None of these diagnostics
 establishes a replacement lexical corpus. The 169 selected Greek entry
 discrepancies still require
 individual lexical decisions; 1,410 other nominal and 31 verbal disjoint
