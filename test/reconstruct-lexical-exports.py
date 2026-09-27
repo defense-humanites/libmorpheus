@@ -77,6 +77,21 @@ class LexicalProjectionTest(unittest.TestCase):
             self.assertEqual(exports.latin_baseline_header_orths(path),
                              {"Abyla": {"A^by^la"}, "Abdalonymus": {"Abdalony^mus"}})
 
+    def test_latin_header_residuals_are_diagnostic_only(self):
+        with TemporaryDirectory() as directory:
+            repo = Path(directory)
+            path = repo / "stemlib/Latin/stemsrc/ls.nom"
+            path.parent.mkdir(parents=True)
+            path.write_text("Ab-c\n:le:one\nAb.c\n:le:two\n"
+                            "Abacus\n:le:three\nAbacus\n:le:four\n", encoding="utf-8")
+            result = exports.latin_header_comparison(repo, {
+                "one": {"Abc"}, "two": {"Abc"}, "three": {"Abac"},
+                "four": {"Catus"}})
+            self.assertEqual(result["normalized_residual_diagnostic"], {
+                "hyphens_only": 1, "other_punctuation_only": 1,
+                "prefix_or_containment": 1, "other": 1})
+            self.assertEqual(result["same_spelling_ignoring_case_homograph_and_quantity"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -173,10 +173,29 @@ def latin_header_comparison(repo, candidates):
 
     normalized = {key for key in common if {spelling(v) for v in baseline[key]} &
                   {spelling(v) for v in candidates[key]}}
+    residual_classes = {"hyphens_only": 0, "other_punctuation_only": 0,
+                        "prefix_or_containment": 0, "other": 0}
+    for key in common:
+        if key in normalized:
+            continue
+        left = {spelling(value) for value in baseline[key]}
+        right = {spelling(value) for value in candidates[key]}
+        if {value.replace("-", "") for value in left} & {
+                value.replace("-", "") for value in right}:
+            category = "hyphens_only"
+        elif {clean for value in left if (clean := re.sub(r"[^a-z]", "", value))} & {
+                clean for value in right if (clean := re.sub(r"[^a-z]", "", value))}:
+            category = "other_punctuation_only"
+        elif any(a in b or b in a for a in left for b in right):
+            category = "prefix_or_containment"
+        else:
+            category = "other"
+        residual_classes[category] += 1
     return {"baseline_lemmas_with_adjacent_header": len(baseline),
             "projected_lemmas_with_adjacent_header": len(common),
             "exact_first_orth": len(exact),
             "same_spelling_ignoring_case_homograph_and_quantity": len(normalized),
+            "normalized_residual_diagnostic": residual_classes,
             "unmatched_examples": [
                 {"lemma": key, "baseline": sorted(baseline[key])[:2],
                  "projected": sorted(candidates[key])[:2]}

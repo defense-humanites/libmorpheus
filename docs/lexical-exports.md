@@ -92,6 +92,13 @@ hyphenation, multiple forms in one orthographic field and real differences
 between editions. `report.json` records examples. This comparison concerns
 headword spelling alone; it does not validate stem records or morphology.
 
+The reproducible residual diagnostic in that report groups the 346 Latin
+first-orthography mismatches left after case, homograph and quantity are
+ignored: 260 agree after additionally removing hyphens, 39 after removing
+other punctuation, 16 have a prefix or containment relation, and 31 do not
+meet any of those tests. These are spelling probes, not accepted equivalences
+or a reason to rewrite the projected headword.
+
 ## Next validation gates
 
 1. Review the unprojectable entries and candidate headword mapping against
@@ -472,3 +479,26 @@ A private trial changed the `do_simpnom` gender branch in the copied
 fallback. It altered 18 nominal lines and reduced equal record multisets
 from 43,123 to 43,107 against the curated witness. That apparent code
 correction is therefore not included in the importer reconstruction.
+
+### Audit boundary
+
+The pinned projection omits 364 of 116,497 Greek entries (321 unsupported
+keys, 38 complex first orthographies and five unsupported characters) and
+136 of 51,596 Latin entries (106 unsupported keys and 30 unsupported
+characters). Every omitted header and its reason remains in the private
+stage. Projecting one of these entries requires a defensible lemma and
+orthography decision; simply deleting unsupported syntax would discard
+source evidence.
+
+The importer trials, exact and spelling diagnostics, private Greek entry
+review, Latin partition inventory audit, and Latin headword diagnostic are
+complete for the pinned projection. They do not establish a replacement
+lexical corpus. The 169 selected Greek entry discrepancies still require
+individual lexical decisions; 1,410 other nominal and 31 verbal disjoint
+groups retain quantity differences, and the Latin trial lacks the historical
+`vtags` selector while 429 verbal-only witness entries land in its nominal
+partition. Analyzer regression fixtures and the 2007 Hopper oracles can
+qualify a selected candidate corpus only after these choices are resolved
+and a complete private stemlib is built. Corpus publication also remains
+subject to the separate rights decision in
+[stemlib-redistribution.md](stemlib-redistribution.md).
