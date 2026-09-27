@@ -381,3 +381,27 @@ projection and `splitlems` do carry an alternate spelling; the stem mismatch
 still needs entry-level comparison with the curated witness. The 24
 same-tag-set label changes and 26 tag changes merit a separate morphological
 review. No normalized spelling is promoted to an exact stem match.
+
+[A follow-up on the adverb path and morphology](https://github.com/defense-humanites/libmorpheus/actions/runs/36311811500)
+matched the **stem token** of each candidate `:wd:` line, rather than its
+`standword`-derived lemma, against the quantity-suppressed split stream and
+projected TEI orthographies. For all 12 diacritic-only adverb groups, that
+candidate stem occurs in both places and a matching TEI header has
+`<pos>Adv.</pos>`; none of the 12 witness stems has the same direct orthography
+match. This traces the candidate's spelling input, but does not decide which
+diacritics the analyzer should use.
+
+The 50 tag-or-label groups divide further:
+
+| Difference against witness | Groups | TEI fields in matched headers |
+| --- | ---: | --- |
+| Same tag `:no:`, different labels | 13 | Entry-level review needed |
+| Same tag `:wd:`, different labels | 10 | Entry-level review needed |
+| Same tag `:aj:`, different labels | 1 | Entry-level review needed |
+| Candidate `:no:` versus witness `:aj:` | 22 | 21 with `<itype>`; 1 with `<gen>` |
+| Candidate `:aj:` versus witness `:no:` | 2 | Neither `<gen>` nor `<itype>` in the matched header |
+| Candidate `:wd:` versus witness `:aj:` | 2 | Both with `<pos>Adv.</pos>`; 1 with `<itype>` |
+
+The field counts are diagnostic and may overlap within an entry. They locate
+the next morphological review; they do not authorize changing tags or
+replacing either curated witness.

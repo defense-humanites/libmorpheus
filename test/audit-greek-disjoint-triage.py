@@ -23,14 +23,14 @@ class DisjointTriageTest(unittest.TestCase):
                                  ":le:stem\n:no:abc os_ou\n"
                                  ":le:tag\n:no:abc os_ou\n"
                                  ":le:labels\n:no:abc os_ou\n"
-                                 ":le:diacritics\n:no:a)/ os_ou\n"
+                                 ":le:diacritics\n:wd:a)/ adverb\n"
                                  ":le:multiplicity\n:no:abc os_ou\n:no:abc os_ou\n",
                                  encoding="utf-8")
             baseline.write_text(":le:quantity\n:no:a os_ou\n"
                                 ":le:stem\n:le:stem\n:no:xyz os_ou\n"
                                 ":le:tag\n:aj:abc os_ou\n"
                                 ":le:labels\n:no:xyz as_ou\n"
-                                ":le:diacritics\n:no:a( os_ou\n"
+                                ":le:diacritics\n:wd:a( adverb\n"
                                 ":le:multiplicity\n:no:xyz os_ou\n", encoding="utf-8")
             headers.write_text("".join(json.dumps(row) + "\n" for row in (
                 {"lemma": "source_key", "headword": "ste^m", "projection_error": None,
@@ -43,9 +43,13 @@ class DisjointTriageTest(unittest.TestCase):
                 {"lemma": "other", "headword": "other", "projection_error": None,
                  "fields": [{"name": "orth", "projection": "other"},
                             {"name": "orth", "projection": "diacritics", "type": "alt"}]},
+                {"lemma": "adverb_source", "headword": "a)/", "projection_error": None,
+                 "fields": [{"name": "orth", "projection": "a)/"},
+                            {"name": "pos", "projection": "Adv."}]},
             )), encoding="utf-8")
             split.write_text("stem\t<gen>x</gen>\n"
                              "diacritics\t<gen>x</gen>\n"
+                             "a)/\t<pos>Adv.</pos>\n"
                              "labels\t<gen>x</gen>\n", encoding="utf-8")
             result = audit(candidate, baseline, headers, split)
             groups = result["non_quantity_disjoint"]
@@ -56,14 +60,20 @@ class DisjointTriageTest(unittest.TestCase):
             self.assertEqual(groups["same_tags_and_labels"]["any_multiple_orth"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["key_and_first_orth_miss_any_orth_match"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["later_orth_type_alt"], 1)
-            self.assertEqual(groups["beta_code_diacritics"]["candidate_tags"][":no:"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["candidate_tags"][":wd:"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["candidate_adverb_groups"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["adverb_stems_all_in_split"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["adverb_stem_header_adv_pos"], 1)
+            self.assertEqual(groups["beta_code_diacritics"]["reference_adverb_header_orth_match"], 0)
             self.assertEqual(groups["different_tags_or_labels"]["no_header_orth_but_split_token_match"], 1)
             self.assertEqual(groups["same_labels_different_multiplicity"]["lemma_groups"], 1)
             self.assertEqual(groups["beta_code_diacritics"]["lemma_groups"], 1)
             self.assertEqual(result["different_tags_or_labels"], {
                 "same_tag_set_different_labels": 1, "different_tag_sets": 1,
+                "label_changes_by_tag": [{"tags": ":no:", "lemma_groups": 1}],
                 "tag_set_changes": [{"candidate_tags": ":no:", "reference_tags": ":aj:",
-                                     "lemma_groups": 1}],
+                                     "lemma_groups": 1, "any_gen": 0, "any_itype": 1,
+                                     "any_adv_pos": 0}],
             })
 
 

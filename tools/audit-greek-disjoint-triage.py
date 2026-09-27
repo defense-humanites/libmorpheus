@@ -26,6 +26,11 @@ def legacy_lemma_spelling(value):
     return spelling[:1] + spelling[1:].replace("r)r(", "rr")
 
 
+def projected_surface(value):
+    """Compare an orth token with the variant's first-token quantity trial."""
+    return value.replace("-", "", 1).translate(str.maketrans("", "", "^_"))
+
+
 def audit(candidate, baseline, headers, split):
     produced, produced_meta = STEM_AUDIT["read_stems"](candidate)
     reference, reference_meta = STEM_AUDIT["read_stems"](baseline)
@@ -33,6 +38,7 @@ def audit(candidate, baseline, headers, split):
     first_orth = defaultdict(list)
     all_orth = defaultdict(list)
     later_orth_types = defaultdict(list)
+    orth_surfaces = defaultdict(list)
     with headers.open(encoding="utf-8") as input_headers:
         for raw in input_headers:
             row = json.loads(raw)
@@ -46,21 +52,27 @@ def audit(candidate, baseline, headers, split):
                     token = field["projection"].split()[0].strip(",;:")
                     normalized = legacy_lemma_spelling(token)
                     all_orth[normalized].append(row["fields"])
+                    orth_surfaces[projected_surface(token)].append(row["fields"])
                     if orth_index > 0:
                         later_orth_types[normalized].append(field.get("type"))
                     orth_index += 1
     split_lemmas = Counter()
+    split_surfaces = set()
     split_digest = hashlib.sha256()
     with split.open("rb") as input_split:
         for line in input_split:
             split_digest.update(line)
             tokens = line.split(maxsplit=1)
             if tokens:
-                split_lemmas[legacy_lemma_spelling(tokens[0].decode("utf-8", errors="replace"))] += 1
+                surface = tokens[0].decode("utf-8", errors="replace")
+                split_surfaces.add(surface)
+                split_lemmas[legacy_lemma_spelling(surface)] += 1
     candidate_markers, _ = PARTIAL_AUDIT["marker_locations"](candidate)
     reference_markers, _ = PARTIAL_AUDIT["marker_locations"](baseline)
     classes = defaultdict(Counter)
     tag_changes = Counter()
+    label_changes = Counter()
+    tag_change_fields = defaultdict(Counter)
     for lemma in produced.keys() & reference.keys():
         left, right = produced[lemma], reference[lemma]
         if not left or not right or left & right:
@@ -101,14 +113,37 @@ def audit(candidate, baseline, headers, split):
         for tag in ("gen", "itype"):
             report["any_" + tag] += any(
                 field["name"] == tag for fields in entries for field in fields)
+        candidate_adverbs = [line[4:].split()[0] for line in left if line.startswith(":wd:")]
+        if candidate_adverbs:
+            report["candidate_adverb_groups"] += 1
+            report["adverb_stems_all_in_split"] += all(
+                stem in split_surfaces for stem in candidate_adverbs)
+            matching_headers = [fields for stem in candidate_adverbs
+                                for fields in orth_surfaces[stem]]
+            report["adverb_stem_header_orth_match"] += bool(matching_headers)
+            report["adverb_stem_header_adv_pos"] += any(
+                field["name"] == "pos" and field["projection"] == "Adv."
+                for fields in matching_headers for field in fields)
+            reference_adverbs = [line[4:].split()[0] for line in right if line.startswith(":wd:")]
+            report["reference_adverb_header_orth_match"] += any(
+                orth_surfaces[stem] for stem in reference_adverbs)
         if kind == "different_tags_or_labels":
             candidate_tags = tuple(sorted({line[:4] for line in left}))
             reference_tags = tuple(sorted({line[:4] for line in right}))
             if candidate_tags == reference_tags:
                 report["same_tag_set_different_labels"] += 1
+                label_changes["+".join(candidate_tags)] += 1
             else:
                 report["different_tag_sets"] += 1
-                tag_changes[("+".join(candidate_tags), "+".join(reference_tags))] += 1
+                pair = ("+".join(candidate_tags), "+".join(reference_tags))
+                tag_changes[pair] += 1
+                fields = tag_change_fields[pair]
+                for name in ("gen", "itype"):
+                    fields["any_" + name] += any(
+                        field["name"] == name for record in entries for field in record)
+                fields["any_adv_pos"] += any(
+                    field["name"] == "pos" and field["projection"] == "Adv."
+                    for record in entries for field in record)
     keys = ("lemma_groups", "candidate_multiple_lemma_markers",
             "reference_multiple_lemma_markers", "projected_key_matches_zero",
             "projected_key_matches_one", "projected_key_matches_multiple",
@@ -119,6 +154,9 @@ def audit(candidate, baseline, headers, split):
             "no_header_orth_but_split_token_match",
             "later_orth_match", "later_orth_untyped",
             "later_orth_type_alt", "later_orth_other_type",
+            "candidate_adverb_groups", "adverb_stems_all_in_split",
+            "adverb_stem_header_orth_match", "adverb_stem_header_adv_pos",
+            "reference_adverb_header_orth_match",
             "any_multiple_orth", "any_gen", "any_itype")
     return {"schema": 1, "scope": "aggregate triage; no normalized stem equivalence",
             "input_sha256": {"candidate": produced_meta["sha256"],
@@ -133,8 +171,14 @@ def audit(candidate, baseline, headers, split):
             "different_tags_or_labels": {
                 "same_tag_set_different_labels": classes["different_tags_or_labels"]["same_tag_set_different_labels"],
                 "different_tag_sets": classes["different_tags_or_labels"]["different_tag_sets"],
+                "label_changes_by_tag": [
+                    {"tags": tags, "lemma_groups": count}
+                    for tags, count in sorted(label_changes.items())],
                 "tag_set_changes": [
-                    {"candidate_tags": left, "reference_tags": right, "lemma_groups": count}
+                    {"candidate_tags": left, "reference_tags": right, "lemma_groups": count,
+                     "any_gen": tag_change_fields[(left, right)]["any_gen"],
+                     "any_itype": tag_change_fields[(left, right)]["any_itype"],
+                     "any_adv_pos": tag_change_fields[(left, right)]["any_adv_pos"]}
                     for (left, right), count in sorted(tag_changes.items())]}}
 
 
