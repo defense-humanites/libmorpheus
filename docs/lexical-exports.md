@@ -405,3 +405,29 @@ The 50 tag-or-label groups divide further:
 The field counts are diagnostic and may overlap within an entry. They locate
 the next morphological review; they do not authorize changing tags or
 replacing either curated witness.
+
+### Private entry-level review
+
+`tools/prepare-greek-lexical-review.py` selects the 150 non-quantity disjoint
+nominal groups and the partial-overlap groups with a genuinely additional
+line. Given locally reproduced filter outputs, it writes the candidate and
+witness marker blocks, matching projected TEI headers and split input lines
+to a **new file outside this repository**. Its stdout contains counts and a
+digest only. For example, after privately producing the same staged streams
+as the research workflow:
+
+```sh
+python3 tools/prepare-greek-lexical-review.py \
+  --candidate /private/stage/Greek.no-first-quantity.nominal \
+  --original-candidate /private/stage/Greek.nominal-diagnostic \
+  --baseline stemlib/Greek/stemsrc/lsj.nom \
+  --headers /private/stage/Greek.headers.jsonl \
+  --split /private/stage/Greek.no-first-quantity.split \
+  --output /private/greek-lexical-review.jsonl
+```
+
+The script refuses an existing output file and any output inside the source
+repository, and creates the file with owner-only permissions. The JSONL rows
+contain source-derived lexical material; keep them private, never attach them
+to CI, and review each candidate/witness discrepancy before changing a
+curated snapshot or the importer. The tool cannot infer which side is correct.
