@@ -9,6 +9,12 @@ the corpus.
 
 ## [Unreleased]
 
+### Fixed
+
+- Greek analysis now grows its result storage on demand instead of failing
+  with an internal error at 25 analyses. The legacy `cruncher` print buffer
+  also grows for larger result sets. Allocation failures remain memory errors.
+
 ### Changed
 
 - All 229 reviewed binary stem-table differences are now decoded and compared
