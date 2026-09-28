@@ -434,7 +434,7 @@ jobs:
               MorpheusLanguage,
               MorpheusLibrary,
               MorpheusOption,
-            } from "jsr:@libmorpheus/deno@0.4.0";
+            } from "jsr:@libmorpheus/deno@0.4.1";
             using library = new MorpheusLibrary(
               Deno.env.get("MORPHEUS_LIBRARY")!,
             );

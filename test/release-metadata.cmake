@@ -124,7 +124,7 @@ foreach(expected_container_value IN ITEMS
         "/opt/morpheus-runtime-data"
         "ENV MORPHEUS_LIBRARY=/opt/morpheus/lib/libmorpheus.so"
         "ENV MORPHEUS_STEMLIB=/opt/morpheus/share/morpheus/stemlib"
-        "jsr:@libmorpheus/deno@0.4.0"
+        "jsr:@libmorpheus/deno@0.4.1"
         "test ! -e /opt/morpheus/share/morpheus/deno"
         "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6"
         "generation lost dual forms")
