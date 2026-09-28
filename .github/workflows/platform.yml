@@ -427,6 +427,7 @@ jobs:
           docker run --rm --entrypoint sh morpheus-deno:ci -c \
             'test ! -e /opt/morpheus/share/morpheus/deno'
           docker run --rm morpheus-deno:ci eval \
+            --minimum-dependency-age=0 \
             --allow-env=MORPHEUS_LIBRARY,MORPHEUS_STEMLIB \
             --allow-ffi=/opt/morpheus/lib/libmorpheus.so \
             --allow-read=/opt/morpheus/share/morpheus/stemlib '
@@ -442,6 +443,12 @@ jobs:
               Deno.env.get("MORPHEUS_STEMLIB")!,
               MorpheusLanguage.Greek,
             );
+            const formerlyCrashing = await context.analyze(
+              "a)mfestan", MorpheusOption.IgnoreAccents,
+            );
+            if (formerlyCrashing.length === 0) {
+              throw new Error("a)mfestan analysis smoke failed");
+            }
             const analyses = await context.analyze("a)/nqrwpos");
             if (analyses.length === 0) throw new Error("analysis smoke failed");
             for (const [word, expected] of [["a)nalow", 26], ["a(napinw", 39]]) {
