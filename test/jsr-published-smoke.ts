@@ -37,6 +37,19 @@ let generatedDuals = 0;
   );
   alpheiosAnalyses = analyses.length;
 
+  const formerlyCrashing = await context.analyze(
+    "a)mfestan",
+    MorpheusOption.IgnoreAccents,
+  );
+  assert(
+    formerlyCrashing.length > 0,
+    "Alpheios analysis failed on the former native 0.4.1 crash case",
+  );
+  for (const [word, expected] of [["a)nalow", 26], ["a(napinw", 39]] as const) {
+    const found = await context.analyze(word, MorpheusOption.IgnoreAccents);
+    assert(found.length === expected, `${word}: expected ${expected} analyses`);
+  }
+
   const forms = await context.generate("lo/gos");
   const duals = forms.filter((form) => form.grammaticalNumber === "dual");
   assert(forms.length === 18, "published generation lost its fixture count");
