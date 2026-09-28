@@ -52,8 +52,10 @@ measurements and the observed variations are accepted; they do not isolate
 the allocation cost of a single high-ambiguity form.
 
 The measurement precedes only version metadata, release documentation and
-evidence integration. Any further native or stemlib-production change needs
-a fresh benchmark before tagging.
+evidence integration, plus a Git-less source-package policy-test correction.
+That test still checks policy values and license evidence inside Docker; Git
+tree provenance remains checked in the source CI checkout. Any further native
+or stemlib-production change needs a fresh benchmark before tagging.
 
 ## Remaining gates
 

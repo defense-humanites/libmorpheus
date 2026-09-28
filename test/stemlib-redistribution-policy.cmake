@@ -37,7 +37,14 @@ foreach(operation IN ITEMS local_reconstruction local_runtime_packaging
   require_json("ON" permitted_operations ${operation})
 endforeach()
 
-find_package(Git REQUIRED)
+set(have_git_checkout OFF)
+if(EXISTS "${MORPHEUS_SOURCE_DIR}/.git")
+  find_package(Git REQUIRED)
+  set(have_git_checkout ON)
+else()
+  message(STATUS
+    "No Git metadata in source package; checking policy and license evidence without tree provenance")
+endif()
 set(expected_ids perseids-tools alpheios-project)
 set(expected_roots stemlib vendor/alpheios-morpheus/dist/stemlib)
 set(expected_revisions
@@ -63,7 +70,7 @@ foreach(index RANGE 0 1)
   require_json("${expected_tree}" datasets ${index} selected_tree)
   require_json("not-qualified" datasets ${index} redistribution)
 
-  if(index EQUAL 0)
+  if(have_git_checkout AND index EQUAL 0)
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" rev-parse "HEAD:${expected_root}"
       WORKING_DIRECTORY "${MORPHEUS_SOURCE_DIR}"
@@ -71,7 +78,7 @@ foreach(index RANGE 0 1)
       OUTPUT_VARIABLE actual_tree
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_VARIABLE tree_error)
-  else()
+  elseif(have_git_checkout)
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" rev-parse "HEAD:dist/stemlib"
       WORKING_DIRECTORY
@@ -95,7 +102,8 @@ foreach(index RANGE 0 1)
         "${actual_revision} (${revision_error})")
     endif()
   endif()
-  if(NOT tree_result EQUAL 0 OR NOT actual_tree STREQUAL expected_tree)
+  if(have_git_checkout AND
+     (NOT tree_result EQUAL 0 OR NOT actual_tree STREQUAL expected_tree))
     message(FATAL_ERROR
       "${expected_id} tree differs from the redistribution policy: "
       "${actual_tree} (${tree_error})")
