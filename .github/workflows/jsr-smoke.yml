@@ -8,7 +8,7 @@ on:
       package_version:
         description: Published @libmorpheus/deno version
         required: true
-        default: 0.4.0
+        default: 0.4.2
         type: string
 
 permissions:
