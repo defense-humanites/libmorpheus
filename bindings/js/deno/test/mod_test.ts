@@ -419,3 +419,17 @@ Deno.test("analyzes Greek through the native ABI", async () => {
   );
   assert(person, "Artaches must preserve the person-name stem flag");
 });
+
+Deno.test("returns every high-ambiguity Alpheios analysis", async () => {
+  const libraryPath = Deno.env.get("MORPHEUS_LIBRARY");
+  const stemlibPath = Deno.env.get("MORPHEUS_ALPHEIOS_STEMLIB");
+  assert(libraryPath, "MORPHEUS_LIBRARY is required");
+  assert(stemlibPath, "MORPHEUS_ALPHEIOS_STEMLIB is required");
+
+  using library = new MorpheusLibrary(libraryPath);
+  await using context = library.createContext(stemlibPath, MorpheusLanguage.Greek);
+  for (const [word, count] of [["a)nalow", 26], ["a(napinw", 39]] as const) {
+    const analyses = await context.analyze(word, MorpheusOption.IgnoreAccents);
+    assert(analyses.length === count, `${word} must retain ${count} analyses`);
+  }
+});

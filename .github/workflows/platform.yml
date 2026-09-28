@@ -317,6 +317,7 @@ jobs:
         env:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.so
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
+          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
         run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
 
       - name: Test Node.js binding
@@ -432,6 +433,7 @@ jobs:
             import {
               MorpheusLanguage,
               MorpheusLibrary,
+              MorpheusOption,
             } from "jsr:@libmorpheus/deno@0.4.0";
             using library = new MorpheusLibrary(
               Deno.env.get("MORPHEUS_LIBRARY")!,
@@ -442,6 +444,12 @@ jobs:
             );
             const analyses = await context.analyze("a)/nqrwpos");
             if (analyses.length === 0) throw new Error("analysis smoke failed");
+            for (const [word, expected] of [["a)nalow", 26], ["a(napinw", 39]]) {
+              const found = await context.analyze(word, MorpheusOption.IgnoreAccents);
+              if (found.length !== expected) {
+                throw new Error(`${word}: expected ${expected} analyses, got ${found.length}`);
+              }
+            }
             const forms = await context.generate("lo/gos");
             if (forms.length === 0) throw new Error("generation smoke failed");
             if (!forms.some((form) => form.grammaticalNumber === "dual")) {
@@ -532,6 +540,7 @@ jobs:
         env:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.dylib
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
+          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
         run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
 
       - name: Test Node.js binding

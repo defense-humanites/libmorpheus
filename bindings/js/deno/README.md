@@ -271,14 +271,15 @@ image:
 git clone --recurse-submodules \
   https://github.com/defense-humanites/libmorpheus.git
 cd libmorpheus
-docker build --target deno-runtime -t morpheus-deno .
+git checkout v0.4.1
+docker build --target deno-runtime -t morpheus-deno:0.4.1 .
 ```
 
 Containerized applications declare `@libmorpheus/deno` as the same normal
 JSR dependency used outside Docker:
 
 ```sh
-deno add jsr:@libmorpheus/deno
+deno add jsr:@libmorpheus/deno@0.4.1
 ```
 
 Application code imports `@libmorpheus/deno` and reads only
@@ -300,9 +301,11 @@ await using context = library.createContext(
 ```
 
 Applications still need Deno's FFI permission. Greek `analyze()` and
-experimental `generate()` are both qualified in the image; CI also checks that
-generation preserves dual forms. The image is a qualification and
-application-build target, not a published registry image.
+experimental `generate()` are both qualified in the image; CI checks the
+26- and 39-analysis Alpheios cases and that generation preserves dual forms.
+Build the image from the `v0.4.1` source tag to include the corrected native
+runtime. The image is a qualification and application-build target, not a
+published registry image.
 
 ## Native library and runtime data
 
@@ -318,8 +321,8 @@ What must be acquired depends on the distribution:
 The following acquisition commands therefore apply to the JSR package and the
 standalone binding archive, not to the Docker image.
 
-Binding and runtime versions are independent. Binding `0.4.0` currently
-acquires native runtime `0.3.2` and requires C ABI `2`; these compatibility
+Binding and runtime versions are independent. Binding `0.4.1` currently
+acquires native runtime `0.4.1` and requires C ABI `2`; these compatibility
 values are declared in `internal/version.ts`. The main module exports
 `MORPHEUS_DENO_VERSION`; the `/native` module exports
 `MORPHEUS_NATIVE_VERSION` and `MORPHEUS_NATIVE_ABI_VERSION` for tooling.
@@ -333,7 +336,7 @@ deno x \
   --allow-net=codeload.github.com \
   --allow-read=./morpheus-data \
   --allow-write=./morpheus-data \
-  jsr:@libmorpheus/deno@0.4.0/data \
+  jsr:@libmorpheus/deno@0.4.1/data \
   --dataset perseids \
   --output ./morpheus-data
 ```
@@ -349,7 +352,7 @@ deno x \
   --allow-net=codeload.github.com \
   --allow-read=./morpheus-greek-data \
   --allow-write=./morpheus-greek-data \
-  jsr:@libmorpheus/deno@0.4.0/data \
+  jsr:@libmorpheus/deno@0.4.1/data \
   --dataset alpheios \
   --with-gener \
   --output ./morpheus-greek-data
@@ -374,7 +377,7 @@ deno x \
   --allow-net=github.com,release-assets.githubusercontent.com \
   --allow-read=./morpheus-native \
   --allow-write=./morpheus-native \
-  jsr:@libmorpheus/deno@0.4.0/native \
+  jsr:@libmorpheus/deno@0.4.1/native \
   --output ./morpheus-native
 ```
 
@@ -459,6 +462,7 @@ build/dev/morpheus_gener_index_builder \
 deno check bindings/js/deno/mod.ts bindings/js/deno/test/mod_test.ts
 MORPHEUS_LIBRARY="$PWD/build/dev/libmorpheus.so" \
 MORPHEUS_STEMLIB="$PWD/stemlib" \
+MORPHEUS_ALPHEIOS_STEMLIB="$PWD/vendor/alpheios-morpheus/dist/stemlib" \
 deno test --allow-env --allow-ffi \
   bindings/js/deno/test/mod_test.ts
 ```

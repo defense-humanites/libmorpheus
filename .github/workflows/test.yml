@@ -238,6 +238,7 @@ jobs:
         env:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
+          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
         run: >-
           deno test --allow-env --allow-ffi --allow-read --allow-write
           bindings/js/deno/test/mod_test.ts bindings/js/deno/test/data_test.ts

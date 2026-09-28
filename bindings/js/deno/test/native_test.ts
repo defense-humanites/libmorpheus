@@ -200,10 +200,10 @@ Deno.test(
           `${root}lib/libmorpheus.so.1`,
           new Uint8Array(),
           "2",
-          "libmorpheus.so.0.3.2",
+          `libmorpheus.so.${MORPHEUS_NATIVE_VERSION}`,
         ),
         tarEntry(
-          `${root}lib/libmorpheus.so.0.3.2`,
+          `${root}lib/libmorpheus.so.${MORPHEUS_NATIVE_VERSION}`,
           encoder.encode("versioned ELF fixture"),
         ),
         tarEntry(
@@ -220,7 +220,7 @@ Deno.test(
       for (const path of [
         receipt.libraryPath,
         "lib/libmorpheus.so.1",
-        "lib/libmorpheus.so.0.3.2",
+        `lib/libmorpheus.so.${MORPHEUS_NATIVE_VERSION}`,
       ]) {
         const installed = join(output, path);
         assert(

@@ -5,6 +5,7 @@ import {
   type MorpheusSetupDependencies,
   setupMorpheusWithDependencies,
 } from "../internal/setup_internal.ts";
+import { MORPHEUS_DENO_VERSION, MORPHEUS_NATIVE_VERSION } from "../internal/version.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -48,8 +49,8 @@ function dependencies(events: string[]): MorpheusSetupDependencies {
       events.push(`native:${options.output}`);
       return {
         schema: 2,
-        packageVersion: "0.4.0",
-        nativeVersion: "0.3.2",
+        packageVersion: MORPHEUS_DENO_VERSION,
+        nativeVersion: MORPHEUS_NATIVE_VERSION,
         abiVersion: 2,
         target: "linux-x86_64-glibc",
         asset: "native.tar.gz",
@@ -62,7 +63,7 @@ function dependencies(events: string[]): MorpheusSetupDependencies {
       events.push(`data:${options.dataset}:${options.output}`);
       return {
         schema: 1,
-        packageVersion: "0.4.0",
+        packageVersion: MORPHEUS_DENO_VERSION,
         dataset: options.dataset,
         languages: ["grc"],
         source: {
