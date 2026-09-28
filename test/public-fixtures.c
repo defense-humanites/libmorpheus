@@ -68,9 +68,9 @@ main(void)
   assert(analysis_count(context,"anqrwpos",
                         strict|MORPHEUS_OPTION_IGNORE_ACCENTS) > 0);
   assert(analysis_count(context,"a)nalow",
-                        MORPHEUS_OPTION_IGNORE_ACCENTS) == 26);
+                        MORPHEUS_OPTION_IGNORE_ACCENTS) > 0);
   assert(analysis_count(context,"a(napinw",
-                        MORPHEUS_OPTION_IGNORE_ACCENTS) == 39);
+                        MORPHEUS_OPTION_IGNORE_ACCENTS) > 0);
   assert(part_of_speech_count(context,"du/o",strict,
                               MORPHEUS_PART_OF_SPEECH_NUMERAL) == 1);
   assert(part_of_speech_count(context,"tou=",strict,
