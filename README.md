@@ -5,6 +5,12 @@ morphological analyzer for Ancient Greek and Latin. It turns the historical C
 programs into an installable C17 shared library with a stable, opaque ABI, and
 comes with JavaScript and Python bindings.
 
+> [!WARNING]
+> Published native `v0.4.1` can abort the process on some Greek forms during
+> analysis. `@libmorpheus/deno` 0.4.1 acquires that native release and should
+> not be deployed for search traffic. A native 0.4.2 correction is in
+> qualification; the binding needs a separate update after its publication.
+
 ## Summary
 
 1. [Project status](#project-status)

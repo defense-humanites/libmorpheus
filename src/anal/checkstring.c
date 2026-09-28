@@ -26,6 +26,10 @@ check_word_once(char *string, PrntFlags prntflags)
   if(is_blank(string) || strlen(string) >= MAXWORDSIZE) return(NULL);
   Gkword=CreatGkword(1);
   if(!Gkword) return(NULL);
+  if(!EnsureGkAnalStorage(Gkword)) {
+    FreeGkword(Gkword);
+    return(NULL);
+  }
   set_dialect(Gkword,GetWantDialect());
   set_workword(Gkword,string);
   set_prntflags(Gkword,prntflags);

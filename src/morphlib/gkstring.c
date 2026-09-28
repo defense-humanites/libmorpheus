@@ -72,6 +72,52 @@ printf("free gkanal \n");
 */
 }
 
+int EnsureGkAnalStorage(gk_word *word)
+{
+	gk_analysis_storage *storage;
+
+	if (!word) {
+		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+		return(0);
+	}
+	if (word->gw_analysis_storage) return(1);
+	storage = calloc(1,sizeof *storage);
+	if (!storage) {
+		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+		return(0);
+	}
+	storage->items = word->gw_analysis;
+	storage->count = word->gw_totanal;
+	storage->capacity = word->gw_anal_capacity;
+	storage->owner = word;
+	word->gw_analysis_storage = storage;
+	return(1);
+}
+
+void DetachGkAnalStorage(gk_word *word)
+{
+	if (!word) return;
+	word->gw_analysis_storage = NULL;
+	word->gw_analysis = NULL;
+	word->gw_totanal = 0;
+	word->gw_anal_capacity = 0;
+}
+
+void ReleaseGkAnalStorage(gk_word *word)
+{
+	if (!word) return;
+	if (word->gw_analysis_storage) {
+		gk_analysis_storage *storage = word->gw_analysis_storage;
+		if (storage->owner == word) {
+			free(storage->items);
+			free(storage);
+		}
+	} else {
+		free(word->gw_analysis);
+	}
+	DetachGkAnalStorage(word);
+}
+
 gk_word *
 CreatGkword(int num)
 {
@@ -115,8 +161,7 @@ void FreeGkword(gk_word *Gkword)
 		fprintf(stderr,"hey! asked to free NULL gkword \n");
 		return;
 	}
-	if( analysis_of(Gkword) )
-		FreeGkAnal(analysis_of(Gkword));
+	ReleaseGkAnalStorage(Gkword);
 	if( oddkeys_of(Gkword) ) 
 		free(oddkeys_of(Gkword));
 /*
@@ -131,9 +176,20 @@ void CpGkAnal(gk_word *Gkword1, gk_word *Gkword2)
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return;
 	}
-	totanal_of(Gkword1) = totanal_of(Gkword2);
-	Gkword1->gw_anal_capacity = Gkword2->gw_anal_capacity;
-	analysis_of(Gkword1) = analysis_of(Gkword2);
+	if (Gkword1->gw_analysis_storage != Gkword2->gw_analysis_storage) {
+		if (Gkword1->gw_analysis_storage ||
+		    Gkword1->gw_analysis != analysis_of(Gkword2))
+			ReleaseGkAnalStorage(Gkword1);
+		else
+			DetachGkAnalStorage(Gkword1);
+		Gkword1->gw_analysis_storage = Gkword2->gw_analysis_storage;
+		if (Gkword1->gw_analysis_storage &&
+		    Gkword1->gw_analysis_storage->owner == Gkword2)
+			Gkword1->gw_analysis_storage->owner = Gkword1;
+	}
+	Gkword1->gw_totanal = totanal_of(Gkword2);
+	Gkword1->gw_anal_capacity = anal_capacity_of(Gkword2);
+	Gkword1->gw_analysis = analysis_of(Gkword2);
 }
 
 /*

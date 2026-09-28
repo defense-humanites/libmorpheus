@@ -1,6 +1,7 @@
 #include <gkstring.h>
 
 #include "checkstring.proto.h"
+#include "../morphlib/gkstring.proto.h"
 static checkstring4(gk_word *);
 static add_apostrvowel(char *, char *, char *);
 /*
@@ -21,6 +22,10 @@ digstring(char *string, PrntFlags prntflags, FILE *fout)
 
 	if( is_blank(string) ) return(0);
 	Gkword = (gk_word *) CreatGkword(1 );
+	if (!Gkword || !EnsureGkAnalStorage(Gkword)) {
+		if (Gkword) FreeGkword(Gkword);
+		return(0);
+	}
 
 	set_dialect(Gkword,WantDialects);
 	set_workword(Gkword,string);

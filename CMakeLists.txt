@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
   libmorpheus
-  VERSION 0.4.1
+  VERSION 0.4.2
   DESCRIPTION "Modernization of the Morpheus morphological analyzer"
   LANGUAGES C
 )
@@ -1881,6 +1881,17 @@ if(BUILD_TESTING)
       PRIVATE morpheus morpheus_build_options)
     add_test(NAME high_ambiguity_analysis
       COMMAND morpheus_high_ambiguity_analysis_test)
+    if(EXISTS "${MORPHEUS_STEMLIB_DIR}/Greek/stemsrc/lemlist")
+      add_executable(morpheus_greek_lemma_sweep_test
+        test/greek-lemma-sweep.c)
+      target_compile_definitions(morpheus_greek_lemma_sweep_test PRIVATE
+        MORPHEUS_TEST_STEMLIB="${MORPHEUS_STEMLIB_DIR}"
+        MORPHEUS_TEST_LEMMA_LIST="${MORPHEUS_STEMLIB_DIR}/Greek/stemsrc/lemlist")
+      target_link_libraries(morpheus_greek_lemma_sweep_test
+        PRIVATE morpheus morpheus_build_options)
+      add_test(NAME greek_lemma_sweep
+        COMMAND morpheus_greek_lemma_sweep_test)
+    endif()
   endif()
   add_executable(morpheus_public_morph_flags_test test/public-morph-flags.c)
   target_compile_definitions(

@@ -9,9 +9,23 @@ the corpus.
 
 ## [Unreleased]
 
+Target project version: **0.4.2**. C ABI: **2**. Shared-library SONAME: **1**.
+
+### Fixed
+
+- Analysis storage now shares its mutable pointer, count and capacity between
+  copied `gk_word` values. This prevents a double `free` and process abort on
+  forms such as `a)mfestan` after the 0.4.1 growth change. The 46 reported
+  crashing forms and a sweep of the pinned Alpheios lemma list are regression
+  tests, including in the sanitizer build.
+
 ## [0.4.1] - 2026-09-28
 
 Target project version: **0.4.1**. C ABI: **2**. Shared-library SONAME: **1**.
+
+**Known regression:** native 0.4.1 may abort the process while analyzing some
+Greek forms when its analysis array grows. The Deno 0.4.1 binding acquires that
+native version. Do not deploy either 0.4.1 release for untrusted searches.
 
 ### Fixed
 

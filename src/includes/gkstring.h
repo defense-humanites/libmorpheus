@@ -60,7 +60,15 @@ typedef struct {
 	char 		z[MAXWORDSIZE];
 } gk_analysis;
 
+struct gk_word;
 typedef struct {
+	gk_analysis *items;
+	int count;
+	int capacity;
+	struct gk_word *owner;
+} gk_analysis_storage;
+
+typedef struct gk_word {
 	word_form	gs_forminfo;
 	Stemtype	gs_steminfo;
 	Derivtype   gs_derivtype;
@@ -83,14 +91,35 @@ typedef struct {
 	char 		st_crasis[MAXWORDSIZE];
 	char * 		st_oddkeys;
 	gk_analysis  *	gw_analysis;
+	/* Copies of a word share this handle; only owner releases it. */
+	gk_analysis_storage *gw_analysis_storage;
 } gk_word;
 
+static inline int *gk_analysis_count_slot(gk_word *word)
+{
+	return word->gw_analysis_storage ? &word->gw_analysis_storage->count
+	                                 : &word->gw_totanal;
+}
 
-#define totanal_of(X)		(X)->gw_totanal
+static inline gk_analysis **gk_analysis_items_slot(gk_word *word)
+{
+	return word->gw_analysis_storage ? &word->gw_analysis_storage->items
+	                                 : &word->gw_analysis;
+}
+
+static inline int *gk_analysis_capacity_slot(gk_word *word)
+{
+	return word->gw_analysis_storage ? &word->gw_analysis_storage->capacity
+	                                 : &word->gw_anal_capacity;
+}
+
+
+#define totanal_of(X)		(*gk_analysis_count_slot(X))
 #define set_totanal(X,Y)	totanal_of(X) = Y
 
-#define analysis_of( X ) (X)->gw_analysis
+#define analysis_of( X ) (*gk_analysis_items_slot(X))
 #define set_analysis( X , Y ) analysis_of(X) = Y
+#define anal_capacity_of(X) (*gk_analysis_capacity_slot(X))
 
 #define dialect_of( X ) (X)->gs_dialect
 #define add_dialect( X , Dial ) dialect_of(X) |= Dial

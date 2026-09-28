@@ -24,7 +24,7 @@ add_empty_analysis(void)
 	set_lemma(&generated,"alpha");
 	assert(AddAnalysis(&candidate,&generated));
 	assert(totanal_of(&candidate) == 1);
-	FreeGkAnal(analysis_of(&candidate));
+	ReleaseGkAnalStorage(&candidate);
 }
 
 static void
@@ -44,8 +44,37 @@ add_many_analyses(void)
 		assert(AddAnalysis(&candidate,&generated));
 		assert(totanal_of(&candidate) == i + 1);
 	}
-	assert(candidate.gw_anal_capacity >= 40);
-	FreeGkAnal(analysis_of(&candidate));
+	assert(anal_capacity_of(&candidate) >= 40);
+	ReleaseGkAnalStorage(&candidate);
+}
+
+static void
+add_analyses_through_copies(void)
+{
+	gk_word candidate = { 0 };
+	gk_word first_copy;
+	gk_word second_copy;
+	gk_word generated = { 0 };
+	char lemma[32];
+	int i;
+
+	assert(EnsureGkAnalStorage(&candidate));
+	first_copy = candidate;
+	second_copy = candidate;
+	set_rawword(&candidate,"copies");
+	set_rawword(&first_copy,"copies");
+	set_rawword(&second_copy,"copies");
+	set_rawword(&generated,"copies");
+	set_workword(&generated,"copies");
+	for (i = 0; i < 10; ++i) {
+		snprintf(lemma,sizeof lemma,"copy%d",i);
+		set_lemma(&generated,lemma);
+		assert(AddAnalysis(i < 5 ? &first_copy : &second_copy,&generated));
+		assert(totanal_of(&candidate) == i + 1);
+		assert(analysis_of(&candidate) == analysis_of(&first_copy));
+		assert(analysis_of(&candidate) == analysis_of(&second_copy));
+	}
+	ReleaseGkAnalStorage(&candidate);
 }
 
 int
@@ -76,8 +105,9 @@ main(void)
 	}
 	add_empty_analysis();
 	add_many_analyses();
-	assert(show_totanals() == 41);
-	assert(show_totlems() == 41);
+	add_analyses_through_copies();
+	assert(show_totanals() == 51);
+	assert(show_totlems() == 51);
 	first->analysis_storage_error = 1;
 
 	morpheus_runtime_context_activate(second);
@@ -87,8 +117,8 @@ main(void)
 	add_empty_analysis();
 
 	morpheus_runtime_context_activate(first);
-	assert(show_totanals() == 41);
-	assert(show_totlems() == 41);
+	assert(show_totanals() == 51);
+	assert(show_totlems() == 51);
 	assert(first->analysis_storage_error);
 
 	morpheus_runtime_context_activate(previous);

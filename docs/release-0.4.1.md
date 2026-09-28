@@ -2,7 +2,12 @@
 
 # Release decision: 0.4.1
 
-Status: benchmark accepted; platform qualification pending.
+Status: published; subsequently found unsafe for some Greek analyses.
+
+**Known regression:** when a copied `gk_word` grows the array, another copy
+can retain the freed pointer. For example, `a)mfestan` with `IgnoreAccents`
+can abort the process. Do not deploy native 0.4.1 for search traffic. The
+corrective candidate is described in `release-0.4.2.md`.
 
 - Project version: **0.4.1**
 - C ABI: **2**

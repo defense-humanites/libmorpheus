@@ -2,6 +2,11 @@
 
 # @libmorpheus/deno 0.4.1
 
+**Known regression:** the native libmorpheus 0.4.1 acquired by this binding
+can abort the process for some Greek forms, including `a)mfestan` with
+`IgnoreAccents`. Do not deploy this binding for search traffic until a binding
+release acquires a corrected native runtime.
+
 This binding release updates `/setup` and `/native` to acquire the published
 libmorpheus 0.4.1 native runtime. That runtime fixes an internal error when a
 Greek form has more than 25 analyses. With the pinned Alpheios stemlib and

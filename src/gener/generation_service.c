@@ -36,11 +36,7 @@ release_input(gk_word *input)
 {
 	free(oddkeys_of(input));
 	oddkeys_of(input) = NULL;
-	if (analysis_of(input)) {
-		FreeGkAnal(analysis_of(input));
-		analysis_of(input) = NULL;
-		totanal_of(input) = 0;
-	}
+	ReleaseGkAnalStorage(input);
 }
 
 static void
@@ -48,8 +44,7 @@ release_forms(gk_word *forms)
 {
 	/* Generated forms borrow these pointers from the call-local input. */
 	oddkeys_of(forms) = NULL;
-	analysis_of(forms) = NULL;
-	totanal_of(forms) = 0;
+	DetachGkAnalStorage(forms);
 	FreeGkword(forms);
 }
 

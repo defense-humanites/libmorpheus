@@ -216,21 +216,23 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(0);
 	}
+	if (!analysis_of(Gkword) && totanal_of(Gkword) != 0) {
+		fprintf(stderr,"hey! anal pointer NULL but totanal is %d\n",
+		        totanal_of(Gkword));
+		context->analysis_storage_error++;
+		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+		return(0);
+	}
+	if (!EnsureGkAnalStorage(Gkword)) return(0);
 
 	if( analysis_of(Gkword) == NULL ) {
-		if( totanal_of(Gkword) != 0 ) {
-			fprintf(stderr,"hey! anal pointer NULL but totanal is %d\n", totanal_of(Gkword) );
-			context->analysis_storage_error++;
-			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
-			return(0);
-		}
 		if( ! ( analysis_of(Gkword) = CreatGkAnal(4) )) {
 			fprintf(stderr,"not enough memory for greek analysis\n");
 			context->analysis_storage_error++;
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 			return(0);
 		}
-		Gkword->gw_anal_capacity = 4;
+		anal_capacity_of(Gkword) = 4;
 	}
 
 
@@ -239,8 +241,8 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 	if(strcmp(tmplem,lemma_of(gkform)) set_dictform(gkform,tmplem);
 */
 
-	if( totanal_of(Gkword) >= Gkword->gw_anal_capacity ) {
-		int capacity = Gkword->gw_anal_capacity;
+	if( totanal_of(Gkword) >= anal_capacity_of(Gkword) ) {
+		int capacity = anal_capacity_of(Gkword);
 		gk_analysis *grown;
 		if (capacity <= 0 || capacity > INT_MAX / 2 ||
 		    (size_t)(capacity * 2) > SIZE_MAX / sizeof *grown) {
@@ -255,7 +257,7 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 		}
 		memset(grown + capacity,0,(size_t)capacity * sizeof *grown);
 		analysis_of(Gkword) = grown;
-		Gkword->gw_anal_capacity = capacity * 2;
+		anal_capacity_of(Gkword) = capacity * 2;
 	}
 	curanal = analysis_of(Gkword) + totanal_of(Gkword);
 	

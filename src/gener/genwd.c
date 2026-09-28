@@ -337,7 +337,7 @@ GenIrregForm(gk_word *Gkword, char *keys, int mode)
 	if (!BuildAWord(Gkword,gstring,gkforms) ||
 	    morpheus_runtime_context_error(morpheus_runtime_context_current()) !=
 	    MORPHEUS_RUNTIME_ERROR_NONE) {
-		analysis_of(gkforms) = NULL;
+		DetachGkAnalStorage(gkforms);
 		FreeGkword(gkforms);
 		FreeGkString(gstring);
 		return(NULL);
@@ -485,7 +485,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 				morpheus_runtime_error_record(
 					MORPHEUS_RUNTIME_ERROR_INTERNAL);
 				*Gkword = SaveGkWord;
-				analysis_of(CurBuf) = NULL;
+				DetachGkAnalStorage(CurBuf);
 				FreeGkword(CurBuf);
 				return(0);
 			}
@@ -506,7 +506,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 	}
 */
 
-	analysis_of(CurBuf) = NULL;
+	DetachGkAnalStorage(CurBuf);
 	FreeGkword(CurBuf);
 	CurBuf = NULL;
 	return(1);
