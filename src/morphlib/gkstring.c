@@ -115,7 +115,7 @@ void FreeGkword(gk_word *Gkword)
 		fprintf(stderr,"hey! asked to free NULL gkword \n");
 		return;
 	}
-	if( totanal_of(Gkword) && analysis_of(Gkword) )
+	if( analysis_of(Gkword) )
 		FreeGkAnal(analysis_of(Gkword));
 	if( oddkeys_of(Gkword) ) 
 		free(oddkeys_of(Gkword));
@@ -132,6 +132,7 @@ void CpGkAnal(gk_word *Gkword1, gk_word *Gkword2)
 		return;
 	}
 	totanal_of(Gkword1) = totanal_of(Gkword2);
+	Gkword1->gw_anal_capacity = Gkword2->gw_anal_capacity;
 	analysis_of(Gkword1) = analysis_of(Gkword2);
 }
 

@@ -87,6 +87,7 @@ struct morpheus_runtime_context {
 	int compound_head_capacity;
 	int compound_head_table_initialized;
 	char *analysis_print_buffer;
+	size_t analysis_print_capacity;
 	char analysis_previous_lemma[MAXWORDSIZE];
 	char analysis_previous_word[MAXWORDSIZE];
 	char analysis_previous_stem[MAXWORDSIZE];

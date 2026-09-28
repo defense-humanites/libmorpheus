@@ -11,6 +11,11 @@
 
 #include "prntanal.proto.h"
 
+static size_t print_capacity(void)
+{
+  return ANALYSIS_CONTEXT->analysis_print_capacity;
+}
+
 int PrntAnalyses(gk_word *Gkword, PrntFlags prntflags, FILE *fout)
 {
   int i, nanals;
@@ -26,13 +31,25 @@ int PrntAnalyses(gk_word *Gkword, PrntFlags prntflags, FILE *fout)
 	  morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 	  return(0);
 	}
-	
-  if( ! pbuf ) {
-    pbuf = (char *)calloc((size_t) MAXANALYSES * 128 , (size_t)sizeof * pbuf );
-	if (!pbuf) {
-	  morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
-	  return(0);
-	}
+  {
+    /* Reserve room for the longest formatted analysis, including its labels. */
+    size_t unit = (size_t)LONGSTRING * 4 + 256;
+    size_t required;
+    char *grown;
+    if ((size_t)nanals > (SIZE_MAX - unit) / unit) {
+      morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+      return(0);
+    }
+    required = ((size_t)nanals + 1) * unit;
+    if (print_capacity() < required) {
+      grown = realloc(pbuf,required);
+      if (!grown) {
+        morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+        return(0);
+      }
+      pbuf = grown;
+      ANALYSIS_CONTEXT->analysis_print_capacity = required;
+    }
   }
   *pbuf = 0;
   SortAnals(analysis_of(Gkword),nanals);
@@ -57,7 +74,7 @@ int PrntAnalyses(gk_word *Gkword, PrntFlags prntflags, FILE *fout)
 	  return(0);
 	}
     if( prntflags & KEEP_BETA ) {
-	  if (!Xstrncat(pbuf,tmp,(size_t)MAXANALYSES * 128)) {
+	  if (!Xstrncat(pbuf,tmp,print_capacity())) {
 	    morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 	    return(0);
 	  }
@@ -82,10 +99,10 @@ int PrntAnalyses(gk_word *Gkword, PrntFlags prntflags, FILE *fout)
 		else*/
     if( prntflags & SHOW_LEMMA ) 
       morpheus_runtime_string_append(
-	  pbuf,"\n",(size_t)MAXANALYSES * 128);
+	  pbuf,"\n",print_capacity());
     else
       morpheus_runtime_string_append(
-	  pbuf,"\r",(size_t)MAXANALYSES * 128);
+	  pbuf,"\r",print_capacity());
   }
   /*	puts(pbuf);*/
   return(nanals);
@@ -192,7 +209,7 @@ void PrntOneAnalysis(gk_analysis *Gkanal, PrntFlags prntflags, FILE *f)
 	  goto too_long;
       }
       if (!morpheus_runtime_string_append(
-	  pbuf,wtmp,(size_t)MAXANALYSES * 128)) return;
+	  pbuf,wtmp,print_capacity())) return;
       curan = 0;
       Xstrcpy(wtmp,"\n");
     }
@@ -255,7 +272,7 @@ void PrntOneAnalysis(gk_analysis *Gkanal, PrntFlags prntflags, FILE *f)
   SprintGkFlags(&TmpGstr,tmp,sizeof tmp," ",1);
 
   if (!morpheus_runtime_string_append(tmp,NEWLINE,sizeof tmp)) goto too_long;
-  if (!Xstrncat(pbuf,tmp,(size_t)MAXANALYSES * 128)) goto too_long;
+  if (!Xstrncat(pbuf,tmp,print_capacity())) goto too_long;
   return;
 
 too_long:

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include <assert.h>
+#include <stdio.h>
 
 #include <gkstring.h>
 
@@ -23,6 +24,27 @@ add_empty_analysis(void)
 	set_lemma(&generated,"alpha");
 	assert(AddAnalysis(&candidate,&generated));
 	assert(totanal_of(&candidate) == 1);
+	FreeGkAnal(analysis_of(&candidate));
+}
+
+static void
+add_many_analyses(void)
+{
+	gk_word candidate = { 0 };
+	gk_word generated = { 0 };
+	char lemma[32];
+	int i;
+
+	set_rawword(&candidate,"many");
+	set_rawword(&generated,"many");
+	set_workword(&generated,"many");
+	for (i = 0; i < 40; ++i) {
+		snprintf(lemma,sizeof lemma,"lemma%d",i);
+		set_lemma(&generated,lemma);
+		assert(AddAnalysis(&candidate,&generated));
+		assert(totanal_of(&candidate) == i + 1);
+	}
+	assert(candidate.gw_anal_capacity >= 40);
 	FreeGkAnal(analysis_of(&candidate));
 }
 
@@ -53,8 +75,9 @@ main(void)
 		first->analysis_storage_error = 0;
 	}
 	add_empty_analysis();
-	assert(show_totanals() == 1);
-	assert(show_totlems() == 1);
+	add_many_analyses();
+	assert(show_totanals() == 41);
+	assert(show_totlems() == 41);
 	first->analysis_storage_error = 1;
 
 	morpheus_runtime_context_activate(second);
@@ -64,8 +87,8 @@ main(void)
 	add_empty_analysis();
 
 	morpheus_runtime_context_activate(first);
-	assert(show_totanals() == 1);
-	assert(show_totlems() == 1);
+	assert(show_totanals() == 41);
+	assert(show_totlems() == 41);
 	assert(first->analysis_storage_error);
 
 	morpheus_runtime_context_activate(previous);

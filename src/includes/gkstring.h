@@ -70,6 +70,7 @@ typedef struct {
 	char  		st_domains[MAXDOMAINS+1];
 	PrntFlags	gs_prntflags;
 	int			gw_totanal;
+	int			gw_anal_capacity;
 	char 		st_lemma[MAXWORDSIZE];
 	gk_string	gs_preverb;
 	gk_string	gs_aug1;
@@ -208,7 +209,6 @@ FILE * MorphFopen(char *, char *);
 #define DIRCHAR '/'
 
 #endif
-#define MAXANALYSES 25
 
 #define PROSEAUTHOR 0100
 #define LENGTH_OF(X) (sizeof X/sizeof X[0])

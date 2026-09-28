@@ -2,6 +2,7 @@
 #include "../morphlib/runtime_context_internal.h"
 
 #include "checkgenwds.proto.h"
+#include <limits.h>
 
 static int
 valid_analysis_argument(const void *argument)
@@ -223,12 +224,13 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			return(0);
 		}
-		if( ! ( analysis_of(Gkword) = (gk_analysis *)CreatGkAnal(MAXANALYSES+1) )) {
+		if( ! ( analysis_of(Gkword) = CreatGkAnal(4) )) {
 			fprintf(stderr,"not enough memory for greek analysis\n");
 			context->analysis_storage_error++;
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 			return(0);
 		}
+		Gkword->gw_anal_capacity = 4;
 	}
 
 
@@ -237,12 +239,24 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 	if(strcmp(tmplem,lemma_of(gkform)) set_dictform(gkform,tmplem);
 */
 
-	if( totanal_of(Gkword) >= MAXANALYSES ) {
-		fprintf(stderr,"%s:  ran out of space with %d analyses!\n",
-			rawword_of(Gkword), totanal_of(Gkword) );
-		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
-		return(0);
-	} 
+	if( totanal_of(Gkword) >= Gkword->gw_anal_capacity ) {
+		int capacity = Gkword->gw_anal_capacity;
+		gk_analysis *grown;
+		if (capacity <= 0 || capacity > INT_MAX / 2 ||
+		    (size_t)(capacity * 2) > SIZE_MAX / sizeof *grown) {
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+			return(0);
+		}
+		grown = realloc(analysis_of(Gkword),
+		                (size_t)(capacity * 2) * sizeof *grown);
+		if (!grown) {
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+			return(0);
+		}
+		memset(grown + capacity,0,(size_t)capacity * sizeof *grown);
+		analysis_of(Gkword) = grown;
+		Gkword->gw_anal_capacity = capacity * 2;
+	}
 	curanal = analysis_of(Gkword) + totanal_of(Gkword);
 	
 	if( crasis_of(gkform)[0] ) {

@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <gkstring.h>
@@ -37,6 +38,31 @@ render_one_analysis(const char *word)
 	set_workword(&analysis,word);
 	set_stem(&analysis,word);
 	assert(PrntAnalyses(&candidate,KEEP_BETA,stdout) == 1);
+}
+
+static void
+render_many_analyses(void)
+{
+	gk_analysis *analyses = calloc(40,sizeof *analyses);
+	gk_word candidate = { 0 };
+	char lemma[32];
+	int i;
+
+	assert(analyses);
+	set_analysis(&candidate,analyses);
+	set_totanal(&candidate,40);
+	set_rawword(&candidate,"many");
+	set_stem(&candidate,"many");
+	for (i = 0; i < 40; ++i) {
+		snprintf(lemma,sizeof lemma,"lemma%02d",i);
+		set_lemma(&analyses[i],lemma);
+		set_rawword(&analyses[i],"many");
+		set_workword(&analyses[i],"many");
+		set_stem(&analyses[i],"many");
+	}
+	assert(PrntAnalyses(&candidate,KEEP_BETA,stdout) == 40);
+	assert(strstr(anal_buf(),"lemma39"));
+	free(analyses);
 }
 
 static void
@@ -81,6 +107,7 @@ main(void)
 	assert(strstr(anal_buf(),"alpha"));
 	render_one_analysis("logos");
 	assert(strstr(anal_buf(),"logos"));
+	render_many_analyses();
 	assert(morpheus_runtime_context_error(greek) ==
 	       MORPHEUS_RUNTIME_ERROR_NONE);
 
@@ -91,7 +118,7 @@ main(void)
 	assert(!strstr(anal_buf(),"alpha"));
 
 	morpheus_runtime_context_activate(greek);
-	assert(strstr(anal_buf(),"logos"));
+	assert(strstr(anal_buf(),"lemma39"));
 	assert(!strstr(anal_buf(),"beta"));
 
 	morpheus_runtime_context_activate(previous);
