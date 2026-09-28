@@ -9,7 +9,7 @@ from C++.
 
 ## Versioning
 
-The current project version is 0.4.0, the SONAME major is 1, and
+The current project version is 0.4.1, the SONAME major is 1, and
 `MORPHEUS_ABI_VERSION` is 2. Version 0.4.0 adds opt-in, non-installed stemlib
 production and qualification infrastructure: the public C declarations and
 symbol set remain identical to 0.3.2. The generation surface remains

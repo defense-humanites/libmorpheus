@@ -9,6 +9,10 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-09-28
+
+Target project version: **0.4.1**. C ABI: **2**. Shared-library SONAME: **1**.
+
 ### Fixed
 
 - Greek analysis now grows its result storage on demand instead of failing

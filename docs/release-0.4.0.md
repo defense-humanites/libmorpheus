@@ -2,7 +2,7 @@
 
 # Release decision: 0.4.0
 
-Status: benchmark refresh and platform qualification pending.
+Status: benchmark accepted; platform qualification pending.
 
 - Project version: **0.4.0**
 - C ABI: **2**
@@ -70,7 +70,7 @@ release assets.
 
 ## Benchmark evidence
 
-The earlier accepted schema 2 report was produced on Apple Silicon from
+The accepted schema 2 report was produced on Apple Silicon from
 `3048fdad64b30f5ba35423bacb5197f5a347e228` with Deno 2.9.6, Apple Clang 21,
 the pinned Alpheios revision and the canonical generation-index digest. Its
 SHA-256 is
@@ -97,28 +97,19 @@ rather than isolated native allocations. The increase is recorded and
 accepted as allocator and high-water-mark variability rather than evidence of
 a functional regression.
 
-The subsequent dynamic analysis-storage correction on `main` invalidates that
-measurement for the release candidate. Linux CI passed on
-[`186fbc5`](https://github.com/defense-humanites/libmorpheus/actions/runs/36385002610),
-including the 40-analysis storage and printing regressions. A new benchmark
-from the final source revision and pinned Alpheios stemlib is required before
-the historical performance comparison can be accepted again. The
-evidence-finalization commit should change only benchmark evidence, release
-decision, changelog and qualification metadata; any later native or
-stemlib-production change requires another report.
+The evidence-finalization commit changes only the benchmark evidence, release
+decision, changelog and qualification metadata. Any subsequent native or
+stemlib-production change invalidates the measurement and requires a new
+report.
 
 ## Remaining gates
 
-1. Run `bench/release.sh` from the source candidate on a controlled host with
-   the pinned Alpheios submodule, `cmake`, `ctest` and Deno. Validate and
-   review the new report against the accepted 0.3.2 baseline, then update
-   `bench/release-evidence/benchmark-0.4.0.json` and its SHA-256 record.
-2. Require the complete Linux CI, including stemlib reconstruction,
+1. Require the complete Linux CI, including stemlib reconstruction,
    sanitizers, signedness builds, bindings, fixtures and release metadata, to
    pass on the benchmark-finalized commit.
-3. Manually dispatch `Platform and release qualification` for the exact
+2. Manually dispatch `Platform and release qualification` for the exact
    benchmark-finalized commit with package artifacts enabled; inspect all
    three data-free native archives and checksums.
-4. Tag that qualified commit as `v0.4.0` only after explicit authorization.
+3. Tag that qualified commit as `v0.4.0` only after explicit authorization.
    Require the tag workflows to rebuild and publish the native assets and
    accepted benchmark evidence.

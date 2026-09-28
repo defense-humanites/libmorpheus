@@ -21,6 +21,8 @@ if(NOT "${CMAKE_MATCH_1}" STREQUAL "${MORPHEUS_ABI_VERSION}")
   )
 endif()
 
+
+
 file(READ "${MORPHEUS_SOURCE_DIR}/docs/public-api.md" api_documentation)
 set(expected_api_versions
     "The current project version is ${MORPHEUS_PROJECT_VERSION}, the SONAME major is ${MORPHEUS_SOVERSION}, and")
@@ -266,5 +268,37 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.0")
      NOT recorded_benchmark_checksum MATCHES
        "^${benchmark_checksum}  benchmark-0.4.0.json")
     message(FATAL_ERROR "Accepted 0.4.0 benchmark digest differs")
+  endif()
+endif()
+
+if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.1")
+  foreach(expected_patch_release_value IN ITEMS
+          "Previous release tag: `v0.4.0`"
+          "Benchmark evidence: **accepted**"
+          "C ABI 2 and SONAME 1 therefore remain correct"
+          "64e09a95c56db782b32c3fdff80c9e972192620b"
+          "58b9f7e7d4a20833ab53b177914bbef98a7a8362a026458907713c4dfb750afa"
+          "Tag the qualified commit as `v0.4.1`")
+    string(FIND "${release_decision}" "${expected_patch_release_value}"
+                patch_release_value_at)
+    if(patch_release_value_at EQUAL -1)
+      message(FATAL_ERROR
+        "release-0.4.1.md is missing: ${expected_patch_release_value}")
+    endif()
+  endforeach()
+  set(benchmark_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.1.json")
+  set(benchmark_checksum
+      "58b9f7e7d4a20833ab53b177914bbef98a7a8362a026458907713c4dfb750afa")
+  if(NOT EXISTS "${benchmark_path}" OR
+     NOT EXISTS "${benchmark_path}.sha256")
+    message(FATAL_ERROR "Accepted 0.4.1 benchmark evidence is missing")
+  endif()
+  file(SHA256 "${benchmark_path}" actual_benchmark_checksum)
+  file(READ "${benchmark_path}.sha256" recorded_benchmark_checksum)
+  if(NOT actual_benchmark_checksum STREQUAL benchmark_checksum OR
+     NOT recorded_benchmark_checksum MATCHES
+       "^${benchmark_checksum}  benchmark-0.4.1.json")
+    message(FATAL_ERROR "Accepted 0.4.1 benchmark digest differs")
   endif()
 endif()

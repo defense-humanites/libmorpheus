@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
   libmorpheus
-  VERSION 0.4.0
+  VERSION 0.4.1
   DESCRIPTION "Modernization of the Morpheus morphological analyzer"
   LANGUAGES C
 )
@@ -1872,6 +1872,16 @@ if(BUILD_TESTING)
     morpheus_public_analysis_test PRIVATE morpheus morpheus_build_options
   )
   add_test(NAME public_analysis COMMAND morpheus_public_analysis_test)
+  if(EXISTS "${MORPHEUS_STEMLIB_DIR}/Greek")
+    add_executable(morpheus_high_ambiguity_analysis_test
+      test/high-ambiguity-analysis.c)
+    target_compile_definitions(morpheus_high_ambiguity_analysis_test
+      PRIVATE MORPHEUS_TEST_STEMLIB="${MORPHEUS_STEMLIB_DIR}")
+    target_link_libraries(morpheus_high_ambiguity_analysis_test
+      PRIVATE morpheus morpheus_build_options)
+    add_test(NAME high_ambiguity_analysis
+      COMMAND morpheus_high_ambiguity_analysis_test)
+  endif()
   add_executable(morpheus_public_morph_flags_test test/public-morph-flags.c)
   target_compile_definitions(
     morpheus_public_morph_flags_test
