@@ -9,6 +9,8 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-09-28
+
 Target project version: **0.4.2**. C ABI: **2**. Shared-library SONAME: **1**.
 
 ### Fixed

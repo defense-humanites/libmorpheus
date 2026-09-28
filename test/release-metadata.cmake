@@ -309,7 +309,7 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.2")
           "Benchmark evidence: **accepted**"
           "5185bc8a94f2fea20afe249b4cd6e812610b4050"
           "0cc89021dbc973db5293a0a7d4c42d3ed17ac3a57fc29b247e2e28514ad90c46"
-          "Tag `v0.4.2` only after those gates pass")
+          "This native release fixes a process crash introduced in 0.4.1.")
     string(FIND "${release_decision}" "${expected_patch_release_value}"
                 patch_release_value_at)
     if(patch_release_value_at EQUAL -1)
