@@ -615,12 +615,23 @@ the inspected entry (some have a related cross-reference). Their provenance
 remains open; absence from this edition is not grounds for deleting them.
 All 19 entry-level evidence classes and source identifiers are kept privately.
 Sense evidence alone does not establish that a proposed stem and inflection
-class are correct, so these groups still require analyzer comparison.
+class are correct. A second controlled index comparison removed the 18
+witness-only lines and inserted the one candidate-only line, leaving every
+other nominal source and constraint unchanged. `cruncher -S -n` changed the
+headword analysis for **all 19** groups. The extra lines are therefore
+analyzer-visible, including the seven whose precise provenance is still
+unknown; do not drop those seven merely to improve stem multiset agreement.
+The comparison qualifies the impact of those lines, not their philological
+correctness or every inflected form.
 
 The other 18 tag/label differences outside the `language` and
 candidate-noun/witness-adjective groups received a first sense-level pass.
 Eight concern entity labels whose semantic scope must be checked against the
-historical entity list. In two, LSJ explicitly supplies both a verbal
+historical entity list. All eight appear there under the witness's label,
+with no matching override in `entitylist-byhand.txt`. Five labels have a
+corresponding LSJ sense; three classify a geographic adjective or a singular
+person as a place or group and need separate review. Do not infer the
+historical entity labels from spelling suffixes. In two, LSJ explicitly supplies both a verbal
 adjective and a noun; retaining both readings is preferable to substituting
 one for the other. Two further entries are adjectives with a separately
 formed adverb, while the importer's `<pos>Adv.</pos>` branch emits the
@@ -632,6 +643,17 @@ eta-declension reading, subject to a paradigm check. The last retains a
 source-supported, quantity-marked noun in the witness alongside another
 reading requiring review. All entry IDs and provisional dispositions are
 private; none is a global rewrite rule.
+
+In the same controlled baseline, replacing the 21 curated adjectives with
+candidate nouns, two adjectives with candidate indeclinable adverbs, and two
+nouns with candidate verbal adjectives changed the headword analysis in
+**all 25** cases. The noun substitutions change gender and case readings;
+the adverb substitutions lose adjectival readings. An additional four-form
+probe recognized all four forms with the witness and only three after these
+substitutions; the missing form was a derived adverb whose adjective entry
+had provided the analysis. Both index digests and the per-form outputs remain
+private. This demonstrates material analyzer effects without making the
+curated witness a universal gold standard.
 
 For the 12 diaeresis entries, two private copies of the curated Greek runtime
 were indexed with the same native `indexnoms` and the same nominal sources,
