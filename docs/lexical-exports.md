@@ -571,6 +571,24 @@ occurrence merely because one is already marked long in `<orth>`; this
 matters especially for the remaining entry with a long orthographic mark
 at another occurrence. The script prints only aggregate counts and requires
 the unchanged pinned checkout.
+For the next entry-level pass, `tools/inspect-greek-quantity-open.py` accepts
+the private 314-row source review used by the long-mark arbitrator. It selects
+only rows still classified `manual_review` and lists zero-based letter positions
+and quantity marks in each source orthography alongside its direct or nested
+`<pron>` records. The output is a **private dossier**, not a decision ledger:
+
+```sh
+python3 tools/inspect-greek-quantity-open.py \
+  --source-review /private/greek-long-source-review.jsonl \
+  --private-output /private/greek-long-open-positions.jsonl
+```
+
+The public summary contains only counts and SHA-256 digests. This selection
+still includes the two cases subsequently checked individually; exclude them
+from the 25 pending decisions during review. Explicit marks in another
+orthography or a longer `<pron>` prompt inspection of their local TEI
+relationship; they do not select the witness's position automatically.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
