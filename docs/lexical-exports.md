@@ -391,6 +391,32 @@ groups, and the changed lemma inventories still need entry-level review;
 quantity normalization alone does not explain them. Keep the variant private
 and retain both quantity-bearing curated snapshots for analyzer checks.
 
+`tools/triage-greek-quantity-residuals.py` narrows these 1,441 disjoint
+groups to the quantity marks in the **stem token**; underscores in labels such
+as `os_ou` do not count. All have one stem record on each side. On the pinned
+private inputs it gives this further partition:
+
+| Quantity marks in stem tokens | Nominal | Verbal |
+| --- | ---: | ---: |
+| Candidate unmarked, witness marked | 1,307 | 31 |
+| Witness unmarked, candidate marked | 60 | 0 |
+| Both marked at distinct positions | 40 | 0 |
+| Both marked with positions partly shared | 2 | 0 |
+| Same positions, different marks or multiplicity | 1 | 0 |
+
+Of the nominal cases, 1,342 candidate records are `:no:` and 68 are `:aj:`;
+all 31 verbal records are `:de:`. The nominal candidate and witness SHA-256
+digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
+and `bfb03e172cb16e464ae6e97793a9c3b0d2196433e40463081f9a1e2d481af8d2`;
+the verbal digests are `8100e9aef3989f1e06a4b8535023a129ddc9be2f7f922722f1be1b2a164b1df2`
+and `1169d2ccea85048e95742d12f58b49faf83fafc02f064abc2fa988239da6aa4c`.
+For an entry-level ledger, run the tool with `--candidate`, `--witness` and
+`--private-output /private/Greek.quantity-review.jsonl`. Its stdout contains
+only counts and digests; the exclusive private output contains individual
+stems and must stay outside the repository and CI artifacts. The classes
+describe where notation differs. They do not establish which vowel quantity
+is correct or authorize copying witness marks to the reconstructed export.
+
 The spelling audit also classifies **unmatched records within partial-overlap
 groups** after subtracting exact shared lines. One-sided residuals are counted
 separately from pairs of residual multisets; the same quantity, Beta Code,
