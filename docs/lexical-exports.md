@@ -414,6 +414,19 @@ short (`^`) at different positions. The two partly shared cases have both
 entry-level source and paradigm review than the simple unmarked/marked
 groups. This ordering is diagnostic, not a judgment of correct quantity.
 
+An exact-lemma join against the pinned Greek header projection found **one
+source entry for each of these 43 cases**. In 34, its first orthography has
+no quantity mark within the compared stem. In nine, it marks a different
+stem vowel from either side of this trial. Each of those nine still has that
+source mark in the *original* projected stem, in addition to the residual
+mark; removing first-token quantity removes exactly that source mark. The
+other 34 projected stem records are unchanged by suppression. Thus the
+nine marked sources do not settle which of the residual marks is correct.
+The header projection SHA-256 is
+`af61209863a354042928ff8c0cecf1ebf15264ae5920da46aa92516119a10dff`;
+the 43 enriched, entry-level findings stay in a private file with SHA-256
+`7028b7b208b26f5953030965e411fa6483cda1aad08905e094e162962317a16c`.
+
 The nominal candidate and witness SHA-256
 digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
 and `bfb03e172cb16e464ae6e97793a9c3b0d2196433e40463081f9a1e2d481af8d2`;
