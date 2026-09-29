@@ -33,6 +33,19 @@ class GreekLongQuantityTest(unittest.TestCase):
         repeated = row()
         repeated["sources"].append(dict(repeated["sources"][0], id="n2"))
         self.assertEqual(module.decision(repeated), "manual_review")
+        context = row(stem=":no:pi_t os_ou", headword="pi/tios", pron="[pi_]")
+        self.assertEqual(module.decision(context),
+                         "retain_witness_long_from_unique_pron_context")
+        context["sources"][0]["pron"][0]["text"] = "[i_]"
+        self.assertEqual(module.decision(context), "manual_review")
+
+        itype = {"lemma": "sta/c", "candidate": ":no:sta_ c_kos masc",
+                 "witness": ":no:sta c_kos masc",
+                 "sources": [{"id": "n3", "headword": "sta/c", "pron": [],
+                              "fields": [{"name": "itype", "projection": "a_kos"}]}]}
+        self.assertEqual(module.decision(itype), "retain_candidate_long_from_itype")
+        itype["sources"][0]["fields"][0]["projection"] = "akos"
+        self.assertEqual(module.decision(itype), "manual_review")
 
     def test_aggregate_and_private_ledger(self):
         with tempfile.TemporaryDirectory(dir=SCRIPT.parents[2]) as directory:
