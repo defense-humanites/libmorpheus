@@ -482,6 +482,20 @@ The ledger checks nested as well as direct `<pron>` elements; this made no
 difference to the nominal counts, but proved necessary for two verbal entries
 below.
 
+`tools/arbitrate-greek-quantity-long.py` applies a deliberately narrow
+entry-level rule to that private ledger: the witness has exactly one long
+mark, the candidate has none, the unmarked stem is a prefix of a **single**
+source headword, the marked vowel appears only once in that entire headword,
+and a direct `<pron>` is exactly `[vowel_]`. It provisionally retains the
+witness's long mark in **214** nominal cases. The other **100** stay open:
+75 witness-only long marks with ambiguous positional evidence, 24
+candidate-only long marks, and the doubled-mark case. This accepts a
+source-backed quantity notation for those 214 entries; it does not prove
+their inflection classes or authorize a bulk edit. The private decision ledger
+has SHA-256 `b2ae393926c92fa10beb8783660574af9a0b806f424467bbe37a0c27df7a7dac`.
+The tool prints only counts and hashes; its `--private-output` must remain
+outside the repository and CI artifacts.
+
 For the two nominal long-mark cases, `cruncher -S -n` was also compared on a
 small inflection probe: five recognized forms of the second noun changed
 their displayed quantity, while six recognized forms of the first lost the
