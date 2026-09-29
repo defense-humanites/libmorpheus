@@ -465,9 +465,8 @@ has a separate constraint rewrite of its inflection label; that rewrite was
 preserved on both sides of the comparison. The other **314** nominal groups
 involve `_` differences (289 witness-only, 23 candidate-only, and the two
 cases above) and remain the analyzer-impact priority. Of the 31 verbal
-groups, 20 have a witness-only `^` and 11 a witness-only `_`; the verbal
-index has **not** yet received an equivalent controlled comparison. These
-figures partition notation and index effect, not philological validity.
+groups, 20 have a witness-only `^` and 11 a witness-only `_`. These figures
+partition notation and index effect, not philological validity.
 
 A private source join for the 314 nominal long-mark groups found one matched
 LSJ entry for 313 groups and two possible orthographic source entries for
@@ -478,13 +477,41 @@ both, and **23** have a marked `<orth>` or `<itype>` without a marked
 but the presence of a mark does not yet identify the vowel or justify either
 stem record. The private 314-row source ledger, including the ambiguous
 source pair, has SHA-256
-`afa10588df6eedfb29046e2525ddbccd95eb61aff8df94344b0897e7febab0ab`.
+`d8b850887260a654332fb879a1c14ada2e0f21d68b06d697b7af9974c9d8a5e9`.
+The ledger checks nested as well as direct `<pron>` elements; this made no
+difference to the nominal counts, but proved necessary for two verbal entries
+below.
 
 For the two nominal long-mark cases, `cruncher -S -n` was also compared on a
 small inflection probe: five recognized forms of the second noun changed
 their displayed quantity, while six recognized forms of the first lost the
 duplicated mark or its stray underscore. The grammatical analyses in this
 probe stayed the same. It does not qualify their entire paradigms.
+
+The verbal comparison has now followed the same controlled procedure. The
+four corrected Greek verbal source files were assembled in manifest order,
+expanded with `do_conj`, and indexed with the same `index_stems` implementation
+used by `indexvbs`. Replacing all **20 short-mark records** at once left the
+complete `vbind` and `.lindex` byte-identical. Replacing the **11 long-mark
+records** changed both index files; each of the 11 changes also did so when
+tested separately, while `oddkeys` remained identical. This is a comparison
+between two builds from the same corrected private source tree; its rebuilt
+baseline does not match the bundled `vbind` byte-for-byte, so these digests
+must not be presented as production-index hashes.
+
+Each of the 11 long-mark verbs has one matched pinned LSJ entry and an
+explicit long-vowel `<pron>`: nine occur directly under the entry and two
+are nested with a cited or inflected form. This distinction matters when
+deciding whether the notation applies to the headword. In a controlled
+`cruncher -S -n` headword probe, all 11 headwords were recognized on both
+sides and all 11 outputs changed only in their displayed marked form; their
+grammatical readings remained the same. The private source ledger and the
+per-entry index-effect ledger have SHA-256 digests
+`ad672ea19bc3cbaa6ebea8c7edfa712f87787633e25ed2a601b484f6ed9c84f4`
+and `3bbfacafd41c83268c0e3fcf587c884c6037e817d83c80ecadc701a768c7d425`.
+These observations prioritize preservation of source-supported length in an
+experimental reconstruction, subject to inflected-form review; they do not
+authorize replacing curated verbal records in this branch.
 
 The nominal candidate and witness SHA-256
 digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
