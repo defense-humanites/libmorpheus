@@ -535,17 +535,28 @@ These cases are not resolved by a bare direct `<pron>` vowel. Each open case
 requires its own source or paradigm decision; the current rule deliberately
 leaves them unselected.
 
-One of the 27 has since received an **individual** source check. Its first
-matched entry is a cross-reference to the second, where a later `<orth>`
+Two of the 27 have since received **individual** checks. For one, the first
+matched LSJ entry is a cross-reference to another, where a later `<orth>`
 spells the same headword and is immediately followed by a contextual direct
 `<pron>` locating the witness's long mark. This provisionally retains that
 mark, without relaxing the single-source automatic rule. The owner-only
 individual decision record has SHA-256
-`437e2308a2050319b8301e2f97441cfcf0d55429de1167d81c7211897c7f8ee4`;
-**26** nominal long-mark cases remain for individual review. Removing this
+`eaab913620acb6c33c3da0a1316d5f99ea41a4f1e953cb5a116f804c5e8e8c61`.
+Removing this first
 one mark in a controlled complete-index trial changed `nomind`, `.lindex`
 and the displayed marked dictionary form; the queried headword retained
 its single grammatical analysis. The full paradigm has not been qualified.
+
+In the second individual case, the witness repeats `_` twice at the same
+stem position, while the candidate uses a single `_` and the matching entry
+has a single `[i_]` notation. A controlled one-record substitution of the
+single-mark spelling changed both nominal index files. Five tested forms
+remained recognized with the same grammatical readings; four inflected
+outputs lost the doubled `__` while retaining one `_`. This supports the
+candidate's **mark multiplicity** and removes that discrepancy from the
+queue; it does not independently prove which of the headword's two `i`
+vowels the source's bare `[i_]` describes. **25** nominal long-mark
+differences remain for individual review.
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
