@@ -503,6 +503,14 @@ the marked headword output for all 24 while retaining recognition and the
 number of analyses. The rules select a source-backed quantity notation, not
 an entire replacement stem record or a proven inflection class.
 
+A controlled index trial removed just these two newly localized long marks
+from a private copy of the same complete nominal input. Both `nomind` and
+its `.lindex` changed. `cruncher -S -n` still recognized both queried
+headwords: the first retained one analysis and the second three. Only the
+marked dictionary form in the affected reading changed; the other two
+readings of the second headword were identical. This compares two builds
+from the same private baseline, not every form in either paradigm.
+
 The other **29** cases stay open: 28 witness-only long marks with ambiguous
 positional evidence, and the doubled-mark case. The private decision ledger
 has SHA-256 `09e8725c6619bdf97abc12779a34b62af7f99cd1b6cf0ea2d049f9c2200a1fd8`.
