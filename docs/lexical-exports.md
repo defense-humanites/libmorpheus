@@ -455,6 +455,37 @@ matched its preexisting index bytes. These two source-grounded corrections
 remain experimental pending full-paradigm checks, and the curated witness
 has not been edited.
 
+The one-sided quantity groups can now be prioritized by mark type. Of the
+1,410 nominal groups, **1,096** become the same complete stem record after
+removing `^` from the stem token alone: 1,018 witness-only short marks, 37
+candidate-only short marks, and the 41 both-marked cases just tested. A
+controlled replacement of **all 1,096 at once** in the complete nominal input
+again produced byte-identical `nomind` and `.lindex` files. One input record
+has a separate constraint rewrite of its inflection label; that rewrite was
+preserved on both sides of the comparison. The other **314** nominal groups
+involve `_` differences (289 witness-only, 23 candidate-only, and the two
+cases above) and remain the analyzer-impact priority. Of the 31 verbal
+groups, 20 have a witness-only `^` and 11 a witness-only `_`; the verbal
+index has **not** yet received an equivalent controlled comparison. These
+figures partition notation and index effect, not philological validity.
+
+A private source join for the 314 nominal long-mark groups found one matched
+LSJ entry for 313 groups and two possible orthographic source entries for
+one. Inspecting the full pinned entries, **187** have an explicitly marked
+`<pron>` but no quantity in the projected `<orth>` or `<itype>`, **104** have
+both, and **23** have a marked `<orth>` or `<itype>` without a marked
+`<pron>`. Every group therefore has some explicit source quantity evidence,
+but the presence of a mark does not yet identify the vowel or justify either
+stem record. The private 314-row source ledger, including the ambiguous
+source pair, has SHA-256
+`afa10588df6eedfb29046e2525ddbccd95eb61aff8df94344b0897e7febab0ab`.
+
+For the two nominal long-mark cases, `cruncher -S -n` was also compared on a
+small inflection probe: five recognized forms of the second noun changed
+their displayed quantity, while six recognized forms of the first lost the
+duplicated mark or its stray underscore. The grammatical analyses in this
+probe stayed the same. It does not qualify their entire paradigms.
+
 The nominal candidate and witness SHA-256
 digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
 and `bfb03e172cb16e464ae6e97793a9c3b0d2196433e40463081f9a1e2d481af8d2`;
