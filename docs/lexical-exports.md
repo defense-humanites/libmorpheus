@@ -405,7 +405,16 @@ private inputs it gives this further partition:
 | Same positions, different marks or multiplicity | 1 | 0 |
 
 Of the nominal cases, 1,342 candidate records are `:no:` and 68 are `:aj:`;
-all 31 verbal records are `:de:`. The nominal candidate and witness SHA-256
+all 31 verbal records are `:de:`.
+In the 40 distinct-position cases, 39 place a short mark (`^`) at different
+vowels on the two sides, and one opposes candidate long (`_`) to witness
+short (`^`) at different positions. The two partly shared cases have both
+`_` and `^` on the candidate against `_` on the witness; the last has one
+`_` against two at the same position. These 43 nominal cases merit earlier
+entry-level source and paradigm review than the simple unmarked/marked
+groups. This ordering is diagnostic, not a judgment of correct quantity.
+
+The nominal candidate and witness SHA-256
 digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
 and `bfb03e172cb16e464ae6e97793a9c3b0d2196433e40463081f9a1e2d481af8d2`;
 the verbal digests are `8100e9aef3989f1e06a4b8535023a129ddc9be2f7f922722f1be1b2a164b1df2`
