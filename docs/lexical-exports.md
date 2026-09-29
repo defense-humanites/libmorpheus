@@ -427,6 +427,34 @@ The header projection SHA-256 is
 the 43 enriched, entry-level findings stay in a private file with SHA-256
 `7028b7b208b26f5953030965e411fa6483cda1aad08905e094e162962317a16c`.
 
+The indexer calls `stripshortmark` on a nominal stem **before** saving its
+marked form. This gives a narrower analyzer-impact result for these 43
+groups: replacing the witness records with the candidate records for the 39
+cases with `^` on different vowels and the two with an additional candidate
+`^` produced byte-identical nominal index and sidecar files both in an
+isolated 43-record build and in the complete controlled nominal input. Only
+two groups change the index because they differ in `_`: one has a doubled
+long mark on the witness, and the other has candidate long versus witness
+short marks on different vowels. Index identity here establishes the effect
+of these 41 records under this indexer, not their correct vowel quantities.
+
+The full pinned LSJ entries were inspected for the two long-mark cases. In
+the doubled-mark case, `<pron>` specifies one long vowel. A controlled full
+nominal-index trial with a single long mark removes an anomalous underscore
+from the analyzed dictionary form. In the other, `<pron>` specifies a short
+vowel while `<itype>` specifies a long vowel elsewhere; the two competing
+stem records each preserve only one of those facts. The candidate long mark
+adds a marked dictionary form to the analysis. An experimental stem carrying
+**both** quantities produces an index byte-identical to the candidate-long
+trial, because the indexer strips the short mark. The private decision ledger
+(SHA-256 `2041321a9e5799877e6b1504ea52d3ca011a68d8ce5d14d9175783104478d0cf`)
+records the source IDs and exact outputs. The full-index comparison used two
+copies of the same private baseline, already containing the separate
+19-line extra-stem experiment; a rebuild of its baseline nominal input
+matched its preexisting index bytes. These two source-grounded corrections
+remain experimental pending full-paradigm checks, and the curated witness
+has not been edited.
+
 The nominal candidate and witness SHA-256
 digests are `ba41260b8cc6e6bdfacbae47c58669780826245cebcb7297fb0198f0234b1b93`
 and `bfb03e172cb16e464ae6e97793a9c3b0d2196433e40463081f9a1e2d481af8d2`;
