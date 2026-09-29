@@ -502,6 +502,10 @@ an entire replacement stem record or a proven inflection class.
 The other **31** cases stay open: 30 witness-only long marks with ambiguous
 positional evidence, and the doubled-mark case. The private decision ledger
 has SHA-256 `ed11d32151ec6f3ec21660c47dd82ff932f562ecb7f343ec3b359782fcbd7ff4`.
+Within this queue, 26 repeat the marked vowel in the stem, three repeat it
+only elsewhere in the headword, one matches two source entries, and one is
+the doubled mark already tested above. Each requires its own source or
+paradigm decision; the current rule deliberately leaves them unselected.
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
