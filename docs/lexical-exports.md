@@ -534,6 +534,18 @@ quantity within the matched stem spelling in `<orth>`.
 These cases are not resolved by a bare direct `<pron>` vowel. Each open case
 requires its own source or paradigm decision; the current rule deliberately
 leaves them unselected.
+
+One of the 27 has since received an **individual** source check. Its first
+matched entry is a cross-reference to the second, where a later `<orth>`
+spells the same headword and is immediately followed by a contextual direct
+`<pron>` locating the witness's long mark. This provisionally retains that
+mark, without relaxing the single-source automatic rule. The owner-only
+individual decision record has SHA-256
+`437e2308a2050319b8301e2f97441cfcf0d55429de1167d81c7211897c7f8ee4`;
+**26** nominal long-mark cases remain for individual review. Removing this
+one mark in a controlled complete-index trial changed `nomind`, `.lindex`
+and the displayed marked dictionary form; the queried headword retained
+its single grammatical analysis. The full paradigm has not been qualified.
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
