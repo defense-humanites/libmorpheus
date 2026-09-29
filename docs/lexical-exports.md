@@ -254,6 +254,66 @@ hand edits and unreviewed spelling differences remain material. The committed
 Greek stem sources stay untouched pending per-lemma review, analyzer fixtures
 and the separate rights decision.
 
+### Latin differential probe with Whitaker's WORDS
+
+Whitaker's own [description of `LISTALL`](https://mk270.github.io/whitakers-words/dictionary.html)
+calls it a deduplicated list of roughly half of two million primary inflected
+forms. The [historical archive is listed on SourceForge](https://sourceforge.net/projects/wwwords/files/Whitaker/),
+and the [preserved HOWTO](https://github.com/mk270/whitakers-words/blob/master/HOWTO.txt)
+defines its scope as the forms generated from `DICTLINE` and `INFLECTS`,
+excluding `ADDONS` and spelling `TRICKS`. The available
+[`mk270/whitakers-words` sources](https://github.com/mk270/whitakers-words)
+provide a fallback for independently generating or checking a pinned corpus;
+the unavailable 2012 Digital Gaffiot morphology archive is not an input.
+
+Use `LISTALL` as an **external differential probe**, never as a Latin gold
+standard or a replacement stemlib. First record the exact archive/source
+revision, SHA-256, encoding, distinct form count and deduplication rules.
+Preserve the literal forms for the first pass, then report any case or
+orthographic normalization in separately named tiers; do not silently merge
+`u/v`, `i/j` or enclitic variants. Analyze the same forms with the same native
+binary and request options against both the curated Perseids Latin stemlib and
+the privately reconstructed Latin stemlib. Report a two-by-two recognition
+table, errors separately from zero analyses, and aggregate digests. Keep the
+per-form differences private and outside CI artifacts.
+
+`tools/audit-latin-listall.py` implements that literal recognition pass for
+an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
+explicit native library and two stemlib roots, checks duplicate and blank
+lines, and emits the input SHA-256, four recognition cells and status pairs.
+It does not fold case or change orthography. A private per-form JSONL can be
+requested for subsequent grouping; it refuses existing files and any output
+inside the repository:
+
+```sh
+python3 tools/audit-latin-listall.py \
+  --forms /private/LISTALL.TXT \
+  --library /private/libmorpheus.so \
+  --curated /private/curated-runtime \
+  --rebuilt /private/rebuilt-runtime \
+  --private-output /private/listall-differences.jsonl
+```
+
+Both contexts use the same native library, Latin language and request options
+zero. The optional JSONL records errors, absences and changed analysis counts
+without exporting analysis contents. It is not a comparison of grammatical
+interpretations: a form recognized by both analyzers can still have different
+lemmes or paradigms. The tool has passed a three-form native smoke test with
+the same curated root on both sides; the full `LISTALL` pass awaits the
+wordlist and a complete privately reconstructed Latin runtime.
+
+`LISTALL` alone contains surface forms, not lemma and paradigm assignments.
+For the unrecognized and changed cells, a second, pinned WORDS analysis pass
+can supply candidate lemmas and paradigms for grouped inspection, checked
+against `DICTLINE.GEN` and `INFLECTS.LAT`. The
+[`kigawas/whitakers-words` TypeScript port](https://github.com/kigawas/whitakers-words)
+offers structured analyses but must be checked against the selected WORDS
+data and implementation before those labels are used. Review samples in
+each group against Lewis & Short, the original and rebuilt Morpheus stems and
+the relevant inflection rule. A missing Morpheus analysis can reflect a
+lexical gap, a paradigm or spelling difference, or a deliberately different
+model; a generated WORDS form is not evidence of historical attestation.
+
 ### Shape of the remaining differences
 
 [An aggregate-only follow-up run](https://github.com/defense-humanites/libmorpheus/actions/runs/36178088608)
@@ -492,6 +552,111 @@ contain source-derived lexical material; keep them private, never attach them
 to CI, and review each candidate/witness discrepancy before changing a
 curated snapshot or the importer. The tool cannot infer which side is correct.
 
+`tools/arbitrate-greek-lexical-review.py` records a first, deliberately narrow
+decision for each row of that private file, in another owner-only file outside
+the repository:
+
+```sh
+python3 tools/arbitrate-greek-lexical-review.py \
+  --review /private/greek-lexical-review.jsonl \
+  --output /private/greek-lexical-decisions.jsonl
+```
+
+On the pinned private review, 86 of the 87 `same_tags_and_labels` groups
+become exactly equal after removing `-` **only from the candidate stem token**.
+This is an accepted stem-separator representation difference: `indexstems`
+calls `stripstemsep` before storing either the plain or marked stem. It calls
+for no change to the curated witness or the importer. The remaining one also
+differs in quantity and stays open. All 12 `beta_code_diacritics` groups
+become equal after removing `+` only from that token. Their lookup key loses
+the diaeresis, but `indexstems` can retain it in the marked stem. A subsequent
+controlled analyzer experiment, described below, qualified this difference;
+the initial decision ledger still records its pre-experiment disposition.
+The other 71 groups remain for entry-level arbitration. The script makes no
+equivalence claim for labels, tags, quantity, multiplicity or extra lines.
+They comprise 50 tag/label changes, 19 distinct extra-line groups, one
+multiplicity difference and the one quantity-bearing stem difference.
+Its stdout gives counts and hashes only; the private ledger contains the
+individual disposition and reason, and must never become a CI artifact.
+
+An initial sense-level inspection of the ten candidate adverbs whose witness
+adds `language` found four LSJ senses explicitly about a language or dialect,
+four describing an ethnic or regional manner, and two with neither a language
+nor a regional sense in that entry. Their ten entry IDs and separate
+dispositions are recorded privately. The historical `getentities.pl` also
+uses the `language` label to build `entitylist.txt`; copying it to the new
+export as a suffix rule would therefore change an entity classification, not
+merely a stem comment. Do not transfer all ten labels as a batch. Resolve the
+intended historical scope of this label and check the entity index before
+accepting individual annotations or editing a curated record.
+
+The 22 cases where the candidate is `:no:` and the witness `:aj:` have also
+been checked against their full LSJ entries. Twenty-one entries give an
+adjectival sense and a genitive in `-onos` or `-wnos`; the historical
+`newlems2` rule uses the projected `<itype>` alone to make a masculine noun.
+For these entries the curated adjective is the better grammatical reading;
+retain it and do not globally reinterpret that `<itype>`, which is also used
+by nouns. The remaining entry is described as a nominal Attic variant in
+LSJ, while the witness has a verbal adjective: keep its distinct reading
+open for a homograph check. Entry IDs and individual findings stay in the
+private review, not in this repository. This grammatical review settles the
+choice to retain the curated adjective for 21 of the 71 initially queued
+groups; 50 groups still need an individual decision, including the nominal
+variant and the ten `language` labels.
+
+The 19 partial-overlap groups have now been checked against the full LSJ
+entries as well. Eleven witness-only extra lines have a second grammatical
+use or paradigm explicitly described in the same entry; the one
+candidate-only extra line is supported by an alternative adjective form in
+another matching entry. Preserve these twelve alternatives for qualification
+rather than treating the shared stem as a complete match. Seven other
+witness-only lines have no direct support for that precise extra reading in
+the inspected entry (some have a related cross-reference). Their provenance
+remains open; absence from this edition is not grounds for deleting them.
+All 19 entry-level evidence classes and source identifiers are kept privately.
+Sense evidence alone does not establish that a proposed stem and inflection
+class are correct, so these groups still require analyzer comparison.
+
+The other 18 tag/label differences outside the `language` and
+candidate-noun/witness-adjective groups received a first sense-level pass.
+Eight concern entity labels whose semantic scope must be checked against the
+historical entity list. In two, LSJ explicitly supplies both a verbal
+adjective and a noun; retaining both readings is preferable to substituting
+one for the other. Two further entries are adjectives with a separately
+formed adverb, while the importer's `<pos>Adv.</pos>` branch emits the
+*adjective headword* as an adverb. That candidate line should not displace
+the curated adjective. Two entries explicitly allow more than one gender;
+two feminine headwords lack the genitive evidence needed to settle their
+declension from the article alone. One headword supports the candidate's
+eta-declension reading, subject to a paradigm check. The last retains a
+source-supported, quantity-marked noun in the witness alongside another
+reading requiring review. All entry IDs and provisional dispositions are
+private; none is a global rewrite rule.
+
+For the 12 diaeresis entries, two private copies of the curated Greek runtime
+were indexed with the same native `indexnoms` and the same nominal sources,
+constraints and recorded lexical source corrections. In one copy, only the
+12 adverb stem records were replaced by the source-projected `+` spellings.
+`cruncher -S -n` analyzed each unmarked headword against both copies: all
+12 had one analysis in each, with no error. The sole difference in these
+outputs was that the source-spelling trial displayed both the marked and
+unmarked dictionary forms, whereas the witness displayed only the unmarked
+one. The rebuilt baseline index was not asserted byte-identical to the
+bundled production index; this is a comparison between two controlled builds.
+Retain the TEI diaeresis in the experimental reconstruction and preserve the
+curated witness unchanged. The private record contains the two index digests
+and output checks; this does not establish equivalence for other spellings or
+other analyzer options.
+
+The last two isolated cases still need provenance checks. In the
+multiplicity case, the witness has two quantity variants on a different vowel
+from the quantity shown in the projected orthography; suppressing first-token
+quantity cannot recover them. In the remaining stem case, an earlier
+orthographic variant marks a vowel's quantity but the matched alternate does
+not; the witness retains that mark. Keep the witness variants and record the
+source relationship without transferring quantity automatically across
+alternates. The private review identifies both entries.
+
 The local review selected 169 groups: 87 with matching tags and labels but
 different stems, 50 with different tags or labels, 12 with Beta Code
 diacritics beyond quantity, one with different multiplicity, and 19 partial
@@ -520,8 +685,9 @@ entry review, Latin partition inventory audit, and Latin headword diagnostic
 are complete for the pinned projection, including the revised Latin
 historical filter-output comparison. None of these diagnostics
 establishes a replacement lexical corpus. The 169 selected Greek entry
-discrepancies still require
-individual lexical decisions; 1,410 other nominal and 31 verbal disjoint
+discrepancies have received a first review, including controlled index and
+analysis checks for the 12 diaeresis cases; unresolved choices remain for
+individual lexical and analyzer qualification. Another 1,410 nominal and 31 verbal disjoint
 groups retain quantity differences, and the Latin trial lacks the historical
 `vtags` selector while 393 verbal-only witness entries still land in its
 revised nominal partition. Analyzer regression fixtures and the 2007 Hopper
