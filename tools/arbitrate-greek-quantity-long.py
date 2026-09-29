@@ -29,6 +29,17 @@ def letters_and_longs(value):
     return "".join(letters), longs
 
 
+def short_positions(value):
+    letters = []
+    shorts = set()
+    for character in value:
+        if character.isascii() and character.isalpha():
+            letters.append(character.lower())
+        elif character == "^" and letters:
+            shorts.add(len(letters) - 1)
+    return shorts
+
+
 def context_locates(pron, spelling, position):
     if not pron["direct"]:
         return False
@@ -66,6 +77,14 @@ def decision(row):
             pron["direct"] and pron["text"] == f"[{vowel}_]"
             for pron in source["pron"]):
         return "retain_witness_long_from_unique_direct_pron"
+    other_vowels = {i for i, letter in enumerate(headword)
+                    if letter == vowel and i != position}
+    shorts = short_positions(source["headword"].split()[0])
+    if (headword.startswith(witness) and other_vowels and position not in shorts and
+            other_vowels <= shorts and
+            any(pron["direct"] and pron["text"] == f"[{vowel}_]"
+                for pron in source["pron"])):
+        return "retain_witness_long_from_other_vowels_short"
     if headword.startswith(witness) and any(
             context_locates(pron, headword, position) for pron in source["pron"]):
         return "retain_witness_long_from_unique_pron_context"
