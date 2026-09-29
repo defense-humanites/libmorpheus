@@ -334,6 +334,7 @@ jobs:
           python3 ../../test/prepare-greek-lexical-review.py
           python3 ../../test/arbitrate-greek-lexical-review.py
           python3 ../../test/triage-greek-quantity-residuals.py
+          python3 ../../test/arbitrate-greek-quantity-long.py
           python3 ../../test/split-greek-lexical-headers.py
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
