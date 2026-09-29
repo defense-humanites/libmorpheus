@@ -557,6 +557,20 @@ candidate's **mark multiplicity** and removes that discrepancy from the
 queue; it does not independently prove which of the headword's two `i`
 vowels the source's bare `[i_]` describes. **25** nominal long-mark
 differences remain for individual review.
+
+`tools/audit-greek-pron-ambiguity.py --lexica /private/lexica` checks this
+positional limitation across the same pinned 27 LSJ files. Among **171**
+direct bare `[vowel_]` pronunciations whose first `<orth>` repeats that
+vowel, **five** already mark the same vowel long somewhere in that `<orth>`
+and **seven** mark it short somewhere. These count pronunciation occurrences,
+not distinct lemmes, and the categories need not be disjoint. The combined
+TEI input SHA-256 is
+`6e3b08975d4d436ea929d86b63c757c70038286389edde6d48f97aa0228e1bc4`.
+Thus a bare long-vowel `<pron>` cannot be assumed to name a *different*
+occurrence merely because one is already marked long in `<orth>`; this
+matters especially for the remaining entry with a long orthographic mark
+at another occurrence. The script prints only aggregate counts and requires
+the unchanged pinned checkout.
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
