@@ -482,7 +482,7 @@ The ledger checks nested as well as direct `<pron>` elements; this made no
 difference to the nominal counts, but proved necessary for two verbal entries
 below.
 
-`tools/arbitrate-greek-quantity-long.py` applies four deliberately narrow
+`tools/arbitrate-greek-quantity-long.py` applies five deliberately narrow
 entry-level rules to that private ledger. In the first, the witness has one
 long mark, the candidate has none, the unmarked stem is a prefix of a
 **single** source headword, the marked vowel appears only once in that entire
@@ -494,8 +494,12 @@ the witness's long mark provisionally in **45** more cases. In the third, the
 same contextual segment has a unique location in every matching later
 `<orth>` of a single source entry when its first `<orth>` does not contain
 the complete stem. This provisionally retains **two** additional witness
-long marks; the matched segments are `[ni_]` and `[i_n]`. In the fourth, the
-candidate ends its stem in `a_`, has the `c_kos` type, and one source entry
+long marks; the matched segments are `[ni_]` and `[i_n]`. In the fourth, a
+single source headword has several occurrences of the marked vowel, but
+explicitly marks **every other** occurrence short in `<orth>` and has a
+direct `[vowel_]` `<pron>`. This localizes the witness long mark in **two**
+more cases, provisionally. In the fifth, the candidate ends its stem in
+`a_`, has the `c_kos` type, and one source entry
 explicitly supplies `<itype>a_kos</itype>`. All **24** candidate-only-long
 cases meet this rule; one has a separate witness short mark that must be preserved.
 Replacing these 24 records together in a controlled nominal index changed
@@ -511,15 +515,23 @@ marked dictionary form in the affected reading changed; the other two
 readings of the second headword were identical. This compares two builds
 from the same private baseline, not every form in either paradigm.
 
-The other **29** cases stay open: 28 witness-only long marks with ambiguous
+A second controlled trial removed only the two marks localized by the
+contrasting short quantities. It changed both nominal index files and the
+marked dictionary output for each queried headword. Each remained recognized
+with one grammatical analysis. These trials establish the effect of those
+marks in the controlled baseline, not full-paradigm equivalence.
+
+The other **27** cases stay open: 26 witness-only long marks with ambiguous
 positional evidence, and the doubled-mark case. The private decision ledger
-has SHA-256 `09e8725c6619bdf97abc12779a34b62af7f99cd1b6cf0ea2d049f9c2200a1fd8`.
-Within this queue, 24 repeat the marked vowel in the stem, three repeat it
+has SHA-256 `3600eabf93c88c4841c77111aa345b845438eef7c230c1df0718f48e5a066f3f`.
+Within this queue, 22 repeat the marked vowel in the stem, three repeat it
 only elsewhere in the headword, one matches two source entries, and one is
-the doubled mark already tested above. One of the 29 has an explicit long
+the doubled mark already tested above. One of the 27 has an explicit long
 mark in the source `<orth>` at a **different** repeated vowel from the
-witness mark; another has a source short mark at a different position.
-Neither is resolved by the bare direct `<pron>` vowel. Each open case
+witness mark; three more have short marks at other positions which do not
+by themselves uniquely locate the long mark. The other 23 have no explicit
+quantity within the matched stem spelling in `<orth>`.
+These cases are not resolved by a bare direct `<pron>` vowel. Each open case
 requires its own source or paradigm decision; the current rule deliberately
 leaves them unselected.
 The tool prints only counts and hashes; its `--private-output` must remain
