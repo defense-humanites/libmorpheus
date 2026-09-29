@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -33,6 +34,12 @@ def decision(row):
     witness, witness_longs = letters_and_longs(row["witness"].split()[0][4:])
     if candidate != witness:
         raise ValueError("candidate and witness stem spellings differ beyond quantity")
+    if (len(row["sources"]) == 1 and len(candidate_longs) == 1 and
+            not witness_longs and row["candidate"].split()[0].endswith("a_") and
+            row["candidate"].split()[1] == "c_kos" and
+            any(field["name"] == "itype" and field["projection"] == "a_kos"
+                for field in row["sources"][0]["fields"])):
+        return "retain_candidate_long_from_itype"
     if candidate_longs or len(witness_longs) != 1:
         return "manual_review"
     if len(row["sources"]) != 1:
@@ -40,13 +47,25 @@ def decision(row):
     source = row["sources"][0]
     headword, _ = letters_and_longs(source["headword"].split()[0])
     position, vowel = witness_longs[0]
-    if (not headword.startswith(witness) or position >= len(headword) or
-            headword.count(vowel) != 1):
+    if not headword.startswith(witness) or position >= len(headword):
         return "manual_review"
-    if not any(pron["direct"] and pron["text"] == f"[{vowel}_]"
-               for pron in source["pron"]):
-        return "manual_review"
-    return "retain_witness_long_from_unique_direct_pron"
+    if headword.count(vowel) == 1 and any(
+            pron["direct"] and pron["text"] == f"[{vowel}_]"
+            for pron in source["pron"]):
+        return "retain_witness_long_from_unique_direct_pron"
+    for pron in source["pron"]:
+        if not pron["direct"]:
+            continue
+        context = re.fullmatch(r"\[([a-z]+)_([a-z]*)\]", pron["text"])
+        if context is None:
+            continue
+        before, after = context.groups()
+        spelling = before + after
+        positions = [i + len(before) - 1 for i in range(len(headword))
+                     if headword.startswith(spelling, i)]
+        if positions == [position]:
+            return "retain_witness_long_from_unique_pron_context"
+    return "manual_review"
 
 
 def arbitrate(source, private_output=None):
