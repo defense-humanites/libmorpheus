@@ -56,6 +56,14 @@ class GreekLongQuantityTest(unittest.TestCase):
         alternate["sources"].append(dict(alternate["sources"][0], id="n2"))
         self.assertEqual(module.decision(alternate), "manual_review")
 
+        contrasted = row(headword="pi/ti^os")
+        self.assertEqual(module.decision(contrasted),
+                         "retain_witness_long_from_other_vowels_short")
+        self.assertEqual(module.decision(row(headword="pi^/ti^os")), "manual_review")
+        self.assertEqual(module.decision(row(headword="pi/tios")), "manual_review")
+        self.assertEqual(module.decision(row(headword="pi/ti^os", direct=False)),
+                         "manual_review")
+
         itype = {"lemma": "sta/c", "candidate": ":no:sta_ c_kos masc",
                  "witness": ":no:sta c_kos masc",
                  "sources": [{"id": "n3", "headword": "sta/c", "pron": [],
