@@ -39,6 +39,23 @@ class GreekLongQuantityTest(unittest.TestCase):
         context["sources"][0]["pron"][0]["text"] = "[i_]"
         self.assertEqual(module.decision(context), "manual_review")
 
+        alternate = row(headword="pi/s", pron="[pi_]")
+        alternate["sources"][0]["fields"] = [
+            {"name": "orth", "projection": "pi/s"},
+            {"name": "orth", "projection": "pi/tos"}]
+        self.assertEqual(module.decision(alternate),
+                         "retain_witness_long_from_alternate_orth_pron_context")
+        alternate["sources"][0]["fields"].append(
+            {"name": "orth", "projection": "pi/ti_tos"})
+        self.assertEqual(module.decision(alternate),
+                         "retain_witness_long_from_alternate_orth_pron_context")
+        alternate["sources"][0]["fields"].append(
+            {"name": "orth", "projection": "pi/tospi"})
+        self.assertEqual(module.decision(alternate), "manual_review")
+        alternate["sources"][0]["fields"].pop()
+        alternate["sources"].append(dict(alternate["sources"][0], id="n2"))
+        self.assertEqual(module.decision(alternate), "manual_review")
+
         itype = {"lemma": "sta/c", "candidate": ":no:sta_ c_kos masc",
                  "witness": ":no:sta c_kos masc",
                  "sources": [{"id": "n3", "headword": "sta/c", "pron": [],
