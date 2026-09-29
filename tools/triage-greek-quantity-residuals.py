@@ -44,6 +44,15 @@ def category(candidate, witness):
     return "different_positions"
 
 
+def mark_pattern(line):
+    return "".join(sorted(mark for _, mark in marks(line))) or "none"
+
+
+def without_stem_short_marks(line):
+    stem, separator, labels = line.partition(" ")
+    return stem.replace("^", "") + separator + labels
+
+
 def triage(candidate, witness, private_output=None):
     if private_output is not None:
         target = private_output.resolve()
@@ -53,6 +62,8 @@ def triage(candidate, witness, private_output=None):
     right, right_meta = STEMS["read_stems"](witness)
     counts = Counter()
     by_tag = Counter()
+    by_mark_pattern = Counter()
+    short_mark_only = 0
     written = hashlib.sha256()
     output = None
     try:
@@ -74,6 +85,8 @@ def triage(candidate, witness, private_output=None):
             kind = category(one, other)
             counts[kind] += 1
             by_tag[one[:4]] += 1
+            by_mark_pattern[f"candidate:{mark_pattern(one)}|witness:{mark_pattern(other)}"] += 1
+            short_mark_only += without_stem_short_marks(one) == without_stem_short_marks(other)
             if output is not None:
                 raw = (json.dumps({"lemma": lemma, "category": kind,
                                    "candidate": one, "witness": other},
@@ -88,6 +101,8 @@ def triage(candidate, witness, private_output=None):
                              "witness": right_meta["sha256"]},
             "by_category": dict(sorted(counts.items())),
             "by_candidate_tag": dict(sorted(by_tag.items())),
+            "by_stem_mark_pattern": dict(sorted(by_mark_pattern.items())),
+            "same_record_after_stem_short_mark_removal": short_mark_only,
             "private_output_sha256": written.hexdigest() if private_output else None}
 
 
