@@ -44,6 +44,7 @@ jobs:
         run: |
           python3 test/partition-lexical-latin.py
           python3 test/audit-latin-partition-gaps.py
+          python3 test/audit-latin-listall.py
           python3 test/audit-lexical-stems.py
           python3 tools/partition-lexical-latin.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
@@ -331,6 +332,7 @@ jobs:
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
           python3 ../../test/audit-greek-disjoint-triage.py
           python3 ../../test/prepare-greek-lexical-review.py
+          python3 ../../test/arbitrate-greek-lexical-review.py
           python3 ../../test/split-greek-lexical-headers.py
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
