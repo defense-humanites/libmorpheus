@@ -482,7 +482,7 @@ The ledger checks nested as well as direct `<pron>` elements; this made no
 difference to the nominal counts, but proved necessary for two verbal entries
 below.
 
-`tools/arbitrate-greek-quantity-long.py` applies three deliberately narrow
+`tools/arbitrate-greek-quantity-long.py` applies four deliberately narrow
 entry-level rules to that private ledger. In the first, the witness has one
 long mark, the candidate has none, the unmarked stem is a prefix of a
 **single** source headword, the marked vowel appears only once in that entire
@@ -491,6 +491,10 @@ retains the witness's long mark in **214** cases. In the second, a direct
 `<pron>` supplies a longer marked segment with a unique location in the
 single source headword, matching the marked position in the stem. It retains
 the witness's long mark provisionally in **45** more cases. In the third, the
+same contextual segment has a unique location in every matching later
+`<orth>` of a single source entry when its first `<orth>` does not contain
+the complete stem. This provisionally retains **two** additional witness
+long marks; the matched segments are `[ni_]` and `[i_n]`. In the fourth, the
 candidate ends its stem in `a_`, has the `c_kos` type, and one source entry
 explicitly supplies `<itype>a_kos</itype>`. All **24** candidate-only-long
 cases meet this rule; one has a separate witness short mark that must be preserved.
@@ -499,13 +503,17 @@ the marked headword output for all 24 while retaining recognition and the
 number of analyses. The rules select a source-backed quantity notation, not
 an entire replacement stem record or a proven inflection class.
 
-The other **31** cases stay open: 30 witness-only long marks with ambiguous
+The other **29** cases stay open: 28 witness-only long marks with ambiguous
 positional evidence, and the doubled-mark case. The private decision ledger
-has SHA-256 `ed11d32151ec6f3ec21660c47dd82ff932f562ecb7f343ec3b359782fcbd7ff4`.
-Within this queue, 26 repeat the marked vowel in the stem, three repeat it
+has SHA-256 `09e8725c6619bdf97abc12779a34b62af7f99cd1b6cf0ea2d049f9c2200a1fd8`.
+Within this queue, 24 repeat the marked vowel in the stem, three repeat it
 only elsewhere in the headword, one matches two source entries, and one is
-the doubled mark already tested above. Each requires its own source or
-paradigm decision; the current rule deliberately leaves them unselected.
+the doubled mark already tested above. One of the 29 has an explicit long
+mark in the source `<orth>` at a **different** repeated vowel from the
+witness mark; another has a source short mark at a different position.
+Neither is resolved by the bare direct `<pron>` vowel. Each open case
+requires its own source or paradigm decision; the current rule deliberately
+leaves them unselected.
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
