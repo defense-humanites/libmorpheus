@@ -29,6 +29,21 @@ def letters_and_longs(value):
     return "".join(letters), longs
 
 
+def context_locates(pron, spelling, position):
+    if not pron["direct"]:
+        return False
+    context = re.fullmatch(r"\[([a-z]+)_([a-z]*)\]", pron["text"])
+    if context is None:
+        return False
+    before, after = context.groups()
+    if len(before) + len(after) < 2:
+        return False
+    segment = before + after
+    positions = [i + len(before) - 1 for i in range(len(spelling))
+                 if spelling.startswith(segment, i)]
+    return positions == [position]
+
+
 def decision(row):
     candidate, candidate_longs = letters_and_longs(row["candidate"].split()[0][4:])
     witness, witness_longs = letters_and_longs(row["witness"].split()[0][4:])
@@ -47,24 +62,22 @@ def decision(row):
     source = row["sources"][0]
     headword, _ = letters_and_longs(source["headword"].split()[0])
     position, vowel = witness_longs[0]
-    if not headword.startswith(witness) or position >= len(headword):
-        return "manual_review"
-    if headword.count(vowel) == 1 and any(
+    if headword.startswith(witness) and headword.count(vowel) == 1 and any(
             pron["direct"] and pron["text"] == f"[{vowel}_]"
             for pron in source["pron"]):
         return "retain_witness_long_from_unique_direct_pron"
-    for pron in source["pron"]:
-        if not pron["direct"]:
-            continue
-        context = re.fullmatch(r"\[([a-z]+)_([a-z]*)\]", pron["text"])
-        if context is None:
-            continue
-        before, after = context.groups()
-        spelling = before + after
-        positions = [i + len(before) - 1 for i in range(len(headword))
-                     if headword.startswith(spelling, i)]
-        if positions == [position]:
-            return "retain_witness_long_from_unique_pron_context"
+    if headword.startswith(witness) and any(
+            context_locates(pron, headword, position) for pron in source["pron"]):
+        return "retain_witness_long_from_unique_pron_context"
+    matching_alternates = [letters_and_longs(field["projection"].split()[0])[0]
+                           for field in source.get("fields", [])
+                           if field["name"] == "orth"]
+    matching_alternates = [orth for orth in matching_alternates[1:]
+                           if orth.startswith(witness)]
+    if matching_alternates and all(
+            any(context_locates(pron, orth, position) for pron in source["pron"])
+            for orth in matching_alternates):
+        return "retain_witness_long_from_alternate_orth_pron_context"
     return "manual_review"
 
 
