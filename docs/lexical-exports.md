@@ -314,6 +314,75 @@ the relevant inflection rule. A missing Morpheus analysis can reflect a
 lexical gap, a paradigm or spelling difference, or a deliberately different
 model; a generated WORDS form is not evidence of historical attestation.
 
+### Complete long-mark generation and analyzer qualification
+
+The provisional consolidated decisions were applied in a private copy of
+the corrected complete Greek nominal baseline. Exactly **28** records
+changed: 24 candidate long marks supported by `<itype>`, three positional
+relocations, and one duplicate mark removed. The source corrections and
+entity constraints were retained; no public stem source was changed.
+The complete decision input SHA-256 is
+`a2ef91ad4755bf9f7e7ef69fed452cc8c0d8c0c1358f8c5f23c8653e8fc64e69`.
+
+Generation indexes contained all source blocks for the **314** selected
+lemmes, including other records in those blocks. Every lemma generated
+forms. Both variants produced **15,880** rows with the same per-lemma
+grammatical multisets and the same letter-only forms; quantity display
+changed for 28 lemmes. The private baseline and decision source SHA-256
+are `6f9cbf18077e955b2d4cb0c4649d8b71277832aa7ca86bcc049f719b32fe19f2`
+and `81f35865ea921a557512a2f165f3013525f903614df4a2edbdc8494658be6b65`.
+Their generated TSV SHA-256 are
+`a59f9f7190890ae64fa952a4dcc6bf9ae2aa3933907133862e78af470bd71eeb`
+and `2826b2d420b1db14c313f32edb43e7d6e40c48f101ba0bd9d44dfc65f9a6eeaa`.
+
+The union supplied **13,634** literal query surfaces after removing only
+quantity marks (SHA-256
+`d9a185c70d7a6e4057cec92426184b08b8fd1f94655076bf2a44bfa5de56beb2`).
+Against the two complete nominal indexes:
+
+| Lookup | Baseline recognized | Decision recognized | Baseline XML rows | Decision XML rows |
+| --- | ---: | ---: | ---: | ---: |
+| `cruncher -S -n -T` | 13,634 | 13,634 | 20,031 | 20,031 |
+| `cruncher -S -T` | 13,616 | 13,618 | 16,648 | 16,647 |
+
+Accent-insensitive lookup preserves every per-surface reading-kind, lemma
+and grammatical multiset; 644 surfaces change display and 12,990 are
+identical. Accent-sensitive lookup gains 18 surfaces, loses 16, changes
+seven shared reading multisets and 603 displays, leaving 12,990 identical.
+The three relocations account for three gains and four reading changes;
+the 24 `<itype>` decisions account for 15 gains, 16 losses and three reading
+changes. Deduplication changes 22 displays without changing recognition or
+readings. The private relaxed and strict difference ledger SHA-256 are
+`6b5c13e52bdb2f653b3492ca28f92aaa8b9acda54cc2ef679111d88b6065f90c`
+and `af123da60b9cd651256534ea7788b128bebc44765ee14339b2f2279fed83cebf`.
+
+A union surface can be recognized only through an unrelated homograph:
+two such strict-lookup cases occur on the baseline side and one on the
+decision side. These surfaces are generated only by the other variant.
+Checking each variant against its **own** generated surfaces avoids
+mistaking these homographs for coverage. All 13,619 baseline and 13,621
+decision expected surface/lemma pairs are covered with accents enabled,
+and also with accents disabled. No own generated surface is absent or
+recognized only through another lemma. These are controlled generator and
+analyzer consistency checks, not evidence of attestation or full equivalence
+between the two accent-sensitive corpora.
+
+`tools/audit-greek-generated-coverage.py` reproduces expected-lemma coverage
+from a saved generation TSV and `cruncher -T` stdout. The TSV has `LEMMA`
+headers and rows containing surface, lemma and nine comma-separated integer
+grammatical fields; its tabs are literal separators. Quantity marks alone
+are removed for lookup. It validates the row/header relationship, rejects
+malformed generation records and missing query surfaces, and separately
+counts missing lemma pairs, absent surfaces, unrelated homographs and
+partial coverage. It prints aggregate counts and input digests only.
+
+```sh
+python3 tools/audit-greek-generated-coverage.py \
+  --generated /private/greek-generated.tsv \
+  --forms /private/greek-union-surfaces.txt \
+  --analysis /private/greek-strict.analysis
+```
+
 ### Shape of the remaining differences
 
 [An aggregate-only follow-up run](https://github.com/defense-humanites/libmorpheus/actions/runs/36178088608)
@@ -1265,8 +1334,12 @@ historical filter-output comparison. None of these diagnostics
 establishes a replacement lexical corpus. The 169 selected Greek entry
 discrepancies have received a first review, including controlled index and
 analysis checks for the 12 diaeresis cases; unresolved choices remain for
-individual lexical and analyzer qualification. Another 1,410 nominal and 31 verbal disjoint
-groups retain quantity differences, and the Latin trial lacks the historical
+individual lexical and analyzer qualification. The 1,410 nominal quantity
+groups have now been triaged: 1,096 short-only cases preserve the controlled
+complete index, while all 314 long-mark cases have provisional source-backed
+decisions and the generation/analyzer checks recorded above. Their
+accent-sensitive corpora are not equivalent. The 31 verbal quantity groups
+still need wider paradigm qualification, and the Latin trial lacks the historical
 `vtags` selector while 393 verbal-only witness entries still land in its
 revised nominal partition. Analyzer regression fixtures and the 2007 Hopper
 oracles can qualify a selected candidate corpus only after these choices are resolved

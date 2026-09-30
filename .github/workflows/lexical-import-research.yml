@@ -341,6 +341,7 @@ jobs:
           python3 ../../test/inspect-greek-quantity-open.py
           python3 ../../test/audit-greek-open-diphthongs.py
           python3 ../../test/compare-greek-cruncher-readings.py
+          python3 ../../test/audit-greek-generated-coverage.py
           python3 ../../test/split-greek-lexical-headers.py
           python3 ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
