@@ -641,6 +641,23 @@ controlled index and paradigm checks before any source replacement. The
 other **16** of the 25 pending individual cases have no decision from this
 diagnostic.
 
+The single position conflicting with the witness was then tested by moving
+its long mark to the only independent vowel indicated by the matching direct
+`<pron>`. Two private nominal inputs were assembled in the same manifest
+order with the **64** recorded Greek nominal corrections and the same
+entity constraints; only this one stem record differs. Their SHA-256 values
+are `d42629acfb53dee4267704e4a097b91a57433d399e9735e2ac8a393e028fe933`
+and `a0c1f263217dbc7c5ee59fff261e8abdcb18e0a4ab1976a4daa5f563243f6952`.
+Both indexed successfully with the same native `indexnoms`. The nominal
+index changed; its `.lindex` remained byte-identical. In a six-form
+`cruncher -S -n` probe, **five** forms were recognized in both indexes,
+with the same **six** grammatical readings. The marked displayed forms
+changed, including the accentuation of one plural output. This supports
+a source-backed correction of the long-mark *position* for this entry, not
+the candidate's entirely unmarked stem or a claim about the full paradigm.
+The rebuilt baseline index differs from the bundled production index; all
+comparisons here are between two builds from the same controlled input.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
