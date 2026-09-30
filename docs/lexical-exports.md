@@ -658,6 +658,30 @@ the candidate's entirely unmarked stem or a claim about the full paradigm.
 The rebuilt baseline index differs from the bundled production index; all
 comparisons here are between two builds from the same controlled input.
 
+Five more of the 16 open cases have now received **individual** component
+checks. In each, the compound's LSJ `<orth>` marks a segment boundary and
+its direct bare `<pron>` is ambiguous in isolation; a separate LSJ entry
+identifies the corresponding component or root. Three of those entries
+explicitly mark the relevant vowel long in `<orth>`, one has a direct bare
+`<pron>` with only one occurrence of that vowel, and one has a bracketed
+quantity notation in its entry text with only one eligible vowel. The
+matching spelling, location, and local sense relationship were reviewed
+separately; one compound's alternate `<orth>` also marks the same position.
+The private five-row evidence record has SHA-256
+`e3f340492650031dbb750c0e543e0f843ddfebd4affffcc64d13af1cbe2790b6`.
+These checks provisionally retain the witness's long position in those five
+entries, without treating matching suffixes as an automatic rule. **Eleven**
+of the original 25 remain without a source-backed positional decision.
+
+A controlled trial removed only those five long marks from the corrected
+complete Greek nominal input (trial input SHA-256
+`ae961cb6409f17f6420c03a07ad4f6207e0a062a53e32a2d81aa0cb56b7e62dd`).
+Both `nomind` and `.lindex` changed. All five queried headwords remained
+recognized in both indexes with the same seven grammatical readings; their
+marked dictionary display changed. This is a headword probe, not a check of
+their full paradigms. The retained source files and bundled index are
+unchanged.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
