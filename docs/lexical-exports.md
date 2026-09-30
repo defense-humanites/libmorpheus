@@ -383,6 +383,61 @@ python3 tools/audit-greek-generated-coverage.py \
   --analysis /private/greek-strict.analysis
 ```
 
+### Wider verbal quantity qualification
+
+The same controlled approach now covers the **31** verbal quantity groups:
+20 witness short marks and 11 witness long marks. Two complete private
+Greek verb inputs were assembled from the ordered lexical manifest, with
+the eight recorded verbal-source corrections applied before conjugation.
+One preserves quantity; the other substitutes just the 31 unmarked candidate
+records. Their SHA-256 are
+`751d6d5adc057e397f13d08dea13afde06ad3e0f1faba16969df05017f93d0f2`
+and `44d6d0225713e966f5a7776fe55b860227183377a4a37746869fc55fcf8a2ff7`.
+Both were expanded with the same native `do_conj` and indexed with
+`indexvbs`; the nominal runtime was held constant. This compares two
+reconstructed verb indexes, not a reconstructed index against the bundled
+historical one.
+
+The selected source blocks were expanded with the supported generation
+source preparer before constructing the generation indexes. Every one of
+the 31 lemmes generated forms. Both variants yielded **14,876** rows with
+identical per-lemma grammatical multisets, letter forms and accents; only
+quantity notation differs. The prepared-source SHA-256 are
+`7f8685a0ea005afb3705939a5027bff2d2eff79d7e035f35e2e8e9ebd1e8717b`
+and `92eba749e3ec82660fef2741049c85aaaa666ee685a3f7a63b5536a022284615`.
+The generated-output SHA-256 are
+`a68c6a8bd19c5afe5d27ebbc0ff0a3c871803cd94b798efe87fa6185f378b9db`
+and `bc16922d68c1e50d66ef1bf8e3f1be141c91d9275a27129f3aafc121f4dcb245`.
+
+Removing only quantity marks supplied **11,563** distinct surfaces
+(SHA-256 `342f6c91d788f51be74f628f03d9cb5d33676a959c68e0c256287840d859be5c`).
+Both complete indexes recognized every surface under the expected lemma,
+with no homograph-only or partially covered generated surfaces. With
+`cruncher -S -T`, both have 20,807 XML reading rows; with `-S -n -T`, both
+have 24,040. Every per-surface reading-kind, lemma and grammatical multiset
+matches in each comparison. In both modes 3,901 surfaces differ only in
+quantity display and 7,662 have identical outputs. The strict and relaxed
+private difference ledger SHA-256 are
+`e085592c82195c53b1a903ef56fe74623debc9eaaa45c70e282111479ee016ca`
+and `4a2d34b9487f30a3f197ac7715cc5c1389a7c04738de31bb8e33bebc7eba8494`.
+
+The existing source-join tool also recovered **11** single-entry matches
+for the long-mark groups (private source-review SHA-256
+`815af3fc311a4d75ad72d45fd1cf6657d94037d61e8c818bf737bb17ca97c38f`).
+Four are positionally unambiguous under the direct bare-pron rule and one
+under the contextual-pron rule. Six require individual review: three are
+localized by excluding second letters of diphthongs, two by explicitly
+inspecting the nested pronunciation of a matching quoted inflected form,
+and one by comparing the iridescent sense with the rainbow component's
+circumflex and a related explicitly quantity-marked compound. These
+individual semantic and quote relationships do not become automatic rules.
+All 11 provisionally retain the witness's long position. The six explicit
+reviews and the complete verbal decision ledger have SHA-256
+`728130ed73f2021866aa8a98f6639b25f7a0bf503b7dd05afd4554ebceca4a8d`
+and `adb0f75aa7d902edb21aa45d61cea006ed779158dfbd31a41921cc28f7f835c1`.
+Analyzer equivalence of the unmarked counterfactual does not justify
+removing source-backed vowel quantities or establish historical attestation.
+
 ### Shape of the remaining differences
 
 [An aggregate-only follow-up run](https://github.com/defense-humanites/libmorpheus/actions/runs/36178088608)
