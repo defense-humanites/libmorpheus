@@ -328,6 +328,58 @@ exact old-row validation and private stage creation. This is a reviewed
 source-recovery rule for a diagnostic trial, not recovery of historical
 `vtags` or approval of the resulting stem corpus.
 
+In [research run 36756480145](https://github.com/defense-humanites/libmorpheus/actions/runs/36756480145), both language jobs passed and the historical filters completed on the recovered stream. The nominal aggregate comparisons remain unchanged; the nominal output digest changes, so this does not establish byte identity. The verbal comparison improves substantially:
+
+| Exact diagnostic | Original partition | Source-recovered partition |
+| --- | ---: | ---: |
+| Candidate verbal lemmas | 6,581 | 6,955 |
+| Shared verbal lemmas | 6,292 | 6,662 |
+| Shared lemmas with equal record multisets | 6,083 | 6,442 |
+| Exact shared stem records, including multiplicity | 9,252 | 9,864 |
+| Reference-only verbal lemmas | 481 | 111 |
+| Shared lemmas with disjoint records | 15 | 16 |
+| Shared lemmas with partial record overlap | 194 | 204 |
+
+The recovered verbal output contains 10,398 stem records and has SHA-256
+`dcdafaaaa24a350d94509a86cbc230c17246d49e8d07e8c24a2e4aa489ac25b0`.
+The nominal output contains 40,268 records, 37,366 distinct lemmas, 32,953
+shared lemmas and 31,270 equal shared record multisets; its SHA-256 is
+`51c1abd4e9bf9d3e18ff3a11ea8723a1b784ec2b1387d6eea0b93bacbe3bc3f2`.
+Neither output has orphan stem records or unexpected colon tags. The
+additional exact matches qualify this limited projection repair; the 220
+shared verbal lemmas with differing records still require lexical review.
+These are stem comparisons, not analyzer or paradigm equivalence checks.
+
+### Remaining Latin cross-reference source review
+
+A private, manually reviewed dossier joins all ten remaining cross-reference
+entries to ten exact source articles, recording source IDs, serialized-entry
+digests, target orthographies, grammatical fields and witness records. Every
+target is verbal in the source-recovered partition. This confirms the links,
+but does not infer replacement stems from witness membership.
+
+| Source relationship | Entries |
+| --- | ---: |
+| Spelling variant | 2 |
+| Present-stem variant | 1 |
+| Root-vowel variant | 1 |
+| Present and participial variant | 1 |
+| Active variant of a deponent | 3 |
+| Deponent variant of an article covering both voices | 1 |
+| Irregular passive relation | 1 |
+
+All ten aliases have verbal witness records; nine target lemmas match that
+inventory literally; the remaining target is absent under that literal lemma.
+Separately, a numbered textual reference joins an article whose
+source key does not encode that number: adding a numeric suffix would invent
+an identifier. The target entry itself includes both active and deponent
+fields, so neither a guessed homograph suffix nor wholesale inheritance of
+its fields is justified. The private dossier SHA-256 is
+`1c76769a38c7a8d408f88793fc554ca96696643624518c59e9291c5bbd519d49`.
+The two spelling links still need literal stem and analyzer checks; the
+remaining relations require voice, stem or irregular-paradigm handling.
+None of these ten aliases is automatically reclassified or rewritten.
+
 ## Isolated Greek importer experiment
 
 The same [research workflow](../.github/workflows/lexical-import-research.yml)
@@ -1495,10 +1547,13 @@ individual lexical and analyzer qualification. The 1,410 nominal quantity
 groups have now been triaged: 1,096 short-only cases preserve the controlled
 complete index, while all 314 long-mark cases have provisional source-backed
 decisions and the generation/analyzer checks recorded above. Their
-accent-sensitive corpora are not equivalent. The 31 verbal quantity groups
-still need wider paradigm qualification, and the Latin trial lacks the historical
-`vtags` selector while 393 verbal-only witness entries still land in its
-revised nominal partition. Analyzer regression fixtures and the 2007 Hopper
+accent-sensitive corpora are not equivalent. The 31 verbal quantity groups now have complete generated-form coverage
+and equal grammatical signatures in the controlled comparison, as recorded
+above; their long marks have source-backed retention decisions. The Latin
+trial still lacks the historical `vtags` selector. Its baseline leaves 393
+verbal-only witness entries nominal, while the separate source-recovery
+trial leaves ten reviewed cross-references and increases exact verbal
+record matches. Those links do not yet establish inherited paradigms. Analyzer regression fixtures and the 2007 Hopper
 oracles can qualify a selected candidate corpus only after these choices are resolved
 and a complete private stemlib is built. Corpus publication also remains
 subject to the separate rights decision in
