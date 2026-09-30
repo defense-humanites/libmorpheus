@@ -785,12 +785,62 @@ baseline: one with all three relocations (input SHA-256
 the other additionally removing the 22 retained marks (input SHA-256
 `f06e43754bab613e72bb55403f3ec52c27a58f355d1fa0f9d3062a6db5d8cbe6`).
 `cruncher -S -n -T` recognized all 1,212 surfaces against both and returned
-the expected lemma for every surface; each side produced 1,642 XML reading
-rows and 1,937 expanded analyses. The lemma and grammatical-reading
+the expected lemma for every surface; each side produced 1,733 XML reading
+rows (1,642 nominal, 87 verbal, four participial) and 1,937 expanded analyses.
+The reading-kind, lemma and grammatical-reading
 multisets matched **per surface**, although quantity display and some
 accentuation changed. This qualifies the forms generated from these one-record
 inputs under accent-insensitive lookup. It does not establish equivalence for
 unattested forms, other source records of a lemma, or the distributed index.
+
+The same 1,212 surfaces were then checked with accents enabled, using
+`cruncher -S -T` and the same three rebuilt indexes:
+
+| Complete index | Recognized surfaces | XML reading rows | Expanded analyses |
+| --- | ---: | ---: | ---: |
+| Corrected witness baseline | 1,209 | 1,425 | 1,497 |
+| Three provisional relocations | 1,212 | 1,424 | 1,496 |
+| Relocations plus 22 long marks removed | 1,191 | 1,431 | 1,503 |
+
+The three relocations gained three circumflex surfaces of one noun and
+changed the reading multisets of four other surfaces that remain recognized.
+Removing the other 22 long marks lost 21 circumflex surfaces across seven
+lemmes and changed the reading multisets of 28 shared surfaces. Each of
+those seven lemmes accounts for three lost and four changed surfaces.
+The two other relocated lemmes retain their recognition and grammatical
+readings in this probe. Thus the earlier accent-insensitive result cannot
+be extended to accent-sensitive lookup: long quantity affects both which
+forms are accepted and which grammatical readings match a supplied accent.
+All recognized forms still include the expected lemma; none is recognized
+only through an unrelated homograph. The individual comparison ledgers
+remain private, with SHA-256
+`88b2f00d56f51c3f38681ff7b6d03e3137d3bca6d05110ebbef989571f148c57`
+and `a519bb3c4f11c676e5195192008c0157f23fd9cb4e3da49ef92df13c4b5c8272`.
+
+`tools/compare-greek-cruncher-readings.py` reproduces these counts from a
+unique literal ASCII wordlist and two saved `cruncher -T` stdout files.
+It includes nominal, verbal and participial homographs, compares reading
+multisets per surface, and distinguishes recognition, grammatical-reading
+and display changes. A headword printed without a separate displayed form
+is interpreted as both display and lemma. Malformed or unsupported output
+is rejected. The options used to obtain the two stdout files must be recorded
+separately; the parser does not infer them. It prints aggregate counts and
+digests, and only writes individual differences to a new owner-only file
+outside the repository:
+
+```sh
+python3 tools/compare-greek-cruncher-readings.py \
+  --forms /private/greek-generated-forms.txt \
+  --left /private/greek-baseline.analysis \
+  --right /private/greek-trial.analysis \
+  --private-output /private/greek-reading-differences.jsonl
+```
+
+The parser also confirms the earlier accent-insensitive comparison across
+all 1,733 XML readings, including the verbal and participial homographs;
+all per-surface grammatical multisets still agree. Its four synthetic tests
+cover omitted unrecognized inputs, duplicate readings, homographs, display
+suppression, malformed output, and the private-output boundary.
 
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
