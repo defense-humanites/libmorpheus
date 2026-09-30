@@ -613,6 +613,42 @@ from the 25 pending decisions during review. Explicit marks in another
 orthography or a longer `<pron>` prompt inspection of their local TEI
 relationship; they do not select the witness's position automatically.
 
+`tools/consolidate-greek-quantity-review.py` overlays explicit individual
+reviews onto this same source queue, without changing stem records or
+inferring judgments. Each private review supplies `lemma`, `source_ids`
+(in source order), `source_row_sha256` (the exact JSONL row including its
+line ending), a nonempty `evidence` note, `disposition`, and a zero-based
+letter-only `long_position`. Supported dispositions are
+`retain_witness_position`, `relocate_witness_long`, and
+`deduplicate_witness_long`. Reviews may address only the automatic
+`manual_review` queue. Stale source bindings, duplicate or unknown lemmas,
+invalid positions and inconsistent quantity marks are rejected before any
+output is written. Individual decisions remain explicitly provisional.
+
+```sh
+python3 tools/consolidate-greek-quantity-review.py \
+  --source-review /private/greek-long-source-review.jsonl \
+  --reviews /private/greek-explicit-quantity-reviews.jsonl \
+  --private-output /private/greek-consolidated-quantity-decisions.jsonl \
+  --expected 314
+```
+
+The consolidated private ledger contains all **314** source rows: 287
+unchanged automatic dispositions and 27 explicit individual reviews.
+The latter comprise 23 retained witness positions, three relocations and
+one deduplication. **26** individual positions are provisionally resolved.
+The deduplication case has `position_resolved: false`: removing a repeated
+underscore does not establish which repeated vowel the source intended.
+Thus an empty unreviewed queue does not mean every long position is settled.
+The exact source, explicit-review and consolidated-ledger SHA-256 digests
+are respectively
+`12afa846e12ab7c8f830d615f104efc2f1548695866106048eb6b0cc8da76423`,
+`e2b3bf2759b620ccc9852ef9d855fa39ca3c787a91b9a8f783f98f98ee0f8122`,
+and `df0085cc7c768dddc2ae8181577afcc12200785256452d0639692200bc1e34d7`.
+The output is a new owner-only file outside the repository; only aggregate
+counts and digests are printed. Synthetic tests check binding failures,
+review boundaries, multiplicity versus position, and private output rules.
+
 A fresh private reconstruction using the portable Greek header splitter and
 locally compiled `newlems`/`newlems2` reproduced the 1,410 quantity groups,
 the 1,096 short-only cases, and all six previously reported dispositions of
