@@ -620,7 +620,8 @@ inferring judgments. Each private review supplies `lemma`, `source_ids`
 line ending), a nonempty `evidence` note, `disposition`, and a zero-based
 letter-only `long_position`. Supported dispositions are
 `retain_witness_position`, `relocate_witness_long`, and
-`deduplicate_witness_long`. Reviews may address only the automatic
+`deduplicate_witness_long`, and
+`deduplicate_witness_long_from_source_circumflex`. Reviews may address only the automatic
 `manual_review` queue. Stale source bindings, duplicate or unknown lemmas,
 invalid positions and inconsistent quantity marks are rejected before any
 output is written. Individual decisions remain explicitly provisional.
@@ -648,6 +649,27 @@ and `df0085cc7c768dddc2ae8181577afcc12200785256452d0639692200bc1e34d7`.
 The output is a new owner-only file outside the repository; only aggregate
 counts and digests are printed. Synthetic tests check binding failures,
 review boundaries, multiplicity versus position, and private output rules.
+
+A subsequent source check resolved the deduplication case's position
+individually: the pinned first `<orth>` has a circumflex on the marked
+monophthong. [Smyth §147a](https://www.ccel.org/s/smyth/grammar/html/smyth_1e_uni.htm)
+establishes that a dichronon bearing circumflex is long. This evidence is
+independent of the ambiguous bare `<pron>`. The new disposition
+`deduplicate_witness_long_from_source_circumflex` requires one matched
+source, matching initial stem letters, exactly one source circumflex at
+the selected position, no explicit short mark there, and no preceding
+vowel. The last conservative check avoids treating a circumflex on a
+diphthong as proof of a long second vowel; hiatus is not inferred.
+This adds no automatic selection rule and changes no stem source.
+
+The revised private ledger therefore has **27** provisional individual
+positions and zero multiplicity-only judgments. Its explicit-review and
+ledger SHA-256 digests are
+`db52d7850a8d9cd9725f63f5e689160345aef81e9724f863f4620b2198a3a670`
+and `f64835561a8fe88ba8f6a697e7a4bde6c6e8539e7700d1c198f122fa977e68ad`.
+The previous ledger remains a recorded intermediate result. Four synthetic
+tests now include rejection of misplaced or repeated circumflexes,
+contradictory short marks, and diphthong positions.
 
 A fresh private reconstruction using the portable Greek header splitter and
 locally compiled `newlems`/`newlems2` reproduced the 1,410 quantity groups,

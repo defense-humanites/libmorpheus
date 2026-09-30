@@ -34,6 +34,25 @@ def read_rows(path):
     return rows
 
 
+def source_circumflex_locates(row, stem, position):
+    """Conservative monophthong check on the sole matched first orthography.
+
+    Diphthongs can bear circumflex without lengthening their second vowel.
+    Reject any preceding vowel rather than inferring hiatus here.
+    """
+    if len(row["sources"]) != 1:
+        return False
+    head = row["sources"][0]["headword"].split()[0]
+    letters, _ = arbitrator.letters_and_longs(head)
+    if (not letters.startswith(stem) or head.count("=") != 1 or
+            position in arbitrator.short_positions(head) or
+            (position and letters[position - 1] in "aehiouw")):
+        return False
+    before = head.split("=", 1)[0]
+    accented, _ = arbitrator.letters_and_longs(before)
+    return len(accented) - 1 == position
+
+
 def validate(row, row_digest, review):
     if review.get("source_row_sha256") != row_digest:
         raise ValueError("review does not match exact source row")
@@ -61,10 +80,14 @@ def validate(row, row_digest, review):
         if (len(witness_longs) != 1 or witness_longs[0] == mark or
                 witness_longs[0][1] != mark[1]):
             raise ValueError("relocation must move one mark to another same-vowel position")
-    elif disposition == "deduplicate_witness_long":
+    elif disposition in {"deduplicate_witness_long",
+                         "deduplicate_witness_long_from_source_circumflex"}:
         if (len(witness_longs) < 2 or set(witness_longs) != {mark} or
                 candidate_longs != [mark]):
             raise ValueError("deduplication must match the single candidate mark")
+        if (disposition.endswith("from_source_circumflex") and
+                not source_circumflex_locates(row, witness, position)):
+            raise ValueError("source circumflex does not locate a single-vowel long")
     else:
         raise ValueError("unsupported individual disposition")
     return disposition

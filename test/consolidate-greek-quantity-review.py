@@ -55,6 +55,30 @@ class ReviewTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.consolidate(self.source, self.reviews, expected=4)
 
+    def test_circumflex_resolves_position_only_with_matching_monophthong(self):
+        row = self.rows[2]
+        row["sources"][0]["headword"] = "pi=pis"
+        review = self.records[2].copy()
+        review["disposition"] = "deduplicate_witness_long_from_source_circumflex"
+        self.assertEqual(m.validate(row, review["source_row_sha256"], review),
+                         review["disposition"])
+        self.source.write_text("".join(json.dumps(r) + "\n" for r in self.rows))
+        review["source_row_sha256"] = hashlib.sha256(
+            self.source.read_bytes().splitlines(keepends=True)[2]).hexdigest()
+        self.records[2] = review
+        self.save()
+        report = m.consolidate(self.source, self.reviews)
+        self.assertEqual(report["individual_positions_resolved"], 3)
+        self.assertEqual(report["multiplicity_only"], 0)
+        for head in ("pipi=s", "pi/pis", "pi=pi=s", "pi^=pis", "other"):
+            row["sources"][0]["headword"] = head
+            with self.subTest(head=head), self.assertRaises(ValueError):
+                m.validate(row, review["source_row_sha256"], review)
+        row["candidate"], row["witness"] = ":no:ai_p os_on", ":no:ai__p os_on"
+        row["sources"][0]["headword"] = "ai=pis"
+        with self.assertRaises(ValueError):
+            m.validate(row, review["source_row_sha256"], review)
+
     def test_invalid_reviews_write_nothing(self):
         for field, value in [("source_row_sha256", "stale"), ("source_ids", ["wrong"]),
                              ("evidence", " "), ("long_position", True),
