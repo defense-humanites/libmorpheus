@@ -336,6 +336,7 @@ jobs:
           python3 ../../test/triage-greek-quantity-residuals.py
           python3 ../../test/arbitrate-greek-quantity-long.py
           python3 ../../test/audit-greek-pron-ambiguity.py
+          python3 ../../test/prepare-greek-quantity-source-review.py
           python3 ../../test/inspect-greek-quantity-open.py
           python3 ../../test/split-greek-lexical-headers.py
           python3 ../../tools/audit-greek-disjoint-triage.py \

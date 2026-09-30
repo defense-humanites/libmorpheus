@@ -571,8 +571,32 @@ occurrence merely because one is already marked long in `<orth>`; this
 matters especially for the remaining entry with a long orthographic mark
 at another occurrence. The script prints only aggregate counts and requires
 the unchanged pinned checkout.
-For the next entry-level pass, `tools/inspect-greek-quantity-open.py` accepts
-the private 314-row source review used by the long-mark arbitrator. It selects
+For a repeatable entry-level pass, `tools/prepare-greek-quantity-source-review.py`
+joins the private output of `triage-greek-quantity-residuals.py` with the
+projected Greek headers and the unchanged pinned LSJ files. It retains only
+stem records with a long mark on either side, requires 314 groups when called
+with `--expected 314`, and writes entry-level source fields and direct or
+nested `<pron>` elements only to a newly created private file. It reports
+source counts and digests without exposing individual entries. The new join
+is a reconstruction of the input shape, not a claim that its bytes equal the
+earlier private ledger; compare its counts and inspect any extra source match
+before applying provisional rules.
+
+```sh
+python3 tools/triage-greek-quantity-residuals.py \
+  --candidate /private/stage/Greek.no-first-quantity.nominal \
+  --witness stemlib/Greek/stemsrc/lsj.nom \
+  --private-output /private/greek-quantity-triage.jsonl
+python3 tools/prepare-greek-quantity-source-review.py \
+  --triage /private/greek-quantity-triage.jsonl \
+  --headers /private/stage/Greek.headers.jsonl \
+  --lexica /private/lexica \
+  --output /private/greek-long-source-review.jsonl \
+  --expected 314
+```
+
+`tools/inspect-greek-quantity-open.py` accepts that private source review
+used by the long-mark arbitrator. It selects
 only rows still classified `manual_review` and lists zero-based letter positions
 and quantity marks in each source orthography alongside its direct or nested
 `<pron>` records. The output is a **private dossier**, not a decision ledger:
