@@ -613,6 +613,34 @@ from the 25 pending decisions during review. Explicit marks in another
 orthography or a longer `<pron>` prompt inspection of their local TEI
 relationship; they do not select the witness's position automatically.
 
+A fresh private reconstruction using the portable Greek header splitter and
+locally compiled `newlems`/`newlems2` reproduced the 1,410 quantity groups,
+the 1,096 short-only cases, and all six previously reported dispositions of
+the 314 long-mark cases. The private decision ledger SHA-256 is again
+`3600eabf93c88c4841c77111aa345b845438eef7c230c1df0718f48e5a066f3f`.
+The source join found 313 single-entry and one two-entry matches. Its input
+triage SHA-256 is
+`3c3e8cf33f6fd2721e51c6ac69f493a232e84905fb43034341e05db11a9a10fe`;
+the pinned TEI SHA-256 remains the one recorded above. The first version of
+the source-join selector counted two cases with `_` on both sides that differed
+only by `^`; the corrected selector compares stem tokens after removing `^`
+and returns exactly 314 groups.
+
+`tools/audit-greek-open-diphthongs.py` applies Morpheus's existing
+`is_diphth` distinction to the 27 open rows: an `i` or `u` immediately after
+the first vowel of a recognized diphthong, without diaeresis, is not an
+independent vowel to which a bare `[i_]` or `[u_]` can assign length. With a
+single matching LSJ entry and direct bare `<pron>`, this leaves one eligible
+position in **nine** rows. In **eight** it agrees with the witness's long
+mark; in **one** it points to another occurrence and therefore does not
+validate either complete stem record. The nine entry-level observations are
+private (SHA-256
+`55e5919a788d7ad020b33e806109b265c57c70a2574b8a6be7c9f273fb38ed1a`).
+These are provisional decisions about the position indicated by LSJ, pending
+controlled index and paradigm checks before any source replacement. The
+other **16** of the 25 pending individual cases have no decision from this
+diagnostic.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.

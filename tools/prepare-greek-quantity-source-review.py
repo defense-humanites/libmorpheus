@@ -59,8 +59,10 @@ def prepare(triage, headers, lexica, output, expected=None):
         for raw in source:
             digests["triage"].update(raw)
             row = json.loads(raw)
-            if "_" not in row["candidate"].split()[0][4:] and \
-                    "_" not in row["witness"].split()[0][4:]:
+            # Two groups contain a long mark on both sides but differ only
+            # by a short mark. They belong to the 1,096 index-neutral cases.
+            if row["candidate"].split()[0].replace("^", "") == \
+                    row["witness"].split()[0].replace("^", ""):
                 continue
             lemma = row["lemma"]
             if lemma in selected:

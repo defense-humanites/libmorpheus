@@ -27,7 +27,9 @@ class SourceJoinTest(unittest.TestCase):
                 {"lemma": "pi/tios", "candidate": ":no:pitios os_ou",
                  "witness": ":no:pi_tios os_ou"},
                 {"lemma": "a/b", "candidate": ":no:ab os_ou",
-                 "witness": ":no:a^b os_ou"})), encoding="utf-8")
+                 "witness": ":no:a^b os_ou"},
+                {"lemma": "gamma", "candidate": ":no:ga_^mma os_ou",
+                 "witness": ":no:ga_mma os_ou"})), encoding="utf-8")
             headers.write_text(json.dumps({
                 "lemma": "other", "headword": "pi/ti^os", "projection_error": None,
                 "source": xml.name, "id": "n1", "fields": [
