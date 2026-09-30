@@ -682,6 +682,37 @@ marked dictionary display changed. This is a headword probe, not a check of
 their full paradigms. The retained source files and bundled index are
 unchanged.
 
+Five further cases were inspected through their individual LSJ etymologies
+and separately indexed components. Four compound relationships identify the
+witness's long-vowel position: a fat-root compound, a verb-derived compound
+whose prefix is explicitly short, a rust-derived noun matched to the
+appropriate homograph, and a leaven compound. In the fifth, the Lydian
+component explicitly has long `u`, whereas the `u(po/` prefix explicitly has
+short `u`; its witness mark is on the prefix, so the source supports moving
+the mark to the component. These are case-specific provisional readings,
+not a general compound-transfer rule. The five private evidence rows have
+SHA-256 `cea865fbda16eb96e597b7ba9071563390302db99d487401c79c8c57c47cfdb8`.
+
+A controlled trial removed the four retained witness marks and relocated the
+fifth in a copy of the same corrected complete nominal input (SHA-256
+`ed393a337d27e2711237bdc69c63573bba6284220db0bd44e5a7e8a0dc99f324`).
+Both nominal index files changed. `cruncher -S -n -T` recognized all five
+queried headwords against each index with the same six grammatical readings.
+The marked displayed forms changed, including both readings of one noun;
+the relocation displayed the component's long `u` in place of the prefix's.
+This checks headwords only, not full paradigms or a production index.
+
+**Six** of the original 25 still lack a complete positional decision. Two
+repeat `a` and four repeat `i`; each has a direct bare quantity notation
+that cannot alone choose the occurrence. In one, a component supports the
+second `a` but does not exclude the witness's first `a`. In another, the
+orthography already marks the first `i` long, and the bare pronunciation may
+repeat that same mark rather than establish a second one. Short orthographic
+quantity at another vowel and an uncertain related-verb sense likewise do
+not settle the other entries. The six private residual reasons have SHA-256
+`d6b95b817d2f9fa736f5d0f094df402d8f99a1a804916da1b594e165ee50f4df`.
+No curated lexical record is changed by these observations.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
