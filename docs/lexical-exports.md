@@ -753,6 +753,45 @@ provisional positional decisions: 22 retain the witness position and three
 relocate a long mark. These are controlled headword probes,
 not full-paradigm qualification, and they do not change the curated source.
 
+A wider controlled generation pass has since tested the **25** individually
+reviewed source blocks. It built three private generation indexes: the
+corrected witness baseline, the same records with the three provisional
+relocations, and a counterfactual with the other 22 witness long marks
+removed. The source-file SHA-256 digests are respectively
+`3cda7aaffe5331373127c704eaed08c3ba48fa9279739ebf78f042e8d67ecc59`,
+`f2e637a5d0ef246b6dc304e006b22b6920a194cf98b561aa163d8b17c1ae4925`,
+and `57869a64b6565467aec2c32a9303b96a621506f75760ce13d6a982119a4e8120`.
+Each yielded **1,394** generated form rows, with identical counts and
+grammatical feature multisets for every lemma. The three relocations changed
+263 generated rows; removing the other 22 marks changed 1,131. Ignoring
+quantity and accent notation, the letter forms and grammatical features
+were identical. The generated accent differed for one relocated lemma and
+seven of the 22 counterfactual unmarked lemmes.
+
+For the three relocations, the union of baseline and relocated generated
+forms supplied **221** distinct surfaces (private SHA-256
+`5fe71ee1dfe3189d6046760e87c00b4c2c2d6af15864b0bbeca05318a53b81ad`).
+Both complete indexes recognized all 221 with the same per-surface
+grammatical readings: 301 XML reading rows and 357 expanded analyses on
+each side. Four generated rows of one noun also changed accent. This
+comparison uses the rebuilt baseline index, not the bundled index.
+
+The union of the three generated outputs contains **1,212** distinct query
+surfaces after stripping quantity marks (private input SHA-256
+`7b0aff0b4b40de95364cd68af49165aac93e4ac09dc7d38c3aa914f6b8680adc`).
+Two complete nominal indexes were rebuilt from the same corrected private
+baseline: one with all three relocations (input SHA-256
+`f1216d809d03da586d3bc420ead248c3f2bcac089728b2f4891b400e2a043908`),
+the other additionally removing the 22 retained marks (input SHA-256
+`f06e43754bab613e72bb55403f3ec52c27a58f355d1fa0f9d3062a6db5d8cbe6`).
+`cruncher -S -n -T` recognized all 1,212 surfaces against both and returned
+the expected lemma for every surface; each side produced 1,642 XML reading
+rows and 1,937 expanded analyses. The lemma and grammatical-reading
+multisets matched **per surface**, although quantity display and some
+accentuation changed. This qualifies the forms generated from these one-record
+inputs under accent-insensitive lookup. It does not establish equivalence for
+unattested forms, other source records of a lemma, or the distributed index.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
