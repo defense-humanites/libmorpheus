@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/lexical-import
+      - research/lexical-arbitration-*
   workflow_dispatch:
 
 permissions:
@@ -54,6 +55,13 @@ jobs:
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
             --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/prepare-latin-partition-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/prepare-latin-partition-review.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin \
+            --expected 393
 
       - name: Build historical header and nominal filters in isolation
         run: |

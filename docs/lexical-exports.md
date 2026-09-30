@@ -226,6 +226,59 @@ entries with no usable TEI signal, differences between projected and
 historical header syntax, and individual stem mismatches before analyzer-level
 checks.
 
+### Source topology of the Latin partition gaps
+
+`tools/prepare-latin-partition-review.py` joins the unchanged projected
+headers back to the pinned archival Latin TEI. It selects a private dossier
+of the **393** verbal-only witness entries assigned to the nominal trial,
+then locates source evidence independently of those inventory labels.
+The dossier binds each source entry to its exact header-row SHA-256 and
+records direct grammatical fields of the first sense, explicitly styled
+italic verb labels, and source references. Quoted grammatical labels and
+later-sense labels are not inherited. No partition or stem record changes.
+
+Among the 393 dossiers, **375** have an explicit verbal `<pos>` as a direct
+child of the first `<sense>`. Another **eight** have a direct italic verbal
+label there (using the recorded `v. a.`, `v. n.`, deponent, frequentative or
+inchoative prefixes). **Ten** have no such first-sense verbal signal and
+need individual cross-reference handling. The old field-profile counts
+(273 `<orth>` only, 120 `<orth>` plus `<itype>`) describe the projected
+header, not the complete source entry. At least 383 gaps therefore reflect
+source information omitted at the first-sense boundary, rather than absence
+of grammatical information in the lexicon.
+
+Across the nominal trial, the same independent inspection also finds
+91 direct verbal `<pos>` signals and 155 italic verbal labels in entries
+absent from both curated inventories. One nominal-only witness entry has
+an italic verb label, and a different one has a conjugation-shaped `<itype>`
+inside the first sense which actually encodes a citation. These controls
+show why neither witness membership nor blindly appending every nested
+`<itype>` can supply a safe global selector. Source labels, source syntax
+and candidate stem generation need separate review before reconstructing
+the missing historical `vtags` behavior.
+
+```sh
+python3 tools/prepare-latin-partition-review.py \
+  --headers /private/Latin.headers.jsonl \
+  --lexica /private/lexica \
+  --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+  --verbal-baseline stemlib/Latin/stemsrc/vbs.latin \
+  --private-output /private/latin-partition-source-review.jsonl \
+  --expected 393
+```
+
+The source TEI and unchanged header SHA-256 are
+`ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee`
+and `21a8475e126d8e912c1d5cf75026c4305e7a6deb14aae846c9362e36afede480`;
+the private dossier SHA-256 is
+`bb910aea9bb215662e05263aebe87b38a6913f01702f186c2df5dd0e06d68da5`.
+The tool verifies the pinned revision and clean exact source, source keys,
+duplicate IDs, optional expected count and owner-only output boundaries.
+Four synthetic tests cover these checks and the source-topology exclusions.
+The lexical research workflow now also runs on `research/lexical-arbitration-*`
+branches. It reproduces this audit without writing or uploading the individual
+dossier, and exercises the existing historical importer chains separately.
+
 ## Isolated Greek importer experiment
 
 The same [research workflow](../.github/workflows/lexical-import-research.yml)
