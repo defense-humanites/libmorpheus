@@ -279,6 +279,55 @@ The lexical research workflow now also runs on `research/lexical-arbitration-*`
 branches. It reproduces this audit without writing or uploading the individual
 dossier, and exercises the existing historical importer chains separately.
 
+### Separate source-backed first-sense recovery trial
+
+`tools/recover-latin-initial-sense.py` stages an alternative Latin header
+stream using **only source evidence**, without consulting either curated
+inventory. It augments a nominal-trial record only when the first sense
+has a direct explicit verbal `<pos>` or one of the styled verbal labels
+identified above. The direct grammatical fields are then appended with
+source-location provenance. Italic verbal labels become explicit trial
+`<pos>` fields. Conjugation-shaped `<itype>` alone does not authorize
+recovery, so the mis-tagged citation is excluded. Quoted and later-sense
+labels are also excluded. Any unsupported recovered field withholds the
+whole recovery rather than silently discarding that field.
+
+All old projected rows are verified against their **entire** original
+header, not just the leading headword, before the new stage is created.
+Unchanged rows retain their literal candidate text. Source joins, pinned
+revision, exact source, row order, duplicate IDs, expected recovery count,
+and new private stage boundaries are checked. The original projection and
+selector remain the baseline; no public lexical file is overwritten.
+
+```sh
+python3 tools/recover-latin-initial-sense.py \
+  --headers /private/Latin.headers.jsonl \
+  --lemmata /private/Latin.lemmata \
+  --lexica /private/lexica \
+  --output /private/latin-source-recovered \
+  --expected 630
+```
+
+The pinned source restores **630** projected records: 466 from verbal
+`<pos>` and 164 from styled verbal labels. All recovered fields are
+supported by the projection; 136 previously unprojected entries remain
+unprojected. Re-running the unchanged partition on this alternative stream
+gives **43,218 nominal**, **7,480 verbal**, and **762 participial** projected
+rows. The verbal-only witness entries still routed nominal fall from 393
+to **ten**; those ten are bare cross-references whose paradigms are not
+inherited by this trial. Inventory labels do not select the 630 recoveries.
+
+The alternative header and candidate-stream SHA-256 are
+`77d759464aacf11b91ff3884be62bc846831b53e95574ff099ae23aaf71ebfa3`
+and `0c260d9ea9875f376801f43ba45fd035da3764488028840ba32ae20db8250ada`.
+The research workflow runs both historical filter chains on this stream
+as a separate experiment, with per-record outputs and filter diagnostics
+kept ephemeral and no artifacts uploaded. Three synthetic tests cover
+explicit versus weak source signals, unsupported-field withholding,
+exact old-row validation and private stage creation. This is a reviewed
+source-recovery rule for a diagnostic trial, not recovery of historical
+`vtags` or approval of the resulting stem corpus.
+
 ## Isolated Greek importer experiment
 
 The same [research workflow](../.github/workflows/lexical-import-research.yml)

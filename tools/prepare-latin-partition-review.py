@@ -112,7 +112,7 @@ def analyze(headers, entries, nominal, verbal):
     return dict(table), dossier
 
 
-def prepare(headers, lexica, nominal_path, verbal_path, private_output=None, expected=None):
+def load_entries(lexica):
     revision = subprocess.check_output(
         ["git", "-C", str(lexica), "rev-parse", "HEAD"], text=True).strip()
     if revision != REVISION:
@@ -130,6 +130,11 @@ def prepare(headers, lexica, nominal_path, verbal_path, private_output=None, exp
         if not key or key in entries:
             raise ValueError("invalid or duplicate Latin source entry ID")
         entries[key] = entry
+    return entries, source, revision
+
+
+def prepare(headers, lexica, nominal_path, verbal_path, private_output=None, expected=None):
+    entries, source, revision = load_entries(lexica)
     def lemmas(path):
         return {line[4:].strip() for line in path.read_text().splitlines()
                 if line.startswith(":le:")}

@@ -156,6 +156,53 @@ jobs:
             --candidate "$RUNNER_TEMP/lexical-partition/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
 
+      - name: Qualify source-backed first-sense Latin recovery separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-initial-sense.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-initial-sense.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-source-recovered" \
+            --expected 630
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-source-recovered-partition"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-partition-gaps.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latnom.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-source-recovered/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-source-recovered/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latvb.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/verbal.stems"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --baseline stemlib/Latin/stemsrc/ls.nom
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/verbal.stems" \
+            --baseline stemlib/Latin/stemsrc/vbs.latin
+
   greek-header-filters:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
