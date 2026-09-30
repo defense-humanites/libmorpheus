@@ -713,6 +713,46 @@ not settle the other entries. The six private residual reasons have SHA-256
 `d6b95b817d2f9fa736f5d0f094df402d8f99a1a804916da1b594e165ee50f4df`.
 No curated lexical record is changed by these observations.
 
+The six remaining positions have now been examined individually. Five
+provisionally retain the witness's position. One direct `[a_]` is localized
+by the short `-ma` suffix and Smyth's explicit long first `a` in the
+cross-referenced eagle noun (§38); a propitiation root has a separate entry with
+one `i` and direct `[i_]`; two nouns in `-i/ths` have the long `-i_ths`
+formation, one also supported by a synonym with a single long `i`; and
+an architectural noun has the long `i` of its door-jamb component rather
+than that of an unrelated similar verb. The architectural interpretation
+is supported by [Ginouvès, *Dictionnaire méthodique de l'architecture grecque
+et romaine*, II (1992)](https://www.persee.fr/doc/efr_0000-0000_1992_dic_84_2),
+p. 47, correcting the broader LSJ gloss. [Smyth's *Greek Grammar*](https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.04.0007%3Apart%3D3)
+(§§833, 843, 861) supplies the suffix quantities. These
+relationships are evaluated for these entries only; they do not license
+automatic transfer to other compounds.
+
+The sixth case provisionally **moves** the witness's long mark from the
+first `a` of a short preposition to the second `a` of its independently
+attested component. [Smyth's convention](https://grammars.alpheios.net/smyth/xhtml/body.1_div1.1_div2.1.html)
+(§4) treats unmarked `a` as short
+and prints the preposition without a macron (§1683). The pinned LSJ entry
+for the component has a single `a` and direct `[a_]`; a parallel compound
+explicitly marks its own first `a` short while retaining `[a_]` for that
+same component. This combination localizes the bare quantity in the target
+compound. The private six-row evidence ledger has SHA-256
+`c23e3936fbe943b4b53a01677b34dbbfa0e0931ca27b351c47a059d06fc46fcc`.
+
+Removing the five retained marks in a controlled copy of the corrected
+complete nominal input (SHA-256
+`a9f814242b78938e6ce70a4b73e24615e5be56c5c87cd4daf7f369f0f5f3879b`)
+changed both nominal index files. All five headwords remained recognized
+with the same six grammatical readings, while their quantity displays
+changed. A separate one-record relocation (input SHA-256
+`88e591434a7c12d327d6df1b0228c8931303c2fa5810bf7c00985e10af5dd1b3`)
+changed `nomind` but left `.lindex` identical; the queried headword
+retained its single grammatical reading and displayed the mark on the
+second `a`. Thus all 25 cases that required individual review now have
+provisional positional decisions: 22 retain the witness position and three
+relocate a long mark. These are controlled headword probes,
+not full-paradigm qualification, and they do not change the curated source.
+
 The tool prints only counts and hashes; its `--private-output` must remain
 outside the repository and CI artifacts. No bulk edit to the curated sources
 follows from these provisional decisions.
