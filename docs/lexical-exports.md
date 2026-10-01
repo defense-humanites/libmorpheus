@@ -973,6 +973,55 @@ The original loss subset now recognizes **3,753** of **15,255** forms with
 **7,160** readings and zero API errors. Complete LISTALL comparisons are
 qualified separately below; this targeted subset is not a corpus-wide verdict.
 
+The complete LISTALL comparison for this stage recognizes **842,776** forms
+with **2,092,352** readings. The identical-root control has zero count
+differences and zero errors. Against the preceding fourth-conjugation trial,
+**902** forms become recognized, none becomes absent, and all **1,412** changed
+counts increase. All **902** recovered forms are independently recognized
+under their expected source verbal lemmas with **1,357** readings and no other
+lemma/POS readings; private dossier SHA-256
+`8f069f07ca02fbccd076189476e2b7294794b5473b66911a74da2e782eacba05`.
+
+Against the controlled rebuilt baseline the recognition cells are **826,038**
+both, **11,952** baseline only, **16,738** candidate only and **178,851** neither.
+Remaining losses have **20,981** baseline readings in **1,031** lemma groups:
+**634** exact source joins, **15** notation joins, **19** native-preverb/base
+review leads and **363** unresolved groups. Private dossier SHA-256
+`b836afcc80babeced4302ce1710bbbc4f9f1dc3e8dae88f8025d64adab205312`.
+The earlier **488** first-repair losses remain absent with zero API errors.
+
+### Complete alternates with three existing regular parts
+
+`tools/recover-latin-regular-parts-alternates.py` is a separate additive stage.
+It accepts only a unique source article with one field exactly `di, sum, 3`
+and a literal active `-ndo` ending, or `i_vi, i_tum, 4` and active `-io`.
+All three primary present/perfect/fourth-part records must already match that
+specific regular pattern, without flags or competing primary records. Only
+complete same-article alternates with the same supported ending qualify;
+source ambiguities, incomplete or voice-changing spellings, and differences
+limited to quantity or separators are withheld. The stage preserves all old
+records and adds each alternate's own three source-supported roots.
+
+The pinned-source trial adds **18** records in **six** blocks. It makes no
+claim about omitted full spellings with unsupported internal delimiters or
+other conjugations. Five synthetic tests cover both paradigms, quantities,
+homographs, private output, no overwrite, missing parts, conflicting records,
+flags, ambiguity, voice, notation-only variants and idempotence. CI checks
+both quantity tiers. Their private output SHA-256 are
+`9551c20f9295e51b2662c6035aa2fa970b943a86e42407d697c3bfbdefcb45c1`
+and `ee9b8cf20942b1fea6eaa7913bc5a8e8ccddc602dbf74ecf5984805d1bddcaa2`.
+
+A historical-filter check reproduces all **18** alternate roots and their
+conjugation tags, ignoring only optional short marks while retaining long marks
+and separators. A separate **18**-form principal-part probe passes from **zero**
+to **18** forms recognized under the expected source lemmas, with **51** such
+verbal readings. Its private before/after dossier SHA-256 are
+`5ffb1b1790daad20011f251c2a7aa46fa7b8c0de640837b5aa52ef97cf67575e`
+and `4519cc8b6d49d462e3600ccdbb320094c2ba454171903c19235103ce62651da0`.
+The letters-only native verbal index and sidecar SHA-256 are
+`862407c19591a0c6ac286a3600da26cebbe0088efdc56f57b74636557c97bc21`
+and `f093d0535e029e8122969b28f6ff293b74264b50590ea0437dc61f9d1200b3b7`.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
