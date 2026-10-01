@@ -280,6 +280,28 @@ jobs:
             --language Latin --source-path stemsrc/ls.nom \
             --private-output "$RUNNER_TEMP/latin-full-compounds/nominal-reviewed.stems" --expected 44
 
+      - name: Qualify source-only regular derivative and principal-part repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-first-conjugation.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-principal-parts.py
+          for tier in all letters-only; do
+            expected=220
+            if [ "$tier" = letters-only ]; then expected=50; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-first-conjugation.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --tier "$tier" --expected "$expected"
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" --expected 2
+          done
+
   greek-header-filters:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

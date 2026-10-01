@@ -581,6 +581,54 @@ blocked on these lexical losses and source/paradigm arbitration. No witness
 stem copying, automatic alias inheritance, public lexical artifact or
 production stemlib replacement is authorized by these measurements.
 
+### Source-backed regular stem repair trials
+
+The loss dossiers expose a historical `latvb` trimming defect: a first
+conjugation headword ending in `eo` can lose the `e`, even though its explicit
+conjugation is 1. `tools/repair-latin-first-conjugation.py` derives the primary
+`are_vb` root from the complete source present spelling, removing only final
+`o` or `or`. It validates the pinned source joins, headwords and conjugation
+fields, requires an existing primary derivative record, and withholds
+ambiguous sources, alternate records and inconsistent voice. It does not
+modify historical filters, import witness stems or assign alias paradigms.
+Five synthetic tests cover spelling quantities, homograph suffixes, voice,
+source mismatch, output boundaries, no overwrite and a separate quantity tier.
+
+Of **3,727** `are_vb` records, the full source trial repairs **220**:
+**50** change letters and **170** change only quantity notation. **3,396**
+already match, **94** lack a unique eligible source and **17** are withheld
+for alternate/voice handling. `--tier letters-only` changes only the 50
+letter-different records and preserves the other 170 for independent
+qualification; it does not declare their quantities unnecessary. Full and
+letters-only private output SHA-256 are
+`0281bed9c7b231296d2786b542109243ff1db2cae79cd89183b764a1a4e6009d`
+and `2d50859e3ac2b0b27d039474a291cbfe982bb5addc93a248317cac42723f418b`.
+
+The full 220-record trial builds its complete verbal index successfully,
+with the nominal index unchanged. Its complete identical-root control
+recognizes **836,311** forms, leaves **197,268** absent, returns **2,070,263**
+readings on each side and has zero changed counts or API errors. Compared
+with the preceding full-compound trial, it gains **3,800** forms and loses
+**488**, with **6,440** changed counts. Against the controlled baseline,
+**823,838** are recognized by both, **14,152** baseline-only, **12,473**
+candidate-only and **183,116** absent from both. Both comparisons reproduce
+the control's reading totals exactly. New losses remain unqualified; source
+repair is not proof that every old reading was wrong.
+
+`tools/repair-latin-principal-parts.py` separately recognizes a precise
+duplicated-present-fragment error in the historical conjugation-3 `s/d,q`
+trimming path. It requires explicit perfect/fourth parts, a perfect component
+spelling the present component, and an exact match to the defective output.
+It removes only that duplicated fragment while retaining the explicit source
+prefix and principal parts. No other ablaut, suppletion, alias or deponent
+paradigm is inferred. Three synthetic tests cover the exact proof, newline
+preservation, already-correct records and withheld unmatched/ambiguous cases.
+This changes **two** records from one article. Full-source and letters-only
+outputs after that repair have SHA-256
+`e2996d043e59a2e8871289590ace2ea627ea216b1f2086d72d3746467fe32c65`
+and `e857385b7a517641cf737b71e73456f7deddc6ed77bbfc1cf9857550192d1af0`.
+These are separate experimental tiers; all individual records remain private.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
