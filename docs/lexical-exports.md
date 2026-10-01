@@ -1022,6 +1022,28 @@ The letters-only native verbal index and sidecar SHA-256 are
 `862407c19591a0c6ac286a3600da26cebbe0088efdc56f57b74636557c97bc21`
 and `f093d0535e029e8122969b28f6ff293b74264b50590ea0437dc61f9d1200b3b7`.
 
+The all-quantity build has the same native verbal index and sidecar hashes;
+nominal indexes remain unchanged. The complete **1,033,579**-form pass
+recognizes **843,126** forms with **2,093,413** readings. Its identical-root
+control has zero differences and zero errors. Relative to the preceding
+duplicate-component stage, **350** forms become recognized, none becomes
+absent, and all **630** changed analysis counts increase. All **350** newly
+recognized forms independently return their expected source verbal lemmas,
+with **588** readings and no other lemma/POS readings; private dossier SHA-256
+`cde259ce894cb696e432f0fb7a61bf05ad596bcc73d118cef26c90d2dbdb5e08`.
+All three complete comparison passes have zero API errors.
+
+Against the controlled rebuilt baseline, the recognition cells are **826,058**
+both, **11,932** baseline only, **17,068** candidate only and **178,521** neither.
+The remaining loss dossier has **20,932** baseline readings in **1,030** lemma
+groups: **633** exact source joins, **15** notation joins, **19** native-preverb
+base review leads and **363** unresolved groups. Its private SHA-256 is
+`eee5deda2e35cb824661dff8792c7e4eadad8746ec8879d05be82ff341f711dc`.
+The earlier **488** first-repair losses remain absent with zero API errors.
+The original **15,255**-form loss subset recognizes **3,773** forms with
+**7,209** readings and zero API errors. Coverage improvements do not resolve
+the remaining lexical decisions or qualify a production replacement.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
