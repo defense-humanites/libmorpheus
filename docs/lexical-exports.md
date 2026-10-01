@@ -761,6 +761,45 @@ groups. The updated private native provenance dossier has SHA-256
 These remaining losses still require lexical arbitration; recognition totals
 alone do not promote this reconstruction.
 
+### Complete same-article first-conjugation alternates
+
+The historical `latvb` derivative branch clears its `orthstem` before emitting
+alternate records, while typed alternate `<orth>` tags are outside its lexer
+rule. `tools/recover-latin-full-alternates.py` stages a separate source-only
+repair for existing primary `are_vb` records. It validates all supplied header
+orthographies against the pinned projection and reads alternate orthographies
+directly from the same article, accepting only `extent="full"`, an untyped or
+`alt` spelling, and a complete present with matching voice. It requires a
+unique source/article block, explicit first conjugation without a conflicting
+conjugation, and an existing primary root matching the source after short-mark
+removal. It preserves prefixes, quantities, homograph ownership and `orth`
+flags. Abbreviations, voice differences, quantity-only alternatives, missing
+primaries and cross-article paradigms are withheld. Existing alternate records
+are not duplicated.
+
+The private candidate adds **131** alternate derivative records under **118**
+lemma blocks in each quantity tier. **368** incomplete spellings, **35** voice
+differences, **49** ambiguous/missing source blocks and **91** unmatched
+primaries are withheld; these counts describe different audit units, not one
+partition of source entries. Four synthetic tests cover source-orthography
+validation, ambiguity, voice, quantities, homographs, idempotence, final
+newlines and private output boundaries. Letters-only and all-quantity output
+SHA-256 are respectively
+`a248a65b6f2053299ac6623354f48fefcedc07f4978c6e45e46f5f0d86096dce`
+and `1e3671ca1f8edb263520f94807145e10e3bae1a3e269aac42b5341663dfd3f19`.
+
+The combined verbal index builds successfully, with unchanged nominal indexes.
+Its index/sidecar SHA-256 are
+`9b515e4809ab17c733baaa1bf39f4474a50018786a80cffaff75b895ec3cc96b`
+and `fd49351ae261e656c2dc09c5e03fcca458022905ed677edd041ba5a37bb5ab3e`.
+On the original **15,255**-form loss subset it recognizes **2,721** forms and
+returns **5,616** readings with no API error. A separate **286**-form source
+article probe recognizes every form under its expected verbal lemma, returning
+**438** readings under that one lemma. Its private reading dossier SHA-256 is
+`38bde5b1f59927436467ee5bea9ed24c71ccf7500577f71d272474f2a2aab0d0`.
+These checks qualify the narrowly staged alternates, not abbreviation
+expansion, alias inheritance or production corpus replacement.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank

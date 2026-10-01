@@ -287,6 +287,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-first-conjugation.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-principal-parts.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-ingo-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-full-alternates.py
           for tier in all letters-only; do
             expected=220
             if [ "$tier" = letters-only ]; then expected=50; fi
@@ -312,6 +313,11 @@ jobs:
               --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-alternates.stems" --expected 131
           done
 
   greek-header-filters:
