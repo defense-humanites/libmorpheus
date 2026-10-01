@@ -286,6 +286,7 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-first-conjugation.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-principal-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-ingo-parts.py
           for tier in all letters-only; do
             expected=220
             if [ "$tier" = letters-only ]; then expected=50; fi
@@ -300,6 +301,17 @@ jobs:
               --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --proof-tier source-allomorphs --expected 20
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-ingo-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" --expected 1
           done
 
   greek-header-filters:

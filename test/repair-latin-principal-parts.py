@@ -36,6 +36,29 @@ class Parts(unittest.TestCase):
         source=row(itype="sce_ndi, scensum, 3")
         self.assertEqual(m.transform(raw,[row(),source])[1]["withheld_ambiguous_source"],1)
 
+    def test_explicit_allomorphs_require_separate_tier_and_primary(self):
+        raw=b":le:zasido\n:vs:za-si_\tconj3\n:vs:za-si_se_d perfstem\n"
+        # A mismatching present record cannot establish the component boundary.
+        self.assertEqual(m.transform(raw,[row("za-si_do","se_di, sessum, 3")],"source-allomorphs")[0],raw)
+        raw=raw.replace(b"za-si_\t",b"za-si_d\t")
+        source=row("za-si_do","se_di, sessum, 3")
+        self.assertEqual(m.transform(raw,[source])[0],raw)
+        fixed,counts=m.transform(raw,[source],"source-allomorphs")
+        self.assertEqual(fixed,raw.replace(b"za-si_se_d",b"za-se_d"))
+        self.assertEqual(counts["repaired_records"],1)
+        self.assertEqual(m.transform(raw,[row("za-si_do","si, sum, 3")],"source-allomorphs")[0],raw)
+
+    def test_reduplication_second_conjugation_and_withheld_voice(self):
+        raw=b":le:zaspandeo\n:vs:za-spand conj2\n:vs:za-spanspo^pand perfstem\n:vs:za-spanspans pp4\n"
+        source=row("za-spande^o","spo^pandi, spansum, 2")
+        fixed,counts=m.transform(raw,[source],"source-allomorphs")
+        self.assertEqual(fixed,raw.replace(b"za-spanspo^pand",b"za-spo^pand").replace(b"za-spanspans",b"za-spans"))
+        self.assertEqual(counts["repaired_records"],2)
+        for withheld in [raw.replace(b"conj2",b"conj3"),raw.replace(b"conj2",b"conj2 orth"),raw.replace(b"conj2",b"conj2 dep")]:
+            self.assertEqual(m.transform(withheld,[source],"source-allomorphs")[0],withheld)
+        self.assertEqual(m.transform(raw,[row("za-spande^or","spo^pandi, spansum, 2")],"source-allomorphs")[0],raw)
+        with self.assertRaises(ValueError):m.transform(raw,[source],"unknown")
+
 
 if __name__ == "__main__":
     unittest.main()

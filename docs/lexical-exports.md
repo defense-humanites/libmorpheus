@@ -685,6 +685,55 @@ This refines the earlier **411** missing exact joins without converting them
 into automatic source recovery. The new losses and the remaining baseline
 losses still block corpus replacement.
 
+### Explicit allomorph and alternative-part recovery
+
+The principal-parts repair now offers a separate `--proof-tier source-allomorphs`
+experiment; its default `exact-present` behavior remains the earlier two-record
+trial. The new tier accepts conjugations 2 and 3 only, requires an existing
+unflagged primary present record matching the source component, and recognizes
+an explicit perfect with the same consonant skeleton or the precise `sp`/`spo`
+reduplication. The source supplies every replacement letter and both principal
+parts. The same exact defective `s/d,q` concatenation must still be present;
+short suffixes, unmatched present records, alternate records, deponents and
+ambiguous parts are withheld. These relations identify the component boundary;
+they do not construct unattested allomorphs.
+
+On the letters-only plus principal-parts candidate this changes **20** records
+from **ten** articles, leaving the original two repairs already correct.
+The private verbal output SHA-256 is
+`95a9883c7b4c43ee7fc1782718c9a9fc73c794026a8a5f0c1216179314d1128f`.
+The rebuilt verbal index and sidecar have SHA-256
+`a6d34fe4dad69bb770899cf36657a0846611d66b6025a1caaa3ab2f3abefde38`
+and `9e2e125df629ad699557295e438da84b1242543d1935db3cbdfe3cd3ac43854d`;
+the nominal indexes are unchanged. The original **15,255**-form loss subset
+now has **2,085** recognized forms and **4,582** readings, with no API error.
+The principal-parts suite has five synthetic tests, including the separate
+tier, source-present boundary, second conjugation, reduplication and withheld
+voice/alternate cases.
+
+`tools/recover-latin-ingo-parts.py` independently handles one narrowly
+recognized unsupported header pattern: an explicit `-ingo` present, `inxi`
+perfect, two `inctum`/`ictum` supines and conjugation 3. It requires one source
+orthography and one matching conjugation field, preserves source quantities,
+prefixes and homograph numbers, and adds four stem records only when the
+complete echoed source header occurs exactly once and no existing lemma block
+is present. It does not split arbitrary textual alternatives, fill another
+article's paradigm or replace existing stem records. Three synthetic tests
+cover those boundaries, private output and no overwrite.
+
+This recovers **one** header. All **170** forms previously lost under its
+source lemma now have that expected verbal lemma, returning **284** such
+readings. On the original full-compound loss subset the combined candidate
+recognizes **2,278** forms and returns **4,915** readings with no API error.
+Private verbal output SHA-256 is
+`b14aadb1c5ee537532f467b3b3d21fd66b06a87728dbbb3e672d9e200f787854`;
+verbal index and sidecar SHA-256 are
+`19b06160b4b4c366fb30ff6803ac6b5412677d38323f2503be74b2067c8b65ed`
+and `9d32a43aff2119f6b1e9fc0ab75d456e9132044de321ac2430af0f5755737e99`.
+The CI checks both new stages on both quantity tiers, without publishing
+lexical artifacts. These targeted checks do not establish whole-corpus
+recognition equivalence or resolve the remaining loss dossiers.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
