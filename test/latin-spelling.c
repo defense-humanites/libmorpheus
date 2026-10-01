@@ -37,5 +37,18 @@ int main(void)
   }
   assert(!morpheus_latin_expand_ex(NULL,sizeof word));
   assert(!morpheus_latin_expand_ex(word,0));
+  {
+    const char final_i[2] = { 'i','\0' };
+    const char poisoned_final_i[3] = { 'i','\0','!' };
+    assert(!morpheus_latin_can_retry_j(final_i));
+    assert(!morpheus_latin_can_retry_j(poisoned_final_i));
+    assert(!morpheus_latin_can_retry_j(NULL));
+    assert(!morpheus_latin_can_retry_j(""));
+    assert(!morpheus_latin_can_retry_j("ia"));
+    assert(!morpheus_latin_can_retry_j("ixa"));
+    assert(morpheus_latin_can_retry_j("iar"));
+    assert(morpheus_latin_can_retry_j("ier"));
+    assert(morpheus_latin_can_retry_j("iur"));
+  }
   return 0;
 }

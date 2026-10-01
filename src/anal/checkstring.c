@@ -683,7 +683,7 @@ int checkstring3(gk_word *Gkword)
       /*
        * don't look for "cupjo"
        */
-      if( *a == 'i' && *(a+2) && strchr("aeiou",*(a+1)) ) {
+      if( morpheus_latin_can_retry_j(a) ) {
 	*a = 'j';
 
 	set_workword(Gkword,workword);

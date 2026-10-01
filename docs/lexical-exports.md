@@ -483,6 +483,15 @@ reproducer now gives **216 readings on each side**, no changed counts and
 zero errors. Twelve existing native API/context tests also pass locally;
 the full LISTALL remeasurement and CI remain separate checks.
 
+The first full corrected identical-root pass found **one** remaining count
+difference. This localized a second spelling-retry defect: the interior `i/j`
+predicate read two positions ahead before checking that the intervening byte
+was not the string terminator; `strchr` also accepts the terminator itself.
+The predicate now short-circuits at that boundary. Synthetic tests include
+a two-byte final `i`, a nonzero poisoned byte after its terminator, unchanged
+cases and valid interior vowel cases. Full coverage counts remain provisional
+until the control succeeds with both fixes.
+
 Use `LISTALL` as an **external differential probe**, never as a Latin gold
 standard or a replacement stemlib. First record the exact archive/source
 revision, SHA-256, encoding, distinct form count and deduplication rules.
@@ -527,7 +536,7 @@ it does not alias unknown classes globally. **44** candidate records match,
 leaving seven untyped records. Three synthetic tests cover exact matching,
 stale sources, invalid replacements, private boundaries and no overwrite.
 Five additional private, source-linked provisional decisions leave **two**
-untyped records from one compound-headword article. They do not constitute
+untyped records from two compound-headword articles. They do not constitute
 a complete valid nominal index: the projection loses part of that compound
 headword, so changing only the class would incorrectly legitimize a truncated
 lemma. No automatic class substitution or deletion is accepted here.

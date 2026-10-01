@@ -5,6 +5,14 @@
 #include <stddef.h>
 #include <string.h>
 
+/* Only an interior i followed by a vowel can take this historical retry. */
+static inline int
+morpheus_latin_can_retry_j(const char *position)
+{
+  return position && position[0] == 'i' && position[1] != '\0' &&
+         position[2] != '\0' && strchr("aeiou",position[1]) != NULL;
+}
+
 /* Expand the historical ex[cpt] spelling without reading stale tail bytes. */
 static inline int
 morpheus_latin_expand_ex(char *word, size_t capacity)
