@@ -652,6 +652,10 @@ explanation: `src/gkdict/indexstems.c` removes short marks before retaining a
 marked stem. It does not establish that source quantities are dispensable,
 that all quantity changes behave alike, or that Greek indexes behave likewise.
 Preserve the source marks in the private reconstruction.
+The subsequent complete literal comparison confirms **836,346** recognized
+and **197,233** absent on each side, **2,070,363** readings per side and zero
+gains, losses, count differences or API errors. This is the two specific
+controlled Latin runtimes, with API options zero, not a general quantity oracle.
 
 Reanalysis of the **488** newly absent forms against the preceding trial
 returns **831** readings, all verbal, grouped under **29** native lemmas.
@@ -662,6 +666,15 @@ These losses include analyzer-generated prefix combinations: neither an empty
 `raw_preverb` nor a missing exact source-header join proves a missing source
 article. Conversely, a prefix/base join is only a review lead, not permission
 to transfer a paradigm or dismiss a lost reading.
+The 488-form loss sets are also exactly equal between the earlier all-quantity
+trial and the letters-only plus principal-parts trial. A separate private
+stem-spelling pass links each of the **831** readings uniquely to one of the
+letter-repaired old derivative roots, either directly or with the regular
+generated `at`/`av` component, ignoring quantity/stem-separator notation.
+Its dossier SHA-256 is
+`1ac41e140589f7e886162d70e49e7937e9537e71067b6a9ab32686488a4a63d5`.
+This identifies a mechanical repair lead for every lost reading, not the
+lexical validity of a compound or a grammatical signature equivalence.
 
 The original full-compound loss dossier has also been joined with both native
 preverb fields. Its **1,061** lemma groups comprise **650** exact header joins,
