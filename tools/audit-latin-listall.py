@@ -59,7 +59,7 @@ class NativeAnalyzer:
         self.api.morpheus_close(self.context)
 
 
-def audit(forms, curated, rebuilt, private_output=None):
+def audit(forms, curated, rebuilt, private_output=None, require_identical=False):
     if private_output is not None:
         target = private_output.resolve()
         if target == REPO or REPO in target.parents or target == forms.resolve():
@@ -67,6 +67,8 @@ def audit(forms, curated, rebuilt, private_output=None):
     seen = set()
     counts = Counter()
     statuses = Counter()
+    analysis_rows = {"curated": 0, "rebuilt": 0}
+    changed_counts = 0
     digest = hashlib.sha256()
     output = None
     try:
@@ -92,6 +94,14 @@ def audit(forms, curated, rebuilt, private_output=None):
                 counts["distinct_forms"] += 1
                 left_status, left_count = curated.analyze(word)
                 right_status, right_count = rebuilt.analyze(word)
+                if require_identical and (left_status or right_status or left_count != right_count):
+                    raise ValueError(f"identical-root control failed at input line {counts['input_lines']}")
+                if not left_status:
+                    analysis_rows["curated"] += left_count
+                if not right_status:
+                    analysis_rows["rebuilt"] += right_count
+                if not left_status and not right_status and left_count != right_count:
+                    changed_counts += 1
                 statuses[(left_status, right_status)] += 1
                 if left_status or right_status:
                     cell = "error"
@@ -109,7 +119,9 @@ def audit(forms, curated, rebuilt, private_output=None):
     finally:
         if output is not None:
             output.close()
-    return {"schema": 1, "mode": "literal ASCII forms; native options 0",
+    return {"schema": 2, "mode": "literal ASCII forms; native options 0",
+            "identical_root_control": require_identical,
+            "analysis_rows": analysis_rows, "changed_analysis_counts": changed_counts,
             "input_sha256": digest.hexdigest(),
             "counts": dict(sorted(counts.items())),
             "status_pairs": {f"{a},{b}": count for (a, b), count in sorted(statuses.items())}}
@@ -122,12 +134,17 @@ def main():
     parser.add_argument("--curated", required=True, type=Path, help="curated stemlib root")
     parser.add_argument("--rebuilt", required=True, type=Path, help="private reconstructed root")
     parser.add_argument("--private-output", type=Path, help="owner-only per-form differences")
+    parser.add_argument("--require-identical", action="store_true",
+                        help="same-root control: refuse any error or changed count")
     args = parser.parse_args()
+    if args.require_identical and args.curated.resolve() != args.rebuilt.resolve():
+        parser.error("identical-root control requires the same root on both sides")
     curated = NativeAnalyzer(args.library, args.curated)
     try:
         rebuilt = NativeAnalyzer(args.library, args.rebuilt)
         try:
-            print(json.dumps(audit(args.forms, curated, rebuilt, args.private_output), sort_keys=True))
+            print(json.dumps(audit(args.forms, curated, rebuilt, args.private_output,
+                                   args.require_identical), sort_keys=True))
         finally:
             rebuilt.close()
     finally:

@@ -492,6 +492,14 @@ a two-byte final `i`, a nonzero poisoned byte after its terminator, unchanged
 cases and valid interior vowel cases. Full coverage counts remain provisional
 until the control succeeds with both fixes.
 
+With both fixes, the full controlled-baseline identical-root pass now
+recognizes **837,990** forms and leaves **195,589** absent on both sides.
+Each context returns **2,048,328** readings, with **zero changed counts** and
+**zero API errors** across all **1,033,579** queries. This qualifies count
+stability for that exact control, not semantic equivalence of different
+corpora. The synthetic spelling regression also passes ASan and UBSan
+(leak detection disabled because the local sandbox has no process metadata).
+
 Use `LISTALL` as an **external differential probe**, never as a Latin gold
 standard or a replacement stemlib. First record the exact archive/source
 revision, SHA-256, encoding, distinct form count and deduplication rules.
@@ -506,10 +514,26 @@ per-form differences private and outside CI artifacts.
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
-lines, and emits the input SHA-256, four recognition cells and status pairs.
+lines, and emits the input SHA-256, four recognition cells, status pairs,
+analysis-row totals and changed-count totals (report schema 2).
 It does not fold case or change orthography. A private per-form JSONL can be
 requested for subsequent grouping; it refuses existing files and any output
 inside the repository:
+
+First run an identical-root control for each runtime. `--require-identical`
+requires the same resolved root on both sides and refuses any API error or
+count mismatch, without printing the affected lexical form:
+
+```sh
+python3 tools/audit-latin-listall.py \
+  --forms /private/LISTALL.TXT --library /private/libmorpheus.so \
+  --curated /private/curated-runtime --rebuilt /private/curated-runtime \
+  --require-identical
+```
+
+Three synthetic auditor tests check differential cells, literal deduplication,
+private output and fail-closed identical-root controls. Then run the
+different-root comparison:
 
 ```sh
 python3 tools/audit-latin-listall.py \

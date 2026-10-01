@@ -42,6 +42,9 @@ class ListallTest(unittest.TestCase):
                 "absent_curated__recognized_rebuilt": 1,
                 "absent_curated__absent_rebuilt": 1, "error": 1})
             self.assertEqual(report["status_pairs"], {"0,0": 3, "6,0": 1})
+            self.assertEqual(report["analysis_rows"], {"curated": 2, "rebuilt": 5})
+            self.assertEqual(report["changed_analysis_counts"], 2)
+            self.assertFalse(report["identical_root_control"])
             self.assertEqual(left.calls, [b"est", b"amat", b"ignotum", b"errat"])
             self.assertEqual(output.stat().st_mode & 0o777, 0o600)
             self.assertEqual(len([json.loads(s) for s in output.read_text().splitlines()]), 4)
@@ -57,6 +60,19 @@ class ListallTest(unittest.TestCase):
                 module.audit(forms, analyzer, analyzer, SCRIPT.parent / "forbidden.jsonl")
             with self.assertRaisesRegex(ValueError, "input line 2"):
                 module.audit(forms, analyzer, analyzer)
+
+    def test_identical_control_rejects_count_changes_and_errors(self):
+        with tempfile.TemporaryDirectory(dir=SCRIPT.parents[2]) as directory:
+            forms = Path(directory) / "forms.txt"
+            forms.write_bytes(b"synthetic\n")
+            left = Analyzer({b"synthetic": (0, 2)})
+            equal = Analyzer({b"synthetic": (0, 2)})
+            report = module.audit(forms, left, equal, require_identical=True)
+            self.assertTrue(report["identical_root_control"])
+            self.assertEqual(report["changed_analysis_counts"], 0)
+            for answer in [(0, 3), (6, 0)]:
+                with self.assertRaisesRegex(ValueError, "control failed at input line 1"):
+                    module.audit(forms, left, Analyzer({b"synthetic": answer}), require_identical=True)
 
 
 if __name__ == "__main__":
