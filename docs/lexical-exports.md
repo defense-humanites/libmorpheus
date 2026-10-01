@@ -541,6 +541,42 @@ a complete valid nominal index: the projection loses part of that compound
 headword, so changing only the class would incorrectly legitimize a truncated
 lemma. No automatic class substitution or deletion is accepted here.
 
+A subsequent source-only trial, `tools/recover-latin-compound-headwords.py`,
+restores **104** first orthographies explicitly marked `extent="full"` whose
+hyphen-separated components were lost by taking only the first space-delimited
+token. Only spaces adjoining component hyphens are removed; quantity marks
+and component hyphens remain. Plain multiword or partial orthographies are
+not expanded, alternative spellings are not inherited, and no witness
+inventory selects a header. Source keys remain metadata: a numeric homograph
+suffix is retained only when its base spells the same complete compound.
+Three synthetic tests cover source mismatch, scope, homograph suffixes,
+stream validation, private boundaries and no overwrite. The research workflow
+runs this as a separate trial, without replacing the earlier 630-header trial.
+
+The partition counts remain unchanged. Raw nominal records are **40,319**,
+with **33,004** shared witness lemmas and **31,323** exact shared record
+multisets. Raw verbal records remain **10,398**, with **6,700** shared lemmas,
+**6,507** exact shared multisets and **73** witness-only lemmas (111 before
+compound recovery). These are literal-stem diagnostics, not analyzer
+equivalence. Private header and stream SHA-256 are
+`85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34`
+and `feb65431b6bd78eddb349e5807727aaa0b3fef5fa20806db43bc088877f0ce82`;
+raw nominal and verbal SHA-256 are
+`210760edb2f3f8a841b28a3c790f6da3e8b5782623561ecdefdfd89f9d8e7c65`
+and `22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479`.
+
+The exact reviewed transfer still matches **44** records. Reapplying the
+five provisional source decisions above gives **40,314 typed nominal
+records**, zero untyped records, and successfully builds a complete nominal
+index. The complete compound-recovered verbal index also builds successfully.
+The private full runtime is only an experimental candidate: a **104**-form
+dictionary-spelling probe recognizes **99** forms and the exact expected lemma
+for **95**, on both the curated and experimental roots, with zero API errors.
+The other nine expected-lemma cases and full paradigms remain unqualified;
+successful index construction does not resolve them. The private nominal
+decision output SHA-256 is
+`0498c0770095c3a607e786110caa8d500170dc55983d9be1fab40e8f7641bdcd`.
+
 `LISTALL` alone contains surface forms, not lemma and paradigm assignments.
 For the unrecognized and changed cells, a second, pinned WORDS analysis pass
 can supply candidate lemmas and paradigms for grouped inspection, checked

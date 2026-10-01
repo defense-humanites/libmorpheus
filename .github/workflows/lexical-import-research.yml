@@ -233,6 +233,53 @@ jobs:
             --private-output "$RUNNER_TEMP/latin-source-recovered/nominal-reviewed.stems" \
             --expected 44
 
+      - name: Stage explicit full Latin compounds as a separate source trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-compound-headwords.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-compound-headwords.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-full-compounds" --expected 104
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-full-compounds/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-full-compounds-partition"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latnom.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-full-compounds/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-full-compounds/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latvb.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/verbal.stems"
+          for kind in nominal verbal; do
+            baseline=stemlib/Latin/stemsrc/ls.nom
+            if [ "$kind" = verbal ]; then baseline=stemlib/Latin/stemsrc/vbs.latin; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/$kind.stems" --baseline "$baseline"
+          done
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-full-compounds/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-full-compounds/nominal-reviewed.stems" --expected 44
+
   greek-header-filters:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
