@@ -470,6 +470,19 @@ identical-root control subsequently exposed a native Latin spelling-buffer
 defect. The corrected analyzer must be remeasured before any differential
 coverage conclusion is accepted.
 
+The defect is localized to the historical Latin `ex[cpt]` to `exs[cpt]`
+spelling retry in `checkstring3`: the overlapping move copied the tail
+letters but not their terminating zero. Results therefore depended on
+residual stack bytes, even for a single query with identical dictionaries.
+The bounded internal spelling helper now moves the terminator as well and
+skips expansion when the extra byte cannot fit. Its synthetic C regression
+uses poisoned tail bytes, all three supported consonants, unchanged prefixes,
+exact-capacity and full-buffer cases, and an unterminated input. No lexical
+source records are needed for this test. The 39-form private identical-root
+reproducer now gives **216 readings on each side**, no changed counts and
+zero errors. Twelve existing native API/context tests also pass locally;
+the full LISTALL remeasurement and CI remain separate checks.
+
 Use `LISTALL` as an **external differential probe**, never as a Latin gold
 standard or a replacement stemlib. First record the exact archive/source
 revision, SHA-256, encoding, distinct form count and deduplication rules.
