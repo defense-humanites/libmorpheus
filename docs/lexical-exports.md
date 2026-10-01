@@ -734,6 +734,33 @@ The CI checks both new stages on both quantity tiers, without publishing
 lexical artifacts. These targeted checks do not establish whole-corpus
 recognition equivalence or resolve the remaining loss dossiers.
 
+Both subsequent full LISTALL comparisons are complete, with **1,033,579**
+literal forms and API options zero. Each runtime's identical-root control has
+zero recognition/count differences and zero API errors. Their reading totals
+are reproduced exactly by the baseline and preceding-trial comparisons:
+
+| Trial | Recognized | Absent | Analysis rows | Gains / losses against preceding trial | Changed counts |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Explicit allomorphs | 836,843 | 196,736 | 2,072,239 | 497 / 0 | 815 |
+| Allomorphs plus two-supine recovery | 837,036 | 196,543 | 2,073,111 | 193 / 0 | 498 |
+
+Every changed count in these two preceding-trial comparisons increases;
+neither decreases. The combined trial thus recovers **690** additional forms
+over the earlier letters-only plus principal-parts runtime on this corpus,
+without introducing a newly absent form. This does not assess unattested or
+non-LISTALL spellings, nor validate every added compound reading.
+
+Against the controlled baseline, the combined runtime has **824,563** forms
+recognized by both, **13,427** baseline-only, **12,473** candidate-only and
+**183,116** absent from both, with **85,289** changed counts and no API error.
+Its remaining baseline-only forms yield **23,236** baseline readings under
+**1,044** native lemma groups: **646** exact source-header joins, **15**
+notation joins, **19** native-prefix/base review leads and **364** unresolved
+groups. The updated private native provenance dossier has SHA-256
+`7939a6c83063ac2059162ed83fa0afac32db2a5aa33f10af3649ec9c67c2b37c`.
+These remaining losses still require lexical arbitration; recognition totals
+alone do not promote this reconstruction.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
