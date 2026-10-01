@@ -511,6 +511,76 @@ the privately reconstructed Latin stemlib. Report a two-by-two recognition
 table, errors separately from zero analyses, and aggregate digests. Keep the
 per-form differences private and outside CI artifacts.
 
+### Corrected native full-corpus measurements
+
+All following runs use the **same native binary with both spelling fixes**,
+ABI 2, Latin, options zero, and the pinned **1,033,579** distinct literal
+queries. The controlled baseline is rebuilt from the committed source
+manifest and reviewed corrections, not the older committed binary indexes.
+It must not be silently equated with that older curated runtime.
+
+| Runtime | Recognized | Absent | Analysis rows | API errors |
+| --- | ---: | ---: | ---: | ---: |
+| Older committed curated indexes | 837,497 | 196,082 | 2,045,866 | 0 |
+| Controlled rebuilt baseline | 837,990 | 195,589 | 2,048,328 | 0 |
+| First-sense recovered verbs; baseline nominals | 835,582 | 197,997 | 2,056,734 | 0 |
+| Full-compound trial plus five provisional nominal decisions | 832,999 | 200,580 | 2,062,058 | 0 |
+
+The earlier pre-fix curated measurement is superseded. Both the controlled
+baseline and full-compound candidate pass a complete identical-root control:
+no changed counts, recognition differences or API errors. Separate baseline
+and verbal-trial single-context passes reproduce their paired counts and
+reading totals exactly. The full-compound candidate's two identical-root
+contexts and a separate single-context full pass also reproduce its
+different-root comparison totals exactly.
+
+For the **verbal-only trial**, the controlled baseline and candidate recognize
+**827,053** forms together; **10,937** are baseline-only, **8,529**
+candidate-only, and **187,060** absent from both. Counts differ on **56,049**
+forms. This loses a net **2,408** recognized forms, despite improving literal
+agreement with witness stems.
+
+For the **full-compound trial**, the differential recognition cells are:
+
+| Controlled baseline | Candidate recognized | Candidate absent |
+| --- | ---: | ---: |
+| Recognized | 822,735 | 15,255 |
+| Absent | 10,264 | 185,325 |
+
+Counts differ on **83,744** forms. The net recognition loss is **4,991**.
+These are recognition/count measurements, not a comparison of grammatical
+signatures, correctness or historical attestation. Neither candidate is an
+equivalent replacement for the controlled baseline.
+
+Private reanalysis of all **10,937** verbal-trial losses yields **17,683**
+baseline readings, all verbal, grouped under **165** lemmas; **61** groups
+have no exact projected-header lemma join. Full-compound losses yield
+**26,172** readings grouped under **1,061** lemmas, with **411** lacking an
+exact projected-header join. A missing join is not proof of source absence:
+spelling, homograph and curated-addition provenance still need review. The
+dossiers retain literal forms and joined source headers privately. Their
+SHA-256 are
+`5282ab86456e593eaf40cb30ad3b5e19c8b62ce61096bef36cf7eedefceb6beb`
+and `f619b3e708df456902bc8087db952c2c31a48247538d369fb90822a1d0ee9990`.
+
+The full-compound count-control and comparison reports have SHA-256
+`0a96f134f6b717a21603f326cac09af507658df0179ff7b54e16ba0fc9c10e7f`
+and `3a56a1ba9ac21217958c26578b0bd11d11edffaa83ad6f689270e6d49fc1a502`.
+Its independent single-context report SHA-256 is
+`4d86e3c69d9252a68df6754acf333ea511b353818ede46402bc9cc6f487cabd8`.
+The nine compound dictionary-probe exceptions are separately joined to the
+pinned source: five absent forms and four recognized under other lemmas,
+including three articles explicitly marked participial in the source.
+Their lemma expectations need semantic review, not automatic paradigm
+inheritance. That dossier SHA-256 is
+`d42e2d25fa51a6d72e4fb417dcd26235c56c5750e38c0c284c7155ad554c097b`.
+
+Stable native execution and successful index construction remove technical
+blockers, but **do not qualify the imported corpus**. Promotion remains
+blocked on these lexical losses and source/paradigm arbitration. No witness
+stem copying, automatic alias inheritance, public lexical artifact or
+production stemlib replacement is authorized by these measurements.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
