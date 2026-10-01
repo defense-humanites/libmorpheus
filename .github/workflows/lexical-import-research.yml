@@ -11,6 +11,28 @@ permissions:
   contents: read
 
 jobs:
+  latin-listall-input:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate and stage the pinned historical LISTALL archive
+        run: |
+          python3 test/prepare-latin-listall.py
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+
+          url = 'https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/listall.zip" \
+            --output "$RUNNER_TEMP/listall-pinned"
+
   latin-header-filters:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -202,6 +224,14 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/latin-source-recovered/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/transfer-lexical-record-corrections.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-source-recovered/nominal-reviewed.stems" \
+            --expected 44
 
   greek-header-filters:
     runs-on: ubuntu-24.04

@@ -380,6 +380,18 @@ The two spelling links still need literal stem and analyzer checks; the
 remaining relations require voice, stem or irregular-paradigm handling.
 None of these ten aliases is automatically reclassified or rewritten.
 
+A separate curated-runtime dictionary-form probe checks the ten aliases and
+ten target lemmas as **20 literal forms**, using `cruncher -L -S -T` against
+the committed Latin stemlib. It recognizes **19/20** forms, each under its
+exact expected verbal lemma. The absent form is the same target absent from
+the literal witness inventory. XML output contains **29** reading rows,
+including two nominal homographs; the legacy summary counter is not used
+as an XML-row count. This is a curated-baseline probe, not a comparison
+against a source-recovered runtime or a test of complete paradigms. Private
+query and XML SHA-256 are
+`fb73e46419ee6a025b7424bcc05e13d00c40b63945f5eed33e26e4f153c4731f`
+and `aac4ef427a5ff3debc66d3d93757cc7aabe0532984fb114a0b68c8bf26102f4d`.
+
 ## Isolated Greek importer experiment
 
 The same [research workflow](../.github/workflows/lexical-import-research.yml)
@@ -415,10 +427,48 @@ calls it a deduplicated list of roughly half of two million primary inflected
 forms. The [historical archive is listed on SourceForge](https://sourceforge.net/projects/wwwords/files/Whitaker/),
 and the [preserved HOWTO](https://github.com/mk270/whitakers-words/blob/master/HOWTO.txt)
 defines its scope as the forms generated from `DICTLINE` and `INFLECTS`,
-excluding `ADDONS` and spelling `TRICKS`. The available
-[`mk270/whitakers-words` sources](https://github.com/mk270/whitakers-words)
-provide a fallback for independently generating or checking a pinned corpus;
-the unavailable 2012 Digital Gaffiot morphology archive is not an input.
+excluding `ADDONS` and spelling `TRICKS`. The current [`mk270/whitakers-words` sources](https://github.com/mk270/whitakers-words)
+can support a separate WORDS analysis pass. Inspection of revision
+`1f2f0fb0867a896d7b9284a03d615ed635d6f992` found neither a LISTALL file nor
+a LISTALL generator, so that checkout alone is not a reproduction recipe.
+The unavailable 2012 Digital Gaffiot morphology archive is not an input.
+
+The historical SourceForge archive has now been fetched and pinned by
+`tools/prepare-latin-listall.py`. The tool accepts only the exact archive and
+its sole `listall` member, validates every token before creating a fresh
+private stage, and preserves the original bytes beside a distinct literal
+query list. It does not fold case, `i/j` or `u/v`. Three synthetic tests check
+pin failures, archive members, invalid tokens, private output boundaries and
+literal deduplication. The research workflow checks this archive in a
+separate job; no lexical artifact is uploaded.
+
+| Input | SHA-256 |
+| --- | --- |
+| Historical ZIP | `ea0b45df1271870b51befa882798c81cae158e8f6ebfbd748f76fbeeb692191d` |
+| Original `listall` member | `6b557b50fc333cddb17082a6eb71fb87029d095738672a3cd308f7161073769b` |
+| Sorted distinct literal LF queries | `1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93` |
+
+The member has **13,121,619 bytes** and **1,034,157 CRLF lines**. Every line
+is a nonempty ASCII token, at most 24 bytes. Despite the historical
+"unique alphabetical" description, the actual bytes contain **578 repeated
+lines**, giving **1,033,579 distinct forms**, and are not ordered by literal
+ASCII bytes. The distinct query list removes only exact duplicate tokens
+and sorts the remainder. Archive pinning does not identify the original
+dictionary revision or assert that the present WORDS dictionary generates
+the same list.
+
+A full native ABI 2 pass, Latin language and request options zero, against
+the committed curated runtime recognizes **837,313** of the **1,033,579**
+distinct literal forms. It leaves **196,266** without an analysis, returns
+**2,045,383** analysis records, and reports **zero errors**. This is a coverage
+measurement against an external historical list, not an attestation claim
+or a replacement-corpus result. The private static C driver uses the same
+public `morpheus_open_path`, `morpheus_analyze`, result-count and free APIs
+as the Python auditor; it avoids requiring a shared-library build in the
+minimal local environment. These initial counts are **not qualified**: an
+identical-root control subsequently exposed a native Latin spelling-buffer
+defect. The corrected analyzer must be remeasured before any differential
+coverage conclusion is accepted.
 
 Use `LISTALL` as an **external differential probe**, never as a Latin gold
 standard or a replacement stemlib. First record the exact archive/source
@@ -453,8 +503,21 @@ zero. The optional JSONL records errors, absences and changed analysis counts
 without exporting analysis contents. It is not a comparison of grammatical
 interpretations: a form recognized by both analyzers can still have different
 lemmes or paradigms. The tool has passed a three-form native smoke test with
-the same curated root on both sides; the full `LISTALL` pass awaits the
-wordlist and a complete privately reconstructed Latin runtime.
+the same curated root on both sides. The pinned wordlist and full curated
+coverage pass above are now complete; a full differential pass requires a
+valid privately reconstructed Latin runtime.
+
+The source-recovered nominal output initially has **51 untyped records**.
+`tools/transfer-lexical-record-corrections.py` transfers only already-reviewed
+corrections whose original record bytes and current lemma match exactly;
+it does not alias unknown classes globally. **44** candidate records match,
+leaving seven untyped records. Three synthetic tests cover exact matching,
+stale sources, invalid replacements, private boundaries and no overwrite.
+Five additional private, source-linked provisional decisions leave **two**
+untyped records from one compound-headword article. They do not constitute
+a complete valid nominal index: the projection loses part of that compound
+headword, so changing only the class would incorrectly legitimize a truncated
+lemma. No automatic class substitution or deletion is accepted here.
 
 `LISTALL` alone contains surface forms, not lemma and paradigm assignments.
 For the unrecognized and changed cells, a second, pinned WORDS analysis pass
