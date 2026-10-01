@@ -800,6 +800,44 @@ article probe recognizes every form under its expected verbal lemma, returning
 These checks qualify the narrowly staged alternates, not abbreviation
 expansion, alias inheritance or production corpus replacement.
 
+The alternate runtime's complete identical-root control recognizes **841,744**
+forms, leaves **191,835** absent and returns **2,089,682** readings on each
+side, with zero count differences or API errors. Against the preceding
+two-supine runtime it gains **4,708** forms and loses none, with **9,615**
+changed counts: **9,612** increase and **three** decrease. Against the controlled
+baseline, **825,006** forms are recognized by both, **12,984** baseline-only,
+**16,738** candidate-only and **178,851** absent from both; **90,686** counts
+change. Both comparisons reproduce the control reading total exactly and
+return no API error. The all-quantity tier is also built separately and
+produces byte-identical verbal indexes and the same original-loss-subset
+totals; this is a measured index comparison, not an assumption from equal
+recognition counts.
+
+The three decreasing counts total **22** prior readings and **15** new readings.
+The new readings are direct gerundives under three source-supported verbal
+lemmas. The earlier readings match the recorded features obtained after
+explicitly removing terminal `dum` from the three inputs. `LatinSuff` in
+`src/anal/checkstring.c` permits that suffix retry only while no direct analysis
+exists. On the explicitly stripped inputs, the earlier runtime returns those
+same **22** readings; the alternate runtime returns **28**, retaining all
+**22** prior rows across the recorded lemma, POS, workword, stem, suffix,
+ending, mood, case, gender and tense fields. The stripped-probe dossier hashes
+are `6866dc3103d873cf6bf6bb02b50dffc84956e578e2eed8c9e25d7f78f1f7180f`
+and `ead9dc158508a185fe560adf9a3fc4538e33f1304729938e225c91a0c66d7c51`.
+This accounts for the direct-match/fallback selection change without removing
+the old lexical entries or declaring every prior interpretation invalid.
+The API and this analyzer selection policy are unchanged.
+
+The current **12,984** baseline-only forms yield **22,537** baseline readings
+under **1,040** lemma groups: **643** exact source-header joins, **15** notation
+joins, **19** native-prefix/base review leads and **363** unresolved groups.
+The updated private native dossier SHA-256 is
+`9a62975377f5d388f4d73cde8bfe72186dc221f134f83ae6485b03d4edf32f4f`.
+The earlier **488** newly absent forms remain absent in this runtime, with
+zero API errors. These remaining dossiers, abbreviated spellings and missing
+paradigm evidence still need individual arbitration; aggregate coverage gains
+do not establish production-corpus equivalence.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
