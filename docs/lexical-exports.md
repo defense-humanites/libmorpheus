@@ -903,6 +903,35 @@ in both quantity tiers. Letters-only/all-quantity private outputs have SHA-256
 `55d5467c0f3caea66dd3d42fc38304528dde412429730818c9e97be5962b541b`
 and `3565bfb7744da352c26fff448030f4ffa7f86790dce467458ce10e041131241a`.
 
+Both quantity tiers build identical native verbal indexes: SHA-256
+`4b33f29060844e6994c6780bc824222d54316524e842a9f301fb043c568053ec`
+and sidecar `3c4b2f850d1a7ad9026735766d8cf508056c3e5486ed26ef0e56bf4465892f5b`.
+The nominal indexes remain unchanged. The original **15,255**-form loss subset
+now recognizes **2,851** forms with **5,803** readings and zero API errors.
+A **154**-form source-article probe recognizes **130** under the expected
+verbal lemma, with **187** readings and no other lemma groups; private dossier
+SHA-256 `b1789d4f1353c323fb677fd8d368cdff96639e378a7063a9f8c4316c873760e4`.
+The **24** still absent forms have **56** baseline verbal readings sharing one
+fourth-part stem (**54** participles and **two** supines). The explicit source
+field used by this stage provides no fourth part, so those readings are held
+for separate arbitration, not silently recreated. Their private baseline
+provenance SHA-256 is
+`ee3d884510eab6497a61e42336ae8dacf8ac5cf7ea17ac3d6aff51e4b75cbde3`.
+
+The full **1,033,579**-form pass recognizes **841,874** forms and returns
+**2,090,028** readings. Its identical-root control has zero differences and
+zero errors. Relative to the preceding second-supine runtime, **130** forms
+become recognized, none becomes absent, and all **237** changed analysis
+counts increase. All three complete comparisons have zero API errors.
+Against the controlled rebuilt baseline, the recognition cells are **825,136**
+both, **12,854** baseline only, **16,738** candidate only and **178,851** neither.
+The remaining loss provenance comprises **22,338** baseline readings in
+**1,040** lemma groups: **643** exact source joins, **15** notation joins,
+**19** native-preverb/base review leads and **363** unresolved groups. These
+are still review leads, not paradigm inheritance decisions. Private dossier
+SHA-256 `39d5aa1e6b3042031cb5c2901075a5a37c519120cb9e75987e2ebd67016d8aa0`.
+The earlier **488** first-repair losses remain absent with zero API errors.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
