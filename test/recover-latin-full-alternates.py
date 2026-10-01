@@ -60,6 +60,25 @@ class Alternates(unittest.TestCase):
                 with self.assertRaises(ValueError):m.prepare(candidate,headers,root/"lexica",root/"bad")
                 self.assertFalse((root/"bad").exists())
 
+    def test_fourth_conjugation_requires_explicit_existing_perfect(self):
+        raw=b":le:zavio#2\n:vs:za_v conj4\n:vs:za_vi_v perfstem\n"
+        source=row("za_vi^o#2",["zavvi^o"],"i_vi, 4")
+        data,counts=m.transform(raw,[source],"fourth-explicit-perfect")
+        self.assertEqual(data,raw+b":vs:zavv\tconj4 orth\n:vs:zavvi_v\tperfstem orth\n")
+        self.assertEqual(counts["added_records"],2)
+        self.assertEqual(m.transform(data,[source],"fourth-explicit-perfect")[0],data)
+        for candidate in [raw.replace(b"za_vi_v",b"other"),raw.replace(b"conj4",b"conj4 dep"),raw*2]:
+            self.assertEqual(m.transform(candidate,[source],"fourth-explicit-perfect")[0],candidate)
+        for parts in ["i_vi, i_tum, 4","i_vi, 3"]:
+            self.assertEqual(m.transform(raw,[row("za_vi^o#2",["zavvi^o"],parts)],"fourth-explicit-perfect")[0],raw)
+
+    def test_fourth_alternates_preserve_other_records_and_withhold_voice(self):
+        raw=b":le:zavio\n:vs:zav conj4\n:vs:zavi_v perfstem\n:vs:unrelated pp4\n"
+        source=row("zavi^o",["zavvi^or","zav-","zav_i^o"],"i_vi, 4")
+        self.assertEqual(m.transform(raw,[source],"fourth-explicit-perfect")[0],raw)
+        self.assertEqual(m.transform(raw,[source,source],"fourth-explicit-perfect")[0],raw)
+        with self.assertRaises(ValueError):m.transform(raw,[source],"unknown")
+
 
 if __name__ == "__main__":
     unittest.main()

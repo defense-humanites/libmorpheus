@@ -874,6 +874,35 @@ totals remain **2,721** recognized forms and **5,616** readings, with no API
 error. A source-supported missing principal part can affect readings without
 increasing this subset's recognition total.
 
+The complete **1,033,579**-form LISTALL control has zero errors and zero
+count differences for identical roots. Against the preceding complete-alternate
+runtime it also has zero changed recognition statuses or analysis counts:
+**841,744** forms recognized and **2,089,682** readings. This corpus therefore
+does not exercise the added principal parts. A separate source-derived probe
+of **12** principal forms increases expected-lemma recognition from **7** to
+**12**, and expected-lemma verbal readings from **30** to **58**. Its private
+before/after dossier SHA-256 are
+`29d0471e61fe126a05ecc7e7680847fc39209680560f5b70fe0d261d208a0ea1`
+and `bce30fcb54fc49ee8d5b6c67e0847c047de09a3bf899144f85e473004ea2a54b`.
+
+### Complete fourth-conjugation alternate with explicit perfect
+
+`tools/recover-latin-full-alternates.py --tier fourth-explicit-perfect` is a
+separate opt-in stage. It requires a unique source article whose only grammatical
+field is exactly `i_vi, 4`, plus matching unflagged present and perfect records
+in one existing lemma block. Only complete same-article alternate orthographies
+with the same active ending qualify. The stage adds the alternate present and
+explicit `i_v` perfect, without supplying an unattested fourth part. Abbreviated,
+quantity-only, deponent, ambiguous and unmatched candidates are withheld.
+The first-conjugation stage remains the default.
+
+The pinned-source trial adds **two** records in **one** article. Six synthetic
+tests cover both tiers, including explicit-perfect matching, voice, quantities,
+homographs, ambiguity, idempotence and private output. CI reconstructs this stage
+in both quantity tiers. Letters-only/all-quantity private outputs have SHA-256
+`55d5467c0f3caea66dd3d42fc38304528dde412429730818c9e97be5962b541b`
+and `3565bfb7744da352c26fff448030f4ffa7f86790dce467458ce10e041131241a`.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank

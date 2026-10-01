@@ -324,6 +324,12 @@ jobs:
               --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --tier fourth-explicit-perfect --expected 2
           done
 
   greek-header-filters:
