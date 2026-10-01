@@ -1046,64 +1046,15 @@ the remaining lexical decisions or qualify a production replacement.
 
 ### Unhandled combined fourth-conjugation headers
 
-`tools/recover-latin-combined-fourth-parts.py` has two separate opt-in stages.
-Both require a unique source article, exactly two complete active `-io`
-orthographies, an explicit active verbal POS, and the exact adjacent projected
-grammatical fields. The `with-supine` tier accepts only `u^i and i_vi` followed
-by `i_tum, 4`; `perfect-only` accepts only `i_vi or u^i` followed by `4`.
-Unsupported fields, deponents, incomplete or quantity-only alternates, source
-ambiguities, existing lemma blocks, and missing or repeated raw headers are
-withheld. No source field is moved. The exact combined raw header must occur
-once in the candidate before its new lemma block can be inserted.
-
-The first stage recovers **one** header and adds **eight** stem records: each
-complete spelling's present, two explicit perfects and supplied fourth part.
-The second independently recovers **one** header and adds **six** records:
-each spelling's present and two explicit perfects, with no fourth part.
-Canonical and alternate quantities follow their respective source spellings.
-Four synthetic tests cover both scopes, exact raw headers, homographs,
-source-field preservation, ambiguity, voice, adjacency, idempotence, expected
-counts, private output and no overwrite. CI reconstructs both stages in each
-quantity tier.
-
-Running the historical filter chain on each original source header reproduces
-the unhandled combined raw header exactly, including the disjunction comma
-normalization in the perfect-only case. Isolating the explicit `i_vi` variant
-reproduces **six** stem/tag pairs for the first stage and **four** for the
-second, ignoring only optional short marks. The isolated `u^i` variants remain
-unhandled by those filters. Their new perfects use the source's explicit short
-`u` suffix on the same fourth-conjugation base proved by the present and
-`i_vi` variant; they are not claimed as historical-filter output. The filters
-remain unchanged.
-
-Independent principal-form probes find all **eight** expected-lemma forms in
-the first stage (previously zero), with **18** such verbal readings, and all
-**six** in the second (previously two), with **seven** such readings. Their
-private before/after SHA-256 are respectively
-`76a57c8ed331cdaa14268d1f08b3031cc26392d6d8dfb69bff3c9504f2ec4449`,
-`bb30f56abeda7f7a04e856852284409be9aa4990489f699ef398c293d681601a`,
-`ca770fadacf17f66e319b3eeb33abba5360bca19306930f472d69b1bdccdc5d2`
-and `31559a93f9018d077c308f648dab7a3a4beb149857f96d272d1dbb9663908591`.
-The controlled rebuilt baseline recognizes **two** expected-lemma forms in
-each probe, with **two** and **three** readings respectively. These probes do
-not establish complete signature equivalence to that baseline.
-
-Letters-only/all-quantity private stem output SHA-256 for the first stage are
-`0d1cb7bbed25ebec78a0a1dab0e076e1d1597b82f57f4d43c0074c85328fb8e3`
-and `da67334a3fb7298cc5a3bb43431aaff0f505986233278c17b19989d825dc32c0`;
-for the second they are
-`ba7caeda7f08a556d6d193418d3cf816c3ad792bde6e7961ea6be1a03e6dd0f1`
-and `afd48c076de0349ef1668ac1181faed153c9b1a614c74a3971e5fc1bb93209d0`.
-Both quantity tiers produce identical native verbal indexes at each stage.
-First-stage index/sidecar SHA-256 are
-`ddb0318e0b4535fe0130f24d79bc18cfcfc7844404fb49594a0d100ac2dd5fff`
-and `1b4b092e2292a38de701231f2d12ffb3ece8d61564cbf8489c27889a50f60b7f`;
-second-stage hashes are
-`588d825508b1477e1c120a58874e98da9ad351721ed3cf301f669c64e3ebdfd5`
-and `7eca5d37736bba0ebc56618fe4df9799d02c42e24c3580eb6cd56e723ede2c3a`.
-Nominal indexes remain unchanged. Both stages recognize **3,929** forms in the
-original **15,255**-form loss subset with **7,426** readings and zero API errors.
-Complete LISTALL qualification follows separately.
+Two separate stages recover exact source headers with combined perfects,
+with and without an explicit fourth part. They add **eight** and **six** stem
+records, recover **218** LISTALL forms without new recognition losses and add
+**1,164** readings. The final runtime recognizes **843,344** forms with
+**2,094,577** readings. Of the newly recognized forms, **164** have direct
+source-lemma readings and **54** have native-prefix readings requiring separate
+paradigm-inheritance review. Complete source rules, controls, recorded-feature
+comparisons, grammar probes, remaining losses and private dossier hashes are
+in [latin-combined-fourth-qualification.md](latin-combined-fourth-qualification.md).
 
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
