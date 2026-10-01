@@ -629,6 +629,49 @@ outputs after that repair have SHA-256
 and `e857385b7a517641cf737b71e73456f7deddc6ed77bbfc1cf9857550192d1af0`.
 These are separate experimental tiers; all individual records remain private.
 
+The letters-only plus principal-parts runtime has now completed the same
+**1,033,579**-form literal qualification. Its identical-root control recognizes
+**836,346** forms, leaves **197,233** absent and returns **2,070,363** readings
+on each side, with zero count differences or API errors. Against the preceding
+full-compound runtime it gains **3,835** forms and loses **488**, with **6,494**
+changed counts. Against the controlled baseline, **823,873** forms are recognized
+by both, **14,117** baseline-only, **12,473** candidate-only and **183,116**
+absent from both. Both comparison reading totals reproduce the controls.
+The separate principal-parts repair recovers **35** additional forms from the
+original full-compound loss subset: the combined trial recognizes **1,588**
+of those **15,255** forms, returning **3,575** readings with no API error.
+
+The all-quantity plus principal-parts runtime also builds successfully.
+Although its expanded verbal source is not byte-identical to the letters-only
+tier, removing only short marks (`^`) makes the expanded files equal. Both
+produce byte-identical `vbind` and `vbind.lindex` files, with SHA-256
+`887240be4655852927d701b1e8dfc49022b9b3408557f855c857fb051d5f72c9`
+and `53375d51c89a236e2cdb3dc4af8a3eb4af00bae0529867e6f8a61288d874543c`.
+Their nominal indexes remain unchanged. This has a specific implementation
+explanation: `src/gkdict/indexstems.c` removes short marks before retaining a
+marked stem. It does not establish that source quantities are dispensable,
+that all quantity changes behave alike, or that Greek indexes behave likewise.
+Preserve the source marks in the private reconstruction.
+
+Reanalysis of the **488** newly absent forms against the preceding trial
+returns **831** readings, all verbal, grouped under **29** native lemmas.
+Of these readings, **712** carry the API's `preverb` field and **119** do not;
+all have an empty `raw_preverb`. The private provenance dossier has SHA-256
+`c307d213e319234c10e47aba504afb4026a649700d55b62596d812f2fd083be3`.
+These losses include analyzer-generated prefix combinations: neither an empty
+`raw_preverb` nor a missing exact source-header join proves a missing source
+article. Conversely, a prefix/base join is only a review lead, not permission
+to transfer a paradigm or dismiss a lost reading.
+
+The original full-compound loss dossier has also been joined with both native
+preverb fields. Its **1,061** lemma groups comprise **650** exact header joins,
+**20** spelling-notation joins, **22** prefixed-lemma/base review leads and
+**369** unresolved groups. The five-field native dossier has SHA-256
+`8898e1898db4582f3f0f651b7eff78eeca24ddeb4f436003351731b7e514f840`.
+This refines the earlier **411** missing exact joins without converting them
+into automatic source recovery. The new losses and the remaining baseline
+losses still block corpus replacement.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
