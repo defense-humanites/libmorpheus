@@ -354,6 +354,18 @@ jobs:
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
               --tier perfect-only --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --tier terminal-delimiter --expected 3
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --tier present-only --expected 4
           done
 
   greek-header-filters:

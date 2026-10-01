@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
 # Combined fourth-conjugation header qualification
 
 This experimental qualification continues the pinned Latin source-recovery

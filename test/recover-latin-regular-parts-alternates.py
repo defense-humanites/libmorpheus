@@ -35,6 +35,36 @@ class Alternates(unittest.TestCase):
         for source in [row(alts=['za_praendor']),row(alts=['za-']),row(alts=['za_prendo']),row(field='3'),row(head='za_prendor#2')]:
             self.assertEqual(m.transform(self.raw,[source])[0],self.raw)
         self.assertIsNone(m.parts('zavi^o','i_vi, 4'))
+    def test_terminal_delimiter_is_opt_in_and_keeps_source_spelling(self):
+        source=row(alts=['za_praen-do'])
+        self.assertEqual(m.transform(self.raw,[source])[0],self.raw)
+        data,counts=m.transform(self.raw,[source],'terminal-delimiter')
+        self.assertEqual(counts['added_records'],3)
+        self.assertTrue(data.endswith(b':vs:za_praen-d\tconj3 orth\n:vs:za_praen-d\tperfstem orth\n:vs:za_praen-s\tpp4 orth\n'))
+        self.assertEqual(m.transform(data,[source],'terminal-delimiter')[0],data)
+        with self.assertRaises(ValueError):m.transform(self.raw,[source],'unknown')
+    def test_terminal_delimiter_withholds_abbreviations_voice_and_other_tiers(self):
+        for source in [row(alts=['za_praen-dor']),row(alts=['za-pren-']),row(alts=['za_prendo']),row(field='3'),row(field='i_vi, i_tum, 4')]:
+            self.assertEqual(m.transform(self.raw,[source],'terminal-delimiter')[0],self.raw)
+        self.assertEqual(m.transform(self.raw.replace(b'za_-prens',b'other'),[row(alts=['za_praen-do'])],'terminal-delimiter')[0],self.raw.replace(b'za_-prens',b'other'))
+    def test_present_only_keeps_missing_parts_missing_and_preserves_other_records(self):
+        raw=b':le:zaprendo#2\n:vs:za_-prend conj3\n:vs:unrelated perfstem\n'
+        source=row(field='3',alts=['za_praendo'])
+        data,counts=m.transform(raw,[source],'present-only')
+        self.assertEqual(counts['added_records'],1)
+        self.assertIn(b':vs:za_praend\tconj3 orth\n',data)
+        self.assertEqual(data.count(b'perfstem'),1);self.assertNotIn(b'pp4',data)
+        self.assertEqual(m.transform(data,[source],'present-only')[0],data)
+        io=b':le:zavio\n:vs:zav conj3_io\n'
+        data,counts=m.transform(io,[row(head='zavi^o',field='3',alts=['zavvi^o'])],'present-only')
+        self.assertEqual(data,io+b':vs:zavv\tconj3_io orth\n')
+    def test_present_only_withholds_voice_subclass_flags_and_unproved_grammar(self):
+        raw=b':le:zaprendo#2\n:vs:za_-prend conj3\n'
+        for source in [row(field='3',alts=['za_praendor']),row(field='3',alts=['za_praendio']),row(field='4'),row(field='3',alts=['za-'])]:
+            self.assertEqual(m.transform(raw,[source],'present-only')[0],raw)
+        source=row(field='3');source['fields'].append(dict(name='pos',projection='v. dep.'))
+        self.assertEqual(m.transform(raw,[source],'present-only')[0],raw)
+        self.assertEqual(m.transform(raw.replace(b'conj3',b'conj3 dep'),[row(field='3')],'present-only')[0],raw.replace(b'conj3',b'conj3 dep'))
     def test_private_output_expected_count_and_no_overwrite(self):
         with tempfile.TemporaryDirectory(dir=SCRIPT.parents[2]) as directory:
             p=Path(directory);candidate=p/'candidate';headers=p/'headers';source=p/'source';target=p/'out'
