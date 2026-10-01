@@ -838,6 +838,42 @@ zero API errors. These remaining dossiers, abbreviated spellings and missing
 paradigm evidence still need individual arbitration; aggregate coverage gains
 do not establish production-corpus equivalence.
 
+### Remaining explicit second-supine fields
+
+`tools/recover-latin-second-supines.py` separately stages the remaining four
+simple dual-supine notices. It recognizes only explicit conjugation-3 `-tendo`
+components with the supplied `d` or reduplicated perfect and `t`/`s` fourth
+parts, or conjugation-4 `c` stems with explicit `s` perfect and `s`/`t` supines.
+The unique source article, primary present, perfect and first fourth-part
+records must all agree with the proven pattern before any change. Deponents,
+conflicting conjugations, unmatched stems, duplicate blocks and unrelated
+textual alternatives are withheld. Already-added records are not duplicated.
+
+This adds **four** second fourth-part records and repairs **two** defective
+records across **four** article blocks. In the conjugation-4 case, processing
+the first explicit variant alone through the historical filters selects their
+exact `si, sum, 4` rule and yields the repaired perfect and first supine.
+Processing the second alone supplies the second supine but takes the generic
+trim branch for the same perfect. The combined source field had taken that
+generic branch for both records. The experiment retains the exact-rule
+perfect, preserves both explicitly supplied fourth parts and leaves the
+historical filters unchanged. It does not extrapolate this choice to other
+principal-part alternations.
+
+Five synthetic tests cover prefixes, quantities, homographs, both variant
+orders, exact defective records, ambiguity, voice, idempotence, private output
+and no overwrite. CI checks the four changed blocks in both quantity tiers.
+Letters-only and all-quantity private output SHA-256 are
+`36a07389a89c40bd9a0be5f3a6bf5f717d68eeba7b36623e82f48095a5497540`
+and `a7b6abb64ce6d66fc08a14479ca32a503aecb207bf2f487b35eee83095764664`.
+The letters-only verbal index and sidecar build successfully with SHA-256
+`02c05aaf281d37a8d9a206ac3989f0b7dc38cfe62f2209e93911d475d7baa2d7`
+and `6adfa718be75e5cfd1b19ea2acc66f0c169bb98e0d21c6412f9e8c384d97b825`;
+the nominal indexes remain unchanged. The original full-compound loss-subset
+totals remain **2,721** recognized forms and **5,616** readings, with no API
+error. A source-supported missing principal part can affect readings without
+increasing this subset's recognition total.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank
