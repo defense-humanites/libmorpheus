@@ -932,6 +932,47 @@ are still review leads, not paradigm inheritance decisions. Private dossier
 SHA-256 `39d5aa1e6b3042031cb5c2901075a5a37c519120cb9e75987e2ebd67016d8aa0`.
 The earlier **488** first-repair losses remain absent with zero API errors.
 
+### Duplicate components proved by complete third-conjugation alternates
+
+`tools/repair-latin-jicio-parts.py` stages nine exact cases separately. It
+requires a single source field `je_ci, jectum, 3` or `je_ci, jactum, 3`, a
+primary complete `-icio` spelling and exactly one complete same-article
+`-jicio` spelling with the same prefix letters. A unique candidate block must
+contain the matching unflagged present and exactly one perfect/fourth-part
+record, each either already correct or equal to the precise duplicated
+component pattern. Unmatched parts, flags, ambiguous source articles or
+blocks, voice changes and differing prefix letters are withheld.
+
+The stage repairs **18** records in **nine** blocks and adds **nine** alternate
+present stems. Each repaired primary part preserves the source primary prefix
+quantities; each added present uses its own complete alternate spelling.
+Applying the historical filters independently to the nine complete alternate
+headers confirms all **18** repaired principal-part letter sequences. This
+is a letter comparison, not a claim that different source quantity spellings
+are interchangeable. The original filters remain unchanged.
+
+Five synthetic tests cover exact defective and already-correct records,
+quantities, homographs, both supplied fourth parts, ambiguity, prefix and
+voice mismatches, private output, expected counts, idempotence and no overwrite.
+The complete-alternate source loader is shared without changing either
+existing alternate tier; its six tests also pass. CI reconstructs both quantity
+tiers. Their private output SHA-256 are
+`58ea0bac73b0a8b4a7f173aa790e58689dc4a938377359faf73cf340b24b1124`
+and `7e51fba761403302919957822e36ffee610ac5da7cf23c421cec4015d4c30e10`.
+Both build identical native verbal indexes with SHA-256
+`0ea900332be6149f47726596146f9a2e0724850a4db8914f1861e2f082a59101`
+and sidecar `1933273f7c1d48daa22b7785942c4a7c905bb26708d82076bb7af304ad6765b1`;
+the nominal indexes remain unchanged.
+
+A separate **27**-form principal-part probe increases expected-lemma
+recognition from **six** to **27** forms and expected-lemma verbal readings
+from **21** to **93**. Private before/after dossier SHA-256 are
+`423e9058d7c68ab54520134839a899553b30ed95ec656726219ecf241e97f51e`
+and `3b8e9eb59828c9ba2fce3d123fe4f8b67d845c439aba272e1746e3b09884c27b`.
+The original loss subset now recognizes **3,753** of **15,255** forms with
+**7,160** readings and zero API errors. Complete LISTALL comparisons are
+qualified separately below; this targeted subset is not a corpus-wide verdict.
+
 `tools/audit-latin-listall.py` implements that literal recognition pass for
 an extracted **plain ASCII, one-form-per-line** wordlist. It accepts an
 explicit native library and two stemlib roots, checks duplicate and blank

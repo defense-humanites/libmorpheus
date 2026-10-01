@@ -142,8 +142,7 @@ def transform_fourth(candidate, rows):
     return b"".join(output), dict(sorted(counts.items()))
 
 
-def prepare(candidate, headers, lexica, output, expected=None, tier="first"):
-    target = first.private_target(candidate, headers, lexica, output)
+def source_alternates(headers, lexica):
     rows, source, revision = first.source_rows(headers, lexica)
     entries, _, _ = first.review.load_entries(lexica)
     for row in rows:
@@ -168,6 +167,12 @@ def prepare(candidate, headers, lexica, output, expected=None, tier="first"):
                 projected = projected.replace(" ", "")
             alternates.append(projected)
         row["full_alternates"] = alternates
+    return rows, source, revision
+
+
+def prepare(candidate, headers, lexica, output, expected=None, tier="first"):
+    target = first.private_target(candidate, headers, lexica, output)
+    rows, source, revision = source_alternates(headers, lexica)
     data, counts = transform(candidate.read_bytes(), rows, tier)
     if expected is not None and counts.get("added_records", 0) != expected:
         raise ValueError("unexpected added alternate count")

@@ -289,6 +289,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-ingo-parts.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-full-alternates.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-second-supines.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-jicio-parts.py
           for tier in all letters-only; do
             expected=220
             if [ "$tier" = letters-only ]; then expected=50; fi
@@ -330,6 +331,11 @@ jobs:
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
               --tier fourth-explicit-perfect --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-jicio-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-jicio.stems" --expected 18
           done
 
   greek-header-filters:
