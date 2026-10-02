@@ -1,0 +1,15 @@
+# Citation-supported third-conjugation present alternates
+
+This opt-in research stage follows the [velar suffix qualification](latin-velar-suffix-qualification.md). It requires a complete same-article alternate, a single source principal-parts field ending in class three, compatible active voice, and a whole-word Latin quotation matching the alternate's bounded present paradigm. The candidate must contain exactly one unflagged canonical present radical in the same conjugation subclass. Only an orthographic present radical is appended; perfect and participial records are preserved.
+
+Quotation matching is literal after the existing Latin projection and quantity/delimiter removal. It does not expand abbreviated forms, replace a missing compound prefix, search translations, or infer principal parts. A quotation is evidence for the spelling; the controlled generator trial separately verifies the present paradigm. It does not establish the semantics of every generated reading or validate native preverb analyses.
+
+On the pinned source revision `56061ca127f4a2844980baffc5f2b6d1332897b3`, eleven records are added under eleven existing lemma blocks. Three attested alternates are already present, three ambiguous source/candidate joins are withheld, and one notation-only variant is withheld. All actual articles, forms, quotations, and per-entry checks remain private.
+
+Both quantity treatments produce identical native indexes. The letter-oriented candidate SHA-256 is `400c28d887045100f9e8b1aa703345bfe19db562e3de454b5abf6c166831f1e6`; the all-quantity candidate is `8acff6ba36f422207288bee3e6bb9c1f8ec4e7c15c394bdb697633048571c5d1`. The verbal index is `530b5e6db59c6aaaea3a8aff7846f6492ef4b58ca01f379323f59d5bdef7d5bd`, with sidecar `13d73e9467b1d37e8c298a5e102c09ad00a500704c400aae68e36e6d1abf1baa`. Nominal indexes are unchanged.
+
+The historical header filters independently reproduce all eleven added present stem/tag pairs from isolated alternate headers with their original source grammar. This does not promote any other output of those isolated headers.
+
+The independent targeted trial covers 143 literal forms: six present indicative, six present subjunctive, and one present infinitive per radical. Expected source-lemma present grammar increases from 26 to 143 forms, with 37 to 187 matching readings. All 259 previous eleven-field readings are retained, 150 are added, and none are removed. Before/after private dossier SHA-256 values are `ac644eb3f7d99d1050273119e210a4e175e20aebad284073ee26e3050cd9779c` and `3a245c6a102c9cf4d202eb6a23079986c060bfd96c843e2308740e3343da40e2`.
+
+Five synthetic tests cover present-only insertion and idempotence, quotation language and whole-word boundaries, abbreviated compound exclusion, grammar/voice/subclass rejection, ambiguous or flagged canonical records, and private output permissions/count/no-overwrite guards. The CI pipeline runs this stage after the suffix trial in both quantity treatments with an expected count of eleven. Full LISTALL qualification is recorded separately below once complete. No production corpus or native preverb policy is changed.
