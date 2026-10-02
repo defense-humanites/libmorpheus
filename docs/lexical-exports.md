@@ -2216,6 +2216,9 @@ fallback. It altered 18 nominal lines and reduced equal record multisets
 from 43,123 to 43,107 against the curated witness. That apparent code
 correction is therefore not included in the importer reconstruction.
 
+Further opt-in alternate stages and their independent principal-form checks
+are recorded in [latin-complete-alternate-qualification.md](latin-complete-alternate-qualification.md).
+
 ### Audit boundary
 
 The pinned projection omits 364 of 116,497 Greek entries (321 unsupported
