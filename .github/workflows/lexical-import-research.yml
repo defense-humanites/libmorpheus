@@ -366,6 +366,12 @@ jobs:
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
               --tier present-only --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-inchoative-present.stems" \
+              --tier inchoative-present --expected 4
           done
 
   greek-header-filters:

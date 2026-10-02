@@ -134,3 +134,6 @@ SHA-256 is
 `4e0e5be0ab3f019bbbb1f5553e5dd316e6e7c6ba585a4fa4b6f891ce698502f8`.
 The earlier **488** first-repair losses remain absent, with zero API errors.
 These results do not settle inheritance, source rights or corpus promotion.
+
+A subsequent narrowly bounded inchoative-present stage is recorded in
+[latin-inchoative-present-qualification.md](latin-inchoative-present-qualification.md).

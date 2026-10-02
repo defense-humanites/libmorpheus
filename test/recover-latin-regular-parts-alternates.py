@@ -65,6 +65,27 @@ class Alternates(unittest.TestCase):
         source=row(field='3');source['fields'].append(dict(name='pos',projection='v. dep.'))
         self.assertEqual(m.transform(raw,[source],'present-only')[0],raw)
         self.assertEqual(m.transform(raw.replace(b'conj3',b'conj3 dep'),[row(field='3')],'present-only')[0],raw.replace(b'conj3',b'conj3 dep'))
+    def test_inchoative_present_requires_exact_same_prefix_and_preserves_parts(self):
+        raw=b':le:zaresco\n:vs:zaresc conj3\n:vs:unrelated perfstem\n'
+        source=row(head='zaresco',field='zaru^i, 3',alts=['zarisco'])
+        data,counts=m.transform(raw,[source],'inchoative-present')
+        self.assertEqual(data,raw.replace(b':vs:zaresc conj3\n',b':vs:zaresc conj3\n:vs:zarisc\tconj3 orth\n'))
+        self.assertEqual(counts['added_records'],1)
+        self.assertEqual(m.transform(data,[source],'inchoative-present')[0],data)
+        self.assertEqual(data.count(b'perfstem'),1);self.assertNotIn(b'pp4',data)
+        self.assertEqual(m.transform(raw,[source],'present-only')[0],raw)
+    def test_inchoative_present_withholds_other_spellings_grammar_and_flags(self):
+        raw=b':le:zaresco\n:vs:zaresc conj3\n'
+        for source in [row(head='zaresco',field='3',alts=['zarisco']),
+                       row(head='zaresco',field='zaru^i, 4',alts=['zarisco']),
+                       row(head='zaresco',field='zaru^i, 3',alts=['zorisco']),
+                       row(head='zaresco',field='zaru^i, 3',alts=['za_risco']),
+                       row(head='zaresco',field='zaru^i, 3',alts=['zariscor'])]:
+            self.assertEqual(m.transform(raw,[source],'inchoative-present')[0],raw)
+        source=row(head='zaresco',field='zaru^i, 3',alts=['zarisco'])
+        source['fields'].append(dict(name='pos',projection='v. dep.'))
+        self.assertEqual(m.transform(raw,[source],'inchoative-present')[0],raw)
+        self.assertEqual(m.transform(raw.replace(b'conj3',b'conj3 dep'),[row(head='zaresco',field='zaru^i, 3',alts=['zarisco'])],'inchoative-present')[0],raw.replace(b'conj3',b'conj3 dep'))
     def test_private_output_expected_count_and_no_overwrite(self):
         with tempfile.TemporaryDirectory(dir=SCRIPT.parents[2]) as directory:
             p=Path(directory);candidate=p/'candidate';headers=p/'headers';source=p/'source';target=p/'out'
