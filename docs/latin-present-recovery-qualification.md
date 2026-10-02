@@ -101,10 +101,54 @@ Both variants build identical verbal index/sidecar SHA-256:
 and `37ddb75cad0fe26e006390013bb1d8c06aeb73d6504a343c6b0f0f51982b4f74`.
 Nominal indexes remain unchanged in both stages. The original 15,255-form loss
 subset remains at **4,238** recognized forms and **7,937** readings in both,
-with zero API errors. Full LISTALL comparisons are running separately.
+with zero API errors. Full LISTALL comparisons follow below.
 
 Two new velar tests and five dedicated untagged-header tests cover exact
 patterns, source identity, voice, quantities, matched canonical parts,
 unaltered projected fields, duplicates, idempotence, private outputs,
 expected counts and no overwrite. All nine repair/recovery test programs
 pass: **51** tests. CI reconstructs both stages in both quantity variants.
+
+
+## Full qualification of the first two stages
+
+All six complete comparisons cover **1,033,579** distinct literal forms with
+API options zero, ABI 2, and zero API errors. The velar stage recognizes
+**844,237** forms and returns **2,097,381** readings: **412** recognition gains,
+zero losses, and **929** increased counts with no decrease. The untagged stage
+retains **844,237** recognized forms and returns **2,097,537** readings,
+adding **156** readings on **103** increased counts without recognition changes.
+Both identical-root controls have zero count differences.
+
+Recorded-feature multiset comparisons on all changed-count forms retain
+all **804** prior rows and add **1,563** in the velar stage, then retain all
+**312** prior rows and add **156** in the untagged stage, with none removed.
+The eleven fields are form, lemma, POS, workword, stem, suffix, ending, mood,
+case, gender and tense; other API attributes are outside this comparison.
+Private before/after SHA-256 are respectively
+`63784f5dbf7f1a2cc99dd1b09ea288ff3b2cd6c496996c58bafc7b94de1c07f9`,
+`00c5043a5db3621cb58b3c92858d81fd026b7df7a081f77a13e8e41aa52ee6eb`,
+`391a284305fc647095b81d65b6fce37327149b3c35165bf8ceb535c961f20d17`
+and `753d55db8c0ab726f1a6af85f48809be64fcf11f3b7905d221f93a69df6b734a`.
+
+The **412** newly recognized velar forms have **312** direct verbal readings
+on **206** forms and **468** native-prefix readings on **309** forms.
+Those form sets overlap: **103** direct only, **206** prefix only and **103**
+with both kinds. All gained-form readings are verbal. The prefix readings use
+three different prefixes; an entry or homograph join must be resolved before
+attributing their alternate paradigms to source compounds. Independent
+provenance SHA-256 is
+`5605a909572c23ec06264a3120f55d1d378d5bbba627a196118dd6a77c5d3fac`.
+The untagged stage's **156** added full-corpus readings supply the direct
+canonical-lemma analyses for the **103** preceding inchoative review forms
+qualified above.
+
+Against the controlled rebuilt baseline, final recognition cells are
+**826,523** both, **11,467** baseline only, **17,714** candidate only and
+**177,875** neither. The earlier **488** first-repair losses remain absent,
+with zero API errors. All four previous alternate tiers reproduce their
+existing private outputs byte for byte after the velar tool extension.
+These improvements do not qualify a production corpus replacement.
+
+The explicit suffix/homograph review continues in
+[latin-velar-suffix-qualification.md](latin-velar-suffix-qualification.md).
