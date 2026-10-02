@@ -399,6 +399,12 @@ jobs:
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
               --expected 11
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-cited-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --evidence future-imperative --expected 4
           done
 
   greek-header-filters:

@@ -25,3 +25,5 @@ An eleven-field multiset comparison of all 520 changed forms retains all 862 pre
 The baseline recognition cells remain 826,523 recognized by both, 11,467 baseline-only, 17,714 trial-only, and 177,875 recognized by neither. The ordered baseline-only form list is unchanged, so its previously recorded private source-join review remains applicable. The original 15,255-loss subset retains its previous 4,238 recognized forms and 7,937 readings; none of the original 488 first-repair loss forms becomes recognized. Counts and provenance do not establish semantic equivalence for the whole corpus.
 
 Removing only the eleven added alternates from the previous review inventory leaves 35 variants in 35 articles. Other alternates in an already treated article remain in this inventory. Its private SHA-256 is `639b815a56d0104e32ad181e1070359ea6e5a152cf5bae3e477f33159fcb3a21`. Lack of a qualifying quotation withholds a variant from this trial; it does not prove the spelling incorrect.
+
+A separate [future/imperative quotation tier](latin-cited-future-imperative-qualification.md) handles four further variants without changing this tier's output.

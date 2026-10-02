@@ -48,6 +48,18 @@ class Recovery(unittest.TestCase):
         row, entry = fixture(); raw = b':le:zaverto\n:vs:za-vert conj3\n'
         for candidate, rows in [(raw * 2, [row]), (raw, [row, row]), (raw.replace(b'conj3', b'conj3 dep'), [row]), (raw.replace(b'za-vert', b'other'), [row])]:
             self.assertEqual(m.transform(candidate, rows, {'n1': entry})[0], candidate)
+    def test_separate_future_imperative_evidence_tier(self):
+        row, entry = fixture()
+        for word in ['zavorte', 'zavortite', 'zavortet']:
+            entry.find('.//quote').text = word
+            self.assertEqual(m.cited_alternates(row, entry), [])
+            self.assertEqual(m.cited_alternates(row, entry, 'future-imperative'), ['zavorto'])
+        changed = copy.deepcopy(row); changed['headword'] = 'zaverio'; changed['full_alternates'] = ['zavorio']
+        for word in ['zavoriet', 'zavorite']:
+            entry.find('.//quote').text = word
+            self.assertEqual(m.cited_alternates(changed, entry, 'future-imperative'), ['zavorio'])
+        entry.find('.//quote').text = 'zavortebat'
+        self.assertEqual(m.cited_alternates(row, entry, 'future-imperative'), [])
     def test_private_output_and_expected_count(self):
         row, entry = fixture()
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[2]) as directory:

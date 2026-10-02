@@ -15,8 +15,10 @@ spec.loader.exec_module(regular)
 first = regular.first
 
 
-def cited_alternates(row, entry):
+def cited_alternates(row, entry, evidence='present'):
     """Require a whole quoted word from a bounded present paradigm."""
+    if evidence not in {'present', 'future-imperative'}:
+        raise ValueError('unsupported quotation evidence tier')
     fields = [f['projection'] for f in row['fields'] if f['name'] == 'itype']
     if (row.get('projection_error') is not None or len(fields) != 1 or
             not re.fullmatch(r'[A-Za-z_^]+(?:, [A-Za-z_^]+)?, 3', fields[0]) or
@@ -41,17 +43,20 @@ def cited_alternates(row, entry):
         stem, tag = parts[0]
         endings = (b'io is it imus itis iunt ere iam ias iat iamus iatis iant'
                    if tag == b'conj3_io' else b'o is it imus itis unt ere am as at amus atis ant').split()
+        if evidence == 'future-imperative':
+            endings = (b'iam ies iet iemus ietis ient e ite'
+                       if tag == b'conj3_io' else b'am es et emus etis ent e ite').split()
         if any(regular.letters(stem + ending).lower() in words for ending in endings):
             admitted.append(alt)
     return admitted
 
 
-def transform(candidate, rows, entries):
+def transform(candidate, rows, entries, evidence='present'):
     selected = []
     for row in rows:
         if row['id'] not in entries:
             raise ValueError('missing source article')
-        admitted = cited_alternates(row, entries[row['id']])
+        admitted = cited_alternates(row, entries[row['id']], evidence)
         if admitted:
             trial = copy.deepcopy(row)
             trial['full_alternates'] = admitted
@@ -62,17 +67,17 @@ def transform(candidate, rows, entries):
     return regular.transform(candidate, selected, 'present-only')
 
 
-def prepare(candidate, headers, lexica, output, expected=None):
+def prepare(candidate, headers, lexica, output, expected=None, evidence='present'):
     target = first.private_target(candidate, headers, lexica, output)
     rows, source, revision = regular.alternates.source_alternates(headers, lexica)
     entries, second_source, second_revision = first.review.load_entries(lexica)
     if source != second_source or revision != second_revision:
         raise ValueError('source changed during validation')
-    data, counts = transform(candidate.read_bytes(), rows, entries)
+    data, counts = transform(candidate.read_bytes(), rows, entries, evidence)
     if expected is not None and counts.get('added_records', 0) != expected:
         raise ValueError('unexpected added record count')
     report = {'schema': 1, 'scope': 'complete class-three present alternates with whole-word Latin quotation evidence',
-              'source_revision': revision, 'counts': counts,
+              'source_revision': revision, 'quotation_evidence': evidence, 'counts': counts,
               'input_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (candidate, headers, source)},
               'output_sha256': hashlib.sha256(data).hexdigest()}
     first.write_private(target, data)
@@ -84,8 +89,9 @@ def main():
     for name in ('candidate', 'headers', 'lexica', 'private-output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--expected', type=int)
+    parser.add_argument('--evidence', choices=['present', 'future-imperative'], default='present')
     args = parser.parse_args()
-    print(json.dumps(prepare(args.candidate, args.headers, args.lexica, args.private_output, args.expected), sort_keys=True))
+    print(json.dumps(prepare(args.candidate, args.headers, args.lexica, args.private_output, args.expected, args.evidence), sort_keys=True))
 
 
 if __name__ == '__main__':
