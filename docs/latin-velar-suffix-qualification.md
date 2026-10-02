@@ -125,3 +125,6 @@ All **55** synthetic tests pass. Linux CI, platform/release qualification and
 lexical research passed on final code commit `583cfe1` (runs **36986049240**,
 **36986049371** and **36986043861**). The draft PR, production corpus,
 historical filters and native preverb policy remain unchanged.
+
+The next opt-in trial and its full qualification are recorded in
+[citation-supported present alternates](latin-cited-present-qualification.md).
