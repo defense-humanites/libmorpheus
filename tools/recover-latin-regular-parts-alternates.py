@@ -34,8 +34,9 @@ def parts(head, field, terminal_delimiter=False, present_only=False):
 
 
 def transform(candidate, rows, tier='regular'):
-    if tier not in {'regular', 'terminal-delimiter', 'present-only', 'inchoative-present'}:
+    if tier not in {'regular', 'terminal-delimiter', 'present-only', 'inchoative-present', 'velar-present'}:
         raise ValueError('unsupported alternate tier')
+    present_tier = tier in {'present-only', 'inchoative-present', 'velar-present'}
     sources = defaultdict(list)
     for row in rows:
         if row.get('projection_error') is not None:
@@ -48,8 +49,14 @@ def transform(candidate, rows, tier='regular'):
                 not re.fullmatch(r'[A-Za-z_^]+(?:-[A-Za-z_^]+)*esco', row['headword']) or
                 any(f['name']=='pos' and f['projection'] not in {'v. a.', 'v. n.'} for f in row['fields'])):
             continue
-        present_tier = tier in {'present-only', 'inchoative-present'}
-        primary = parts(row['headword'], '3' if tier == 'inchoative-present' else fields[0], present_only=present_tier) if len(fields)==1 else None
+        if tier == 'velar-present' and (fields != ['nxi, nctum, 3'] or
+                not re.fullmatch(r'[A-Za-z_^]+(?:-[A-Za-z_^]+)*ngo', row['headword']) or
+                any(f['name']=='pos' and f['projection'] not in {'v. a.', 'v. n.'} for f in row['fields'])):
+            continue
+        primary = parts(row['headword'], '3' if tier in {'inchoative-present', 'velar-present'} else fields[0], present_only=present_tier) if len(fields)==1 else None
+        if tier == 'velar-present' and primary:
+            root = primary[0][0]
+            primary += [(root[:-2] + b'nx', b'perfstem'), (root[:-2] + b'nct', b'pp4')]
         if primary:
             lemma = row['headword'].translate(str.maketrans('', '', '_^-')).encode()
             sources[lemma].append((primary, fields[0], row.get('full_alternates', [])))
@@ -81,10 +88,12 @@ def transform(candidate, rows, tier='regular'):
                 primary_head = primary[0][0].decode() + 'o'
                 if alt != primary_head[:-4] + 'isco':
                     counts['withheld_outside_inchoative_pattern'] += 1; continue
-            alternate = parts(alt, '3' if tier == 'inchoative-present' else field,
+            if tier == 'velar-present' and alt != primary[0][0].decode() + 'uo':
+                counts['withheld_outside_velar_pattern'] += 1; continue
+            alternate = parts(alt, '3' if tier in {'inchoative-present', 'velar-present'} else field,
                               terminal_delimiter=tier == 'terminal-delimiter',
-                              present_only=tier in {'present-only', 'inchoative-present'})
-            if tier in {'present-only', 'inchoative-present'} and alternate and alternate[0][1] != primary[0][1]:
+                              present_only=present_tier)
+            if present_tier and alternate and alternate[0][1] != primary[0][1]:
                 counts['withheld_conjugation_subclass'] += 1; continue
             if not alternate:
                 counts['withheld_incomplete_or_voice_alternate'] += 1; continue
@@ -97,7 +106,7 @@ def transform(candidate, rows, tier='regular'):
                 seen.add(key); added.append(b':vs:'+stem+b'\t'+tag+b' orth\n')
                 counts['added_records'] += 1
         if added:
-            anchor_tag = primary[0][1] if tier in {'present-only', 'inchoative-present'} else b'pp4'
+            anchor_tag = primary[0][1] if present_tier else b'pp4'
             anchor = next(r[0] for r in existing if r[2]==anchor_tag and not r[3])
             additions[anchor] = added; counts['changed_lemma_blocks'] += 1
     output = []
@@ -128,7 +137,7 @@ def main():
     for name in ('candidate','headers','lexica','private-output'):
         parser.add_argument('--'+name,type=Path,required=True)
     parser.add_argument('--expected',type=int)
-    parser.add_argument('--tier', choices=['regular','terminal-delimiter','present-only','inchoative-present'], default='regular')
+    parser.add_argument('--tier', choices=['regular','terminal-delimiter','present-only','inchoative-present','velar-present'], default='regular')
     args = parser.parse_args()
     print(json.dumps(prepare(args.candidate,args.headers,args.lexica,args.private_output,args.expected,args.tier),sort_keys=True))
 

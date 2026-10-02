@@ -77,10 +77,13 @@ before/after SHA-256 are
 and `391a284305fc647095b81d65b6fce37327149b3c35165bf8ceb535c961f20d17`.
 Independent native-preverb provenance confirms that all **156** added readings
 on these **103** forms use one prefixed lemma, with no direct source-lemma
-addition on LISTALL. The corresponding compound article has complete spelling
-variants and an inchoative verbal label, but no explicit grammatical type.
-The returned prefixed lemma also differs from the article's canonical lemma;
-the reading additions therefore remain inheritance/lemma review leads.
+addition on LISTALL. At this stage the projected compound header had complete spelling
+variants and an inchoative verbal label but no grammatical field. Subsequent
+full-entry review found an explicit conjugation in untagged header text; its
+separate recovery is qualified in
+[latin-present-recovery-qualification.md](latin-present-recovery-qualification.md).
+The earlier returned prefixed lemma differs from the source canonical lemma;
+its provenance remains distinct from the new direct source-lemma readings.
 Private before/after provenance SHA-256 are
 `2d49ea8988d0251d69e66c4c2f7783944556cbedff1add199758ce761ad1e1b3`
 and `51f1e83be02f9374b118c463f305206ea1bf75e5ea5a1119caf9e0994cce34b7`.

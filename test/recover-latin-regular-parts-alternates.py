@@ -86,6 +86,24 @@ class Alternates(unittest.TestCase):
         source['fields'].append(dict(name='pos',projection='v. dep.'))
         self.assertEqual(m.transform(raw,[source],'inchoative-present')[0],raw)
         self.assertEqual(m.transform(raw.replace(b'conj3',b'conj3 dep'),[row(head='zaresco',field='zaru^i, 3',alts=['zarisco'])],'inchoative-present')[0],raw.replace(b'conj3',b'conj3 dep'))
+    def test_velar_present_matches_all_parts_but_adds_only_present(self):
+        raw=b':le:zatingo\n:vs:za_ting conj3\n:vs:za_tinx perfstem\n:vs:za_tinct pp4\n'
+        source=row(head='za_tingo',field='nxi, nctum, 3',alts=['za_tinguo'])
+        data,counts=m.transform(raw,[source],'velar-present')
+        self.assertEqual(counts['added_records'],1)
+        self.assertEqual(data,raw.replace(b':vs:za_ting conj3\n',b':vs:za_ting conj3\n:vs:za_tingu\tconj3 orth\n'))
+        self.assertEqual(data.count(b'perfstem'),1);self.assertEqual(data.count(b'pp4'),1)
+        self.assertEqual(m.transform(data,[source],'velar-present')[0],data)
+    def test_velar_present_withholds_prefix_quantity_voice_and_part_mismatch(self):
+        raw=b':le:zatingo\n:vs:za_ting conj3\n:vs:za_tinx perfstem\n:vs:za_tinct pp4\n'
+        for source in [row(head='za_tingo',field='nxi, nctum, 3',alts=['za_tungo']),
+                       row(head='za_tingo',field='nxi, nctum, 3',alts=['za_ting^uo']),
+                       row(head='za_tingo',field='nxi, nctum, 3',alts=['za_tinguor']),
+                       row(head='za_tingo',field='nxi, nctum, 4',alts=['za_tinguo'])]:
+            self.assertEqual(m.transform(raw,[source],'velar-present')[0],raw)
+        source=row(head='za_tingo',field='nxi, nctum, 3',alts=['za_tinguo'])
+        for data in [raw.replace(b'za_tinx',b'other'),raw.replace(b'za_tinct',b'other'),raw.replace(b'conj3',b'conj3 dep')]:
+            self.assertEqual(m.transform(data,[source],'velar-present')[0],data)
     def test_private_output_expected_count_and_no_overwrite(self):
         with tempfile.TemporaryDirectory(dir=SCRIPT.parents[2]) as directory:
             p=Path(directory);candidate=p/'candidate';headers=p/'headers';source=p/'source';target=p/'out'
