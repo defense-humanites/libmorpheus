@@ -35,3 +35,5 @@ The full compound article corresponding to all 103 prefix-only gains has no comp
 Baseline recognition cells are 826,523 recognized by both, 11,467 baseline-only, 18,023 trial-only and 177,566 recognized by neither. The ordered baseline-only list is unchanged. The original 15,255-loss subset remains at 4,238 recognized forms and 7,937 readings, and all 488 first-repair losses remain absent.
 
 Across the two quotation evidence tiers, fifteen alternate present radicals add 309 recognized forms and 2,803 readings without a new absence. All six full comparisons have zero errors, and both identical controls have zero differences. All 61 synthetic tests in the eleven-stage repair/recovery pipeline pass. Linux CI, platform/release qualification and lexical research are green on code commit `be80d5f` (runs `36990411770`, `36990411781`, `36990406201`). The PR remains a draft, and the production corpus is unchanged.
+
+The next separate source trial is documented in [bounded prefix-boundary present alternates](latin-boundary-present-qualification.md).

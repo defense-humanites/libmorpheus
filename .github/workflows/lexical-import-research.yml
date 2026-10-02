@@ -295,6 +295,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-untagged-inchoative-present.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-velar-suffix.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-cited-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-boundary-present.py
           for tier in all letters-only; do
             expected=220
             if [ "$tier" = letters-only ]; then expected=50; fi
@@ -405,6 +406,12 @@ jobs:
               --lexica "$RUNNER_TEMP/lexica" \
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
               --evidence future-imperative --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-boundary-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-boundary-present.stems" \
+              --expected 11
           done
 
   greek-header-filters:
