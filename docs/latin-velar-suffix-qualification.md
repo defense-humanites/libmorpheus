@@ -71,7 +71,7 @@ Both variants build identical verbal index/sidecar SHA-256:
 and `aa1f450cfe771a4238a332c3740c3a768ae9f8466c35ce81a468c8d309dc44aa`.
 Nominal indexes remain unchanged. The original 15,255-form loss subset remains
 at **4,238** recognized forms and **7,937** readings, with zero API errors.
-Full LISTALL comparisons are running separately.
+The complete LISTALL comparisons are recorded below.
 
 Four new synthetic tests cover explicit delimiter scope, source identity,
 quantity, voice, infinitive, homograph preservation, unchanged unrelated
@@ -79,3 +79,49 @@ parts, duplicate blocks, flags, idempotence, private output, expected counts
 and no overwrite. All ten repair/recovery programs pass: **55** tests in total.
 CI reconstructs this stage in both quantity variants. Production data and the
 historical filters remain unchanged.
+
+
+All three complete comparisons cover **1,033,579** distinct literal forms,
+options zero, ABI 2, with zero API errors. The suffix stage retains **844,237**
+recognized forms and returns **2,097,693** readings. Recognition gains and
+losses versus its predecessor are both zero; **103** counts increase and none
+decreases. The identical-root control has zero count differences. On all
+changed-count forms, the eleven recorded-feature multisets retain all **156**
+prior rows and add **156**, with none removed. Before/after SHA-256 are
+`e3c9cb2298e02ed6928816e7203e3b5507c4a87c8b64eaa18fdfda94b69425db`
+and `3383b29431e8957bf7085d9eecf6ae4ebe22b49927535b277f6e15a9d82712bd`.
+
+Across the three new stages, **412** forms become recognized and **1,875**
+readings are added, without a new absent form. All nine complete comparisons
+have zero API errors, and all three identical-root controls have zero count
+differences. Each quantity pair builds the same native indexes. Source
+principal-form/present-system checks independently cover **39**, **26** and
+**13** forms, with the expected lemma/homograph and grammar after each stage.
+These probes and feature comparisons are bounded checks, not complete API
+signature equivalence or a production qualification.
+
+Final controlled-baseline recognition cells remain **826,523** both,
+**11,467** baseline only, **17,714** candidate only and **177,875** neither.
+The remaining baseline-loss form set is byte-identical in order and content
+to the preceding **11,467**-form dossier: **20,100** baseline readings under
+**1,025** lemma groups (**631** exact source joins, **12** notation joins,
+**19** native-preverb/base leads and **363** unresolved groups). Its existing
+provenance SHA-256 remains
+`4e0e5be0ab3f019bbbb1f5553e5dd316e6e7c6ba585a4fa4b6f891ce698502f8`.
+The earlier **488** first-repair losses still have zero recognized forms and
+zero API errors in the final runtime.
+
+Removing the three complete velar records from the broader alternate review
+inventory leaves **46** candidates in **44** articles. The untagged header and
+explicit suffix were outside that complete-alternate inventory. New private
+remaining-inventory SHA-256 is
+`e3dbe0605f1f42e6cec19b753eda7f0d97bb29319b28809374672c1085613ad4`.
+A bare ending variant marked complete still needs contextual adjudication;
+an explicit leading delimiter permits only the bounded expansion proved
+here. The remaining native-prefix/base discrepancy likewise cannot be
+settled by changing counts or assigning the compound's lemma automatically.
+
+All **55** synthetic tests pass. Linux CI, platform/release qualification and
+lexical research passed on final code commit `583cfe1` (runs **36986049240**,
+**36986049371** and **36986043861**). The draft PR, production corpus,
+historical filters and native preverb policy remain unchanged.
