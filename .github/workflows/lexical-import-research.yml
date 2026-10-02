@@ -4,12 +4,35 @@ on:
   push:
     branches:
       - research/lexical-import
+      - research/lexical-arbitration-*
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  latin-listall-input:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate and stage the pinned historical LISTALL archive
+        run: |
+          python3 test/prepare-latin-listall.py
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+
+          url = 'https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/listall.zip" \
+            --output "$RUNNER_TEMP/listall-pinned"
+
   latin-header-filters:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -42,17 +65,25 @@ jobs:
 
       - name: Partition Latin headers using TEI evidence
         run: |
-          python3 test/partition-lexical-latin.py
-          python3 test/audit-latin-partition-gaps.py
-          python3 test/audit-lexical-stems.py
-          python3 tools/partition-lexical-latin.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" test/partition-lexical-latin.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-partition-gaps.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-listall.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-lexical-stems.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
             --output "$RUNNER_TEMP/lexical-partition"
-          python3 tools/audit-latin-partition-gaps.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-partition-gaps.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
             --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/prepare-latin-partition-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/prepare-latin-partition-review.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin \
+            --expected 393
 
       - name: Build historical header and nominal filters in isolation
         run: |
@@ -91,7 +122,7 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
             > "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -116,10 +147,10 @@ jobs:
           print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts,
                             'unpartitioned_nominal_diagnostic': tags}, sort_keys=True))
           PY
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic" \
             --baseline stemlib/Latin/stemsrc/ls.nom
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
 
@@ -140,12 +171,255 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
             > "$RUNNER_TEMP/lexical-partition/verbal.stems"
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-partition/nominal.stems" \
             --baseline stemlib/Latin/stemsrc/ls.nom
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-partition/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
+
+      - name: Qualify source-backed first-sense Latin recovery separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-initial-sense.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-initial-sense.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-source-recovered" \
+            --expected 630
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-source-recovered-partition"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-partition-gaps.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latnom.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-source-recovered/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-source-recovered/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latvb.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/verbal.stems"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --baseline stemlib/Latin/stemsrc/ls.nom
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/verbal.stems" \
+            --baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/transfer-lexical-record-corrections.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-source-recovered/nominal-reviewed.stems" \
+            --expected 44
+
+      - name: Stage explicit full Latin compounds as a separate source trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-compound-headwords.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-compound-headwords.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-full-compounds" --expected 104
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-full-compounds/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-full-compounds-partition"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latnom.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-full-compounds/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-full-compounds/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latvb.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/verbal.stems"
+          for kind in nominal verbal; do
+            baseline=stemlib/Latin/stemsrc/ls.nom
+            if [ "$kind" = verbal ]; then baseline=stemlib/Latin/stemsrc/vbs.latin; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/$kind.stems" --baseline "$baseline"
+          done
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-full-compounds/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-full-compounds/nominal-reviewed.stems" --expected 44
+
+      - name: Qualify source-only regular derivative and principal-part repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-first-conjugation.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-principal-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-ingo-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-full-alternates.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-second-supines.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-jicio-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-regular-parts-alternates.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-combined-fourth-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-untagged-inchoative-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-velar-suffix.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-cited-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-boundary-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-vowel-present.py
+          for tier in all letters-only; do
+            expected=220
+            if [ "$tier" = letters-only ]; then expected=50; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-first-conjugation.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --tier "$tier" --expected "$expected"
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --proof-tier source-allomorphs --expected 20
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-ingo-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-alternates.stems" --expected 131
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-second-supines.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --tier fourth-explicit-perfect --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-jicio-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-jicio.stems" --expected 18
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-jicio.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-regular-alternates.stems" --expected 18
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-combined-fourth-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-regular-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-supine.stems" --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-combined-fourth-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-supine.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
+              --tier perfect-only --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --tier terminal-delimiter --expected 3
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --tier present-only --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-inchoative-present.stems" \
+              --tier inchoative-present --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-inchoative-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-present.stems" \
+              --tier velar-present --expected 3
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-untagged-inchoative-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-untagged-inchoative.stems" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-velar-suffix.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-untagged-inchoative.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-suffix.stems" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-cited-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-suffix.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
+              --expected 11
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-cited-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --evidence future-imperative --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-boundary-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-boundary-present.stems" \
+              --expected 11
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-vowel-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-boundary-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --expected 4
+          done
 
   greek-header-filters:
     runs-on: ubuntu-24.04
@@ -196,12 +470,12 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/setquant" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
             > "$RUNNER_TEMP/lexical-stage/Greek.split"
-          python3 tools/split-greek-lexical-headers.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/split-greek-lexical-headers.py \
             --input "$RUNNER_TEMP/lexical-stage/Greek.lemmata" \
             --output "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
           cmp -s "$RUNNER_TEMP/lexical-stage/Greek.split" \
             "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import hashlib
           import json
           import os
@@ -245,7 +519,7 @@ jobs:
           timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
             < "$RUNNER_TEMP/lexical-stage/Greek.split" \
             > "$RUNNER_TEMP/lexical-stage/Greek.checked"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           from collections import Counter
@@ -267,11 +541,11 @@ jobs:
           grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.morph" \
             > "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic"
           cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --baseline stemsrc/lsj.nom \
             --greek-spelling-diagnostic
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
@@ -281,7 +555,7 @@ jobs:
         run: |
           set -euo pipefail
           ulimit -c 0
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           import re
@@ -315,33 +589,43 @@ jobs:
           grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.morph" \
             > "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal"
           cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
             --greek-spelling-diagnostic
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
-          python3 ../../test/audit-greek-partial-novelty.py
-          python3 ../../tools/audit-greek-partial-novelty.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-partial-novelty.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-greek-partial-novelty.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --original-candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
-          python3 ../../test/audit-greek-disjoint-triage.py
-          python3 ../../test/prepare-greek-lexical-review.py
-          python3 ../../test/split-greek-lexical-headers.py
-          python3 ../../tools/audit-greek-disjoint-triage.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-disjoint-triage.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/prepare-greek-lexical-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/arbitrate-greek-lexical-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/triage-greek-quantity-residuals.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/arbitrate-greek-quantity-long.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/consolidate-greek-quantity-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-pron-ambiguity.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/prepare-greek-quantity-source-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/inspect-greek-quantity-open.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-open-diphthongs.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/compare-greek-cruncher-readings.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-generated-coverage.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/split-greek-lexical-headers.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl" \
             --split "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.split"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs
