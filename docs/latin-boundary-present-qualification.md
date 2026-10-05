@@ -37,3 +37,11 @@ Removing precisely the eleven added alternates from the preceding inventory leav
 The next opt-in trial is documented in [bounded internal-vowel present alternates](latin-vowel-present-qualification.md).
 
 Linux CI, platform/release qualification and lexical research passed on code commit `03426ac` (runs `36993155934`, `36993155938`, `36993149140`). All 66 synthetic tests in the twelve-tool repair/recovery pipeline passed at this stage.
+
+A later [controlled-nominal replay](latin-present-replay-qualification.md#complete-runner-measurements)
+passed on `25b5839` (research run `37341356033`). It reproduces this stage's
+528 increased counts, 794 added readings and zero recognition changes:
+780 additions are direct source-lemma verbs and 14 remain native-preverb
+review leads. All 1,163 previous rows are retained under that replay's explicit
+eleven-field grammatical scope. Its nominal witness differs from the earlier
+private candidate, so its cumulative totals are recorded separately.

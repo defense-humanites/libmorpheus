@@ -20,3 +20,19 @@ A separate [controlled-nominal replay](latin-present-replay-qualification.md)
 now automates the complete LISTALL comparisons in CI. Its nominal witness
 differs from the five-decision private reconstruction used in earlier totals;
 the two measurement series must remain distinct.
+
+## Full qualification with controlled nominal witnesses
+
+The [complete replay](latin-present-replay-qualification.md#complete-runner-measurements)
+passed on `25b5839` in research run `37341356033`. This four-record stage
+recovers **92** of 1,033,579 literal LISTALL forms, loses none and adds **312**
+direct source-lemma verb readings. All **206** changed counts increase.
+On these forms, all **182** earlier eleven-field rows are retained and none
+is removed; the exact grammatical field scope is defined in the replay report.
+There are no new native-preverb or ambiguous-provenance rows in this comparison.
+
+The final controlled-nominal trial recognizes **847,544** forms and returns
+**2,099,321** readings. Both identical controls have zero changed counts, all
+five complete comparisons have zero API errors, and both quantity treatments
+produce identical indexes. These totals do not reproduce the earlier private
+nominal candidate or establish a production corpus replacement.

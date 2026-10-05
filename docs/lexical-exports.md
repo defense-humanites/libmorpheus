@@ -2219,6 +2219,13 @@ correction is therefore not included in the importer reconstruction.
 Further opt-in alternate stages and their independent principal-form checks
 are recorded in [latin-complete-alternate-qualification.md](latin-complete-alternate-qualification.md).
 
+The latest complete present-system comparisons are automated in
+[latin-present-replay-qualification.md](latin-present-replay-qualification.md).
+They use the controlled rebuilt nominal witness, excluding the five private
+nominal decisions in earlier research runtimes. Their aggregate totals form
+a separate measurement series; they do not replace or reproduce those
+earlier nominal candidates.
+
 ### Audit boundary
 
 The pinned projection omits 364 of 116,497 Greek entries (321 unsupported
