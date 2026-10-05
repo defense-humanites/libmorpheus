@@ -15,3 +15,8 @@ An independent 52-form present trial increases expected source-lemma present gra
 Five synthetic tests cover internal-vowel and prefix constraints, rejection of other edits and shortened words, homograph/quantity retention, present-only insertion, idempotence, incompatible voice/grammar, abbreviations, ambiguous or flagged canonical records, and private output permissions/count/no-overwrite guards. CI applies the trial after the boundary trial in both quantity treatments with an expected count of four. Full LISTALL qualification is recorded separately once complete; the production corpus is unchanged.
 
 Removing precisely the four added alternates leaves 16 variants in 16 articles. The private inventory SHA-256 is `9bc4d2c9dd32652c1bf99f8d81c425e7991868515d4e15d81c3a121b1d8fd79d`.
+
+A separate [controlled-nominal replay](latin-present-replay-qualification.md)
+now automates the complete LISTALL comparisons in CI. Its nominal witness
+differs from the five-decision private reconstruction used in earlier totals;
+the two measurement series must remain distinct.

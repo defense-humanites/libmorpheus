@@ -35,7 +35,7 @@ jobs:
 
   latin-header-filters:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
 
@@ -420,6 +420,40 @@ jobs:
               --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
               --expected 4
           done
+
+      - name: Replay the latest present trials with controlled nominal witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-present-stages.py
+          cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+          cmake --build "$RUNNER_TEMP/present-native" --parallel 2 \
+            --target morpheus morpheus_stemlib_production_latin
+          python3 test/qualify-latin-present-stages-native.py "$RUNNER_TEMP/present-native"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+
+          url = 'https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'present-listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/present-listall.zip" \
+            --output "$RUNNER_TEMP/present-listall"
+          python3 tools/qualify-latin-present-stages.py \
+            --forms "$RUNNER_TEMP/present-listall/LISTALL.distinct-literal.txt" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --stage "$RUNNER_TEMP/latin-full-compounds" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --private-output "$RUNNER_TEMP/present-qualification" \
+            --expected-forms 1033579
 
   greek-header-filters:
     runs-on: ubuntu-24.04
