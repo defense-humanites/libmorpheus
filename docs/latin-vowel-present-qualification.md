@@ -19,8 +19,11 @@ Removing precisely the four added alternates leaves 16 variants in 16 articles. 
 A [reproducible remaining-present audit](latin-remaining-present-review.md)
 now rebuilds private source dossiers for the next individual review. Its new
 schema is separate from this historical inventory fingerprint. The first
-source run finds fifteen strict-selector variants; their relationship to the
-older sixteen-record review pool still requires the private dossiers.
+source run finds fifteen strict-selector variants. A subsequent source review
+finds one additional diagnostic article excluded by coordinated-supine
+grammar, explaining the selector count difference. Identity with the older
+private sixteen-record inventory is still unproved. Nine strict-selector
+variants proceed to a separate [reverse-reference present trial](latin-backlinked-present-qualification.md).
 
 A separate [controlled-nominal replay](latin-present-replay-qualification.md)
 now automates the complete LISTALL comparisons in CI. Its nominal witness

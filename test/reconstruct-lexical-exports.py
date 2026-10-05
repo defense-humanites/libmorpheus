@@ -3,9 +3,11 @@
 """Small contract checks for the separate TEI investigation tool."""
 
 import importlib.util
+import hashlib
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from lxml import etree
 
@@ -17,6 +19,41 @@ spec.loader.exec_module(exports)
 
 
 class LexicalProjectionTest(unittest.TestCase):
+    def test_standalone_source_requires_exact_bytes_and_filename(self):
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / exports.LATIN_SOURCE.name
+            source.write_bytes(b"synthetic source\n")
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            with patch.object(exports, "LATIN_SOURCE_SHA256", digest):
+                self.assertEqual(exports.selected_sources(source, ("Latin",)),
+                                 (exports.LEXICA_REVISION, {"Latin": [source]}))
+                source.write_bytes(b"synthetic source\r\n")
+                with self.assertRaises(ValueError):
+                    exports.selected_sources(source, ("Latin",))
+                wrong = source.with_name("other.xml")
+                wrong.write_bytes(b"synthetic source\n")
+                with self.assertRaises(ValueError):
+                    exports.selected_sources(wrong, ("Latin",))
+
+    def test_standalone_source_rejects_greek_before_stage_creation(self):
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / exports.LATIN_SOURCE.name
+            source.write_bytes(b"synthetic source")
+            output = Path(directory) / "stage"
+            for languages in (("Greek",), ("Greek", "Latin")):
+                with self.assertRaises(ValueError):
+                    exports.run(source, Path(directory), output, languages)
+                self.assertFalse(output.exists())
+
+    def test_unverified_standalone_source_creates_no_stage(self):
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / exports.LATIN_SOURCE.name
+            source.write_bytes(b"unverified source")
+            output = Path(directory) / "stage"
+            with self.assertRaises(ValueError):
+                exports.run(source, Path(directory), output, ("Latin",))
+            self.assertFalse(output.exists())
+
     def test_ordered_latin_header_and_quantity(self):
         entry = etree.fromstring(
             '<entryFree key="abactus2"><orth>ăbactus</orth>'

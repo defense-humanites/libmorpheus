@@ -189,7 +189,7 @@ def comparison(forms, library, before, after, output, source_lemmas=None, identi
     return report
 
 
-def qualify(forms, library, baseline, stage, tools, output, expected_forms=None):
+def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False):
     forms, library, baseline, stage, tools = (p.resolve() for p in (forms, library, baseline, stage, tools))
     output = output.resolve()
     inputs = [p.resolve() for p in (forms, library, baseline, stage, tools)]
@@ -197,9 +197,13 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None)
             any(output == p or p in output.parents or output in p.parents for p in inputs)):
         raise ValueError('private work directory must be outside repository and inputs')
     names = ('cited-future-imperative', 'boundary-present', 'vowel-present')
+    if include_backlinked:
+        names += ('backlinked-present',)
     paths = {name: stage / ('verbal-letters-only-' + name + '.stems') for name in names}
     boundary_lemmas = additions(paths[names[0]].read_bytes(), paths[names[1]].read_bytes(), 11)
     vowel_lemmas = additions(paths[names[1]].read_bytes(), paths[names[2]].read_bytes(), 4)
+    if include_backlinked:
+        backlinked_lemmas = additions(paths[names[2]].read_bytes(), paths[names[3]].read_bytes(), 9)
     output.mkdir(mode=0o700)
     report = {'schema': 1, 'scope': 'verbal present trials with controlled rebuilt nominal witnesses',
               'nominal_policy': 'all baseline nominals unchanged; excludes five private reconstruction decisions',
@@ -214,6 +218,12 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None)
     report['indexes']['all-quantity-vowel-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity')
     if report['indexes'][names[2]] != report['indexes']['all-quantity-vowel-present']:
         raise ValueError('quantity treatments produce different indexes')
+    if include_backlinked:
+        quantity = stage / 'verbal-all-backlinked-present.stems'
+        report['input_sha256']['all-quantity-backlinked-present'] = digest(quantity)
+        report['indexes']['all-quantity-backlinked-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity-backlinked')
+        if report['indexes'][names[3]] != report['indexes']['all-quantity-backlinked-present']:
+            raise ValueError('backlinked quantity treatments produce different indexes')
     for name in names:
         for nominal in ('nomind', 'nomind.lindex'):
             if report['indexes'][name][nominal] != digest(baseline / 'Latin/steminds' / nominal):
@@ -223,11 +233,16 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None)
               ('boundary-step', names[0], names[1], boundary_lemmas, False),
               ('vowel-step', names[1], names[2], vowel_lemmas, False),
               ('baseline-to-vowel', None, names[2], None, False)]
+    if include_backlinked:
+        passes += [('backlinked-control', names[3], names[3], None, True),
+                   ('backlinked-step', names[2], names[3], backlinked_lemmas, False)]
     for label, old, new, lemmas, identical in passes:
         result = comparison(forms, library, baseline if old is None else output / old,
                             output / new, output / (label + '.jsonl'), lemmas, identical)
         if expected_forms is not None and result['counts']['distinct_forms'] != expected_forms:
             raise ValueError('full comparison form count differs')
+        if label == 'backlinked-step' and result['changed_form_eleven_field_multisets'].get('removed_rows', 0):
+            raise ValueError('backlinked trial removes previous grammatical readings')
         report['comparisons'][label] = result
         print(json.dumps({'research_comparison': label, 'report': result}, sort_keys=True), flush=True)
     write_private(output / 'report.json', (json.dumps(report, sort_keys=True, indent=2) + '\n').encode())
@@ -239,9 +254,10 @@ def main():
     for name in ('forms', 'library', 'baseline', 'stage', 'tools', 'private-output'):
         parser.add_argument('--' + name, required=True, type=Path)
     parser.add_argument('--expected-forms', type=int)
+    parser.add_argument('--include-backlinked', action='store_true')
     args = parser.parse_args()
     qualify(args.forms, args.library, args.baseline, args.stage, args.tools,
-            args.private_output, args.expected_forms)
+            args.private_output, args.expected_forms, args.include_backlinked)
 
 
 if __name__ == '__main__':

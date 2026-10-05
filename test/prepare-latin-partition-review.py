@@ -3,6 +3,7 @@
 """Source topology and witness inventories must remain separate signals."""
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -24,6 +25,31 @@ def header(key, lemma):
 
 
 class SourceReviewTest(unittest.TestCase):
+    def test_verified_standalone_source_uses_the_same_article_parser(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / m.SOURCE.name
+            data = (b'<!DOCTYPE TEI [<!ENTITY x "private">]><TEI>'
+                    b'<entryFree id="a" key="one"><orth>one</orth>'
+                    b'<sense><quote lang="la">&x;</quote></sense></entryFree></TEI>')
+            source.write_bytes(data)
+            with patch.object(m.projection, "LATIN_SOURCE_SHA256", hashlib.sha256(data).hexdigest()):
+                entries, path, revision = m.load_entries(source)
+                self.assertEqual((path, revision), (source, m.REVISION))
+                self.assertEqual(list(entries), ["a"])
+                self.assertIsInstance(entries['a'].find('sense/quote')[0], etree._Entity)
+                source.write_bytes(data + b'\n')
+                with self.assertRaisesRegex(ValueError, 'pinned edition'):
+                    m.load_entries(source)
+
+    def test_verified_standalone_source_rejects_duplicate_article_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / m.SOURCE.name
+            data = b'<TEI><entryFree id="a"/><entryFree id="a"/></TEI>'
+            source.write_bytes(data)
+            with patch.object(m.projection, "LATIN_SOURCE_SHA256", hashlib.sha256(data).hexdigest()):
+                with self.assertRaisesRegex(ValueError, 'duplicate'):
+                    m.load_entries(source)
+
     def test_direct_initial_sense_fields_only_and_inventory_does_not_infer_signal(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "headers"

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Rebuild private remaining-alternate dossiers; publish aggregates only."""
 import argparse
+import copy
 from collections import Counter, defaultdict
 import hashlib
 import importlib.util
@@ -70,10 +71,29 @@ def spelling_shape(head, alternate):
             'removed_letters': removed, 'inserted_letters': inserted}
 
 
-def inventory(candidate, rows, entries):
+def diagnostic_rows(rows, grammar='strict'):
+    if grammar not in {'strict', 'coordinated-supines'}:
+        raise ValueError('unsupported diagnostic grammar')
+    selected = boundary.selected_rows(rows, lambda head, alternate: True)
+    if grammar == 'coordinated-supines':
+        for row in rows:
+            fields = [f['projection'] for f in row['fields'] if f['name'] == 'itype']
+            if (row.get('projection_error') is not None or len(fields) != 1 or
+                    not re.fullmatch(r'[A-Za-z_^]+i, [A-Za-z_^]+um and [A-Za-z_^]+um, 3', fields[0]) or
+                    any(f['name'] == 'pos' and f['projection'] not in {'v. a.', 'v. n.'} for f in row['fields'])):
+                continue
+            trial = copy.deepcopy(row)
+            for field in trial['fields']:
+                if field['name'] == 'itype':
+                    field['projection'] = '3'
+            selected.append(trial)
+    return selected
+
+
+def inventory(candidate, rows, entries, grammar='strict'):
     # This unrestricted proposal is only an inventory selector. It is never
     # written as a stem source, used to build an index or source-qualified.
-    selected = boundary.selected_rows(rows, lambda head, alternate: True)
+    selected = diagnostic_rows(rows, grammar)
     proposed, counts = regular.transform(candidate, selected, 'present-only')
     records = inserted_records(candidate, proposed)
     if len(records) != counts.get('added_records', 0):
@@ -119,21 +139,21 @@ def inventory(candidate, rows, entries):
     return dossiers, report
 
 
-def prepare(candidate, headers, lexica, output, expected=None, expected_articles=None):
+def prepare(candidate, headers, lexica, output, expected=None, expected_articles=None, grammar='strict'):
     target = first.private_target(candidate, headers, lexica, output)
     rows, source, revision = regular.alternates.source_alternates(headers, lexica)
     entries, second_source, second_revision = first.review.load_entries(lexica)
     if source != second_source or revision != second_revision:
         raise ValueError('source changed during validation')
     original = candidate.read_bytes()
-    dossiers, counts = inventory(original, rows, entries)
+    dossiers, counts = inventory(original, rows, entries, grammar)
     if expected is not None and counts['variants'] != expected:
         raise ValueError(f"remaining variant count {counts['variants']} differs from expected {expected}")
     if expected_articles is not None and counts['articles'] != expected_articles:
         raise ValueError(f"remaining article count {counts['articles']} differs from expected {expected_articles}")
     data = ''.join(json.dumps(row, sort_keys=True, ensure_ascii=True) + '\n' for row in dossiers).encode()
     report = {'schema': 1, 'scope': 'remaining complete class-three alternates; diagnostics only',
-              'source_revision': revision, 'counts': counts,
+              'source_revision': revision, 'counts': counts, 'grammar_selector': grammar,
               'input_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                                for p in (candidate, headers, source)},
               'private_inventory_sha256': hashlib.sha256(data).hexdigest()}
@@ -149,9 +169,10 @@ def main():
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--expected', type=int)
     parser.add_argument('--expected-articles', type=int)
+    parser.add_argument('--grammar', choices=('strict', 'coordinated-supines'), default='strict')
     args = parser.parse_args()
     print(json.dumps(prepare(args.candidate, args.headers, args.lexica, args.private_output,
-                             args.expected, args.expected_articles), sort_keys=True))
+                             args.expected, args.expected_articles, args.grammar), sort_keys=True))
 
 
 if __name__ == '__main__':

@@ -27,6 +27,21 @@ def fixture():
 
 
 class Audit(unittest.TestCase):
+    def test_coordinated_supines_extend_diagnostics_without_approving_parts(self):
+        candidate, row, entries = fixture()
+        row['fields'][0]['projection'] = 'te^texi, textum and texum, 3'
+        self.assertEqual(m.inventory(candidate, [row], entries)[1]['variants'], 0)
+        dossiers, counts = m.inventory(candidate, [row], entries, 'coordinated-supines')
+        self.assertEqual(counts['variants'], 2)
+        self.assertEqual(dossiers[0]['projected_fields'][0]['projection'], 'te^texi, textum and texum, 3')
+        self.assertEqual(row['fields'][0]['projection'], 'te^texi, textum and texum, 3')
+        for invalid in ('texi, textum or texum, 3', 'texi, textum and texum, 2', '3'):
+            changed = copy.deepcopy(row);changed['fields'][0]['projection'] = invalid
+            self.assertEqual(m.inventory(candidate, [changed], entries, 'coordinated-supines')[1]['variants'], 0)
+        changed = copy.deepcopy(row);changed['fields'][1]['projection'] = 'v. dep.'
+        self.assertEqual(m.inventory(candidate, [changed], entries, 'coordinated-supines')[1]['variants'], 0)
+        with self.assertRaises(ValueError): m.inventory(candidate, [row], entries, 'other')
+
     def test_remaining_variants_share_article_and_keep_private_evidence(self):
         candidate, row, entries = fixture()
         before = copy.deepcopy(row)

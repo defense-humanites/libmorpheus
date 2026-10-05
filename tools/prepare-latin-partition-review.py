@@ -113,14 +113,17 @@ def analyze(headers, entries, nominal, verbal):
 
 
 def load_entries(lexica):
-    revision = subprocess.check_output(
-        ["git", "-C", str(lexica), "rev-parse", "HEAD"], text=True).strip()
-    if revision != REVISION:
-        raise ValueError("Latin source checkout differs from pinned revision")
-    if subprocess.check_output(["git", "-C", str(lexica), "status", "--porcelain", "--",
-                                str(SOURCE)], text=True):
-        raise ValueError("selected Latin source differs from pinned revision")
-    source = lexica / SOURCE
+    if lexica.is_file():
+        source, revision = projection.standalone_latin_source(lexica)
+    else:
+        revision = subprocess.check_output(
+            ["git", "-C", str(lexica), "rev-parse", "HEAD"], text=True).strip()
+        if revision != REVISION:
+            raise ValueError("Latin source checkout differs from pinned revision")
+        if subprocess.check_output(["git", "-C", str(lexica), "status", "--porcelain", "--",
+                                    str(SOURCE)], text=True):
+            raise ValueError("selected Latin source differs from pinned revision")
+        source = lexica / SOURCE
     parser = etree.XMLParser(resolve_entities=False, load_dtd=False, no_network=True,
                              huge_tree=True)
     tree = etree.parse(str(source), parser)

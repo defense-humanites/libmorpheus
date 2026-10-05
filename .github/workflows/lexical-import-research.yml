@@ -35,7 +35,7 @@ jobs:
 
   latin-header-filters:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
 
@@ -65,6 +65,15 @@ jobs:
 
       - name: Partition Latin headers using TEI evidence
         run: |
+          "$RUNNER_TEMP/lexical-python/bin/python" test/reconstruct-lexical-exports.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
+            --language Latin \
+            --lexica "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --output "$RUNNER_TEMP/standalone-latin-stage"
+          for name in headers.jsonl lemmata skipped.tsv; do
+            cmp "$RUNNER_TEMP/lexical-stage/Latin.$name" \
+                "$RUNNER_TEMP/standalone-latin-stage/Latin.$name"
+          done
           "$RUNNER_TEMP/lexical-python/bin/python" test/partition-lexical-latin.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-partition-gaps.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-listall.py
@@ -435,6 +444,13 @@ jobs:
               --private-output "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.jsonl" \
               --expected 15 \
               > "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.report.json"
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.jsonl" \
+              --grammar coordinated-supines --expected 16 --expected-articles 16 \
+              > "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.report.json"
           done
           python3 - <<'PY'
           import json
@@ -448,13 +464,46 @@ jobs:
           if (left['counts'] != right['counts'] or
                   left['private_inventory_sha256'] != right['private_inventory_sha256']):
               raise ValueError('quantity treatments produce different remaining-present inventories')
+          broader = {tier: json.loads((stage / ('coordinated-present-' + tier + '.report.json')).read_text())
+                     for tier in ('all', 'letters-only')}
+          broad_left, broad_right = broader.values()
+          if (broad_left['counts'] != broad_right['counts'] or
+                  broad_left['private_inventory_sha256'] != broad_right['private_inventory_sha256']):
+              raise ValueError('coordinated diagnostic inventories differ between quantity treatments')
+          for tier in reports:
+              strict_rows = {row for row in (stage / ('remaining-present-' + tier + '.jsonl')).read_bytes().splitlines()}
+              broad_rows = {row for row in (stage / ('coordinated-present-' + tier + '.jsonl')).read_bytes().splitlines()}
+              if not strict_rows < broad_rows or len(broad_rows - strict_rows) != 1:
+                  raise ValueError('coordinated syntax does not explain exactly one additional dossier')
           print(json.dumps({'remaining_present_audit': reports,
+                            'coordinated_supine_diagnostic': broader,
                             'legacy_inventory_comparison': {
                                 'recorded_variants': 16, 'recorded_articles': 16,
                                 'strict_selector_variants': left['counts']['variants'],
                                 'strict_selector_articles': left['counts']['articles'],
                                 'identity_with_legacy_inventory': 'unresolved'}}, sort_keys=True))
           PY
+
+      - name: Stage present alternates with independent reverse references
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-backlinked-present.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-backlinked-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --expected 9
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/post-backlinked-$tier.jsonl" \
+              --expected 6 --expected-articles 6
+          done
 
       - name: Replay the latest present trials with controlled nominal witnesses
         shell: bash
@@ -488,7 +537,7 @@ jobs:
             --stage "$RUNNER_TEMP/latin-full-compounds" \
             --tools "$RUNNER_TEMP/present-native" \
             --private-output "$RUNNER_TEMP/present-qualification" \
-            --expected-forms 1033579
+            --expected-forms 1033579 --include-backlinked
 
   greek-header-filters:
     runs-on: ubuntu-24.04
