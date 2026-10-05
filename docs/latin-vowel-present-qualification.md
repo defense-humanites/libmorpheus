@@ -16,6 +16,10 @@ Five synthetic tests cover internal-vowel and prefix constraints, rejection of o
 
 Removing precisely the four added alternates leaves 16 variants in 16 articles. The private inventory SHA-256 is `9bc4d2c9dd32652c1bf99f8d81c425e7991868515d4e15d81c3a121b1d8fd79d`.
 
+A [reproducible remaining-present audit](latin-remaining-present-review.md)
+now rebuilds private source dossiers for the next individual review. Its new
+schema is separate from this historical inventory fingerprint.
+
 A separate [controlled-nominal replay](latin-present-replay-qualification.md)
 now automates the complete LISTALL comparisons in CI. Its nominal witness
 differs from the five-decision private reconstruction used in earlier totals;

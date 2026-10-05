@@ -421,6 +421,36 @@ jobs:
               --expected 4
           done
 
+      - name: Rebuild the private remaining-present inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-remaining-presents.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.jsonl" \
+              --expected 16 --expected-articles 16 \
+              > "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.report.json"
+          done
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'latin-full-compounds'
+          reports = {tier: json.loads((stage / ('remaining-present-' + tier + '.report.json')).read_text())
+                     for tier in ('all', 'letters-only')}
+          left, right = reports.values()
+          if (left['counts'] != right['counts'] or
+                  left['private_inventory_sha256'] != right['private_inventory_sha256']):
+              raise ValueError('quantity treatments produce different remaining-present inventories')
+          print(json.dumps({'remaining_present_audit': reports}, sort_keys=True))
+          PY
+
       - name: Replay the latest present trials with controlled nominal witnesses
         shell: bash
         run: |
