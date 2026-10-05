@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 
-# Reproducible dossiers for remaining complete present alternates
+# Reproducible strict-selector dossiers for complete present alternates
 
 The earlier private inventory contains sixteen remaining alternates in
 sixteen articles after the boundary and internal-vowel trials. Its individual
@@ -36,11 +36,26 @@ not necessarily a philologically verified compound prefix. Quotation counts
 only indicate whether a Latin quote exists; they do not assert that it attests
 the proposed spelling or any of its generated forms.
 
-CI requires sixteen variants and sixteen articles for both quantity
-treatments. Their new serialized dossiers and aggregate counts must be
-identical. This new schema includes article text and cannot reproduce the
-older inventory's serialized hash; matching the old count alone does not
-establish identity with every old private record.
+## Difference from the historical sixteen-record inventory
+
+The first source run on `21cca20` found **15** strict-selector variants,
+failing the initial expectation of sixteen before writing a private dossier.
+This is a newly observed diagnostic scope, not a correction to the historical
+sixteen-record review pool. The old per-entry records are unavailable here,
+so neither subset identity nor the reason for the difference is established.
+Grammar, voice, canonical-record matching and other inventory choices must
+be compared against the old dossiers before attributing the missing record.
+
+The next source run checks the observed fifteen strict-selector variants for
+both quantity treatments. Their new serialized dossiers and aggregate counts
+must be identical; the article count is reported independently. The public
+report retains the older sixteen-variant/sixteen-article totals and explicitly
+marks identity with that inventory unresolved. None of the sixteen historical
+review decisions is dismissed or approved by this change.
+
+This new schema includes article text and cannot reproduce the older
+inventory's serialized hash. Even equal cardinalities would not establish
+identity with every old private record.
 
 Eight synthetic tests cover several alternates in one article, homographs,
 source quantities, existing records, voice and conjugation compatibility,

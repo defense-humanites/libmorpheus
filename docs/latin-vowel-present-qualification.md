@@ -18,7 +18,9 @@ Removing precisely the four added alternates leaves 16 variants in 16 articles. 
 
 A [reproducible remaining-present audit](latin-remaining-present-review.md)
 now rebuilds private source dossiers for the next individual review. Its new
-schema is separate from this historical inventory fingerprint.
+schema is separate from this historical inventory fingerprint. The first
+source run finds fifteen strict-selector variants; their relationship to the
+older sixteen-record review pool still requires the private dossiers.
 
 A separate [controlled-nominal replay](latin-present-replay-qualification.md)
 now automates the complete LISTALL comparisons in CI. Its nominal witness
