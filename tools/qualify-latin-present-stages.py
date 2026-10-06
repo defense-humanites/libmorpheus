@@ -189,21 +189,75 @@ def comparison(forms, library, before, after, output, source_lemmas=None, identi
     return report
 
 
-def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False):
+def source_quote_control(witness, library, before, after, output, source_lemmas, candidate_hash, headers_hash):
+    records = [json.loads(line) for line in witness.read_text().splitlines() if line]
+    if (len(records) != len(source_lemmas) or
+            {row['lemma'].encode() for row in records} != source_lemmas):
+        raise ValueError('quoted witnesses differ from inserted source lemmas')
+    for row in records:
+        if (row.get('schema') != 1 or not re.fullmatch(r'[a-z]+', row['form']) or
+                row.get('source_revision') != '56061ca127f4a2844980baffc5f2b6d1332897b3' or
+                row.get('source_sha256') != 'ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee' or
+                row.get('candidate_sha256') != candidate_hash or row.get('headers_sha256') != headers_hash):
+            raise ValueError('quoted witness is not bound to the selected source and candidate')
+    totals = Counter()
+    private_rows = []
+    left = NativeRows(library, before)
+    try:
+        right = NativeRows(library, after)
+        try:
+            for row in records:
+                word, lemma = row['form'].encode(), row['lemma'].encode()
+                old, new = left.rows(word), right.rows(word)
+                # Public C constants: verb, third person, singular, present,
+                # indicative, passive. Require a direct reading, not a preverb lead.
+                def expected(reading):
+                    fields, preverb = reading
+                    return (not preverb and fields[1] == lemma and
+                            tuple(fields[i] for i in (2, 3, 4, 7, 8, 9)) == (2, 3, 1, 1, 4, 2))
+                old_matches, new_matches = sum(map(expected, old)), sum(map(expected, new))
+                if old_matches or not new_matches:
+                    raise ValueError('quoted passive-present coverage differs from the source expectation')
+                grammar = compare_rows(old, new, source_lemmas)
+                if grammar['removed_rows']:
+                    raise ValueError('quoted trial removes previous grammatical readings')
+                totals.update(grammar)
+                totals['witnesses'] += 1
+                totals['before_covered'] += bool(old_matches)
+                totals['after_covered'] += bool(new_matches)
+                totals['expected_readings'] += new_matches
+                private_rows.append(dict(row, before_matches=old_matches,
+                                         after_matches=new_matches, grammatical_multisets=grammar))
+        finally:
+            right.close()
+    finally:
+        left.close()
+    write_private(output, (''.join(json.dumps(row, sort_keys=True) + '\n' for row in private_rows)).encode())
+    return {'counts': dict(sorted(totals.items())), 'signature_fields': list(SIGNATURE),
+            'scope': 'source-quoted third-singular passive present; native options 0',
+            'private_witness_sha256': digest(witness), 'private_control_sha256': digest(output)}
+
+
+def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False, include_coordinated=False):
     forms, library, baseline, stage, tools = (p.resolve() for p in (forms, library, baseline, stage, tools))
     output = output.resolve()
     inputs = [p.resolve() for p in (forms, library, baseline, stage, tools)]
     if (output == REPO or REPO in output.parents or
             any(output == p or p in output.parents or output in p.parents for p in inputs)):
         raise ValueError('private work directory must be outside repository and inputs')
+    include_backlinked = include_backlinked or include_coordinated
     names = ('cited-future-imperative', 'boundary-present', 'vowel-present')
     if include_backlinked:
         names += ('backlinked-present',)
+    if include_coordinated:
+        names += ('coordinated-present',)
     paths = {name: stage / ('verbal-letters-only-' + name + '.stems') for name in names}
     boundary_lemmas = additions(paths[names[0]].read_bytes(), paths[names[1]].read_bytes(), 11)
     vowel_lemmas = additions(paths[names[1]].read_bytes(), paths[names[2]].read_bytes(), 4)
     if include_backlinked:
         backlinked_lemmas = additions(paths[names[2]].read_bytes(), paths[names[3]].read_bytes(), 9)
+    if include_coordinated:
+        coordinated_lemmas = additions(paths[names[3]].read_bytes(), paths[names[4]].read_bytes(), 1)
     output.mkdir(mode=0o700)
     report = {'schema': 1, 'scope': 'verbal present trials with controlled rebuilt nominal witnesses',
               'nominal_policy': 'all baseline nominals unchanged; excludes five private reconstruction decisions',
@@ -224,10 +278,22 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
         report['indexes']['all-quantity-backlinked-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity-backlinked')
         if report['indexes'][names[3]] != report['indexes']['all-quantity-backlinked-present']:
             raise ValueError('backlinked quantity treatments produce different indexes')
+    if include_coordinated:
+        quantity = stage / 'verbal-all-coordinated-present.stems'
+        report['input_sha256']['all-quantity-coordinated-present'] = digest(quantity)
+        report['indexes']['all-quantity-coordinated-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity-coordinated')
+        if report['indexes'][names[4]] != report['indexes']['all-quantity-coordinated-present']:
+            raise ValueError('coordinated quantity treatments produce different indexes')
     for name in names:
         for nominal in ('nomind', 'nomind.lindex'):
             if report['indexes'][name][nominal] != digest(baseline / 'Latin/steminds' / nominal):
                 raise ValueError('nominal witness changed')
+    if include_coordinated:
+        report['source_quote_control'] = source_quote_control(
+            stage / 'coordinated-present-letters-only.witness.jsonl', library,
+            output / names[3], output / names[4], output / 'coordinated-source-quote.jsonl',
+            coordinated_lemmas, digest(paths[names[4]]), digest(stage / 'Latin.headers.jsonl'))
+        print(json.dumps({'research_source_quote_control': report['source_quote_control']}, sort_keys=True), flush=True)
     passes = [('boundary-control', names[1], names[1], None, True),
               ('vowel-control', names[2], names[2], None, True),
               ('boundary-step', names[0], names[1], boundary_lemmas, False),
@@ -236,13 +302,16 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
     if include_backlinked:
         passes += [('backlinked-control', names[3], names[3], None, True),
                    ('backlinked-step', names[2], names[3], backlinked_lemmas, False)]
+    if include_coordinated:
+        passes += [('coordinated-control', names[4], names[4], None, True),
+                   ('coordinated-step', names[3], names[4], coordinated_lemmas, False)]
     for label, old, new, lemmas, identical in passes:
         result = comparison(forms, library, baseline if old is None else output / old,
                             output / new, output / (label + '.jsonl'), lemmas, identical)
         if expected_forms is not None and result['counts']['distinct_forms'] != expected_forms:
             raise ValueError('full comparison form count differs')
-        if label == 'backlinked-step' and result['changed_form_eleven_field_multisets'].get('removed_rows', 0):
-            raise ValueError('backlinked trial removes previous grammatical readings')
+        if label in {'backlinked-step', 'coordinated-step'} and result['changed_form_eleven_field_multisets'].get('removed_rows', 0):
+            raise ValueError(label + ' trial removes previous grammatical readings')
         report['comparisons'][label] = result
         print(json.dumps({'research_comparison': label, 'report': result}, sort_keys=True), flush=True)
     write_private(output / 'report.json', (json.dumps(report, sort_keys=True, indent=2) + '\n').encode())
@@ -255,9 +324,10 @@ def main():
         parser.add_argument('--' + name, required=True, type=Path)
     parser.add_argument('--expected-forms', type=int)
     parser.add_argument('--include-backlinked', action='store_true')
+    parser.add_argument('--include-coordinated', action='store_true')
     args = parser.parse_args()
     qualify(args.forms, args.library, args.baseline, args.stage, args.tools,
-            args.private_output, args.expected_forms, args.include_backlinked)
+            args.private_output, args.expected_forms, args.include_backlinked, args.include_coordinated)
 
 
 if __name__ == '__main__':

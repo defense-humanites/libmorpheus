@@ -81,7 +81,34 @@ comparison in addition to the existing five comparisons. Every changed
 count is reanalyzed under the eleven-field grammatical multiset and native
 preverb provenance control. Removed previous grammatical readings fail this
 new step. Actual lexical outputs remain private; only reports and hashes are
-printed. Full runner results are pending when this trial is first committed.
-The five remaining spellings, coordinated-grammar case, historical identity
-and global reconstruction losses still require their own qualification.
+printed.
+
+The complete Linux run on `6d0a199` passed all seven comparisons on
+**1,033,579** distinct forms, without API errors and with zero changed counts
+in all three same-root controls. The five original reports, their private
+hashes and three indexes reproduce `f9338dc` exactly. The consecutive step
+increases counts on **490** already recognized forms, adds **747** direct
+source-lemma verb readings, retains **922** old eleven-field readings on
+those forms and removes none. It gains and loses no recognized form. The
+runtime recognizes **847,544** inputs and returns **2,100,068** readings.
+
+Linux all-quantity and letter-treatment stem hashes are
+`5a11ca636d4ac9eaac48a69608c4cd474ac943a59b3c2ecb629e44092254dded` and
+`309942cb9bf28580562c1dce26b43b9210089199119f190a87aa6ffa926b12ef`.
+The common verbal index is
+`97fcde5d7da6bc9423f5434f56ff30fb4fc38c1285795bd02a5585ae48d5ecd3`,
+with sidecar
+`5ae0b185886a7b181478ba19631f3d2c80eec5e34905c7103a2354226e2971ae`.
+The same-root and consecutive private comparison hashes are
+`fc99203e0decaba03cf7752dc68e20adbfb451099311f4a80aa4d4d7c3ceb2b2` and
+`9e75aaf4dba4f5e7dedb214ec03beea92479bcf8d2090657bb9c3f485bb8ef52`.
+All three CI workflows are green after targeted retries of jobs cancelled
+before execution. The [full native job](https://github.com/defense-humanites/libmorpheus/actions/runs/37372785571/job/111973821302)
+and [PR summary](https://github.com/defense-humanites/libmorpheus/pull/18)
+record these measurements and remaining global reconstruction losses.
+
+The coordinated-grammar case now has a separate
+[quoted-present trial](latin-coordinated-present-qualification.md).
+The five other spellings, historical inventory identity and global losses
+still require their own qualification.
 The production corpus remains unchanged.

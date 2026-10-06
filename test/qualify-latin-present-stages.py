@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'tools/qualify-latin-present-stages.py'
 spec = importlib.util.spec_from_file_location('qualification', SCRIPT)
@@ -18,6 +18,75 @@ def reading(lemma=b'synthetic', person=1):
 
 
 class Qualification(unittest.TestCase):
+    def quote_fixture(self, parent):
+        witness = parent / 'witness'
+        row = {'schema': 1, 'form': 'azenitur', 'lemma': 'azego',
+               'source_revision': '56061ca127f4a2844980baffc5f2b6d1332897b3',
+               'source_sha256': 'ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee',
+               'candidate_sha256': 'candidate', 'headers_sha256': 'headers'}
+        witness.write_text(json.dumps(row)+'\n')
+        expected = ((b'azenitur', b'azego', 2, 3, 1, 0, 0, 1, 4, 2, 0), b'')
+        return witness, row, expected
+
+    def test_source_quote_preserves_old_readings_and_requires_exact_direct_grammar(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, expected = self.quote_fixture(p)
+            old = (reading(b'other'), b'')
+            left, right = Mock(), Mock()
+            left.rows.return_value = [old]; right.rows.return_value = [old, expected]
+            with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                report = m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+            self.assertEqual(report['counts'], {'added_rows': 1, 'after_covered': 1,
+                'before_covered': 0, 'direct_source_verb': 1, 'expected_readings': 1,
+                'removed_rows': 0, 'retained_rows': 1, 'witnesses': 1})
+            left.close.assert_called_once(); right.close.assert_called_once()
+            self.assertEqual((p/'out').stat().st_mode & 0o777, 0o600)
+
+    def test_source_quote_binding_rejects_wrong_candidate_header_or_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, row, _ = self.quote_fixture(p)
+            for field in ('candidate_sha256', 'headers_sha256', 'source_sha256', 'source_revision'):
+                changed = dict(row); changed[field] = 'wrong'; witness.write_text(json.dumps(changed)+'\n')
+                with patch.object(m, 'NativeRows') as native:
+                    with self.assertRaisesRegex(ValueError, 'bound'):
+                        m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+                    native.assert_not_called()
+                self.assertFalse((p/'out').exists())
+
+    def test_source_quote_rejects_old_coverage_wrong_voice_and_preverb_lead(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, expected = self.quote_fixture(p)
+            wrong_voice = (expected[0][:9]+(1, 0), b'')
+            for old, new in [([expected], [expected]), ([], []),
+                             ([], [wrong_voice]), ([], [(expected[0], b'ex')])]:
+                left, right = Mock(), Mock(); left.rows.return_value = old; right.rows.return_value = new
+                with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                    with self.assertRaisesRegex(ValueError, 'coverage'):
+                        m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+                left.close.assert_called_once(); right.close.assert_called_once()
+                self.assertFalse((p/'out').exists())
+
+    def test_source_quote_removals_and_native_errors_fail_without_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, expected = self.quote_fixture(p)
+            for error in (False, True):
+                left, right = Mock(), Mock(); left.rows.return_value = [(reading(b'other'), b'')]
+                right.rows.return_value = [expected]
+                if error: right.rows.side_effect = ValueError('native reading analysis failed')
+                with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                    with self.assertRaises(ValueError):
+                        m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+                left.close.assert_called_once(); right.close.assert_called_once()
+                self.assertFalse((p/'out').exists())
+
+    def test_source_quote_identity_and_duplicate_witnesses_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, row, _ = self.quote_fixture(p)
+            for records in ([dict(row, lemma='other')], [row, row]):
+                witness.write_text(''.join(json.dumps(r)+'\n' for r in records))
+                with self.assertRaisesRegex(ValueError, 'lemmas'):
+                    m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+
     def test_preserve_multiplicity_and_attribute_changes(self):
         row, changed = reading(), reading(person=2)
         result = m.compare_rows([(row, b'')] * 2, [(row, b''), (changed, b'')], {b'synthetic'})

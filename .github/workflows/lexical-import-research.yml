@@ -505,6 +505,47 @@ jobs:
               --expected 6 --expected-articles 6
           done
 
+      - name: Stage the quoted present with coordinated supines
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-coordinated-present.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-coordinated-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-coordinated-present.stems" \
+              --private-witness "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.witness.jsonl" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-coordinated-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/post-coordinated-$tier.jsonl" \
+              --grammar coordinated-supines --expected 6 --expected-articles 6
+            cmp "$RUNNER_TEMP/latin-full-compounds/post-backlinked-$tier.jsonl" \
+                "$RUNNER_TEMP/latin-full-compounds/post-coordinated-$tier.jsonl"
+          done
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'latin-full-compounds'
+          witnesses = []
+          for tier in ('all', 'letters-only'):
+              rows = [json.loads(row) for row in (stage / ('coordinated-present-' + tier + '.witness.jsonl')).read_text().splitlines()]
+              if len(rows) != 1:
+                  raise ValueError('expected one source quotation witness')
+              witnesses.append([{key: value for key, value in row.items() if key != 'candidate_sha256'} for row in rows])
+          if witnesses[0] != witnesses[1]:
+              raise ValueError('quantity treatments produce different source quotation witnesses')
+          print(json.dumps({'coordinated_present_source_control': {'witnesses': 1, 'quantity_witnesses_equal': True,
+                            'remaining_inventories_unchanged': True}}, sort_keys=True))
+          PY
+
       - name: Replay the latest present trials with controlled nominal witnesses
         shell: bash
         run: |
@@ -537,7 +578,7 @@ jobs:
             --stage "$RUNNER_TEMP/latin-full-compounds" \
             --tools "$RUNNER_TEMP/present-native" \
             --private-output "$RUNNER_TEMP/present-qualification" \
-            --expected-forms 1033579 --include-backlinked
+            --expected-forms 1033579 --include-coordinated
 
   greek-header-filters:
     runs-on: ubuntu-24.04

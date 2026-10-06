@@ -118,6 +118,10 @@ The other five spellings are explicitly supplied in their own headers, but
 that finding does not supply a general edit-distance rule or authorize
 perfect and participial systems. The coordinated grammar case's quotation
 attests its present spelling; it does not resolve handling both supines.
+A separate [quoted-present trial](latin-coordinated-present-qualification.md)
+requires that quotation as a native third-singular passive-present witness,
+with a bounded full-spelling selector and no supine reconstruction. Its source
+count and native results remain to be verified on the pinned source.
 
 The nine reverse-reference cases form a separate
 [present-only trial](latin-backlinked-present-qualification.md). It leaves
