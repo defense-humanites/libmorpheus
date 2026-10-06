@@ -121,7 +121,13 @@ attests its present spelling; it does not resolve handling both supines.
 A separate [quoted-present trial](latin-coordinated-present-qualification.md)
 requires that quotation as a native third-singular passive-present witness,
 with a bounded full-spelling selector and no supine reconstruction. Its source
-count and native results remain to be verified on the pinned source.
+controls passed on `04a88f4`; its native quotation control was too strict
+about prior coverage and is now revised to measure that coverage. Native and
+full replay results for the revised control remain pending.
+The five complete spellings now have a separate
+[bounded-spelling trial](latin-bounded-present-qualification.md), requiring
+five distinct rules, 65 native present cells and the same single withheld
+contextual dossier afterward. These remain CI expectations until qualified.
 
 The nine reverse-reference cases form a separate
 [present-only trial](latin-backlinked-present-qualification.md). It leaves

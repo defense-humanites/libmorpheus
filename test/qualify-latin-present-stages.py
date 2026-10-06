@@ -53,16 +53,85 @@ class Qualification(unittest.TestCase):
                     native.assert_not_called()
                 self.assertFalse((p/'out').exists())
 
-    def test_source_quote_rejects_old_coverage_wrong_voice_and_preverb_lead(self):
+    def test_source_quote_accepts_preexisting_exact_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, expected = self.quote_fixture(p)
+            left, right = Mock(), Mock(); left.rows.return_value = [expected]; right.rows.return_value = [expected]
+            with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                report = m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+            self.assertEqual(report['counts']['before_covered'], 1)
+            self.assertEqual(report['counts']['after_covered'], 1)
+            self.assertEqual(report['counts']['added_rows'], 0)
+            self.assertEqual(report['counts']['removed_rows'], 0)
+
+    def test_source_quote_rejects_missing_coverage_wrong_voice_and_preverb_lead(self):
         with tempfile.TemporaryDirectory() as directory:
             p = Path(directory); witness, _, expected = self.quote_fixture(p)
             wrong_voice = (expected[0][:9]+(1, 0), b'')
-            for old, new in [([expected], [expected]), ([], []),
+            for old, new in [([], []),
                              ([], [wrong_voice]), ([], [(expected[0], b'ex')])]:
                 left, right = Mock(), Mock(); left.rows.return_value = old; right.rows.return_value = new
                 with patch.object(m, 'NativeRows', side_effect=[left, right]):
                     with self.assertRaisesRegex(ValueError, 'coverage'):
                         m.source_quote_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+                left.close.assert_called_once(); right.close.assert_called_once()
+                self.assertFalse((p/'out').exists())
+
+    def family_fixture(self, parent):
+        witness, row, _ = self.quote_fixture(parent)
+        row.pop('form')
+        row['forms'] = [{'form': 'az' + chr(97+i), 'person': person, 'number': number, 'mood': mood}
+                        for i, (person, number, mood) in enumerate(
+                            [(p, n, mood) for mood in (4, 8) for n in (1, 3) for p in (1, 2, 3)] + [(0, 0, 5)])]
+        witness.write_text(json.dumps(row)+'\n')
+        readings = {r['form'].encode(): [((r['form'].encode(), b'azego', 2, r['person'], r['number'],
+                     0, 0, 1, r['mood'], 1, 0), b'')] for r in row['forms']}
+        return witness, row, readings
+
+    def test_family_all_thirteen_cells_and_preexisting_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, readings = self.family_fixture(p)
+            left, right = Mock(), Mock()
+            left.rows.side_effect = lambda word: readings[word] if word == b'aza' else []
+            right.rows.side_effect = lambda word: readings[word]
+            with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                report = m.source_family_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+            self.assertEqual(report['counts']['cells'], 13)
+            self.assertEqual(report['counts']['before_covered'], 1)
+            self.assertEqual(report['counts']['after_covered'], 13)
+            self.assertEqual(report['counts']['added_rows'], 12)
+            self.assertEqual(report['counts']['removed_rows'], 0)
+            self.assertEqual((p/'out').stat().st_mode & 0o777, 0o600)
+
+    def test_family_binding_and_cell_inventory_reject_before_native_analysis(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, row, _ = self.family_fixture(p)
+            invalid = [dict(row, candidate_sha256='wrong'), dict(row, lemma='other'),
+                       dict(row, forms=row['forms'][:-1]), dict(row, forms=[row['forms'][0]]*13)]
+            for changed in invalid:
+                witness.write_text(json.dumps(changed)+'\n')
+                with patch.object(m, 'NativeRows') as native:
+                    with self.assertRaises(ValueError):
+                        m.source_family_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
+                    native.assert_not_called()
+                self.assertFalse((p/'out').exists())
+
+    def test_family_missing_reading_wrong_voice_preverb_and_removals_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p = Path(directory); witness, _, readings = self.family_fixture(p)
+            for mode in ('missing', 'voice', 'preverb', 'removed', 'api'):
+                left, right = Mock(), Mock(); left.rows.return_value = [(reading(b'other'), b'')] if mode == 'removed' else []
+                def after(word):
+                    expected = readings[word][0]
+                    if mode == 'api': raise ValueError('native reading analysis failed')
+                    if mode == 'missing': return []
+                    if mode == 'voice': return [(expected[0][:9] + (2, 0), b'')]
+                    if mode == 'preverb': return [(expected[0], b'ex')]
+                    return [expected]
+                right.rows.side_effect = after
+                with patch.object(m, 'NativeRows', side_effect=[left, right]):
+                    with self.assertRaises(ValueError):
+                        m.source_family_control(witness, None, None, None, p/'out', {b'azego'}, 'candidate', 'headers')
                 left.close.assert_called_once(); right.close.assert_called_once()
                 self.assertFalse((p/'out').exists())
 

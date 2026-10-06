@@ -216,7 +216,7 @@ def source_quote_control(witness, library, before, after, output, source_lemmas,
                     return (not preverb and fields[1] == lemma and
                             tuple(fields[i] for i in (2, 3, 4, 7, 8, 9)) == (2, 3, 1, 1, 4, 2))
                 old_matches, new_matches = sum(map(expected, old)), sum(map(expected, new))
-                if old_matches or not new_matches:
+                if not new_matches:
                     raise ValueError('quoted passive-present coverage differs from the source expectation')
                 grammar = compare_rows(old, new, source_lemmas)
                 if grammar['removed_rows']:
@@ -238,19 +238,78 @@ def source_quote_control(witness, library, before, after, output, source_lemmas,
             'private_witness_sha256': digest(witness), 'private_control_sha256': digest(output)}
 
 
-def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False, include_coordinated=False):
+def source_family_control(witness, library, before, after, output, source_lemmas, candidate_hash, headers_hash):
+    records = [json.loads(line) for line in witness.read_text().splitlines() if line]
+    cells = {(person, number, mood) for mood in (4, 8) for number in (1, 3) for person in (1, 2, 3)} | {(0, 0, 5)}
+    if (len(records) != len(source_lemmas) or
+            {row['lemma'].encode() for row in records} != source_lemmas):
+        raise ValueError('present families differ from inserted source lemmas')
+    for row in records:
+        forms = row.get('forms', [])
+        if (row.get('schema') != 1 or
+                row.get('source_revision') != '56061ca127f4a2844980baffc5f2b6d1332897b3' or
+                row.get('source_sha256') != 'ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee' or
+                row.get('candidate_sha256') != candidate_hash or row.get('headers_sha256') != headers_hash):
+            raise ValueError('present family is not bound to the selected source and candidate')
+        if (len(forms) != 13 or len({r['form'] for r in forms}) != 13 or
+                {(r['person'], r['number'], r['mood']) for r in forms} != cells or
+                any(not re.fullmatch(r'[a-z]+', r['form']) for r in forms)):
+            raise ValueError('present family must contain all thirteen distinct active cells')
+    totals = Counter()
+    private_rows = []
+    left = NativeRows(library, before)
+    try:
+        right = NativeRows(library, after)
+        try:
+            for row in records:
+                lemma = row['lemma'].encode()
+                totals['source_families'] += 1
+                for cell in row['forms']:
+                    old, new = left.rows(cell['form'].encode()), right.rows(cell['form'].encode())
+                    def expected(reading):
+                        fields, preverb = reading
+                        return (not preverb and fields[1] == lemma and
+                                tuple(fields[i] for i in (2, 3, 4, 7, 8, 9)) ==
+                                (2, cell['person'], cell['number'], 1, cell['mood'], 1))
+                    old_matches, new_matches = sum(map(expected, old)), sum(map(expected, new))
+                    if not new_matches:
+                        raise ValueError('active present-family coverage differs from the source expectation')
+                    grammar = compare_rows(old, new, source_lemmas)
+                    if grammar['removed_rows']:
+                        raise ValueError('present-family trial removes previous grammatical readings')
+                    totals.update(grammar)
+                    totals['cells'] += 1
+                    totals['before_covered'] += bool(old_matches)
+                    totals['after_covered'] += bool(new_matches)
+                    totals['expected_readings'] += new_matches
+                    private_rows.append({'lemma': row['lemma'], **cell, 'before_matches': old_matches,
+                                         'after_matches': new_matches, 'grammatical_multisets': grammar})
+        finally:
+            right.close()
+    finally:
+        left.close()
+    write_private(output, (''.join(json.dumps(row, sort_keys=True) + '\n' for row in private_rows)).encode())
+    return {'counts': dict(sorted(totals.items())), 'signature_fields': list(SIGNATURE),
+            'scope': 'six indicative, six subjunctive and one infinitive active present per source alternate; native options 0',
+            'private_witness_sha256': digest(witness), 'private_control_sha256': digest(output)}
+
+
+def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False, include_coordinated=False, include_bounded=False):
     forms, library, baseline, stage, tools = (p.resolve() for p in (forms, library, baseline, stage, tools))
     output = output.resolve()
     inputs = [p.resolve() for p in (forms, library, baseline, stage, tools)]
     if (output == REPO or REPO in output.parents or
             any(output == p or p in output.parents or output in p.parents for p in inputs)):
         raise ValueError('private work directory must be outside repository and inputs')
+    include_coordinated = include_coordinated or include_bounded
     include_backlinked = include_backlinked or include_coordinated
     names = ('cited-future-imperative', 'boundary-present', 'vowel-present')
     if include_backlinked:
         names += ('backlinked-present',)
     if include_coordinated:
         names += ('coordinated-present',)
+    if include_bounded:
+        names += ('bounded-present',)
     paths = {name: stage / ('verbal-letters-only-' + name + '.stems') for name in names}
     boundary_lemmas = additions(paths[names[0]].read_bytes(), paths[names[1]].read_bytes(), 11)
     vowel_lemmas = additions(paths[names[1]].read_bytes(), paths[names[2]].read_bytes(), 4)
@@ -258,6 +317,8 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
         backlinked_lemmas = additions(paths[names[2]].read_bytes(), paths[names[3]].read_bytes(), 9)
     if include_coordinated:
         coordinated_lemmas = additions(paths[names[3]].read_bytes(), paths[names[4]].read_bytes(), 1)
+    if include_bounded:
+        bounded_lemmas = additions(paths[names[4]].read_bytes(), paths[names[5]].read_bytes(), 5)
     output.mkdir(mode=0o700)
     report = {'schema': 1, 'scope': 'verbal present trials with controlled rebuilt nominal witnesses',
               'nominal_policy': 'all baseline nominals unchanged; excludes five private reconstruction decisions',
@@ -284,6 +345,12 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
         report['indexes']['all-quantity-coordinated-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity-coordinated')
         if report['indexes'][names[4]] != report['indexes']['all-quantity-coordinated-present']:
             raise ValueError('coordinated quantity treatments produce different indexes')
+    if include_bounded:
+        quantity = stage / 'verbal-all-bounded-present.stems'
+        report['input_sha256']['all-quantity-bounded-present'] = digest(quantity)
+        report['indexes']['all-quantity-bounded-present'] = build_trial(baseline, quantity, tools, output / 'all-quantity-bounded')
+        if report['indexes'][names[5]] != report['indexes']['all-quantity-bounded-present']:
+            raise ValueError('bounded quantity treatments produce different indexes')
     for name in names:
         for nominal in ('nomind', 'nomind.lindex'):
             if report['indexes'][name][nominal] != digest(baseline / 'Latin/steminds' / nominal):
@@ -294,6 +361,12 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
             output / names[3], output / names[4], output / 'coordinated-source-quote.jsonl',
             coordinated_lemmas, digest(paths[names[4]]), digest(stage / 'Latin.headers.jsonl'))
         print(json.dumps({'research_source_quote_control': report['source_quote_control']}, sort_keys=True), flush=True)
+    if include_bounded:
+        report['source_family_control'] = source_family_control(
+            stage / 'bounded-present-letters-only.witness.jsonl', library,
+            output / names[4], output / names[5], output / 'bounded-source-families.jsonl',
+            bounded_lemmas, digest(paths[names[5]]), digest(stage / 'Latin.headers.jsonl'))
+        print(json.dumps({'research_source_family_control': report['source_family_control']}, sort_keys=True), flush=True)
     passes = [('boundary-control', names[1], names[1], None, True),
               ('vowel-control', names[2], names[2], None, True),
               ('boundary-step', names[0], names[1], boundary_lemmas, False),
@@ -305,12 +378,15 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
     if include_coordinated:
         passes += [('coordinated-control', names[4], names[4], None, True),
                    ('coordinated-step', names[3], names[4], coordinated_lemmas, False)]
+    if include_bounded:
+        passes += [('bounded-control', names[5], names[5], None, True),
+                   ('bounded-step', names[4], names[5], bounded_lemmas, False)]
     for label, old, new, lemmas, identical in passes:
         result = comparison(forms, library, baseline if old is None else output / old,
                             output / new, output / (label + '.jsonl'), lemmas, identical)
         if expected_forms is not None and result['counts']['distinct_forms'] != expected_forms:
             raise ValueError('full comparison form count differs')
-        if label in {'backlinked-step', 'coordinated-step'} and result['changed_form_eleven_field_multisets'].get('removed_rows', 0):
+        if label in {'backlinked-step', 'coordinated-step', 'bounded-step'} and result['changed_form_eleven_field_multisets'].get('removed_rows', 0):
             raise ValueError(label + ' trial removes previous grammatical readings')
         report['comparisons'][label] = result
         print(json.dumps({'research_comparison': label, 'report': result}, sort_keys=True), flush=True)
@@ -325,9 +401,10 @@ def main():
     parser.add_argument('--expected-forms', type=int)
     parser.add_argument('--include-backlinked', action='store_true')
     parser.add_argument('--include-coordinated', action='store_true')
+    parser.add_argument('--include-bounded', action='store_true')
     args = parser.parse_args()
     qualify(args.forms, args.library, args.baseline, args.stage, args.tools,
-            args.private_output, args.expected_forms, args.include_backlinked, args.include_coordinated)
+            args.private_output, args.expected_forms, args.include_backlinked, args.include_coordinated, args.include_bounded)
 
 
 if __name__ == '__main__':

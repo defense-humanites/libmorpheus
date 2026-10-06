@@ -4,6 +4,7 @@
 import contextlib
 import importlib.util
 import io
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -19,6 +20,47 @@ LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorp
 
 
 class NativeQualification(unittest.TestCase):
+    def witness(self, lemma, candidate):
+        return {'schema': 1, 'lemma': lemma,
+                'source_revision': '56061ca127f4a2844980baffc5f2b6d1332897b3',
+                'source_sha256': 'ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee',
+                'candidate_sha256': m.digest(candidate), 'headers_sha256': 'synthetic-headers'}
+
+    def test_native_quote_covers_new_and_preexisting_direct_passive_readings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); source = root/'source'
+            source.write_bytes(b':le:zzlemma\n:vs:zzalternz conj3 orth\n')
+            m.build_trial(BASELINE, source, BUILD, root/'trial')
+            row = dict(self.witness('zzlemma', source), form='zzalternzitur')
+            witness = root/'witness'; witness.write_text(json.dumps(row)+'\n')
+            for name, before, covered in [('new', BASELINE, 0), ('existing', root/'trial', 1)]:
+                report = m.source_quote_control(witness, LIBRARY, before, root/'trial', root/name,
+                                                {b'zzlemma'}, m.digest(source), 'synthetic-headers')
+                self.assertEqual(report['counts']['before_covered'], covered)
+                self.assertEqual(report['counts']['after_covered'], 1)
+                self.assertEqual(report['counts']['removed_rows'], 0)
+
+    def test_native_active_families_cover_both_class_three_subclasses(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); source = root/'source'
+            source.write_bytes(b':le:zzlemmaa\n:vs:zzalternz conj3 orth\n:le:zzlemmab\n:vs:zzalternb conj3_io orth\n')
+            m.build_trial(BASELINE, source, BUILD, root/'trial')
+            records = []
+            for io, lemma, stem in [(False, 'zzlemmaa', 'zzalternz'), (True, 'zzlemmab', 'zzalternb')]:
+                forms = []
+                for mood, endings in [(4, ['io' if io else 'o', 'is', 'it', 'imus', 'itis', 'iunt' if io else 'unt']),
+                                      (8, ['iam', 'ias', 'iat', 'iamus', 'iatis', 'iant'] if io else ['am', 'as', 'at', 'amus', 'atis', 'ant'])]:
+                    for i, suffix in enumerate(endings):
+                        forms.append({'form': stem+suffix, 'person': i % 3 + 1, 'number': 1 if i < 3 else 3, 'mood': mood})
+                forms.append({'form': stem+'ere', 'person': 0, 'number': 0, 'mood': 5})
+                records.append(dict(self.witness(lemma, source), forms=forms))
+            witness = root/'witness'; witness.write_text(''.join(json.dumps(row)+'\n' for row in records))
+            report = m.source_family_control(witness, LIBRARY, BASELINE, root/'trial', root/'output',
+                                              {b'zzlemmaa', b'zzlemmab'}, m.digest(source), 'synthetic-headers')
+            self.assertEqual(report['counts']['before_covered'], 0)
+            self.assertEqual(report['counts']['after_covered'], 26)
+            self.assertEqual(report['counts']['removed_rows'], 0)
+
     def test_controlled_source_replays_exact_indexes_and_abi_readings(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

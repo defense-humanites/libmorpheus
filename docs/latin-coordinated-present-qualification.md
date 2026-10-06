@@ -46,21 +46,33 @@ under the eleven-field grammatical multiset; removing previous readings fails
 the trial. The five-pass default and explicit seven-pass option remain.
 
 A native control also analyzes the source quotation independently of LISTALL
-membership. Before insertion it must have no direct source-lemma reading
-with verb POS, third person, singular, present, indicative and passive voice;
-after insertion it must have that exact reading. A native preverb lead cannot
+membership. It records coverage before insertion and requires a direct
+source-lemma reading after insertion with verb POS, third person, singular,
+present, indicative and passive voice. Existing coverage is retained rather
+than reported as a new gain. A native preverb lead cannot
 satisfy it. Wrong candidate/header/source bindings, API errors and removed
 previous eleven-field readings fail. Other analysis attributes and
 unchanged-count forms remain outside the multiset control.
 
-Seven new source tests and five new native-control unit tests pass locally;
-the seven existing replay tests also pass. They exercise quotation boundaries,
+Seven source tests and the native-control unit tests pass locally.
+They exercise quotation boundaries,
 Unicode quantities, entities, grammar/voice/subclass and ambiguity exclusions,
 idempotence, preserved bytes, witness binding, exact native grammar, preverbs,
-errors, removals and private output. Source and full native runner results are
-pending at this commit.
+errors, removals and private output.
+
+The pinned-source run on `04a88f4` passed the expected single insertion,
+quantity witness agreement and exact unchanged six-dossier inventory.
+Both native indexes also remained identical to the reverse-reference stage.
+Its replay failed before LISTALL because the first version of the quotation
+control required zero prior coverage. The retained baseline verbal assembly
+already contains a matching present stem. The revised control therefore
+reports prior coverage and still requires the exact direct grammatical
+reading afterward, while rejecting errors and removed readings. Synthetic
+native tests exercise both newly covered and already covered quotations.
+The revised native and full replay results remain pending.
 
 Only tools, synthetic fixtures, counts and fingerprints are published. Actual
 quotations, forms, lemmas and candidate records stay in private runner paths.
 The production corpus remains unchanged. This trial authorizes neither supine,
-the five other pending spellings nor the contextually abbreviated component.
+the five other spellings nor the contextually abbreviated component.
+The former have a separate [bounded-spelling trial](latin-bounded-present-qualification.md).
