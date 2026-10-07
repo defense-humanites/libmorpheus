@@ -603,6 +603,7 @@ jobs:
           python3 test/qualify-latin-present-stages.py
           python3 test/audit-latin-global-readings.py
           python3 test/diagnose-latin-lost-stems.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-missing-definitions.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
@@ -688,6 +689,24 @@ jobs:
             --private-output "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
             --expected-forms 6789 --expected-lemmas 133 --expected-rows 11005 \
             --expected-difference-sha256 08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52
+
+      - name: Review missing Latin definitions with isolated historical source replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-missing-definitions.py \
+            --dossier "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --final-expanded "$RUNNER_TEMP/present-qualification/bounded-present/Latin/lexical/present-trial.expanded" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --private-output "$RUNNER_TEMP/latin-missing-definition-review.jsonl" \
+            --expected-lemmas 30 --expected-rows 2672 \
+            --expected-dossier-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940
 
   greek-header-filters:
     runs-on: ubuntu-24.04
