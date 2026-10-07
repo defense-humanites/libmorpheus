@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Review of complete losses without final definitions
 
 `tools/review-latin-missing-definitions.py` selects the 30 literal lemmas
