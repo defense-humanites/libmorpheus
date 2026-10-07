@@ -76,7 +76,7 @@ def stem_match(stem, before, after):
     return 'baseline_stem_unmatched'
 
 
-def source_index(rows, entries):
+def source_index(rows, entries, classifier=None):
     result = defaultdict(dict)
     for row in rows:
         if row.get('projection_error') is not None:
@@ -86,7 +86,8 @@ def source_index(rows, entries):
         for lemma, kind in names:
             if lemma is not None:
                 choice = result[lemma.encode()].setdefault(row['id'],
-                    {'row': row, 'entry': entries[row['id']], 'join_routes': []})
+                    {'row': row, 'entry': entries[row['id']], 'join_routes': [],
+                     'partition': classifier(row)[0] if classifier else 'unclassified'})
                 if kind not in choice['join_routes']:
                     choice['join_routes'].append(kind)
     return result
@@ -108,7 +109,7 @@ def grouped(counter, fields):
 
 def diagnose(differences, left, right, old_defs, new_defs, substituted, retained, sources,
              output, article_details):
-    groups, states, matches, joins, membership = (Counter() for _ in range(5))
+    groups, states, matches, joins, membership, partitions = (Counter() for _ in range(6))
     lemmas, seen = {}, set()
     forms = rows_total = nonverbal = 0
     with differences.open('rb') as stream:
@@ -142,13 +143,16 @@ def diagnose(differences, left, right, old_defs, new_defs, substituted, retained
                 state, match = definition_state(before, after), stem_match(row.stem, before, after)
                 choices = sources.get(lemma, {})
                 join = 'unique_article' if len(choices) == 1 else 'ambiguous_articles' if choices else 'no_article_join'
+                partition = (next(iter(choices.values())).get('partition', 'unclassified')
+                             if len(choices) == 1 else join)
                 origin = 'native_preverb' if row.preverb else 'direct'
                 present, kept = lemma in substituted, lemma in retained
                 membership[(present, kept)] += 1
                 states[state] += 1
                 matches[match] += 1
                 joins[join] += 1
-                groups[(row.part_of_speech, row.tense, origin, state, match, join, present, kept)] += 1
+                partitions[partition] += 1
+                groups[(row.part_of_speech, row.tense, origin, state, match, join, partition, present, kept)] += 1
                 if row.part_of_speech != 2:
                     nonverbal += 1
                 if lemma not in lemmas:
@@ -156,7 +160,8 @@ def diagnose(differences, left, right, old_defs, new_defs, substituted, retained
                         'in_substituted_source': present, 'in_retained_sources': kept,
                         'baseline_definitions': [{'line': decoded(line), 'multiplicity': n} for line, n in sorted(before.items())],
                         'final_definitions': [{'line': decoded(line), 'multiplicity': n} for line, n in sorted(after.items())],
-                        'source_join': join, 'articles': [article_details(c) for _, c in sorted(choices.items())]}
+                        'source_join': join, 'source_partition': partition,
+                        'articles': [article_details(c) for _, c in sorted(choices.items())]}
                 details.append({'signature': [decoded(v) for v in signature(row)],
                                 'stem_match': match,
                                 **{f: decoded(getattr(row, f)) for f in ('preverb', 'raw_preverb', 'stem', 'suffix', 'ending')}})
@@ -165,14 +170,16 @@ def diagnose(differences, left, right, old_defs, new_defs, substituted, retained
         output.write(json.dumps({'kind': 'lemma_review', **dossier}, sort_keys=True)+'\n')
     lemma_states = Counter(v['definition_state'] for v in lemmas.values())
     lemma_joins = Counter(v['source_join'] for v in lemmas.values())
+    lemma_partitions = Counter(v['source_partition'] for v in lemmas.values())
     return {'schema': 1, 'scope': 'complete losses only; literal definitions and stem/source review leads; no repair approval',
             'counts': {'forms': forms, 'readings': rows_total, 'distinct_lemmas': len(lemmas), 'nonverbal_readings': nonverbal},
             'definition_states': {'readings': dict(sorted(states.items())), 'lemmas': dict(sorted(lemma_states.items()))},
             'stem_matches_by_readings': dict(sorted(matches.items())),
             'source_joins': {'readings': dict(sorted(joins.items())), 'lemmas': dict(sorted(lemma_joins.items()))},
+            'source_partitions': {'readings': dict(sorted(partitions.items())), 'lemmas': dict(sorted(lemma_partitions.items()))},
             'source_membership_by_readings': grouped(membership, ('in_substituted_source', 'in_retained_sources')),
             'reading_groups': grouped(groups, ('part_of_speech', 'tense', 'provenance', 'definition_state',
-                'stem_match', 'source_join', 'in_substituted_source', 'in_retained_sources'))}
+                'stem_match', 'source_join', 'source_partition', 'in_substituted_source', 'in_retained_sources'))}
 
 
 def private_target(output, inputs):
@@ -216,7 +223,7 @@ def prepare(args):
     entries, checked_source, checked_revision = first.review.load_entries(args.lexica)
     if source != checked_source or revision != checked_revision:
         raise ValueError('source changed during loss review')
-    sources = source_index(headers, entries)
+    sources = source_index(headers, entries, first.review.partition.classify)
     target = private_target(args.private_output, [args.comparison_dir, args.baseline, args.candidate,
         args.candidate_source, args.headers, args.lexica, args.library, source])
     from lxml import etree

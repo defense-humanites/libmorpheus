@@ -56,6 +56,9 @@ by the Latin filters. It keeps the join route, preserves homograph suffixes,
 and deduplicates routes to the same article. Multiple articles are retained
 as an ambiguity; no article is chosen by guesswork. Entries with projection
 errors are not silently used as valid joins.
+Unique joins are also grouped by the existing research header partition
+(verbal, nominal or participial). That partition is a review signal, not a
+replacement for the unavailable historical selector or a linguistic verdict.
 
 The owner-only dossier contains the lost forms and native readings, expanded
 definitions under each lemma, source routes, projected headers, partition

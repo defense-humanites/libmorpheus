@@ -45,14 +45,16 @@ class LossDiagnostics(unittest.TestCase):
                 {'form':'unchanged_count', 'curated_count':1, 'rebuilt_count':1})+'\n')
             old={b'zzlemma':m.Counter({b':vs:zzstem conj3':2}), b'zzother':m.Counter({b':vs:zzroot perfstem':1})}
             new={b'zzlemma':m.Counter({b':vs:zzstem conj3':1})}
-            source={b'zzlemma':{'entry1':{'id':'entry1'}, 'entry2':{'id':'entry2'}}}
+            source={b'zzlemma':{'entry1':{'id':'entry1'}, 'entry2':{'id':'entry2'}},
+                    b'zzother':{'entry3':{'id':'entry3','partition':'verbal'}}}
             left,right=Analyzer({b'zzform':[a,a,b]}),Analyzer({})
             output=io.StringIO()
             report=m.diagnose(diff,left,right,old,new,{b'zzlemma'}, {b'zzother'},source,output,lambda x:x)
             self.assertEqual(report['counts'], {'forms':1,'readings':3,'distinct_lemmas':2,'nonverbal_readings':0})
             self.assertEqual(report['definition_states']['readings'], {'changed_definition_multisets':2,'no_final_definitions':1})
             self.assertEqual(report['stem_matches_by_readings'], {'baseline_exact__final_exact':2,'baseline_exact__final_no_exact':1})
-            self.assertEqual(report['source_joins']['readings'],{'ambiguous_articles':2,'no_article_join':1})
+            self.assertEqual(report['source_joins']['readings'],{'ambiguous_articles':2,'unique_article':1})
+            self.assertEqual(report['source_partitions']['readings'],{'ambiguous_articles':2,'verbal':1})
             self.assertEqual(sum(r['rows'] for r in report['reading_groups']),3)
             self.assertEqual(left.calls,[b'zzform']); self.assertEqual(right.calls,left.calls)
             public=json.dumps(report)
@@ -87,10 +89,11 @@ class LossDiagnostics(unittest.TestCase):
         rows=[{'id':'one','lemma':'zzkey#2','headword':'zz-he_ad#2','projection_error':None},
               {'id':'two','lemma':'zzhead#2','headword':'zzother#2','projection_error':None},
               {'id':'bad','lemma':None,'headword':None,'projection_error':'unsupported'}]
-        sources=m.source_index(rows,{'one':object(),'two':object()})
+        sources=m.source_index(rows,{'one':object(),'two':object()},lambda r:('nominal','synthetic'))
         self.assertEqual(set(sources[b'zzhead#2']),{'one','two'})
         self.assertNotIn(b'zzhead',sources)
         self.assertEqual(sources[b'zzkey#2']['one']['join_routes'],['projected_key'])
+        self.assertEqual(sources[b'zzkey#2']['one']['partition'],'nominal')
 
     def test_changed_native_counts_signatures_api_errors_or_candidate_coverage_abort(self):
         with tempfile.TemporaryDirectory() as directory:
