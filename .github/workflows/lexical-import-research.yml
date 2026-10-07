@@ -604,6 +604,7 @@ jobs:
           python3 test/audit-latin-global-readings.py
           python3 test/diagnose-latin-lost-stems.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-missing-definitions.py
+          python3 test/probe-latin-terminal-conjugation.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
@@ -707,6 +708,30 @@ jobs:
             --expected-dossier-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
             --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
             --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940
+
+      - name: Probe seven explicit terminal conjugation digits without changing the final candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/probe-latin-terminal-conjugation.py \
+            --review-dossier "$RUNNER_TEMP/latin-missing-definition-review.jsonl" \
+            --loss-dossier "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --output "$RUNNER_TEMP/latin-terminal-conjugation-probe" \
+            --expected-lemmas 7 --expected-rows 928 \
+            --expected-review-sha256 0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc \
+            --expected-loss-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-baseline-expanded-sha256 f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3
 
   greek-header-filters:
     runs-on: ubuntu-24.04

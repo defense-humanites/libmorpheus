@@ -26,6 +26,30 @@ LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorp
 
 
 class NativeQualification(unittest.TestCase):
+    def test_terminal_conjugation_counterfactual_uses_source_headword_and_exact_lost_signature(self):
+        terminal_spec = importlib.util.spec_from_file_location('terminal', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
+        terminal = importlib.util.module_from_spec(terminal_spec)
+        terminal_spec.loader.exec_module(terminal)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, source_text in [('missing', ':le:zzunrelated\n:vs:zzotherz conj3\n'),
+                                     ('supplied', ':le:zzsourcezo\n:vs:zzsourcez conj3\n')]:
+                source = root / (name + '.stems'); source.write_text(source_text)
+                m.build_trial(BASELINE, source, BUILD, root / name)
+            before = m.NativeRows(LIBRARY, root / 'missing')
+            after = m.NativeRows(LIBRARY, root / 'supplied')
+            try:
+                case = {'lemma': 'zzsourcezo', 'header': {'headword': 'zzsourcezo'}}
+                probe = terminal.source_headword_probe(case, before, after)
+                self.assertEqual(probe['before_expected'], 0)
+                self.assertEqual(probe['after_expected'], 1)
+                expected = terminal.Counter(map(losses.signature, after.analyses(b'zzsourcezo', require_untruncated=True)))
+                report = terminal.probe_losses({b'zzsourcezo': expected}, after, before, after, io.StringIO())
+                self.assertEqual(report['counts']['recovered_exact_readings'], sum(expected.values()))
+                self.assertEqual(report['counts']['still_missing_exact_readings'], 0)
+            finally:
+                after.close(); before.close()
+
     def test_complete_loss_reprobes_native_stem_and_expanded_definitions(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
