@@ -23,15 +23,16 @@ class Qualification(unittest.TestCase):
         def analyze(context,word,length,options,result):
             result._obj.value=1
             return 0
-        def get(result,index,row,size):
+        def get(result,index,row):
             row._obj.lemma=b'zzlemma'; row._obj.stem=b'zzstem'
             return 0
         native.api.morpheus_analyze.side_effect=analyze
-        native.api.morpheus_result_count.return_value=1
+        native.api.morpheus_result_count.return_value=2
         native.api.morpheus_result_get.side_effect=get
         for mask,should_fail in [(1,False),(1<<5,True),(1<<2,True)]:
-            def truncated(result,value):
-                value._obj.value=mask
+            def truncated(result,index,value):
+                self.assertIn(index,(0,1))
+                value._obj.value=mask if index == 1 else 0
                 return 0
             native.api.morpheus_result_truncated_fields.side_effect=truncated
             native.api.morpheus_result_free.reset_mock()
@@ -40,6 +41,7 @@ class Qualification(unittest.TestCase):
                     native.analyses(b'zzform',require_untruncated=True)
             else:
                 self.assertEqual(native.analyses(b'zzform',require_untruncated=True)[0].stem,b'zzstem')
+                self.assertEqual([c.args[1] for c in native.api.morpheus_result_truncated_fields.call_args_list[-2:]],[0,1])
             native.api.morpheus_result_free.assert_called_once()
 
     def quote_fixture(self, parent):

@@ -38,7 +38,7 @@ class NativeRows(listall.NativeAnalyzer):
         super().__init__(library, stemlib)
         self.api.morpheus_analysis_size.restype = ctypes.c_size_t
         self.api.morpheus_result_get.argtypes = [ctypes.c_void_p, ctypes.c_size_t,
-                                                ctypes.c_void_p, ctypes.c_size_t]
+                                                ctypes.c_void_p]
         self.api.morpheus_result_get.restype = ctypes.c_int
         if self.api.morpheus_analysis_size() != ctypes.sizeof(Analysis):
             self.close()
@@ -51,19 +51,20 @@ class NativeRows(listall.NativeAnalyzer):
             if status or not result:
                 raise ValueError('native reading analysis failed')
             if require_untruncated:
-                self.api.morpheus_result_truncated_fields.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32)]
+                self.api.morpheus_result_truncated_fields.argtypes = [ctypes.c_void_p, ctypes.c_size_t,
+                                                                     ctypes.POINTER(ctypes.c_uint32)]
                 self.api.morpheus_result_truncated_fields.restype = ctypes.c_int
-                truncated = ctypes.c_uint32()
-                # Only the text used by the loss diagnostic must be complete.
-                # A truncated display-only raw analysis does not affect it.
-                used_fields = sum(1 << bit for bit in (1, 2, 3, 5, 6, 7, 11))
-                if self.api.morpheus_result_truncated_fields(result, ctypes.byref(truncated)) or truncated.value & used_fields:
-                    raise ValueError('native loss diagnostic has truncated text')
             rows = []
             for index in range(self.api.morpheus_result_count(result)):
                 row = Analysis()
-                if self.api.morpheus_result_get(result, index, ctypes.byref(row), ctypes.sizeof(row)):
+                if self.api.morpheus_result_get(result, index, ctypes.byref(row)):
                     raise ValueError('native structured reading failed')
+                if require_untruncated:
+                    truncated = ctypes.c_uint32()
+                    # Inspect each analysis; only text used by this diagnostic.
+                    used_fields = sum(1 << bit for bit in (1, 2, 3, 5, 6, 7, 11))
+                    if self.api.morpheus_result_truncated_fields(result, index, ctypes.byref(truncated)) or truncated.value & used_fields:
+                        raise ValueError('native loss diagnostic has truncated text')
                 rows.append(row)
             return rows
         finally:
