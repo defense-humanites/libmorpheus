@@ -133,5 +133,22 @@ class TerminalConjugation(unittest.TestCase):
                 path.write_text(''.join(json.dumps(r)+'\n' for r in rows))
                 with self.assertRaises(ValueError): m.select_cases(path)
 
+    def test_regular_perfect_aliases_are_not_unknown_or_present(self):
+        for tag in (b'avperf', b'evperf', b'ivperf', b'perfstem'):
+            self.assertEqual(m.definition_type(b':vs:zzstem ' + tag), 'perfect')
+            with self.assertRaises(ValueError): m.definition_type(b':vs:zzstem conj1 ' + tag)
+
+    def test_present_isolation_preserves_literal_directive_without_derivative_or_past(self):
+        case = {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}}
+        present = b':vs:zzroot conj3_io dep'
+        expanded = {b'zzlemma': Counter({present: 1, b':vs:zzperf ivperf': 1,
+                                       b':vs:zzsup pp4': 1, b':wd:zzword unknown': 1})}
+        selected = m.present_cases(expanded, [case])
+        self.assertEqual(selected[0]['counterfactual_definitions'], {b'zzlemma': Counter({present: 1})})
+        self.assertEqual(case, {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}})
+        for records in ({}, {present: 2}, {present: 1, b':vs:zzother conj3': 1},
+                        {b':de:zzroot conj3': 1}, {b':vs:zzperf ivperf': 1}):
+            with self.assertRaises(ValueError): m.present_cases({b'zzlemma': Counter(records)}, [case])
+
 
 if __name__ == '__main__': unittest.main()

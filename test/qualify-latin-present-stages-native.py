@@ -26,6 +26,31 @@ LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorp
 
 
 class NativeQualification(unittest.TestCase):
+    def test_present_isolation_rebuilds_without_regular_perfect_alias(self):
+        terminal_spec = importlib.util.spec_from_file_location('terminal_isolation', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
+        terminal = importlib.util.module_from_spec(terminal_spec)
+        terminal_spec.loader.exec_module(terminal)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / 'full.stems'
+            source.write_bytes(b':le:zzsourcezo\n:vs:zzsourcez conj3\n:vs:zzpastz avperf\n')
+            m.build_trial(BASELINE, source, BUILD, root / 'full')
+            expanded = losses.definitions(root / 'full/Latin/lexical/present-trial.expanded')
+            cases = terminal.present_cases(expanded, [{'lemma': 'zzsourcezo'}])
+            isolated = root / 'present.stems'
+            isolated.write_bytes(terminal.candidate_payload(b'', cases))
+            m.build_trial(BASELINE, isolated, BUILD, root / 'present')
+            profile = terminal.expanded_profiles(losses.definitions(root / 'present/Latin/lexical/present-trial.expanded'), ['zzsourcezo'])
+            self.assertEqual(profile, {'present': 1})
+            full = m.NativeRows(LIBRARY, root / 'full')
+            present = m.NativeRows(LIBRARY, root / 'present')
+            try:
+                self.assertTrue(any(r.lemma == b'zzsourcezo' for r in full.analyses(b'zzpastzavi', require_untruncated=True)))
+                self.assertFalse(any(r.lemma == b'zzsourcezo' for r in present.analyses(b'zzpastzavi', require_untruncated=True)))
+                self.assertTrue(any(r.lemma == b'zzsourcezo' for r in present.analyses(b'zzsourcezo', require_untruncated=True)))
+            finally:
+                present.close(); full.close()
+
     def test_terminal_conjugation_counterfactual_uses_source_headword_and_exact_lost_signature(self):
         terminal_spec = importlib.util.spec_from_file_location('terminal', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
         terminal = importlib.util.module_from_spec(terminal_spec)

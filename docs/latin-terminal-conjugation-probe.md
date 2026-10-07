@@ -41,6 +41,25 @@ must not be promoted to a recovery merely because a source headword or lost
 form becomes recognized. This experiment does not establish a complete
 paradigm or global absence of regressions.
 
+A second private assembly isolates exactly one literal `:vs:` present
+directive per selected lemma from the first counterfactual's expansion.
+It preserves the directive bytes and flags, excludes all derivative
+directives, and never copies baseline witness stems. Ambiguous, missing,
+duplicated or non-verbal present directives abort the experiment. The
+classifier includes `perfstem`, `avperf`, `evperf` and `ivperf` as perfect
+classes, following the repository's Latin ending tables; conflicting
+class tags are rejected rather than resolved by precedence.
+
+The second expansion must contain precisely seven present directives for
+these lemmas and no other stem class. It independently rebuilds indexes,
+checks the unchanged nominal indexes, and repeats the source-headword and
+exact lost-reading controls. Separate source, index and private-probe
+hashes identify this trial. Present stems also generate imperfect, future
+and other readings: “present-only” describes the stem class, not a tense
+restriction on native output. This diagnostic does not qualify complete
+present families, establish source-supported principal parts, or authorize
+an addition to the final candidate.
+
 The private candidate, native copy, transcripts and per-form probes remain
 outside the repository and inputs, under a mode-0700 directory with an
 exclusive mode-0600 probe file. Nothing is uploaded as a CI artifact. Only

@@ -144,16 +144,44 @@ def probe_losses(forms, baseline, before, after, output):
             'readings_by_tense_outcome': loss.grouped(tense_groups, ('tense', 'outcome'))}
 
 
+PRESENT_CLASSES = {b'conj1', b'conj2', b'conj3', b'conj3_io', b'conj4'}
+PERFECT_CLASSES = {b'perfstem', b'avperf', b'evperf', b'ivperf'}
+
+
+def definition_type(line):
+    fields = set(line[4:].split())
+    kinds = []
+    if fields & PERFECT_CLASSES: kinds.append('perfect')
+    if b'pp4' in fields: kinds.append('supine')
+    if fields & PRESENT_CLASSES: kinds.append('present')
+    if len(kinds) > 1:
+        raise ValueError('expanded directive has conflicting stem classes')
+    return kinds[0] if kinds else 'other'
+
+
+def present_cases(expanded, cases):
+    result = []
+    for case in cases:
+        lemma = case['lemma'].encode('ascii')
+        records = Counter()
+        for line, n in expanded.get(lemma, {}).items():
+            if line.startswith(loss.STEM_PREFIXES) and definition_type(line) == 'present':
+                if not line.startswith(b':vs:') or n != 1:
+                    raise ValueError('present isolation needs unique literal verbal stems')
+                records[line] = n
+        if sum(records.values()) != 1:
+            raise ValueError('present isolation needs exactly one stem per source case')
+        result.append(dict(case, counterfactual_definitions={lemma: records}))
+    return result
+
+
 def expanded_profiles(expanded, lemmas):
     groups = Counter()
     for lemma in lemmas:
         for line, n in expanded.get(lemma.encode(), {}).items():
             if not line.startswith(loss.STEM_PREFIXES):
                 continue
-            fields = line[4:].split()
-            kind = ('perfect' if b'perfstem' in fields else 'supine' if b'pp4' in fields else
-                    'present' if any(f in {b'conj1', b'conj2', b'conj3', b'conj3_io', b'conj4'} for f in fields) else 'other')
-            groups[kind] += n
+            groups[definition_type(line)] += n
     return dict(sorted(groups.items()))
 
 
@@ -266,6 +294,41 @@ def prepare(args):
     finally:
         baseline.close()
     expanded = loss.definitions(target / 'native/Latin/lexical/present-trial.expanded')
+    isolated_cases = present_cases(expanded, replay_cases)
+    present_source = target / 'present-only.stems'
+    native.write_private(present_source, candidate_payload(args.candidate_source.read_bytes(), isolated_cases))
+    present_hashes = native.build_trial(args.baseline, present_source, args.tools, target / 'present-native')
+    if any(present_hashes[name] != original_indexes[name] for name in ('nomind', 'nomind.lindex')):
+        raise ValueError('present-only counterfactual changes nominal indexes')
+    present_expanded = loss.definitions(target / 'present-native/Latin/lexical/present-trial.expanded')
+    present_profile = expanded_profiles(present_expanded, [c['lemma'] for c in cases])
+    if present_profile != {'present': len(cases)}:
+        raise ValueError('present-only assembly retains extrapolated or unknown classes')
+    present_output = target / 'present-only-probes.jsonl'
+    baseline = native.NativeRows(args.library, args.baseline)
+    try:
+        before = native.NativeRows(args.library, args.candidate)
+        try:
+            after = native.NativeRows(args.library, target / 'present-native')
+            try:
+                with os.fdopen(os.open(present_output, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
+                                      getattr(os, 'O_NOFOLLOW', 0), 0o600), 'w') as stream:
+                    present_losses = probe_losses(forms, baseline, before, after, stream)
+                    present_heads = Counter()
+                    for case in isolated_cases:
+                        probe = source_headword_probe(case, before, after)
+                        present_heads['before_covered'] += bool(probe['before_expected'])
+                        present_heads['after_covered'] += bool(probe['after_expected'])
+                        for key in ('retained_rows', 'removed_rows', 'added_rows'):
+                            present_heads[key] += probe[key]
+                        stream.write(json.dumps({'kind': 'present_source_case', 'lemma': case['lemma'],
+                            'source_headword_probe': probe}, sort_keys=True) + '\n')
+            finally:
+                after.close()
+        finally:
+            before.close()
+    finally:
+        baseline.close()
     if any(loss.digest(args.candidate / 'Latin/steminds' / name) != digest for name, digest in original_indexes.items()):
         raise ValueError('counterfactual mutated final candidate indexes')
     return {'schema': 1, 'scope': 'seven private diagnostic counterfactuals; terminal digit only; no repair approval or final-candidate mutation',
@@ -275,6 +338,10 @@ def prepare(args):
         'original_trace_profiles': [dict(json.loads(profile), lemmas=n) for profile, n in sorted(trace_groups.items())],
         'source_headword_control': dict(sorted(headword_counts.items())), 'lost_reading_control': loss_probe,
         'counterfactual_expanded_definition_types': expanded_profiles(expanded, [c['lemma'] for c in cases]),
+        'present_only_control': {'scope': 'isolated literal present stems; not source approval or complete-family qualification',
+            'expanded_definition_types': present_profile, 'source_headword_control': dict(sorted(present_heads.items())),
+            'lost_reading_control': present_losses, 'source_sha256': loss.digest(present_source),
+            'indexes_sha256': present_hashes, 'private_native_probe_sha256': loss.digest(present_output)},
         'source_revision': revision, 'input_sha256': {name: loss.digest(path) for name, path in [
             ('review_dossier', args.review_dossier), ('loss_dossier', args.loss_dossier), ('headers', args.headers),
             ('Latin_TEI', source), ('candidate_source', args.candidate_source),
