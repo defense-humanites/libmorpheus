@@ -595,12 +595,13 @@ jobs:
                             'private_remaining_sha256': hashlib.sha256(remaining[0]).hexdigest()}}, sort_keys=True))
           PY
 
-      - name: Replay the latest present trials with controlled nominal witnesses
+      - name: Compare final readings globally with controlled nominal witnesses
         shell: bash
         run: |
           set -euo pipefail
           umask 077
           python3 test/qualify-latin-present-stages.py
+          python3 test/audit-latin-global-readings.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
@@ -627,7 +628,48 @@ jobs:
             --stage "$RUNNER_TEMP/latin-full-compounds" \
             --tools "$RUNNER_TEMP/present-native" \
             --private-output "$RUNNER_TEMP/present-qualification" \
-            --expected-forms 1033579 --include-bounded
+            --expected-forms 1033579 --include-bounded --global-readings-only
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          temp = Path(os.environ['RUNNER_TEMP'])
+          stage = temp / 'latin-full-compounds'
+          reference = json.loads(Path('tools/latin-final-present-reference.json').read_text())
+          report = json.loads((temp / 'present-qualification/report.json').read_text())
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          source = temp / 'lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml'
+          if (digest(source) != reference['source_sha256'] or
+                  digest(stage / 'Latin.headers.jsonl') != reference['headers_sha256']):
+              raise ValueError('selected source or recovered headers differ from qualified reference')
+          for tier in ('all', 'letters-only'):
+              if digest(stage / ('verbal-' + tier + '-bounded-present.stems')) != reference['candidate_sha256'][tier]:
+                  raise ValueError('final candidate differs from qualified reference')
+          if report['indexes']['bounded-present'] != reference['indexes_sha256']:
+              raise ValueError('final runtime indexes differ from qualified reference')
+          control = report['global_comparisons']['final-global-control']
+          delta = report['global_comparisons']['baseline-to-final-global']
+          if (control['input_sha256'] != reference['listall_sha256'] or
+                  delta['input_sha256'] != reference['listall_sha256'] or
+                  control['counts']['recognized_curated__recognized_rebuilt'] != reference['final_recognized_forms'] or
+                  control['analysis_rows']['curated'] != reference['final_analysis_rows'] or
+                  control['analysis_rows']['rebuilt'] != reference['final_analysis_rows']):
+              raise ValueError('full final-root recognition or reading totals differ from reference')
+          baseline_recognized = sum(delta['counts'].get(key, 0) for key in
+              ('recognized_curated__recognized_rebuilt', 'recognized_curated__absent_rebuilt'))
+          final_recognized = sum(delta['counts'].get(key, 0) for key in
+              ('recognized_curated__recognized_rebuilt', 'absent_curated__recognized_rebuilt'))
+          if (baseline_recognized != reference['baseline_recognized_forms'] or
+                  final_recognized != reference['final_recognized_forms'] or
+                  delta['analysis_rows'] != {'curated': reference['baseline_analysis_rows'], 'rebuilt': reference['final_analysis_rows']}):
+              raise ValueError('global comparison totals differ from qualified reference')
+          print(json.dumps({'global_reading_reference_control': {'reference_revision': reference['code_revision'],
+                            'candidate_and_indexes_identical': True, 'recognition_and_reading_totals_identical': True,
+                            'earlier_count_passes': 'qualified on reference revision; not repeated in global-only mode'}}, sort_keys=True))
+          PY
 
   greek-header-filters:
     runs-on: ubuntu-24.04

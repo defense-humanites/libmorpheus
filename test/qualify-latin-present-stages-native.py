@@ -14,12 +14,36 @@ SCRIPT = Path(__file__).resolve().parents[1] / 'tools/qualify-latin-present-stag
 spec = importlib.util.spec_from_file_location('qualification', SCRIPT)
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
+global_spec = importlib.util.spec_from_file_location('global_readings', SCRIPT.with_name('audit-latin-global-readings.py'))
+g = importlib.util.module_from_spec(global_spec)
+global_spec.loader.exec_module(g)
 BUILD = Path(sys.argv.pop(1)).resolve()
 BASELINE = BUILD / 'stemlib-production/latin'
 LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorpheus.so')
 
 
 class NativeQualification(unittest.TestCase):
+    def test_global_comparison_detects_equal_count_lemma_change_with_real_api(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name, lemma in [('before','zzbefore'),('after','zzafter')]:
+                source=root/(name+'.stems')
+                source.write_text(':le:'+lemma+'\n:vs:zzstemz conj3\n')
+                m.build_trial(BASELINE,source,BUILD,root/name)
+            forms=root/'forms'; forms.write_bytes(b'zzstemzo\n')
+            left=m.NativeRows(LIBRARY,root/'before')
+            try:
+                right=m.NativeRows(LIBRARY,root/'after')
+                try:
+                    report=g.audit(forms,left,right,root/'private',g.source_lemmas(root/'after.stems'))
+                finally: right.close()
+            finally: left.close()
+            self.assertEqual(report['changed_analysis_counts'],0)
+            self.assertEqual(report['changed_grammatical_multisets'],1)
+            self.assertEqual(report['changed_multisets_at_equal_counts'],1)
+            self.assertEqual(report['global_eleven_field_multisets']['removed_rows'],1)
+            self.assertEqual(report['global_eleven_field_multisets']['added_rows'],1)
+
     def witness(self, lemma, candidate):
         return {'schema': 1, 'lemma': lemma,
                 'source_revision': '56061ca127f4a2844980baffc5f2b6d1332897b3',
@@ -95,7 +119,8 @@ class NativeQualification(unittest.TestCase):
             forms = root / 'forms'
             forms.write_bytes(b'zzrootbo\nzzalternatebo\nzzalternatezo\nest\n')
             with contextlib.redirect_stdout(io.StringIO()):
-                report = m.qualify(forms, LIBRARY, BASELINE, stage, BUILD, root / 'output', 4)
+                report = m.qualify(forms, LIBRARY, BASELINE, stage, BUILD, root / 'output', 4,
+                                   include_global_readings=True)
             for name in ('boundary-step', 'vowel-step'):
                 rows = report['comparisons'][name]['changed_form_eleven_field_multisets']
                 self.assertGreater(rows['direct_source_verb'], 0)
@@ -103,6 +128,11 @@ class NativeQualification(unittest.TestCase):
             for name in ('boundary-control', 'vowel-control'):
                 self.assertEqual(report['comparisons'][name]['changed_analysis_counts'], 0)
             self.assertEqual(len(report['comparisons']), 5)
+            global_control=report['global_comparisons']['final-global-control']
+            self.assertEqual(global_control['changed_grammatical_multisets'],0)
+            global_delta=report['global_comparisons']['baseline-to-final-global']
+            self.assertEqual(global_delta['counts']['absent_curated__recognized_rebuilt'],3)
+            self.assertEqual(global_delta['global_eleven_field_multisets']['removed_rows'],0)
             self.assertEqual((root / 'output').stat().st_mode & 0o777, 0o700)
             self.assertEqual((root / 'output/report.json').stat().st_mode & 0o777, 0o600)
 

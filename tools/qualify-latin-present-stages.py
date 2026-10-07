@@ -294,7 +294,7 @@ def source_family_control(witness, library, before, after, output, source_lemmas
             'private_witness_sha256': digest(witness), 'private_control_sha256': digest(output)}
 
 
-def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False, include_coordinated=False, include_bounded=False):
+def qualify(forms, library, baseline, stage, tools, output, expected_forms=None, include_backlinked=False, include_coordinated=False, include_bounded=False, include_global_readings=False, global_readings_only=False):
     forms, library, baseline, stage, tools = (p.resolve() for p in (forms, library, baseline, stage, tools))
     output = output.resolve()
     inputs = [p.resolve() for p in (forms, library, baseline, stage, tools)]
@@ -381,6 +381,8 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
     if include_bounded:
         passes += [('bounded-control', names[5], names[5], None, True),
                    ('bounded-step', names[4], names[5], bounded_lemmas, False)]
+    if global_readings_only:
+        passes = []
     for label, old, new, lemmas, identical in passes:
         result = comparison(forms, library, baseline if old is None else output / old,
                             output / new, output / (label + '.jsonl'), lemmas, identical)
@@ -390,6 +392,29 @@ def qualify(forms, library, baseline, stage, tools, output, expected_forms=None,
             raise ValueError(label + ' trial removes previous grammatical readings')
         report['comparisons'][label] = result
         print(json.dumps({'research_comparison': label, 'report': result}, sort_keys=True), flush=True)
+    if include_global_readings or global_readings_only:
+        spec = importlib.util.spec_from_file_location('global_readings', REPO / 'tools/audit-latin-global-readings.py')
+        global_readings = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(global_readings)
+        if global_readings.SIGNATURE != SIGNATURE:
+            raise ValueError('global grammatical signature differs from native replay')
+        lemmas = global_readings.source_lemmas(paths[names[-1]])
+        report['global_comparisons'] = {}
+        for label, old, identical in [('final-global-control', output / names[-1], True),
+                                       ('baseline-to-final-global', baseline, False)]:
+            left = NativeRows(library, old)
+            try:
+                right = NativeRows(library, output / names[-1])
+                try:
+                    result = global_readings.audit(forms, left, right, output / (label + '.jsonl'), lemmas, identical)
+                finally:
+                    right.close()
+            finally:
+                left.close()
+            if expected_forms is not None and result['counts']['distinct_forms'] != expected_forms:
+                raise ValueError('global comparison form count differs')
+            report['global_comparisons'][label] = result
+            print(json.dumps({'research_global_comparison': label, 'report': result}, sort_keys=True), flush=True)
     write_private(output / 'report.json', (json.dumps(report, sort_keys=True, indent=2) + '\n').encode())
     return report
 
@@ -402,9 +427,12 @@ def main():
     parser.add_argument('--include-backlinked', action='store_true')
     parser.add_argument('--include-coordinated', action='store_true')
     parser.add_argument('--include-bounded', action='store_true')
+    parser.add_argument('--include-global-readings', action='store_true')
+    parser.add_argument('--global-readings-only', action='store_true', help='run two global reading passes instead of the earlier count passes')
     args = parser.parse_args()
     qualify(args.forms, args.library, args.baseline, args.stage, args.tools,
-            args.private_output, args.expected_forms, args.include_backlinked, args.include_coordinated, args.include_bounded)
+            args.private_output, args.expected_forms, args.include_backlinked, args.include_coordinated,
+            args.include_bounded, args.include_global_readings, args.global_readings_only)
 
 
 if __name__ == '__main__':
