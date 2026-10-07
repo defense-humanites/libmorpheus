@@ -44,23 +44,35 @@ class NativeRows(listall.NativeAnalyzer):
             self.close()
             raise ValueError('structured analysis size differs from ABI 2')
 
-    def rows(self, word):
+    def analyses(self, word, require_untruncated=False):
         result = ctypes.c_void_p()
         status = self.api.morpheus_analyze(self.context, word, len(word), 0, ctypes.byref(result))
         try:
             if status or not result:
                 raise ValueError('native reading analysis failed')
+            if require_untruncated:
+                self.api.morpheus_result_truncated_fields.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32)]
+                self.api.morpheus_result_truncated_fields.restype = ctypes.c_int
+                truncated = ctypes.c_uint32()
+                # Only the text used by the loss diagnostic must be complete.
+                # A truncated display-only raw analysis does not affect it.
+                used_fields = sum(1 << bit for bit in (1, 2, 3, 5, 6, 7, 11))
+                if self.api.morpheus_result_truncated_fields(result, ctypes.byref(truncated)) or truncated.value & used_fields:
+                    raise ValueError('native loss diagnostic has truncated text')
             rows = []
             for index in range(self.api.morpheus_result_count(result)):
                 row = Analysis()
                 if self.api.morpheus_result_get(result, index, ctypes.byref(row), ctypes.sizeof(row)):
                     raise ValueError('native structured reading failed')
-                fields = tuple(getattr(row, name) for name in SIGNATURE)
-                rows.append((fields, row.preverb))
+                rows.append(row)
             return rows
         finally:
             if result:
                 self.api.morpheus_result_free(result)
+
+    def rows(self, word):
+        return [(tuple(getattr(row, name) for name in SIGNATURE), row.preverb)
+                for row in self.analyses(word)]
 
 
 def digest(path):

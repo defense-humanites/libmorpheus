@@ -18,6 +18,30 @@ def reading(lemma=b'synthetic', person=1):
 
 
 class Qualification(unittest.TestCase):
+    def test_detailed_analysis_checks_used_text_truncation_and_frees_native_results(self):
+        native=m.NativeRows.__new__(m.NativeRows); native.api=Mock(); native.context=None
+        def analyze(context,word,length,options,result):
+            result._obj.value=1
+            return 0
+        def get(result,index,row,size):
+            row._obj.lemma=b'zzlemma'; row._obj.stem=b'zzstem'
+            return 0
+        native.api.morpheus_analyze.side_effect=analyze
+        native.api.morpheus_result_count.return_value=1
+        native.api.morpheus_result_get.side_effect=get
+        for mask,should_fail in [(1,False),(1<<5,True),(1<<2,True)]:
+            def truncated(result,value):
+                value._obj.value=mask
+                return 0
+            native.api.morpheus_result_truncated_fields.side_effect=truncated
+            native.api.morpheus_result_free.reset_mock()
+            if should_fail:
+                with self.assertRaisesRegex(ValueError,'truncated text'):
+                    native.analyses(b'zzform',require_untruncated=True)
+            else:
+                self.assertEqual(native.analyses(b'zzform',require_untruncated=True)[0].stem,b'zzstem')
+            native.api.morpheus_result_free.assert_called_once()
+
     def quote_fixture(self, parent):
         witness = parent / 'witness'
         row = {'schema': 1, 'form': 'azenitur', 'lemma': 'azego',

@@ -602,6 +602,7 @@ jobs:
           umask 077
           python3 test/qualify-latin-present-stages.py
           python3 test/audit-latin-global-readings.py
+          python3 test/diagnose-latin-lost-stems.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
@@ -670,6 +671,23 @@ jobs:
                             'candidate_and_indexes_identical': True, 'recognition_and_reading_totals_identical': True,
                             'earlier_count_passes': 'qualified on reference revision; not repeated in global-only mode'}}, sort_keys=True))
           PY
+
+      - name: Diagnose complete Latin losses against expanded stems and source articles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/diagnose-latin-lost-stems.py \
+            --comparison-dir "$RUNNER_TEMP/present-qualification" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --private-output "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --expected-forms 6789 --expected-lemmas 133 --expected-rows 11005 \
+            --expected-difference-sha256 08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52
 
   greek-header-filters:
     runs-on: ubuntu-24.04

@@ -17,12 +17,38 @@ spec.loader.exec_module(m)
 global_spec = importlib.util.spec_from_file_location('global_readings', SCRIPT.with_name('audit-latin-global-readings.py'))
 g = importlib.util.module_from_spec(global_spec)
 global_spec.loader.exec_module(g)
+loss_spec = importlib.util.spec_from_file_location('losses', SCRIPT.with_name('diagnose-latin-lost-stems.py'))
+losses = importlib.util.module_from_spec(loss_spec)
+loss_spec.loader.exec_module(losses)
 BUILD = Path(sys.argv.pop(1)).resolve()
 BASELINE = BUILD / 'stemlib-production/latin'
 LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorpheus.so')
 
 
 class NativeQualification(unittest.TestCase):
+    def test_complete_loss_reprobes_native_stem_and_expanded_definitions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            for name,stem in [('before','zzstemz'),('after','zzotherz')]:
+                source=root/(name+'.stems')
+                source.write_text(':le:zzlemma\n:vs:'+stem+' conj3\n')
+                m.build_trial(BASELINE,source,BUILD,root/name)
+            forms=root/'forms'; forms.write_bytes(b'zzstemzo\n')
+            left=m.NativeRows(LIBRARY,root/'before'); right=m.NativeRows(LIBRARY,root/'after')
+            try:
+                g.audit(forms,left,right,root/'diff')
+                output=io.StringIO()
+                report=losses.diagnose(root/'diff',left,right,
+                    losses.definitions(root/'before/Latin/lexical/present-trial.expanded'),
+                    losses.definitions(root/'after/Latin/lexical/present-trial.expanded'),
+                    {b'zzlemma'},set(),{},output,lambda x:x)
+            finally:
+                right.close(); left.close()
+            self.assertEqual(report['counts'],{'forms':1,'readings':1,'distinct_lemmas':1,'nonverbal_readings':0})
+            self.assertEqual(report['stem_matches_by_readings'],{'baseline_exact__final_no_exact':1})
+            self.assertEqual(report['definition_states']['lemmas'],{'changed_definition_multisets':1})
+            self.assertEqual(json.loads(output.getvalue().splitlines()[0])['readings'][0]['stem'],'zzstemz')
+
     def test_global_comparison_detects_equal_count_lemma_change_with_real_api(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
