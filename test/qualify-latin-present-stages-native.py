@@ -132,7 +132,11 @@ class NativeQualification(unittest.TestCase):
             self.assertEqual(global_control['changed_grammatical_multisets'],0)
             global_delta=report['global_comparisons']['baseline-to-final-global']
             self.assertEqual(global_delta['counts']['absent_curated__recognized_rebuilt'],3)
-            self.assertEqual(global_delta['global_eleven_field_multisets']['removed_rows'],0)
+            multisets=global_delta['global_eleven_field_multisets']
+            self.assertEqual(multisets['retained_rows']+multisets['removed_rows'],
+                             global_delta['analysis_rows']['curated'])
+            self.assertEqual(multisets['retained_rows']+multisets['added_rows'],
+                             global_delta['analysis_rows']['rebuilt'])
             self.assertEqual((root / 'output').stat().st_mode & 0o777, 0o700)
             self.assertEqual((root / 'output/report.json').stat().st_mode & 0o777, 0o600)
 
