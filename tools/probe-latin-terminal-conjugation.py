@@ -159,8 +159,65 @@ def source_present_family(case):
     return cells
 
 
+def principal_parts_profile(case):
+    fields = [f['projection'] for f in case['header']['fields'] if f['name'] == 'itype']
+    if len(fields) != 1:
+        raise ValueError('principal-part review needs the original single source field')
+    match = re.fullmatch(r'(.*),\s*([1-4])', fields[0] or '')
+    if not match or int(match[2]) != case['digit']:
+        raise ValueError('principal-part review differs from the validated source digit')
+    parts = [part.strip() for part in match[1].split(',')]
+    shapes = []
+    for part in parts:
+        plain = part.translate(str.maketrans('', '', '_^'))
+        syntax = ('single_notated_token' if re.fullmatch(r'[A-Za-z_^]+', part) else
+                  'coordinated_or_alternative' if re.search(r'\b(?:and|or)\b', part) else
+                  'empty' if not part else 'complex')
+        ending = ('ending_um' if plain.endswith('um') else 'ending_us' if plain.endswith('us') else
+                  'ending_i' if plain.endswith('i') else 'other_ending')
+        shapes.append({'syntax': syntax, 'terminal_spelling': ending,
+                       'quantity_notation': bool(set(part) & set('_^')),
+                       'initial_dash': part.startswith('-')})
+    head = re.sub(r'#[1-9]$', '', case['header']['headword']).translate(str.maketrans('', '', '_^-'))
+    return {'source_conjugation_digit': case['digit'], 'declared_parts': len(parts),
+            'headword_morphology': 'passive_headword' if head.endswith('or') else 'active_headword',
+            'part_shapes': shapes}, parts
+
+
+def review_principal_parts(cases, output):
+    groups = Counter()
+    for case in cases:
+        profile, parts = principal_parts_profile(case)
+        groups[json.dumps(profile, sort_keys=True)] += 1
+        output.write(json.dumps({'kind': 'source_principal_parts', 'lemma': case['lemma'],
+            'header': case['header'], 'literal_comma_separated_parts': parts,
+            'profile': profile, 'decision': 'syntax_review_only_no_past_stem_reconstruction'}, sort_keys=True) + '\n')
+    return {'scope': 'original source field syntax; endings do not establish complete principal parts or authorize suffix expansion',
+            'groups': [dict(json.loads(profile), lemmas=n) for profile, n in sorted(groups.items())]}
+
+
+def reading_profiles(counter, analyses, source_lemmas, current_lemma=None):
+    provenance = {}
+    for row in analyses:
+        provenance.setdefault(loss.signature(row), set()).add('native_preverb' if row.preverb else 'direct')
+    groups = Counter()
+    for sig, n in counter.items():
+        if sig not in provenance:
+            raise ValueError('reading profile lacks native provenance')
+        relation = ('same_source_lemma' if sig[1] == current_lemma else
+                    'source_lemma' if sig[1] in source_lemmas else 'outside_source_lemmas')
+        route = next(iter(provenance[sig])) if len(provenance[sig]) == 1 else 'mixed'
+        groups[(relation, route, *sig[2:])] += n
+    return groups
+
+
+def public_reading_profiles(groups):
+    return loss.grouped(groups, ('lemma_relation', 'provenance', *loss.SIGNATURE[2:]))
+
+
 def probe_present_families(cases, before, after, output):
-    counts = Counter()
+    counts, other_groups = Counter(), Counter()
+    source_lemmas = {case['lemma'].encode('ascii') for case in cases}
     for case in cases:
         lemma = case['lemma'].encode('ascii')
         counts['families'] += 1
@@ -182,15 +239,26 @@ def probe_present_families(cases, before, after, output):
             counts['retained_rows'] += sum((old & new).values())
             counts['removed_rows'] += sum((old - new).values())
             counts['added_rows'] += sum((new - old).values())
+            added = new - old
+            expected_new = Counter(loss.signature(row) for row in right if expected(row))
+            expected_added = added & expected_new
+            other_added = added - expected_added
+            counts['added_expected_rows'] += sum(expected_added.values())
+            counts['added_other_rows'] += sum(other_added.values())
+            other_groups.update(reading_profiles(other_added, right, source_lemmas, lemma))
             output.write(json.dumps({'kind': 'source_present_family', 'lemma': case['lemma'], **cell,
                 'before_matches': old_matches, 'after_matches': new_matches,
-                'retained_rows': sum((old & new).values()), 'added_rows': sum((new - old).values())}, sort_keys=True) + '\n')
+                'retained_rows': sum((old & new).values()), 'added_rows': sum(added.values()),
+                'other_added': [{'signature': [loss.decoded(v) for v in sig], 'multiplicity': n}
+                                for sig, n in sorted(other_added.items())]}, sort_keys=True) + '\n')
     return {'counts': dict(sorted(counts.items())),
+        'other_added_reading_profiles': public_reading_profiles(other_groups),
         'scope': 'six indicative, six subjunctive and one infinitive present; source headword/digit expectations; direct literal lemma and source morphology'}
 
 
 def probe_losses(forms, baseline, before, after, output):
-    totals, tense_groups = Counter(), Counter()
+    totals, tense_groups, other_groups = Counter(), Counter(), Counter()
+    source_lemmas = {sig[1] for expected in forms.values() for sig in expected}
     for form, expected in sorted(forms.items()):
         witness = baseline.analyses(form, require_untruncated=True)
         actual = Counter(loss.signature(row) for row in witness if row.lemma in {s[1] for s in expected})
@@ -207,6 +275,7 @@ def probe_losses(forms, baseline, before, after, output):
         totals['recovered_exact_readings'] += sum(recovered.values())
         totals['still_missing_exact_readings'] += sum(missing.values())
         totals['other_counterfactual_readings'] += sum((final - expected).values())
+        other_groups.update(reading_profiles(final - expected, new, source_lemmas))
         for signature, amount in expected.items():
             tense_groups[(signature[7], 'recovered')] += recovered[signature]
             tense_groups[(signature[7], 'missing')] += missing[signature]
@@ -214,6 +283,7 @@ def probe_losses(forms, baseline, before, after, output):
             'expected': [{'signature': [loss.decoded(v) for v in sig], 'multiplicity': n} for sig, n in sorted(expected.items())],
             'counterfactual': [{'signature': [loss.decoded(v) for v in sig], 'multiplicity': n} for sig, n in sorted(final.items())]}, sort_keys=True) + '\n')
     return {'counts': dict(sorted(totals.items())),
+            'other_counterfactual_reading_profiles': public_reading_profiles(other_groups),
             'readings_by_tense_outcome': loss.grouped(tense_groups, ('tense', 'outcome'))}
 
 
@@ -430,6 +500,10 @@ def prepare(args):
     if present_profile != {'present': len(cases)}:
         raise ValueError('present-only assembly retains extrapolated or unknown classes')
     present_output = target / 'present-only-probes.jsonl'
+    parts_output = target / 'source-parts-review.jsonl'
+    with os.fdopen(os.open(parts_output, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
+                          getattr(os, 'O_NOFOLLOW', 0), 0o600), 'w') as stream:
+        parts_review = review_principal_parts(replay_cases, stream)
     baseline = native.NativeRows(args.library, args.baseline)
     try:
         before = native.NativeRows(args.library, args.candidate)
@@ -470,6 +544,7 @@ def prepare(args):
         'source_headword_control': dict(sorted(headword_counts.items())), 'lost_reading_control': loss_probe,
         'counterfactual_expanded_definition_types': expanded_profiles(expanded, [c['lemma'] for c in cases]),
         'counterfactual_expanded_directive_profiles': expanded_directive_profiles(expanded, [c['lemma'] for c in cases]),
+        'source_principal_parts_review': dict(parts_review, private_review_sha256=loss.digest(parts_output)),
         'present_only_control': {'scope': 'isolated literal present stems; source-family coverage; not source approval or complete-paradigm qualification',
             'expanded_definition_types': present_profile, 'source_headword_control': dict(sorted(present_heads.items())),
             'full_to_present_comparison': direct_comparison,

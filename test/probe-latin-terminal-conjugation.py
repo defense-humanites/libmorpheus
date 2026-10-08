@@ -186,6 +186,58 @@ class TerminalConjugation(unittest.TestCase):
         for head, digit in (('zzrootzo', 4), ('zzrootzo', 2), ('zz rootzo', 3), ('o', 1)):
             with self.assertRaises(ValueError): m.source_present_family({'header': {'headword': head}, 'digit': digit})
 
+    def test_principal_part_syntax_keeps_coordinated_and_empty_parts_unresolved(self):
+        case = {'lemma': 'zzsource#2', 'digit': 3, 'header': {'headword': 'zzsourceor#2',
+            'fields': [{'name': 'itype', 'projection': 'zzpe_rfi, zzsupum and zzotherum, , 3'}]}}
+        output = io.StringIO()
+        report = m.review_principal_parts([case], output)
+        profile = report['groups'][0]
+        self.assertEqual(profile['declared_parts'], 3)
+        self.assertEqual(profile['headword_morphology'], 'passive_headword')
+        self.assertEqual(profile['part_shapes'][0]['terminal_spelling'], 'ending_i')
+        self.assertTrue(profile['part_shapes'][0]['quantity_notation'])
+        self.assertEqual(profile['part_shapes'][1]['syntax'], 'coordinated_or_alternative')
+        self.assertEqual(profile['part_shapes'][2]['syntax'], 'empty')
+        self.assertNotIn('zz', json.dumps(report))
+        private = json.loads(output.getvalue())
+        self.assertEqual(private['literal_comma_separated_parts'], ['zzpe_rfi', 'zzsupum and zzotherum', ''])
+        self.assertEqual(private['decision'], 'syntax_review_only_no_past_stem_reconstruction')
+        for fields in ([], [{'name': 'itype', 'projection': 'zzperf, 4'}],
+                       [{'name': 'itype', 'projection': '3'}], case['header']['fields'] * 2):
+            with self.assertRaises(ValueError): m.principal_parts_profile(dict(case, header=dict(case['header'], fields=fields)))
+
+    def test_reading_profiles_keep_source_identity_and_mixed_native_provenance_private(self):
+        direct = reading(); derived = reading(preverb=b'ex'); outside = reading(lemma=b'zzoutside', tense=5)
+        counter = Counter({m.loss.signature(direct): 2, m.loss.signature(outside): 1})
+        groups = m.reading_profiles(counter, [direct, derived, outside], {b'zzlemma'}, b'zzlemma')
+        report = m.public_reading_profiles(groups)
+        self.assertEqual(sum(row['rows'] for row in report), 3)
+        self.assertTrue(any(row['lemma_relation']=='same_source_lemma' and row['provenance']=='mixed' and row['rows']==2 for row in report))
+        self.assertTrue(any(row['lemma_relation']=='outside_source_lemmas' and row['tense']==5 for row in report))
+        self.assertNotIn('zz', json.dumps(report))
+        with self.assertRaises(ValueError): m.reading_profiles(counter, [outside], {b'zzlemma'})
+
+    def test_family_added_readings_are_partitioned_without_approving_other_grammar(self):
+        case = {'lemma': 'zzlemma', 'digit': 3, 'header': {'headword': 'zzrootzo'}}
+        cells = {cell['form'].encode(): cell for cell in m.source_present_family(case)}
+        class FamilyAnalyzer:
+            def analyses(self, form, require_untruncated=False):
+                if not require_untruncated: raise AssertionError('missing native truncation guard')
+                cell = cells[form]
+                expected = reading()
+                expected.workword = form
+                for key in ('person', 'number', 'mood', 'voice'): setattr(expected, key, cell[key])
+                other = SimpleNamespace(**vars(expected)); other.tense = 5
+                return [expected, other]
+        output = io.StringIO()
+        report = m.probe_present_families([case], Analyzer([]), FamilyAnalyzer(), output)
+        self.assertEqual(report['counts']['added_expected_rows'], 13)
+        self.assertEqual(report['counts']['added_other_rows'], 13)
+        self.assertEqual(sum(row['rows'] for row in report['other_added_reading_profiles']), 13)
+        self.assertTrue(all(row['lemma_relation']=='same_source_lemma' and row['tense']==5 for row in report['other_added_reading_profiles']))
+        self.assertNotIn('zz', json.dumps(report))
+        self.assertTrue(all(row['other_added'] for row in map(json.loads, output.getvalue().splitlines())))
+
     def test_present_isolation_preserves_literal_directive_without_derivative_or_past(self):
         case = {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}}
         present = b':vs:zzroot conj3_io dep'

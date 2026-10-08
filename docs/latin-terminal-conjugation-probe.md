@@ -84,6 +84,26 @@ multisets must retain every existing reading. This establishes targeted
 family coverage of the counterfactual, not the linguistic acceptability of
 discarding source principal parts or global absence of regressions.
 
+The original, unmodified source `itype` is reviewed separately in a private
+`source-parts-review.jsonl` file. The public report groups only the number
+of comma-separated parts, isolated/coordinated/complex/empty syntax,
+terminal spelling category, quantity notation, initial dash, headword
+morphology and explicit conjugation digit. A token ending in `i`, `um`
+or `us` does not establish that it is a complete perfect or fourth part.
+No suffix is expanded and no past stem is reconstructed by this review.
+The literal fields and part strings stay private, bound to the validated
+headers, with a separate dossier hash.
+
+Additional readings on the lost forms and present-family cells are grouped
+by their numeric grammar, source-lemma relationship and direct/native-
+preverb provenance. Mixed provenance is labelled explicitly when the
+eleven-field signature does not distinguish two routes. Family additions
+are partitioned into signatures matching the expected cell and other
+signatures; these profiles diagnose extra analyses without approving them.
+Literal signatures of the other family additions remain in the private
+probe file. Public profiles contain no form, lemma, stem or free lexical
+field, including when an analysis belongs to another lemma.
+
 The private candidate, native copy, transcripts and per-form probes remain
 outside the repository and inputs, under a mode-0700 directory with an
 exclusive mode-0600 probe file. Nothing is uploaded as a CI artifact. Only

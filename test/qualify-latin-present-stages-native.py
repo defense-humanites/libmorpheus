@@ -52,6 +52,9 @@ class NativeQualification(unittest.TestCase):
                 self.assertEqual(report['counts']['before_covered'], 0)
                 self.assertEqual(report['counts']['after_covered'], 104)
                 self.assertEqual(report['counts']['removed_rows'], 0)
+                self.assertEqual(report['counts']['added_expected_rows'], 104)
+                self.assertEqual(report['counts']['added_other_rows'],
+                    sum(row['rows'] for row in report['other_added_reading_profiles']))
             finally:
                 after.close(); before.close()
 
