@@ -608,6 +608,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/probe-latin-isolated-fields.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-isolated-source-present.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-source-present-preverbs.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/search-latin-unjoined-preverb-source.py
           python3 test/probe-latin-terminal-conjugation.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -820,6 +821,19 @@ jobs:
             --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
             --expected-headers-sha256 85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34 \
             --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
+
+      - name: Search the complete Latin TEI for the unjoined preverb lemma
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/search-latin-unjoined-preverb-source.py \
+            --dossier "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --private-output "$RUNNER_TEMP/latin-unjoined-preverb-source-search.jsonl" \
+            --expected-rows 123 \
+            --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a \
             --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
 
   greek-header-filters:

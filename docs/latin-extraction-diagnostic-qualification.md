@@ -4,6 +4,64 @@
 
 Ces résultats agrégés proviennent des qualifications CI de la PR nº 18. Les dossiers individuels restent privés. Ils ne constituent pas une approbation du remplacement du corpus.
 
+## Revue source des préverbes sur `f3f8c15` — qualification mesurée
+
+Le commit [`f3f8c15`](https://github.com/defense-humanites/libmorpheus/commit/f3f8c15df1725f9d76fe77181385a934f00e6a40) rapproche les ajouts par préverbes de leurs articles source, sans hériter de la conjugaison du verbe de base. Les dossiers privés sont liés aux empreintes qualifiées ; leur projection grammaticale est reproduite.
+
+**Les trois workflows réussissent** : [Linux](https://github.com/defense-humanites/libmorpheus/actions/runs/37802685333), [plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37802685476), [recherche](https://github.com/defense-humanites/libmorpheus/actions/runs/37802676749). Les 91 tests unitaires ciblés et les 10 tests d’intégration native passent. Les résultats globaux précédents sont reproduits à empreintes identiques.
+
+**Les 123 lectures par préverbes concernent un seul autre lemme**, non 123 lemmes. Ce lemme n’a aucune définition dans le candidat final original et **aucun article joint** par les routes exactes de l’index actuel (clé projetée ou headword émis, numéros d’homographes conservés). Aucune lecture ne reçoit donc une attente de présent sous un article unique littéralement identique. Répartition : 33 lectures sans temps spécifié, 47 présentes, 26 imparfaites et 17 futures.
+
+Cette absence de jointure **ne prouve pas l’absence du lemme dans le TEI complet** : les articles en erreur de projection sont exclus de cet index, et aucune identité alternative n’est substituée. Une recherche source élargie et bornée reste nécessaire avant arbitrage. Les 123 lectures ne sont pas approuvées ; la copie de présent reste expérimentale.
+
+Dossier privé SHA-256 : `8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a`. Les entrées sont vérifiées inchangées. Articles, formes et décompositions restent privés. Aucun essai n’est promu ; PR en brouillon, production inchangée. [Méthode et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-source-present-preverb-review.md).
+
+## Présent à chiffre source sur `1174ee2` — qualification mesurée
+
+Le commit [`1174ee2`](https://github.com/defense-humanites/libmorpheus/commit/1174ee2685c5ced75144f3d55531bdc04a8ce677) sélectionne l’unique essai réussi dont le champ source contient un chiffre de conjugaison nu, sans indication terminale contradictoire. L’orthographie source est complète et le lemme littéral identique. Les autres champs de l’en-tête restent conservés comme preuves ; aucune partie passée n’est reconstruite. La copie de présent déjà construite est revalidée par les empreintes qualifiées de sa source, de ses index et de son dossier natif.
+
+**Les trois workflows ont réussi** : [Linux](https://github.com/defense-humanites/libmorpheus/actions/runs/37792624984), [plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37792624900), [recherche](https://github.com/defense-humanites/libmorpheus/actions/runs/37792618112), dont le [job latin](https://github.com/defense-humanites/libmorpheus/actions/runs/37792618112/job/113363707928). Les 83 tests unitaires ciblés et les 10 tests d’intégration native passent.
+
+### Famille de présent issue du chiffre source
+
+Une famille, sous un seul lemme source, comporte 13 cellules indépendamment attendues : six indicatifs, six subjonctifs et un infinitif présents. La couverture passe de **0 à 13 cellules**. Les trois lectures antérieures sont conservées ; aucune n’est supprimée. Les 15 lectures ajoutées sont toutes directes sous ce lemme : **13 attendues et deux supplémentaires**, au présent passif, deuxième personne du singulier (une impérative et une indicative). La comparaison étendue des décompositions confirme ces mêmes nombres et aucun ajout par préverbe dans cette famille. Ces deux lectures supplémentaires ne sont pas comptées comme cellules attendues.
+
+### Comparaison globale candidat final → copie de présent
+
+Les **1 033 579 formes** de LISTALL sont comparées, options natives 0, sur les multisets à onze champs, y compris les changements à compte égal, avec garde de troncature. Tous les couples de statuts API valent 0/0.
+
+| Mesure | Résultat |
+| --- | ---: |
+| Formes reconnues dans les deux copies | 847 750 |
+| Formes absentes avant, reconnues après | **93** |
+| Formes reconnues avant, absentes après | **0** |
+| Formes absentes dans les deux copies | 185 736 |
+| Lectures avant → après | 2 100 530 → 2 100 776 |
+| Lectures conservées / supprimées / ajoutées | **2 100 530 / 0 / 246** |
+| Formes dont le multiset grammatical change | 188 |
+| Changements à compte égal | 0 |
+
+Les 246 ajouts sont verbaux : **123 directs sous le lemme source et 123 par préverbe natif sous d’autres lemmes**. Chaque route a la même répartition numérique : 33 lectures sans temps spécifié, 47 présentes, 26 imparfaites et 17 futures. Aucun ajout au parfait, plus-que-parfait ou futur antérieur ; aucun changement nominal ou adjectival. Une entrée limitée au radical de présent peut donc produire aussi des lectures d’imparfait et de futur.
+
+Les décompositions étendues sont relues sur les **188 formes dont les onze champs changent** et reproduisent les 246 ajouts, sans suppression. Cette relecture distingue les routes et les relations de lemmes ; **elle n’est pas un audit global à seize champs**. Le contrôle global copie → même copie conserve les 2 100 776 lectures, sans aucun changement sur les 1 033 579 formes.
+
+### Limites et reçus
+
+**Les 123 ajouts sous d’autres lemmes par préverbe restent à arbitrer avec leurs articles source.** Le résultat numérique ne constitue pas leur approbation lexicale. La justification des 99 lectures récupérées seulement par l’essai complet précédent reste également ouverte. Les nombres de cette famille, de cette comparaison globale et des deux isolations précédentes ne doivent pas être additionnés comme des récupérations distinctes.
+
+Les index du candidat final d’origine sont vérifiés inchangés. Aucun essai n’est promu au candidat ou à la production ; la PR reste en brouillon. Seuls les outils, tests synthétiques, agrégats et empreintes sont publiés.
+
+| Reçu SHA-256 | Empreinte |
+| --- | --- |
+| Source de la copie de présent | `fa0fb3904e5c43bf6c95ed1cffa7b6072408ddc985025ffbc51669b1732677c4` |
+| LISTALL comparé | `1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93` |
+| Dossier privé de la famille | `908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91` |
+| Différence globale privée | `b84e4cc77a9c8581285b3a47271277f917b1a52411a5355c39295997d419bbc3` |
+| Relecture privée des routes | `461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627` |
+| Différence vide du contrôle identique | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+[Critères et limites de cette qualification](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-isolated-source-present-qualification.md). Les mesures complètes des itérations précédentes sont conservées dans le [compte rendu archivé](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-extraction-diagnostic-qualification.md).
+
 ## Essais natifs des champs isolés qualifiés sur `e131f03`
 
 Le commit [`e131f03`](https://github.com/defense-humanites/libmorpheus/commit/e131f038aaf01c9f5557b5598d1012521a636f26) est qualifié par les trois workflows verts : [Linux](https://github.com/defense-humanites/libmorpheus/actions/runs/37781371593), [plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37781371607), [recherche](https://github.com/defense-humanites/libmorpheus/actions/runs/37781363582). Le [job latin](https://github.com/defense-humanites/libmorpheus/actions/runs/37781363582/job/113324992698) confirme **76 tests unitaires ciblés et dix tests natifs**, dont le nouveau contrôle synthétique de la productivité d’une dérivation.
