@@ -26,6 +26,46 @@ LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorp
 
 
 class NativeQualification(unittest.TestCase):
+    def test_isolated_field_probe_measures_productive_derivative_separately_from_present(self):
+        isolated_spec = importlib.util.spec_from_file_location('isolated_native', SCRIPT.with_name('probe-latin-isolated-fields.py'))
+        isolated = importlib.util.module_from_spec(isolated_spec)
+        isolated_spec.loader.exec_module(isolated)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            witness_source = root / 'witness.stems'
+            witness_source.write_bytes(b':le:zzfieldzo\n:de:zzfieldz are_vb\n')
+            m.build_trial(BASELINE, witness_source, BUILD, root / 'witness')
+            witness = m.NativeRows(LIBRARY, root / 'witness')
+            try:
+                forms = {}
+                for form in (b'zzfieldzo', b'zzfieldzavi'):
+                    expected = isolated.Counter(losses.signature(r) for r in witness.analyses(form, require_untruncated=True) if r.lemma == b'zzfieldzo')
+                    self.assertTrue(expected)
+                    forms[form] = expected
+            finally:
+                witness.close()
+            # build_trial uses exclusive work files, so keep the witness indexes
+            # while returning its assembly directory to a clean copyable state.
+            for path in (root / 'witness/Latin/lexical').glob('present-trial*'):
+                path.unlink()
+            candidate_source = root / 'candidate.stems'; candidate_source.write_bytes(b'')
+            from types import SimpleNamespace
+            args = SimpleNamespace(baseline=root / 'witness', candidate=BASELINE,
+                candidate_source=candidate_source, tools=BUILD, library=LIBRARY)
+            trial = {'lemma': 'zzfieldzo', 'header': {'headword': 'zzfieldzo'},
+                'source_field_position': 0, 'source_field_shape': 'bare_conjugation_digit',
+                'lost_readings': sum(sum(v.values()) for v in forms.values()),
+                'counterfactual_definitions': {b'zzfieldzo': isolated.Counter({b':de:zzfieldz are_vb': 1})}}
+            indexes = {name: m.digest(BASELINE / 'Latin/steminds' / name)
+                       for name in ('nomind', 'nomind.lindex', 'vbind', 'vbind.lindex')}
+            report = isolated.probe_trial(trial, forms, args, root / 'trial', indexes)
+            self.assertEqual(report['full_control']['source_headword_control']['after_expected'], 1)
+            self.assertEqual(report['present_control']['source_headword_control']['after_expected'], 1)
+            self.assertEqual(report['present_control']['expanded_definition_types'], {'present': 1})
+            self.assertGreater(report['full_to_present_comparison']['counts']['target_recoveries_removed'], 0)
+            self.assertEqual(report['full_to_present_comparison']['counts']['target_recoveries_added'], 0)
+            self.assertNotIn('zzfield', json.dumps(report))
+
     def test_source_present_families_cover_active_and_deponent_conjugations(self):
         terminal_spec = importlib.util.spec_from_file_location('terminal_families', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
         terminal = importlib.util.module_from_spec(terminal_spec)
