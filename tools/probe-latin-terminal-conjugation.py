@@ -173,7 +173,8 @@ def principal_parts_profile(case):
         syntax = ('single_notated_token' if re.fullmatch(r'[A-Za-z_^]+', part) else
                   'coordinated_or_alternative' if re.search(r'\b(?:and|or)\b', part) else
                   'empty' if not part else 'complex')
-        ending = ('ending_um' if plain.endswith('um') else 'ending_us' if plain.endswith('us') else
+        ending = ('ending_re' if plain.endswith('re') else 'ending_ri' if plain.endswith('ri') else
+                  'ending_um' if plain.endswith('um') else 'ending_us' if plain.endswith('us') else
                   'ending_i' if plain.endswith('i') else 'other_ending')
         shapes.append({'syntax': syntax, 'terminal_spelling': ending,
                        'quantity_notation': bool(set(part) & set('_^')),
@@ -184,16 +185,84 @@ def principal_parts_profile(case):
             'part_shapes': shapes}, parts
 
 
-def review_principal_parts(cases, output):
+def principal_part_evidence(case, entry, projection):
+    _, parts = principal_parts_profile(case)
+    full_orths, quoted = set(), set()
+    plain = lambda text: text.translate(str.maketrans('', '', '_^'))
+    for orth in entry.findall('orth'):
+        if orth.get('extent') != 'full' or orth.get('type') not in (None, 'alt'):
+            continue
+        value = projection.normalize(' '.join(''.join(orth.itertext()).split()), 'Latin')
+        if value is not None:
+            full_orths.add(plain(value))
+    token = r'[A-Za-zÀ-ÖØ-öø-ÿĀ-ſ\u0300-\u036f_^]+(?:-[A-Za-zÀ-ÖØ-öø-ÿĀ-ſ\u0300-\u036f_^]+)*'
+    for node in entry.iter():
+        if node.tag not in ('quote', 'foreign') or (node.get('lang') or node.get('{http://www.w3.org/XML/1998/namespace}lang')) not in ('la', 'lat'):
+            continue
+        for word in re.findall(token, ''.join(node.itertext())):
+            value = projection.normalize(word, 'Latin')
+            if value is not None:
+                quoted.add(plain(value))
+    head = re.sub(r'#[1-9]$', '', case['header']['headword'])
+    component = head.rsplit('-', 1)[-1]
+    component = component[:-2] if component.endswith('or') else component[:-1] if component.endswith('o') else ''
+    component = plain(component)
+    evidence = []
+    for part in parts:
+        isolated = bool(re.fullmatch(r'[A-Za-z_^]+', part))
+        value = plain(part)
+        evidence.append({'isolated_source_token': isolated,
+            'literal_present_component_prefix': bool(isolated and component and value.startswith(component)),
+            'independent_full_orth_exact': bool(isolated and value in full_orths),
+            'explicit_latin_quote_token_exact': bool(isolated and value in quoted)})
+    return evidence
+
+
+def review_principal_parts(cases, output, entries=None, projection=None):
     groups = Counter()
     for case in cases:
         profile, parts = principal_parts_profile(case)
+        if entries is not None:
+            evidence = principal_part_evidence(case, entries[case['header']['id']], projection)
+            profile['source_evidence'] = evidence
         groups[json.dumps(profile, sort_keys=True)] += 1
         output.write(json.dumps({'kind': 'source_principal_parts', 'lemma': case['lemma'],
             'header': case['header'], 'literal_comma_separated_parts': parts,
             'profile': profile, 'decision': 'syntax_review_only_no_past_stem_reconstruction'}, sort_keys=True) + '\n')
     return {'scope': 'original source field syntax; endings do not establish complete principal parts or authorize suffix expansion',
             'groups': [dict(json.loads(profile), lemmas=n) for profile, n in sorted(groups.items())]}
+
+
+ROUTE_FIELDS = ('preverb', 'raw_preverb', 'stem', 'suffix', 'ending')
+
+
+def route_signature(row):
+    return loss.signature(row) + tuple(getattr(row, name) for name in ROUTE_FIELDS)
+
+
+def compare_family_routes(left, right, lemma, cell):
+    old, new = Counter(map(route_signature, left)), Counter(map(route_signature, right))
+    retained, removed, added = old & new, old - new, new - old
+    expected = Counter({sig: n for sig, n in added.items() if
+        not sig[11] and sig[1] == lemma and
+        tuple(sig[i] for i in (2, 3, 4, 7, 8, 9)) ==
+        (2, cell['person'], cell['number'], 1, cell['mood'], cell['voice'])})
+    counts = Counter(retained_rows=sum(retained.values()), removed_rows=sum(removed.values()),
+                     added_rows=sum(added.values()), added_expected_rows=sum(expected.values()),
+                     added_other_rows=sum((added - expected).values()), added_direct_rows=0,
+                     added_native_preverb_rows=0, removed_direct_rows=0, removed_native_preverb_rows=0)
+    for name, records in (('added', added), ('removed', removed)):
+        for sig, n in records.items():
+            counts[name + ('_native_preverb_rows' if sig[11] else '_direct_rows')] += n
+    groups = Counter()
+    for sig, n in (added - expected).items():
+        groups[('same_source_lemma' if sig[1] == lemma else 'other_lemma',
+                'native_preverb' if sig[11] else 'direct', *sig[2:11])] += n
+    def serial(records):
+        return [{'signature': [loss.decoded(v) for v in sig[:11]], 'multiplicity': n,
+                 'route_fields': {name: loss.decoded(value) for name, value in zip(ROUTE_FIELDS, sig[11:])}}
+                for sig, n in sorted(records.items())]
+    return counts, groups, {'retained_rows': sum(retained.values()), 'removed': serial(removed), 'added': serial(added)}
 
 
 def reading_profiles(counter, analyses, source_lemmas, current_lemma=None):
@@ -217,6 +286,7 @@ def public_reading_profiles(groups):
 
 def probe_present_families(cases, before, after, output):
     counts, other_groups = Counter(), Counter()
+    route_counts, route_groups = Counter(), Counter()
     source_lemmas = {case['lemma'].encode('ascii') for case in cases}
     for case in cases:
         lemma = case['lemma'].encode('ascii')
@@ -246,12 +316,18 @@ def probe_present_families(cases, before, after, output):
             counts['added_expected_rows'] += sum(expected_added.values())
             counts['added_other_rows'] += sum(other_added.values())
             other_groups.update(reading_profiles(other_added, right, source_lemmas, lemma))
+            sensitive_counts, sensitive_groups, sensitive_private = compare_family_routes(left, right, lemma, cell)
+            route_counts.update(sensitive_counts)
+            route_groups.update(sensitive_groups)
             output.write(json.dumps({'kind': 'source_present_family', 'lemma': case['lemma'], **cell,
                 'before_matches': old_matches, 'after_matches': new_matches,
                 'retained_rows': sum((old & new).values()), 'added_rows': sum(added.values()),
                 'other_added': [{'signature': [loss.decoded(v) for v in sig], 'multiplicity': n}
-                                for sig, n in sorted(other_added.items())]}, sort_keys=True) + '\n')
+                                for sig, n in sorted(other_added.items())],
+                'route_sensitive_comparison': sensitive_private}, sort_keys=True) + '\n')
     return {'counts': dict(sorted(counts.items())),
+        'route_sensitive_comparison': {'route_fields': list(ROUTE_FIELDS), 'counts': dict(sorted(route_counts.items())),
+            'other_added_reading_profiles': public_reading_profiles(route_groups)},
         'other_added_reading_profiles': public_reading_profiles(other_groups),
         'scope': 'six indicative, six subjunctive and one infinitive present; source headword/digit expectations; direct literal lemma and source morphology'}
 
@@ -501,9 +577,11 @@ def prepare(args):
         raise ValueError('present-only assembly retains extrapolated or unknown classes')
     present_output = target / 'present-only-probes.jsonl'
     parts_output = target / 'source-parts-review.jsonl'
+    entries, _, _ = first.review.load_entries(args.lexica)
     with os.fdopen(os.open(parts_output, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
                           getattr(os, 'O_NOFOLLOW', 0), 0o600), 'w') as stream:
-        parts_review = review_principal_parts(replay_cases, stream)
+        parts_review = review_principal_parts(replay_cases, stream, entries, first.review.projection)
+    del entries
     baseline = native.NativeRows(args.library, args.baseline)
     try:
         before = native.NativeRows(args.library, args.candidate)

@@ -17,7 +17,8 @@ spec.loader.exec_module(m)
 
 def reading(lemma=b'zzlemma', tense=1, preverb=b'', person=1, voice=1):
     return SimpleNamespace(workword=b'zzform', lemma=lemma, part_of_speech=2, person=person,
-        number=1, gender=0, grammatical_case=0, tense=tense, mood=4, voice=voice, degree=0, preverb=preverb)
+        number=1, gender=0, grammatical_case=0, tense=tense, mood=4, voice=voice, degree=0,
+        preverb=preverb, raw_preverb=preverb, stem=b'zzstem', suffix=b'', ending=b'zzend')
 
 
 class Analyzer:
@@ -237,6 +238,54 @@ class TerminalConjugation(unittest.TestCase):
         self.assertTrue(all(row['lemma_relation']=='same_source_lemma' and row['tense']==5 for row in report['other_added_reading_profiles']))
         self.assertNotIn('zz', json.dumps(report))
         self.assertTrue(all(row['other_added'] for row in map(json.loads, output.getvalue().splitlines())))
+
+    def test_route_comparison_separates_new_direct_from_retained_preverb_with_same_eleven_fields(self):
+        direct, derived = reading(tense=3), reading(tense=3, preverb=b'ex')
+        cell = {'person': 1, 'number': 1, 'mood': 8, 'voice': 1}
+        self.assertEqual(m.loss.signature(direct), m.loss.signature(derived))
+        counts, groups, private = m.compare_family_routes([derived], [derived, direct], b'zzlemma', cell)
+        self.assertEqual(counts['retained_rows'], 1)
+        self.assertEqual(counts['added_direct_rows'], 1)
+        self.assertEqual(counts['added_native_preverb_rows'], 0)
+        self.assertEqual(counts['added_other_rows'], 1)
+        self.assertEqual(m.public_reading_profiles(groups)[0]['provenance'], 'direct')
+        self.assertNotIn('zz', json.dumps({'counts':counts,'profiles':m.public_reading_profiles(groups)}))
+        self.assertEqual(private['added'][0]['route_fields']['preverb'], '')
+        counts, _, _ = m.compare_family_routes([direct], [derived], b'zzlemma', cell)
+        self.assertEqual(counts['removed_direct_rows'], 1)
+        self.assertEqual(counts['added_native_preverb_rows'], 1)
+        self.assertEqual(counts['retained_rows'], 0)
+
+    def test_route_comparison_keeps_raw_preverb_and_decomposition_multiplicity(self):
+        old = reading(preverb=b'ex'); new = SimpleNamespace(**vars(old)); new.raw_preverb=b'rawalternate'
+        other = SimpleNamespace(**vars(old)); other.stem=b'zzchangedstem'
+        counts, _, _ = m.compare_family_routes([old, old], [old, new, other], b'zzlemma',
+            {'person':1,'number':1,'mood':4,'voice':1})
+        self.assertEqual((counts['retained_rows'], counts['removed_rows'], counts['added_rows']), (1,1,2))
+        self.assertEqual(counts['added_native_preverb_rows'], 2)
+
+    def test_part_evidence_requires_full_orth_or_explicit_latin_quote_and_never_expands_fragments(self):
+        import xml.etree.ElementTree as ET
+        entry=ET.fromstring('<entry><orth extent="full">zzfulli</orth><orth>zzfragmentum</orth>'
+            '<quote lang="en">zzfragmentum</quote><quote>zzfragmentum</quote>'
+            '<quote lang="la">zzquotum zzrootzi</quote><foreign xml:lang="la">zzforeignus</foreign></entry>')
+        class Projection:
+            @staticmethod
+            def normalize(value, language):
+                return value if value.replace('_','').replace('^','').isalpha() else None
+        case={'lemma':'zzrootzo','digit':3,'header':{'headword':'zzrootzo','fields':[{'name':'itype',
+            'projection':'zzfulli, zzfragmentum, zzquotum, zzforeignus, zzrootzi, zzmissingri, 3'}]}}
+        evidence=m.principal_part_evidence(case,entry,Projection)
+        self.assertTrue(evidence[0]['independent_full_orth_exact'])
+        self.assertFalse(evidence[1]['independent_full_orth_exact'])
+        self.assertFalse(evidence[1]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[2]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[3]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[4]['literal_present_component_prefix'])
+        self.assertFalse(evidence[5]['literal_present_component_prefix'])
+        self.assertNotIn('zz',json.dumps(evidence))
+        profile,_=m.principal_parts_profile(case)
+        self.assertEqual(profile['part_shapes'][-1]['terminal_spelling'],'ending_ri')
 
     def test_present_isolation_preserves_literal_directive_without_derivative_or_past(self):
         case = {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}}

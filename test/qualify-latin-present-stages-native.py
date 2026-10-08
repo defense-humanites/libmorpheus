@@ -55,6 +55,10 @@ class NativeQualification(unittest.TestCase):
                 self.assertEqual(report['counts']['added_expected_rows'], 104)
                 self.assertEqual(report['counts']['added_other_rows'],
                     sum(row['rows'] for row in report['other_added_reading_profiles']))
+                routes=report['route_sensitive_comparison']['counts']
+                self.assertEqual(routes['added_expected_rows'],104)
+                self.assertEqual(routes['removed_rows'],0)
+                self.assertEqual(routes['added_native_preverb_rows'],0)
             finally:
                 after.close(); before.close()
 

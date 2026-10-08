@@ -102,7 +102,29 @@ are partitioned into signatures matching the expected cell and other
 signatures; these profiles diagnose extra analyses without approving them.
 Literal signatures of the other family additions remain in the private
 probe file. Public profiles contain no form, lemma, stem or free lexical
-field, including when an analysis belongs to another lemma.
+field, including when an analysis belongs to another lemma. “Other” counts
+occurrences outside the allocated expected direct readings; it does not
+necessarily imply different grammar if two routes share a signature.
+
+An additional comparison preserves `preverb`, `raw_preverb`, `stem`,
+`suffix` and `ending` alongside the eleven grammatical fields. It compares
+these extended multisets before/after each family cell, reports additions
+and removals by direct/native-preverb route, and independently allocates
+expected direct additions. This resolves route ambiguity that the smaller
+signature can hide; it does not claim to identify every internal parser path.
+All five text fields are covered by the existing per-analysis truncation
+guard. Their literal values and extended differences stay private.
+
+Source-part evidence distinguishes tokens ending in `re` and `ri` as well
+as `i`, `um` and `us`. Each isolated token is checked against full orths
+in the validated article and tokens in `quote`/`foreign` nodes explicitly
+labelled `la` or `lat`. English/unlabelled quotes and partial orths provide
+no positive evidence. Quantity notation is ignored only for these labelled
+comparisons. A separate literal present-component prefix flag is a lead,
+not a test of complete form status: stem alternation can invalidate it.
+An independently cited spelling likewise does not assign a grammatical
+role or a lemma to the citation. Neither evidence flag authorizes joining
+a fragment to a base or constructing a past stem.
 
 The private candidate, native copy, transcripts and per-form probes remain
 outside the repository and inputs, under a mode-0700 directory with an
