@@ -607,6 +607,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-extraction-blockers.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/probe-latin-isolated-fields.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-isolated-source-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-source-present-preverbs.py
           python3 test/probe-latin-terminal-conjugation.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -798,6 +799,28 @@ jobs:
             --expected-vbind-sha256 00fb4438695a8de07da3c2b28f3ac91dd510cca1dccfa3eb8b31e0420e10bd8a \
             --expected-vside-sha256 1401f2885c3a2d44df8bbaaf4774dbecb9c42952e5ff6d924c7821c3d6315b50 \
             --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9
+
+      - name: Review other-lemma native preverb additions against their source articles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-source-present-preverbs.py \
+            --routes "$RUNNER_TEMP/latin-isolated-source-present-qualification/changed-routes.jsonl" \
+            --delta "$RUNNER_TEMP/latin-isolated-source-present-qualification/global-delta.jsonl" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --expanded "$RUNNER_TEMP/present-qualification/bounded-present/Latin/lexical/present-trial.expanded" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --private-output "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --expected-forms 188 --expected-rows 246 --expected-preverbs 123 \
+            --expected-routes-sha256 461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627 \
+            --expected-delta-sha256 b84e4cc77a9c8581285b3a47271277f917b1a52411a5355c39295997d419bbc3 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-headers-sha256 85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
 
   greek-header-filters:
     runs-on: ubuntu-24.04
