@@ -116,6 +116,79 @@ def source_headword_probe(case, before, after):
             'added_rows': sum((new_counter - old_counter).values())}
 
 
+def source_present_family(case):
+    # Expectations come from the full source headword and conjugation digit,
+    # independently of expanded stems and native analysis results. Quantities
+    # are omitted only in the submitted spelling, as in the headword control.
+    head = re.sub(r'#[1-9]$', '', case['header']['headword']).translate(str.maketrans('', '', '_^-'))
+    digit = case['digit']
+    if not re.fullmatch('[a-z]+', head) or digit not in (1, 3, 4) or not head.endswith(('o', 'or')):
+        raise ValueError('unsupported source family headword or conjugation')
+    passive = head.endswith('or')
+    base = head[:-2] if passive else head[:-1]
+    io = digit == 4 or (digit == 3 and base.endswith('i'))
+    if io:
+        if not base.endswith('i'):
+            raise ValueError('fourth conjugation source lacks full io/ior headword')
+        base = base[:-1]
+    if not base:
+        raise ValueError('source family has no literal base')
+    if passive:
+        if digit == 1:
+            indicative, subjunctive, infinitive = ('or aris atur amur amini antur', 'er eris etur emur emini entur', 'ari')
+        elif digit == 4:
+            indicative, subjunctive, infinitive = ('ior iris itur imur imini iuntur', 'iar iaris iatur iamur iamini iantur', 'iri')
+        elif io:
+            indicative, subjunctive, infinitive = ('ior eris itur imur imini iuntur', 'iar iaris iatur iamur iamini iantur', 'i')
+        else:
+            indicative, subjunctive, infinitive = ('or eris itur imur imini untur', 'ar aris atur amur amini antur', 'i')
+    elif digit == 1:
+        indicative, subjunctive, infinitive = ('o as at amus atis ant', 'em es et emus etis ent', 'are')
+    elif io:
+        indicative, subjunctive, infinitive = ('io is it imus itis iunt', 'iam ias iat iamus iatis iant', 'ire' if digit == 4 else 'ere')
+    else:
+        indicative, subjunctive, infinitive = ('o is it imus itis unt', 'am as at amus atis ant', 'ere')
+    cells = []
+    for mood, suffixes in ((4, indicative.split()), (8, subjunctive.split())):
+        for i, suffix in enumerate(suffixes):
+            cells.append(dict(form=base + suffix, person=i % 3 + 1, number=1 if i < 3 else 3,
+                              mood=mood, voice=2 if passive else 1))
+    cells.append(dict(form=base + infinitive, person=0, number=0, mood=5, voice=2 if passive else 1))
+    if len({c['form'] for c in cells}) != 13:
+        raise ValueError('source family does not contain thirteen distinct cells')
+    return cells
+
+
+def probe_present_families(cases, before, after, output):
+    counts = Counter()
+    for case in cases:
+        lemma = case['lemma'].encode('ascii')
+        counts['families'] += 1
+        for cell in source_present_family(case):
+            def expected(row):
+                return (not row.preverb and row.lemma == lemma and
+                    (row.part_of_speech, row.person, row.number, row.tense, row.mood, row.voice) ==
+                    (2, cell['person'], cell['number'], 1, cell['mood'], cell['voice']))
+            left = before.analyses(cell['form'].encode(), require_untruncated=True)
+            right = after.analyses(cell['form'].encode(), require_untruncated=True)
+            old, new = Counter(map(loss.signature, left)), Counter(map(loss.signature, right))
+            old_matches, new_matches = sum(map(expected, left)), sum(map(expected, right))
+            if not new_matches or old - new:
+                raise ValueError('source present-family expectation missing or previous reading removed')
+            counts['cells'] += 1
+            counts['before_covered'] += bool(old_matches)
+            counts['after_covered'] += bool(new_matches)
+            counts['expected_readings'] += new_matches
+            counts['retained_rows'] += sum((old & new).values())
+            counts['removed_rows'] += sum((old - new).values())
+            counts['added_rows'] += sum((new - old).values())
+            output.write(json.dumps({'kind': 'source_present_family', 'lemma': case['lemma'], **cell,
+                'before_matches': old_matches, 'after_matches': new_matches,
+                'retained_rows': sum((old & new).values()), 'added_rows': sum((new - old).values())}, sort_keys=True) + '\n')
+    return {'counts': dict(sorted(counts.items())),
+        'scope': 'six indicative, six subjunctive and one infinitive present; source headword/digit expectations; direct literal lemma and source morphology'}
+
+
 def probe_losses(forms, baseline, before, after, output):
     totals, tense_groups = Counter(), Counter()
     for form, expected in sorted(forms.items()):
@@ -149,7 +222,13 @@ PERFECT_CLASSES = {b'perfstem', b'avperf', b'evperf', b'ivperf'}
 
 
 def definition_type(line):
-    fields = set(line[4:].split())
+    if line.startswith(b':de:'):
+        return 'derivation'
+    if line.startswith(b':vb:'):
+        return 'literal_verbal_word'
+    if line.startswith(b':wd:'):
+        return 'literal_word'
+    fields = set(line[4:].split()[1:])
     kinds = []
     if fields & PERFECT_CLASSES: kinds.append('perfect')
     if b'pp4' in fields: kinds.append('supine')
@@ -157,6 +236,52 @@ def definition_type(line):
     if len(kinds) > 1:
         raise ValueError('expanded directive has conflicting stem classes')
     return kinds[0] if kinds else 'other'
+
+
+def expanded_directive_profiles(expanded, lemmas):
+    # Only fixed grammar names can leave the private expansion. Stems and
+    # arbitrary fields never enter this report, even for an unknown directive.
+    allowed = PRESENT_CLASSES | PERFECT_CLASSES | {b'pp4', b'are_vb', b'ire_vb', b'reg_conj'}
+    groups = Counter()
+    for lemma in lemmas:
+        for line, n in expanded.get(lemma.encode(), {}).items():
+            if not line.startswith(loss.STEM_PREFIXES):
+                continue
+            classes = tuple(sorted(f.decode() for f in set(line[4:].split()[1:]) & allowed))
+            groups[(line[:4].decode(), definition_type(line), classes)] += n
+    return [dict(directive=prefix, definition_type=kind, declared_classes=classes, rows=n)
+            for (prefix, kind, classes), n in sorted(groups.items())]
+
+
+def compare_counterfactuals(forms, full, present, output):
+    counts, removed_tenses = Counter(), Counter()
+    for form, expected in sorted(forms.items()):
+        left = Counter(map(loss.signature, full.analyses(form, require_untruncated=True)))
+        right = Counter(map(loss.signature, present.analyses(form, require_untruncated=True)))
+        retained, removed, added = left & right, left - right, right - left
+        old_recovered, new_recovered = expected & left, expected & right
+        counts['forms'] += 1
+        counts['changed_multisets'] += left != right
+        counts['lost_recognition'] += bool(left) and not right
+        counts['gained_recognition'] += bool(right) and not left
+        counts['retained_rows'] += sum(retained.values())
+        counts['removed_rows'] += sum(removed.values())
+        counts['added_rows'] += sum(added.values())
+        counts['target_recoveries_removed'] += sum((old_recovered - new_recovered).values())
+        counts['target_recoveries_added'] += sum((new_recovered - old_recovered).values())
+        for sig, n in removed.items():
+            removed_tenses[(sig[7],)] += n
+        def serial(counter):
+            return [{'signature': [loss.decoded(v) for v in sig], 'multiplicity': n}
+                    for sig, n in sorted(counter.items())]
+        output.write(json.dumps({'kind': 'counterfactual_comparison', 'form': form.decode(),
+            'retained_rows': sum(retained.values()), 'removed': serial(removed), 'added': serial(added),
+            'target_recoveries_removed': serial(old_recovered - new_recovered),
+            'target_recoveries_added': serial(new_recovered - old_recovered)}, sort_keys=True) + '\n')
+    return {'counts': dict(sorted(counts.items())),
+            'removed_readings_by_tense': loss.grouped(removed_tenses, ('tense',)),
+            'same_exact_target_recoveries': not (counts['target_recoveries_removed'] or counts['target_recoveries_added']),
+            'present_multisets_included_in_full': counts['added_rows'] == 0}
 
 
 def present_cases(expanded, cases):
@@ -314,6 +439,12 @@ def prepare(args):
                 with os.fdopen(os.open(present_output, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
                                       getattr(os, 'O_NOFOLLOW', 0), 0o600), 'w') as stream:
                     present_losses = probe_losses(forms, baseline, before, after, stream)
+                    present_families = probe_present_families(isolated_cases, before, after, stream)
+                    full = native.NativeRows(args.library, target / 'native')
+                    try:
+                        direct_comparison = compare_counterfactuals(forms, full, after, stream)
+                    finally:
+                        full.close()
                     present_heads = Counter()
                     for case in isolated_cases:
                         probe = source_headword_probe(case, before, after)
@@ -338,8 +469,11 @@ def prepare(args):
         'original_trace_profiles': [dict(json.loads(profile), lemmas=n) for profile, n in sorted(trace_groups.items())],
         'source_headword_control': dict(sorted(headword_counts.items())), 'lost_reading_control': loss_probe,
         'counterfactual_expanded_definition_types': expanded_profiles(expanded, [c['lemma'] for c in cases]),
-        'present_only_control': {'scope': 'isolated literal present stems; not source approval or complete-family qualification',
+        'counterfactual_expanded_directive_profiles': expanded_directive_profiles(expanded, [c['lemma'] for c in cases]),
+        'present_only_control': {'scope': 'isolated literal present stems; source-family coverage; not source approval or complete-paradigm qualification',
             'expanded_definition_types': present_profile, 'source_headword_control': dict(sorted(present_heads.items())),
+            'full_to_present_comparison': direct_comparison,
+            'source_present_family_control': present_families,
             'lost_reading_control': present_losses, 'source_sha256': loss.digest(present_source),
             'indexes_sha256': present_hashes, 'private_native_probe_sha256': loss.digest(present_output)},
         'source_revision': revision, 'input_sha256': {name: loss.digest(path) for name, path in [

@@ -48,7 +48,13 @@ directives, and never copies baseline witness stems. Ambiguous, missing,
 duplicated or non-verbal present directives abort the experiment. The
 classifier includes `perfstem`, `avperf`, `evperf` and `ivperf` as perfect
 classes, following the repository's Latin ending tables; conflicting
-class tags are rejected rather than resolved by precedence.
+class tags are rejected rather than resolved by precedence. The classifier
+examines flags after the literal stem, never the stem token itself.
+Derivative `:de:` directives and literal `:vb:`/`:wd:` word directives are
+reported separately from explicit stem classes. A public directive profile
+contains only prefixes and fixed grammar names; unknown lexical fields are
+never printed. A derivative remains productive in the native index, even
+when its explicit stem expansion shows only a present class.
 
 The second expansion must contain precisely seven present directives for
 these lemmas and no other stem class. It independently rebuilds indexes,
@@ -57,8 +63,26 @@ exact lost-reading controls. Separate source, index and private-probe
 hashes identify this trial. Present stems also generate imperfect, future
 and other readings: “present-only” describes the stem class, not a tense
 restriction on native output. This diagnostic does not qualify complete
-present families, establish source-supported principal parts, or authorize
-an addition to the final candidate.
+paradigms, establish source-supported principal parts, or authorize an
+addition to the final candidate.
+
+The two counterfactual roots are also compared directly on every selected
+lost form. This comparison reports retained, removed and added eleven-field
+signatures with multiplicity, changes of recognition, and exact target
+recoveries gained or lost. Equal recovery totals alone do not establish
+equal recovery multisets. Detailed differences stay in the private probe.
+
+Thirteen present cells per source case are constructed independently from
+the full headword and its explicit conjugation digit: six indicative, six
+subjunctive and one infinitive. The supported scope is source digits 1, 3
+and 4, including third-conjugation `io` and the passive morphology of
+deponent headwords. Suffixes follow the repository's Latin ending tables;
+they are not obtained from candidate stems or native analyses. Each cell
+must return the direct literal lemma, person, number, present tense, mood
+and expected morphology, without truncation. The before/after eleven-field
+multisets must retain every existing reading. This establishes targeted
+family coverage of the counterfactual, not the linguistic acceptability of
+discarding source principal parts or global absence of regressions.
 
 The private candidate, native copy, transcripts and per-form probes remain
 outside the repository and inputs, under a mode-0700 directory with an

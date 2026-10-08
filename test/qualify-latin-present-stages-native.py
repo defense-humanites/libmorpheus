@@ -26,6 +26,35 @@ LIBRARY = BUILD / ('libmorpheus.dylib' if sys.platform == 'darwin' else 'libmorp
 
 
 class NativeQualification(unittest.TestCase):
+    def test_source_present_families_cover_active_and_deponent_conjugations(self):
+        terminal_spec = importlib.util.spec_from_file_location('terminal_families', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
+        terminal = importlib.util.module_from_spec(terminal_spec)
+        terminal_spec.loader.exec_module(terminal)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cases, blocks = [], []
+            for letter, digit, tag, passive in (
+                ('b', 1, 'conj1', False), ('c', 3, 'conj3', False),
+                ('d', 3, 'conj3_io', False), ('f', 4, 'conj4', False),
+                ('g', 1, 'conj1', True), ('h', 3, 'conj3', True),
+                ('k', 3, 'conj3_io', True), ('l', 4, 'conj4', True)):
+                stem = 'zzfamily' + letter + 'z'
+                head = stem + ('io' if tag in ('conj3_io', 'conj4') else 'o') + ('r' if passive else '')
+                cases.append({'lemma': head+'#2', 'header': {'headword': head+'#2'}, 'digit': digit})
+                blocks.append(':le:'+head+'#2\n:vs:'+stem+' '+tag+(' dep' if passive else '')+'\n')
+            source = root / 'families.stems'; source.write_text(''.join(blocks))
+            m.build_trial(BASELINE, source, BUILD, root / 'trial')
+            before = m.NativeRows(LIBRARY, BASELINE)
+            after = m.NativeRows(LIBRARY, root / 'trial')
+            try:
+                report = terminal.probe_present_families(cases, before, after, io.StringIO())
+                self.assertEqual(report['counts']['cells'], 104)
+                self.assertEqual(report['counts']['before_covered'], 0)
+                self.assertEqual(report['counts']['after_covered'], 104)
+                self.assertEqual(report['counts']['removed_rows'], 0)
+            finally:
+                after.close(); before.close()
+
     def test_present_isolation_rebuilds_without_regular_perfect_alias(self):
         terminal_spec = importlib.util.spec_from_file_location('terminal_isolation', SCRIPT.with_name('probe-latin-terminal-conjugation.py'))
         terminal = importlib.util.module_from_spec(terminal_spec)

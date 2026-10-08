@@ -118,7 +118,7 @@ class TerminalConjugation(unittest.TestCase):
         records = {b'zzlemma': Counter({b':vs:zzroot conj3': 1, b':vs:zzperf perfstem': 2,
                    b':vs:zzsup pp4': 1, b':wd:zzword other': 1})}
         report = m.expanded_profiles(records, ['zzlemma'])
-        self.assertEqual(report, {'present': 1, 'perfect': 2, 'supine': 1, 'other': 1})
+        self.assertEqual(report, {'present': 1, 'perfect': 2, 'supine': 1, 'literal_word': 1})
         self.assertNotIn('zz', json.dumps(report))
 
     def test_review_selection_keeps_only_qualified_principal_part_dossiers(self):
@@ -137,6 +137,54 @@ class TerminalConjugation(unittest.TestCase):
         for tag in (b'avperf', b'evperf', b'ivperf', b'perfstem'):
             self.assertEqual(m.definition_type(b':vs:zzstem ' + tag), 'perfect')
             with self.assertRaises(ValueError): m.definition_type(b':vs:zzstem conj1 ' + tag)
+
+    def test_derivatives_and_literal_words_are_distinct_from_explicit_stem_classes(self):
+        self.assertEqual(m.definition_type(b':de:zzroot are_vb'), 'derivation')
+        self.assertEqual(m.definition_type(b':vb:zzword perf act 1st sg'), 'literal_verbal_word')
+        self.assertEqual(m.definition_type(b':wd:zzword unknown'), 'literal_word')
+        self.assertEqual(m.definition_type(b':vs:conj1 unknown'), 'other')
+        profiles = m.expanded_directive_profiles({b'zzlemma': Counter({
+            b':de:zzprivate are_vb zzsecret': 2, b':vs:zzstem conj3': 1,
+            b':vb:zzword perf act 1st sg': 1})}, ['zzlemma'])
+        self.assertEqual(profiles[0], {'directive': ':de:', 'definition_type': 'derivation',
+            'declared_classes': ('are_vb',), 'rows': 2})
+        self.assertNotIn('zz', json.dumps(profiles))
+
+    def test_direct_comparison_preserves_multiplicity_and_detects_equal_count_target_substitution(self):
+        old = reading(); other = reading(tense=5)
+        forms = {b'zzform': Counter({m.loss.signature(old): 2})}
+        report = m.compare_counterfactuals(forms, Analyzer([old, old, other]), Analyzer([old, old]), io.StringIO())
+        self.assertTrue(report['same_exact_target_recoveries'])
+        self.assertTrue(report['present_multisets_included_in_full'])
+        self.assertEqual(report['counts']['removed_rows'], 1)
+        self.assertEqual(report['counts']['retained_rows'], 2)
+        self.assertEqual(report['removed_readings_by_tense'], [{'tense': 5, 'rows': 1}])
+        self.assertNotIn('zz', json.dumps(report))
+        report = m.compare_counterfactuals(forms, Analyzer([old, old]), Analyzer([old, other]), io.StringIO())
+        self.assertFalse(report['same_exact_target_recoveries'])
+        self.assertFalse(report['present_multisets_included_in_full'])
+        self.assertEqual(report['counts']['target_recoveries_removed'], 1)
+        self.assertEqual(report['counts']['added_rows'], 1)
+
+    def test_source_families_use_headword_and_digit_with_distinct_infinitives_and_voices(self):
+        for head, digit, second, infinitive, voice in (
+            ('zzrootzo', 1, 'zzrootzas', 'zzrootzare', 1),
+            ('zzrootzo', 3, 'zzrootzis', 'zzrootzere', 1),
+            ('zzrootzio', 3, 'zzrootzis', 'zzrootzere', 1),
+            ('zzrootzio', 4, 'zzrootzis', 'zzrootzire', 1),
+            ('zzrootzor', 1, 'zzrootzaris', 'zzrootzari', 2),
+            ('zzrootzor', 3, 'zzrootzeris', 'zzrootzi', 2),
+            ('zzrootzior', 3, 'zzrootzeris', 'zzrootzi', 2),
+            ('zzrootzior', 4, 'zzrootziris', 'zzrootziri', 2)):
+            cells = m.source_present_family({'header': {'headword': head+'#2'}, 'digit': digit})
+            self.assertEqual(len(cells), 13)
+            self.assertEqual(cells[0]['form'], head)
+            self.assertEqual(cells[1]['form'], second)
+            self.assertEqual(cells[-1], {'form': infinitive, 'person': 0, 'number': 0, 'mood': 5, 'voice': voice})
+            self.assertEqual({(c['person'], c['number'], c['mood']) for c in cells},
+                {(person, number, mood) for mood in (4,8) for number in (1,3) for person in (1,2,3)} | {(0,0,5)})
+        for head, digit in (('zzrootzo', 4), ('zzrootzo', 2), ('zz rootzo', 3), ('o', 1)):
+            with self.assertRaises(ValueError): m.source_present_family({'header': {'headword': head}, 'digit': digit})
 
     def test_present_isolation_preserves_literal_directive_without_derivative_or_past(self):
         case = {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}}
