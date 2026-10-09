@@ -251,3 +251,22 @@ source reproduction from stream context without publishing a header or form.
 Ten synthetic tests cover these mechanisms. A matching historical replay is
 mechanical evidence and cannot replace literal source attestation.
 
+The [completed trace on `7a8cf4c`](https://github.com/defense-humanites/libmorpheus/actions/runs/37918332997/job/113779885033)
+has a [full aggregate report](qualification/latin-historical-source-trace-7a8cf4c.json).
+It preserves every pinned input and the private source-dossier hash
+`20f15264462a6ab964f2a4d1998e2a223364f1c25fc43fba0e1863ffdac4c80a`.
+The unique source header contains one `itype` field with an alternative
+connector; no field is merely a bare fourth-conjugation indication. The
+isolated source reproduces all four selected-lemma directives of the complete
+diagnostic stream. This demonstrates reproduction without preceding articles
+for this selected multiset.
+
+The removed directive is perfect; the additions are one perfect and one
+supine. The literal source recipe remains unclassified. Its zero expected
+directives and zero quantity-only pairs are absence of a supported recipe,
+not evidence of absent principal parts or quantity agreement. Four mechanically
+reproduced directives do not count as four source-validated directives.
+Reconstruction of a separate candidate remains withheld pending interpretation
+of the actual source grammar and its quantities. No original output receipt,
+qualified candidate, runtime index or production corpus is replaced.
+
