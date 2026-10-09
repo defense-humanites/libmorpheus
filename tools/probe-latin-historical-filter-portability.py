@@ -15,6 +15,22 @@ import subprocess
 import sys
 
 LEXER_SHA256 = '27765fb0e13ba200f432c98218e1bb53126acedb391bf1d8c5cabe1fe30dd231'
+LEMMA_SUFFIXES = '''    {
+        const char *suffixes[] = {"i^or","e^or","i^o","e^o","ior","eor","or","eo","it","et","io"};
+        size_t n = strlen(stem);
+        int i;
+        for (i = 0; i < 11; i++) {
+            size_t width = strlen(suffixes[i]);
+            if (n >= width && !strcmp(stem+n-width,suffixes[i])) {
+                stem[n-width] = 0;
+                sawi = (i == 0 || i == 2 || i == 4 || i == 10);
+                sawpass = (i == 1 || i == 4 || i == 5 || i == 6);
+                return 0;
+            }
+        }
+        if (n) stem[n-1] = 0;
+    }
+'''
 TRUNCSTEM = '''truncstem(char * workstem, int trimn)
 {
     size_t n = strlen(workstem);
@@ -76,6 +92,19 @@ def diagnostic_source(data):
         if text.count(old) != count:
             raise ValueError('diagnostic copy site inventory differs')
         text = text.replace(old, new)
+    for suffix in ('igo', 'igor', 'ingo'):
+        old = '!strcmp(lemma+strlen(lemma)-strlen("' + suffix + '"),"' + suffix + '")'
+        if text.count(old) != 1:
+            raise ValueError('diagnostic lemma-suffix site inventory differs')
+        text = text.replace(old, '(strlen(lemma) >= strlen("' + suffix + '") && ' + old + ')')
+    start = '\tt = stem+strlen(stem) - 4;'
+    end = '\n}\n/*\n\n*/\n\n\ndoderiv(char * tag)'
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise ValueError('diagnostic lemma preparation site inventory differs')
+    a, b = text.index(start), text.index(end)
+    if b <= a:
+        raise ValueError('diagnostic lemma preparation boundaries differ')
+    text = text[:a] + LEMMA_SUFFIXES + text[b:]
     marker = 'truncstem(char * workstem, int trimn)\n{'
     if text.count(marker) != 1:
         raise ValueError('diagnostic truncation site inventory differs')

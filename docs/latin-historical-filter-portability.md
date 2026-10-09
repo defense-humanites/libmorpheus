@@ -114,6 +114,25 @@ addresses, excerpts or paths. Three additional unit tests check redaction,
 unknown errors and preservation of exclusive private logs. A failure stays
 fatal; no partial result or changed receipt is accepted.
 
+The redacted Linux failure on `2cebf54` identifies `global-buffer-overflow`
+in `do_itype`, with a source location at the suffix-comparison branch. That
+branch subtracts the widths of three literal endings from `strlen(lemma)`
+without checking that the lemma is at least that long. The diagnostic copy
+now guards those three comparisons. It also replaces the fixed backward
+offset in `set_lemma` with length-guarded suffix selection, preserving the
+historical order, flags and fallback; this addresses the analogous short-stem
+boundary without asserting a linguistic correction.
+
+The extended diagnostic lexer has SHA-256
+`654be9aa0e2bb47ac27f9bb6f4dfe7183a522b6f657083aab99f884e806a3189`.
+Its full local stream again exits without sanitizer output and reproduces
+exactly the old local raw bytes, 10,399 definition occurrences and 6,988
+literal lemma multisets, with zero additions or removals. Nine unit and four
+native tests pass, including short synthetic lemmas through the complete
+lexer and all eleven suffix/flag choices through a sanitizer-built harness.
+The next Linux comparison is required before making any statement about its
+output equivalence. Earlier qualified Linux candidates remain unchanged.
+
 ## Consequences for the research
 
 The local final candidate was rejected before any real-source family or
