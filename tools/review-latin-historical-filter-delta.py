@@ -52,6 +52,19 @@ def source_expectations(row):
         return 'unclassified',Counter()
     # combitype joins only adjacent itype fields. Preserve all source quantities.
     grammar=', '.join(value for _,value in fields)
+    # A literal compound boundary supplies the prefix; do not infer it from
+    # the historical backwards search for a consonant. Both alternatives in
+    # each principal-part slot remain source expectations.
+    compound=re.fullmatch(r'([A-Za-z_^]+)-([A-Za-z_^]+)o',row['headword'])
+    alternatives=re.fullmatch(r'([A-Za-z_^]+i) or ([A-Za-z_^]+i), ([A-Za-z_^]+um) or ([A-Za-z_^]+um), 3',grammar)
+    if compound and alternatives:
+        parts=alternatives.groups();base=compound[2];prefix=compound[1]+'-'
+        if (all(part[0]==base[0] for part in parts) and base[0] not in 'aeioux'
+                and parts[0]!=parts[1] and parts[2]!=parts[3]):
+            expected=[((':vs:'+prefix+base).encode(),b'conj3')]
+            expected.extend(((':vs:'+prefix+part[:-1]).encode(),b'perfstem') for part in parts[:2])
+            expected.extend(((':vs:'+prefix+part[:-2]).encode(),b'pp4') for part in parts[2:])
+            return 'explicit_compound_two_perfects_two_supines',Counter(expected)
     match=re.fullmatch(r'(i_vi|i\^i|ii),? (?:or|and) (i_vi|i\^i|ii), (?:(i_tum|i\^tum), )?(?:4|i_re)',grammar)
     if not match or match[1]==match[2] or 'i_vi' not in (match[1],match[2]):
         return 'unclassified',Counter()

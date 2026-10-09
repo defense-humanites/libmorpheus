@@ -14,6 +14,17 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class SourceReview(unittest.TestCase):
+    def test_explicit_compound_preserves_both_supines_and_quantities(self):
+        row={'headword':'zz-zaro','fields':[{'name':'itype','projection':'zavi or z^i, zatum or z_tum, 3'}]}
+        branch,expected=m.source_expectations(row)
+        self.assertEqual(branch,'explicit_compound_two_perfects_two_supines')
+        self.assertEqual(sum(expected.values()),5)
+        self.assertIn((b':vs:zz-z_t',b'pp4'),expected)
+        self.assertIn((b':vs:zz-z^',b'perfstem'),expected)
+        for head in ('zzzaro','zz-zaro#2','zz-zz-zaro','zz-aaro'):
+            row['headword']=head
+            self.assertEqual(m.source_expectations(row),('unclassified',m.Counter()))
+
     def test_grammar_shape_publishes_only_structure_and_receipt(self):
         row={'fields':[{'name':'itype','projection':'zz_vi or zz^i, zz_tum, 3'},
                        {'name':'pos','projection':'SECRET'}]}
