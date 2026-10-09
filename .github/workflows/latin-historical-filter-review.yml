@@ -83,3 +83,22 @@ jobs:
             --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
             --filters "$RUNNER_TEMP/filters" --diagnostic-filter "$RUNNER_TEMP/diagnostic/latvb" \
             --output "$RUNNER_TEMP/source-review"
+      - name: Qualify isolated source supine families natively
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-historical-source-supines.py
+          cmake -S . -B "$RUNNER_TEMP/supine-native" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON \
+            > "$RUNNER_TEMP/supine-configure.log" 2>&1
+          cmake --build "$RUNNER_TEMP/supine-native" --parallel 2 \
+            --target morpheus morpheus_stemlib_production_latin \
+            > "$RUNNER_TEMP/supine-build.log" 2>&1
+          python3 test/qualify-latin-historical-source-supines-native.py "$RUNNER_TEMP/supine-native"
+          python3 tools/qualify-latin-historical-source-supines.py \
+            --review "$RUNNER_TEMP/source-review/source-review.jsonl" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/source-supine-families"
