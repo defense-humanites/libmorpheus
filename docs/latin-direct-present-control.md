@@ -106,3 +106,9 @@ as do every original-candidate and open-trial index and input receipt.
 No lexical form, directive or individual analysis is published. No candidate,
 native production policy or production corpus is changed.
 
+The complete run on `b4cd55d` (Latin job `113750704211`, workflow
+`37909422275`) reproduces this entire aggregate report exactly, including
+family counts, all global comparisons, index and private difference receipts.
+Its separate diagnostic historical-filter comparison does not substitute
+the original candidate or open-trial inputs.
+

@@ -150,3 +150,49 @@ results, a separate defined-copy/empty-stem control must compare source
 identity and emitted definition multisets against the qualified historical
 output, then requalify any changed candidate. Merely accepting the old local
 hash or weakening its guard would erase the difference rather than resolve it.
+
+## Completed Linux comparison on `b4cd55d`
+
+The [Latin job](https://github.com/defense-humanites/libmorpheus/actions/runs/37909422275/job/113750704211)
+completed successfully, as did [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/37909428223)
+and [platform qualification](https://github.com/defense-humanites/libmorpheus/actions/runs/37909428206).
+The [complete aggregate report](qualification/latin-historical-portability-b4cd55d.json)
+records the pinned execution.
+
+Linux and macOS received the **same input bytes**, used the **same diagnostic
+lexer bytes**, and produced **identical output bytes**: the input, diagnostic
+lexer and output SHA-256 values match the extended local measurement above.
+Both sanitizer executions exited successfully. This establishes agreement
+for these two executions and this exact stream, not universal portability
+or the absence of other defects.
+
+Relative to the original Linux historical-filter output:
+
+| Definition multiset measurement | Occurrences |
+| --- | ---: |
+| Original Linux output | 10,398 |
+| Diagnostic output | 10,399 |
+| Retained | 10,397 |
+| Removed | 1 |
+| Added | 2 |
+
+Exactly **one literal lemma multiset** changes; the other **6,987** are
+identical. The raw historical and diagnostic outputs differ.
+The private delta SHA-256 is
+`258e211210c33e223fe3055c7c21e3a9c834f51d5e27e1ff4332d900dd2d4622`.
+No changed lemma, directive or source excerpt is published.
+
+The combined defined-copy and bounds interventions remove the observed
+Linux/macOS output divergence on this stream. The experiment does not isolate
+which intervention causes each changed directive or justify their lexical
+content. The one-lemma delta must be reviewed against the pinned source
+before rebuilding and qualifying a separate candidate. The original final
+candidate receipt `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`
+is preserved; the local alternate final receipt is not substituted.
+
+The same completed run reproduces the entire direct-present counterfactual
+report from `b022abb` exactly, including all three global comparisons, family
+counts, index receipts and private delta hashes. Thus the diagnostic filter
+comparison has not replaced the inputs of the existing qualification.
+No production lexer, runtime index, native policy or corpus is changed.
+
