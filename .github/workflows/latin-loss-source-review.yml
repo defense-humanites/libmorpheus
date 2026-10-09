@@ -158,4 +158,19 @@ jobs:
             --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
             --filters "$RUNNER_TEMP/filters" --diagnostic-filter "$RUNNER_TEMP/diagnostic/latvb" \
             --output "$RUNNER_TEMP/changed-definition-review"
+      - name: Review lost native identifiers against their literal bases
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/review-latin-lost-preverb-bases.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-lost-preverb-bases.py \
+            --dossier "$RUNNER_TEMP/complete-losses/loss-dossier.jsonl" \
+            --baseline-expanded "$RUNNER_TEMP/supine-native/stemlib-production/latin/Latin/lexical/verb.expanded" \
+            --final-expanded "$RUNNER_TEMP/complete-losses/candidate/Latin/lexical/present-trial.expanded" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/complete-losses/candidate" \
+            --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/lost-preverb-base-review"
 
