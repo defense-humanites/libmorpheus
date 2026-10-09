@@ -96,7 +96,10 @@ missing-definition lemmas, native base dependencies and other grammatical
 losses remain open.
 
 The two selected headers account for 119 readings in the old complete-loss
-snapshot. The global additions measured here are not a reading-by-reading
-recovery of that dossier, nor source approval of every native composed
-identifier. Such attribution requires a separate dossier comparison.
+snapshot. The [separate attribution review](latin-third-supine-recovery-attribution.md)
+now measures 28 restored readings and 91 remaining in that selected dossier.
+Across the complete global delta, 151 historical readings are restored;
+274 of the 434 native-preverb additions have exact source-base dependencies.
+These dependencies do not approve composed lexical identities. The remaining
+160 native-preverb additions have no accepted literal identifier decomposition.
 The earlier trials are not combined or promoted. The PR remains a draft.
