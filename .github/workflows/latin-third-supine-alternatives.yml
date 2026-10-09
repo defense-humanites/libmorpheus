@@ -8,6 +8,8 @@ on:
     paths:
       - 'tools/qualify-latin-third-supine-alternatives.py'
       - 'test/qualify-latin-third-supine-alternatives.py'
+      - 'tools/review-latin-third-supine-recoveries.py'
+      - 'test/review-latin-third-supine-recoveries.py'
       - '.github/workflows/latin-third-supine-alternatives.yml'
   workflow_dispatch:
 
@@ -169,6 +171,19 @@ jobs:
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --forms "$RUNNER_TEMP/third-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/third-supine-trial"
+      - name: Attribute added native bases and historical reading recoveries
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/review-latin-third-supine-recoveries.py
+          python3 tools/review-latin-third-supine-recoveries.py \
+            --qualification docs/qualification/latin-third-supine-alternatives-60b3eb4.json \
+            --source-report docs/qualification/latin-loss-source-review-8462af2.json \
+            --trial "$RUNNER_TEMP/third-supine-trial" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --original "$RUNNER_TEMP/primary-original-native" \
+            --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/third-supine-attribution"
   source-profile:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
