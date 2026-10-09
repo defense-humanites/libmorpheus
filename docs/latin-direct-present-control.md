@@ -10,7 +10,8 @@ composition to be disabled.
 `tools/qualify-latin-direct-present-control.py` binds the open trial's source,
 verbal indexes, thirteen-cell family and LISTALL to their qualified receipts.
 It requires that the selected lemma has no original candidate definition,
-then appends only `not_in_comp` to its unique explicit `:vs:`/`conj1` directive.
+then appends only `not_in_comp` to its unique explicit `:vs:` directive with exactly `conj1 are_vb`. The `are_vb` token survives
+native expansion of the qualified derivation; it is preserved by the control.
 Other bytes and homograph suffixes remain unchanged. The flag is an existing
 native input feature, used here solely as a diagnostic intervention.
 
@@ -39,3 +40,10 @@ it also exercises the complete three-pass control on 26 synthetic forms,
 including reconstruction from an already built trial without file collisions.
 The control does not promote a candidate, change native policy, add a lexical
 restriction, or validate the remaining direct ambiguities or past reconstructions.
+
+The first Linux run on `9f9ba4c` passed all preceding qualifications but
+stopped before the three new global passes: its new guard incorrectly expected
+only `conj1`. The corrected native synthetic test builds an `are_vb` derivation
+and uses its expanded present directive, rather than a manually shortened
+fixture. Input receipts remain unchanged; no result is inferred from that failed
+run. Unknown tokens, bare `conj1`, and an existing restriction are rejected.

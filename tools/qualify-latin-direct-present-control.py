@@ -31,7 +31,7 @@ def restricted_payload(data, lemma):
         if line.startswith(b':le:'):
             current = line[4:].strip()
         if current == lemma and line.startswith(loss.STEM_PREFIXES):
-            if not line.startswith(b':vs:') or line.split()[1:] != [b'conj1']:
+            if not line.startswith(b':vs:') or line.split()[1:] != [b'conj1', b'are_vb']:
                 raise ValueError('selected present directive differs from qualified class')
             newline = b'\r\n' if line.endswith(b'\r\n') else b'\n' if line.endswith(b'\n') else b''
             line = line[:len(line)-len(newline)] if newline else line

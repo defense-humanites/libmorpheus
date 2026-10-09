@@ -14,22 +14,22 @@ spec.loader.exec_module(m)
 
 class DirectControl(unittest.TestCase):
     def test_one_flag_preserves_unselected_bytes_and_homographs(self):
-        data = b'# synthetic\n:le:zzsourcezo#1\n:vs:zzother conj1\n:le:zzsourcezo#2\n:vs:zzsourcez conj1\n'
+        data = b'# synthetic\n:le:zzsourcezo#1\n:vs:zzother conj1 are_vb\n:le:zzsourcezo#2\n:vs:zzsourcez conj1 are_vb\n'
         result = m.restricted_payload(data, b'zzsourcezo#2')
-        self.assertEqual(result, data.replace(b':vs:zzsourcez conj1\n', b':vs:zzsourcez conj1 not_in_comp\n'))
+        self.assertEqual(result, data.replace(b':vs:zzsourcez conj1 are_vb\n', b':vs:zzsourcez conj1 are_vb not_in_comp\n'))
 
     def test_line_endings_and_missing_terminal_newline_are_preserved(self):
         for ending in (b'\n', b'\r\n', b''):
-            data = b':le:zzsourcezo\n:vs:zzsourcez conj1' + ending
-            self.assertEqual(m.restricted_payload(data, b'zzsourcezo'), b':le:zzsourcezo\n:vs:zzsourcez conj1 not_in_comp'+ending)
+            data = b':le:zzsourcezo\n:vs:zzsourcez conj1 are_vb' + ending
+            self.assertEqual(m.restricted_payload(data, b'zzsourcezo'), b':le:zzsourcezo\n:vs:zzsourcez conj1 are_vb not_in_comp'+ending)
 
     def test_multiple_or_absent_present_directives_abort(self):
-        for data in (b':le:zzsourcezo\n', b':le:zzsourcezo\n:vs:zzsourcez conj1\n:vs:zzother conj1\n'):
+        for data in (b':le:zzsourcezo\n', b':le:zzsourcezo\n:vs:zzsourcez conj1 are_vb\n:vs:zzother conj1 are_vb\n'):
             with self.assertRaisesRegex(ValueError, 'exactly one'):
                 m.restricted_payload(data, b'zzsourcezo')
 
     def test_other_stem_classes_or_existing_flags_abort(self):
-        for directive in (b':de:zzsourcez are_vb', b':vs:zzsourcez conj3', b':vs:zzsourcez conj1 not_in_comp'):
+        for directive in (b':de:zzsourcez are_vb', b':vs:zzsourcez conj3', b':vs:zzsourcez conj1', b':vs:zzsourcez conj1 are_vb orth', b':vs:zzsourcez conj1 are_vb not_in_comp'):
             with self.assertRaisesRegex(ValueError, 'qualified class'):
                 m.restricted_payload(b':le:zzsourcezo\n'+directive+b'\n', b'zzsourcezo')
 

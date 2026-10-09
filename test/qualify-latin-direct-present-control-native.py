@@ -20,7 +20,14 @@ class NativeDirectControl(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory); readers={}
             try:
-                data=b':le:zzsyntheticzo#2\n:vs:zzsyntheticz conj1\n'
+                derivation=root/'derivation.stems'
+                derivation.write_bytes(b':le:zzsyntheticzo#2\n:de:zzsyntheticz are_vb\n')
+                m.native.build_trial(BUILD/'stemlib-production/latin',derivation,BUILD,root/'derived')
+                expanded=m.loss.definitions(root/'derived/Latin/lexical/present-trial.expanded')
+                present=[line for line in expanded[b'zzsyntheticzo#2'] if line.startswith(b':vs:')]
+                self.assertEqual(len(present),1)
+                self.assertEqual(present[0].split()[1:],[b'conj1',b'are_vb'])
+                data=b':le:zzsyntheticzo#2\n'+present[0]+b'\n'
                 for name,payload in (('open',data),('restricted',m.restricted_payload(data,b'zzsyntheticzo#2'))):
                     source=root/(name+'.stems'); source.write_bytes(payload)
                     m.native.build_trial(BUILD/'stemlib-production/latin',source,BUILD,root/name)
