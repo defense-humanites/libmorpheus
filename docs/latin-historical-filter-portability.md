@@ -103,6 +103,17 @@ synthetic notation and alternative perfects. The workflow adds an independent
 Linux comparison before the original transformation stages, with the original
 Linux output receipt; its results remain pending.
 
+The first Linux job on `b6a0454` passed six unit and two native synthetic
+tests, then failed while executing the copied filter on the complete private
+stream. No raw-byte or definition comparison was qualified. Its detailed
+stderr remained private, and the original public failure message provided
+no category or location. The tool now reports only allowlisted sanitizer
+categories, source line numbers, known function names and the process exit
+code on failure. It reconstructs this summary instead of copying log lines,
+addresses, excerpts or paths. Three additional unit tests check redaction,
+unknown errors and preservation of exclusive private logs. A failure stays
+fatal; no partial result or changed receipt is accepted.
+
 ## Consequences for the research
 
 The local final candidate was rejected before any real-source family or

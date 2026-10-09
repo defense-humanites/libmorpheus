@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -33,6 +34,32 @@ TRUNCSTEM = '''truncstem(char * workstem, int trimn)
 }
 '''
 STEM_PREFIXES = (b':vs:', b':de:', b':vb:', b':wd:')
+ASAN_CATEGORIES = {'strcpy-param-overlap', 'stack-buffer-overflow', 'global-buffer-overflow',
+                   'heap-buffer-overflow', 'stack-buffer-underflow', 'heap-use-after-free',
+                   'stack-use-after-return', 'stack-use-after-scope', 'SEGV', 'DEADLYSIGNAL'}
+FUNCTIONS = {'set_lemma', 'set_orth', 'do_vstems', 'truncstem', 'do_itype',
+             'doverb', 'doderiv', 'is_spectype', 'yylex', 'main'}
+
+
+class DiagnosticProcessError(ValueError):
+    def __init__(self, summary):
+        super().__init__('private diagnostic process failed; detailed logs remain private')
+        self.summary = summary
+
+
+def failure_summary(name, returncode, stderr):
+    """Reconstruct only allowlisted categories/locations; never copy log lines."""
+    text = stderr.decode('utf-8', errors='replace')
+    candidates = re.findall(r'AddressSanitizer: ([A-Za-z_-]+)', text)
+    categories = sorted(set(candidates) & ASAN_CATEGORIES)
+    if 'runtime error:' in text:
+        categories.append('undefined-behavior')
+    lines = sorted({int(n) for n in re.findall(r'/latvb\.[lc]:([0-9]+)', text)})
+    functions = sorted(set(re.findall(r'\bin ([A-Za-z_][A-Za-z_0-9]*)', text)) & FUNCTIONS)
+    return {'schema': 1, 'scope': 'failed diagnostic process; no output comparison qualified',
+            'operation': name if name in {'flex', 'cc', 'filter'} else 'unknown',
+            'returncode': returncode, 'categories': categories,
+            'lexer_or_generated_source_lines': lines, 'functions': functions}
 
 
 def digest(data):
@@ -96,7 +123,7 @@ def run_private(command, target, name, data=None):
     write_private(target / (name + '.stdout'), result.stdout)
     write_private(target / (name + '.stderr'), result.stderr)
     if result.returncode:
-        raise ValueError('private diagnostic process failed; inspect its local logs')
+        raise DiagnosticProcessError(failure_summary(name, result.returncode, result.stderr))
     return result.stdout
 
 
@@ -144,7 +171,11 @@ def main():
     parser.add_argument('--expected-reference-sha256', required=True)
     previous = os.umask(0o077)
     try:
-        report = prepare(parser.parse_args())
+        try:
+            report = prepare(parser.parse_args())
+        except DiagnosticProcessError as error:
+            print(json.dumps({'latin_historical_filter_failure': error.summary}, sort_keys=True), flush=True)
+            raise ValueError(str(error)) from None
     finally:
         os.umask(previous)
     print(json.dumps({'latin_historical_filter_portability': report}, sort_keys=True))

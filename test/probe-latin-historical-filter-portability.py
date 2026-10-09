@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('probe', Path(__file__).resolve().parents[1] /
                                            'tools/probe-latin-historical-filter-portability.py')
@@ -13,6 +14,35 @@ spec.loader.exec_module(m)
 
 
 class PortabilityControl(unittest.TestCase):
+    def test_failure_summary_excludes_private_text_and_addresses(self):
+        stderr=(b'ERROR: AddressSanitizer: global-buffer-overflow on address 0xdeadbeef\n'
+                b'#1 0x123 in set_lemma /private/SECRET/latvb.l:211:4\n'
+                b'#2 0xabc in SECRET /private/SECRET/input:999\n'
+                b'private article SECRET and stem SECRET\n')
+        result=m.failure_summary('filter',1,stderr)
+        self.assertEqual(result['categories'],['global-buffer-overflow'])
+        self.assertEqual(result['functions'],['set_lemma'])
+        self.assertEqual(result['lexer_or_generated_source_lines'],[211])
+        self.assertNotIn('SECRET',str(result)); self.assertNotIn('0x',str(result))
+
+    def test_unknown_error_text_is_not_forwarded(self):
+        result=m.failure_summary('SECRET',-6,b'AddressSanitizer: SECRET\nruntime error: SECRET')
+        self.assertEqual(result['operation'],'unknown')
+        self.assertEqual(result['categories'],['undefined-behavior'])
+        self.assertNotIn('SECRET',str(result))
+
+    def test_failed_process_preserves_private_logs_and_raises_typed_summary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            r=Path(directory)
+            with patch.object(m.subprocess,'run',return_value=SimpleNamespace(
+                    returncode=1,stdout=b'SECRET',stderr=b'AddressSanitizer: SEGV\nSECRET')):
+                with self.assertRaises(m.DiagnosticProcessError) as failure:
+                    m.run_private(['synthetic'],r,'filter',b'SECRET')
+            self.assertEqual(failure.exception.summary['categories'],['SEGV'])
+            self.assertNotIn('SECRET',str(failure.exception))
+            self.assertEqual((r/'filter.stdout').read_bytes(),b'SECRET')
+            self.assertEqual((r/'filter.stderr').stat().st_mode & 0o777,0o600)
+
     def test_source_receipt_precedes_patch(self):
         with self.assertRaisesRegex(ValueError, 'lexer receipt'):
             m.diagnostic_source(b'synthetic changed lexer')
