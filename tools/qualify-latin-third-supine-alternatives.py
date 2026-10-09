@@ -54,6 +54,24 @@ def recipe(row):
     expected.update(((':vs:'+s).encode(),b'pp4') for s in stems)
     return branch,expected
 
+def shape(row):
+    fields=[f['projection'] for f in row['fields'] if f['name']=='itype']
+    grammar=', '.join(fields)
+    head=re.sub(r'#[1-9]$','',row.get('headword',''))
+    parts=[p.strip() for p in re.split(r', | and ',grammar) if p.strip() not in ('3','and')]
+    root=head[:-3] if head.endswith('i^o') else head[:-1]
+    return {'grammar_shape':re.sub(r'[A-Za-z_^]+','PART',grammar),
+        'head_plain_length':len(plain(head)),'head_ascii_lower':bool(re.fullmatch(r'[a-z_^]+',head)),
+        'head_plain_o':head.endswith('o'),'head_io':head.endswith(('io','i^o')),
+        'parts_plain_lengths':[len(plain(p)) for p in parts],
+        'perfect_matches_present':bool(parts and plain(parts[0][:-1])==plain(root)),
+        'supines_start_present':[plain(p[:-2]).startswith(plain(root)) for p in parts[1:]],
+        'supines_end_um':[p.endswith('um') for p in parts[1:]],
+        'parts_ascii_lower':[bool(re.fullmatch(r'[a-z_^]+',p)) for p in parts],
+        'adjacent_itypes':all(b==a+1 for a,b in zip(
+            [i for i,f in enumerate(row['fields']) if f['name']=='itype'],
+            [i for i,f in enumerate(row['fields']) if f['name']=='itype'][1:]))}
+
 def anchors(actual,expected):
     missing=expected-actual
     if (sum(actual.values())!=3 or actual-expected or sum(missing.values()) not in (1,2)
@@ -105,7 +123,7 @@ def prepare(args):
     first=review.sibling('repair-latin-first-conjugation')
     rows,_,_=first.source_rows(args.headers,args.tei)
     headers={review.probe.digest(json.dumps(r,sort_keys=True).encode()):r for r in rows}
-    selected=[];groups=Counter();screened=0;private=[];additions={}
+    selected=[];groups=Counter();screened=0;private=[];additions={};coordinated_shapes=[]
     data=args.candidate.read_bytes();definitions=review.probe.definitions(data)
     for case in report['changed_definition_source_review']['anonymous_cases']:
         if case.get('source_partition')!='verbal':continue
@@ -116,6 +134,7 @@ def prepare(args):
         if primary.source_recipe(row)[1]:continue
         screened+=1
         branch,expected=recipe(row)
+        if ' and ' in ', '.join(fields):coordinated_shapes.append(shape(row))
         groups[branch]+=1
         if not expected:continue
         if not case.get('literal_headword_identity'):
@@ -128,7 +147,7 @@ def prepare(args):
         private.append({'source_header':row,'lemma':lemma.decode(),'recipe':branch,
                         'missing':[[t.decode() for t in tokens] for tokens in missing]})
     print(json.dumps({'latin_third_supine_screen':{'screened':screened,'groups':dict(groups),
-          'selected':len(selected),'missing_directives':sum(sum(c.values()) for c in additions.values())}},sort_keys=True),flush=True)
+          'coordinated_shapes':coordinated_shapes,'selected':len(selected),'missing_directives':sum(sum(c.values()) for c in additions.values())}},sort_keys=True),flush=True)
     if screened!=27 or len(selected)!=2 or sum(sum(c.values()) for c in additions.values())!=3:
         raise ValueError('coordinated supine bounded selection differs')
     target=changed.loss.private_target(args.output,[*paths.values(),args.native,args.library,args.baseline,args.tools])

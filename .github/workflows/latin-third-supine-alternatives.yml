@@ -169,3 +169,65 @@ jobs:
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --forms "$RUNNER_TEMP/third-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/third-supine-trial"
+  source-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install isolated lexer and source dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flex libfl-dev
+          python3 -m venv "$RUNNER_TEMP/lexical-python"
+          "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
+      - name: Fetch the pinned TEI
+        run: |
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
+          git -C "$RUNNER_TEMP/lexica" sparse-checkout set --no-cone \
+            '/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml'
+          git -C "$RUNNER_TEMP/lexica" checkout 56061ca127f4a2844980baffc5f2b6d1332897b3
+      - name: Reconstruct the qualified recovered headers privately
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
+            --language Latin --lexica "$RUNNER_TEMP/lexica" --output "$RUNNER_TEMP/projected"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-initial-sense.py \
+            --headers "$RUNNER_TEMP/projected/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/projected/Latin.lemmata" --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/initial-sense" --expected 630
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-compound-headwords.py \
+            --headers "$RUNNER_TEMP/initial-sense/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/initial-sense/Latin.lemmata" --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/compounds" --expected 104
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/compounds/Latin.lemmata" --output "$RUNNER_TEMP/partition"
+      - name: Masked coordinated source profile
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location('trial',Path('tools/qualify-latin-third-supine-alternatives.py'))
+          trial=importlib.util.module_from_spec(spec);spec.loader.exec_module(trial)
+          temporary=Path(os.environ['RUNNER_TEMP'])
+          report_path=Path('docs/qualification/latin-loss-source-review-8462af2.json')
+          if trial.native.digest(report_path)!=trial.primary.REPORT_SHA:
+              raise ValueError('source profile report receipt differs')
+          first=trial.review.sibling('repair-latin-first-conjugation')
+          rows,_,_=first.source_rows(temporary/'compounds/Latin.headers.jsonl',temporary/'lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml')
+          headers={trial.review.probe.digest(json.dumps(r,sort_keys=True).encode()):r for r in rows}
+          selected=[]
+          for case in json.loads(report_path.read_bytes())['changed_definition_source_review']['anonymous_cases']:
+              if case.get('source_partition')!='verbal':continue
+              row=headers[case['source_header_sha256']]
+              grammar=', '.join(f['projection'] for f in row['fields'] if f['name']=='itype')
+              if grammar.endswith('3') and ' and ' in grammar:
+                  selected.append(trial.shape(row))
+          print(json.dumps({'latin_coordinated_masked_source_profile':selected},sort_keys=True))
+          PY
