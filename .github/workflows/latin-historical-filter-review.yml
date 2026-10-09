@@ -96,7 +96,7 @@ jobs:
             --target morpheus morpheus_stemlib_production_latin \
             > "$RUNNER_TEMP/supine-build.log" 2>&1
           python3 test/qualify-latin-historical-source-supines-native.py "$RUNNER_TEMP/supine-native"
-          python3 tools/qualify-latin-historical-source-supines.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-historical-source-supines.py \
             --review "$RUNNER_TEMP/source-review/source-review.jsonl" \
             --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
