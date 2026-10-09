@@ -609,6 +609,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-isolated-source-present.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-source-present-preverbs.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/search-latin-unjoined-preverb-source.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/diagnose-latin-preverb-identifiers.py
           python3 test/probe-latin-terminal-conjugation.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -835,6 +836,21 @@ jobs:
             --expected-rows 123 \
             --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a \
             --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
+
+      - name: Diagnose native preverb identifiers without substituting lexical identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/diagnose-latin-preverb-identifiers.py \
+            --routes "$RUNNER_TEMP/latin-isolated-source-present-qualification/changed-routes.jsonl" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --dossier "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --private-output "$RUNNER_TEMP/latin-preverb-identifier-diagnostic.jsonl" \
+            --expected-forms 188 --expected-rows 246 --expected-preverbs 123 \
+            --expected-routes-sha256 461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a
 
   greek-header-filters:
     runs-on: ubuntu-24.04
