@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
 # Qualification of a separate full Latin source candidate
 
 On `bca050d`, the [dedicated source qualification](https://github.com/defense-humanites/libmorpheus/actions/runs/37921913936/job/113791604037)

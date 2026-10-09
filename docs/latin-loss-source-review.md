@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
 # Latin complete-loss source and native-base review
 
 The [dedicated job](https://github.com/defense-humanites/libmorpheus/actions/runs/37927335700/job/113809311246)
@@ -99,9 +101,14 @@ Failure to find a peer or source join is not proof of non-attestation.
 
 ## Remaining arbitration
 
-The next bounded source work is the nine verbal replay differences, followed
-by the other changed-definition grammar shapes and the 30 missing-definition
-lemmas. Native losses should be reviewed with their base dependencies; their
+The subsequent [primary-source qualification](latin-loss-primary-source.md)
+covers all nine verbal replay differences and eight additional cases. Its
+twenty expected primary directives already match the original candidate,
+with 120 native family cells covered. This qualifies those directives without
+settling every historical lost reading or the additional orthographic records.
+Forty verbal grammar cases remain unclassified by those bounded recipes,
+alongside the nominal/unjoined cases and the 30 missing-definition lemmas.
+Native losses should be reviewed with their base dependencies; their
 composed lexical identity still requires source support. The 543 unclassified
 native readings require their own identifier/decomposition investigation.
 
@@ -113,3 +120,4 @@ qualification remain open. Source inputs and native indexes are unchanged.
 Only code, synthetic tests, aggregate categories and hashes are public;
 articles, forms, lemmas, stems and private dossiers are withheld. The PR stays
 in draft and no candidate is promoted to production.
+
