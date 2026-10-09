@@ -18,15 +18,15 @@ class Bounds(unittest.TestCase):
         self.assertEqual(branch,'literal_triple_supines')
         self.assertEqual(sum(expected.values()),5)
         self.assertIn((b':vs:bru_t',b'pp4'),expected)
-    def test_literal_contracted_triple(self):
+    def test_literal_full_triple_with_changing_supines(self):
         branch,expected=trial.recipe(row('ba^vo','ba^vi, bau_tum, bavatum and ba_tum, 3'))
-        self.assertEqual(branch,'literal_triple_supines_vowel_contraction')
+        self.assertEqual(branch,'literal_triple_supines')
         self.assertEqual(sum(expected.values()),5)
         self.assertIn((b':vs:bau_t',b'pp4'),expected)
         self.assertIn((b':vs:bavat',b'pp4'),expected)
         self.assertIn((b':vs:ba_t',b'pp4'),expected)
-    def test_unrelated_contraction_withheld(self):
-        self.assertFalse(trial.recipe(row('bavo','bavi, bautum, bavatum and betum, 3'))[1])
+    def test_foreign_initial_withheld(self):
+        self.assertFalse(trial.recipe(row('bavo','bavi, bautum, bavatum and detum, 3'))[1])
     def test_short_supine_withheld(self):
         self.assertFalse(trial.recipe(row('bavo','bavi, utum, bavatum and batum, 3'))[1])
     def test_adjacent_fields(self):
@@ -42,8 +42,8 @@ class Bounds(unittest.TestCase):
         self.assertFalse(trial.recipe(row('bruo','brui, tum, bruitum and bruutum, 3'))[1])
     def test_changing_perfect_withheld(self):
         self.assertFalse(trial.recipe(row('bruo','brai, brutum, bruitum and bruutum, 3'))[1])
-    def test_changing_supine_withheld(self):
-        self.assertFalse(trial.recipe(row('bruo','brui, brutum, bratium and bruutum, 3'))[1])
+    def test_foreign_supine_withheld(self):
+        self.assertFalse(trial.recipe(row('bruo','brui, brutum, cratium and bruutum, 3'))[1])
     def test_compound_withheld(self):
         self.assertFalse(trial.recipe(row('ab-bruo','brui, brutum, bruitum and bruutum, 3'))[1])
     def test_nonadjacent_fields_withheld(self):

@@ -47,12 +47,13 @@ def recipe(row):
         return 'unclassified',Counter()
     stems=[p[:-2] for p in parts[1:]]
     base=plain(root)
-    ordinary=all(plain(s).startswith(base) for s in stems)
-    contraction=(triple is not None and len(base)==3 and base[1:]=='av'
-        and [plain(s) for s in stems]==[base[:-1]+'ut',base+'at',base[:-1]+'t'])
-    if (not (ordinary or contraction) or len(set(stems))!=len(stems) or root[0] in 'aeiou'):
+    # A complete perfect anchors the full present word in the triple header.
+    # Use the same whole-part bounds as the earlier qualified single-supine
+    # recipe: no short suffix, unrelated initial, or generated vowel/quantity.
+    complete=(all(len(plain(s))>=len(base) and s[0]==root[0] for s in stems)
+        if triple else all(plain(s).startswith(base) for s in stems))
+    if (not complete or len(set(stems))!=len(stems) or root[0] in 'aeiou'):
         return 'unclassified',Counter()
-    if contraction:branch='literal_triple_supines_vowel_contraction'
     expected=Counter({((':vs:'+root).encode(),kind):1,
                       ((':vs:'+parts[0][:-1]).encode(),b'perfstem'):1})
     expected.update(((':vs:'+s).encode(),b'pp4') for s in stems)
@@ -62,7 +63,7 @@ def shape(row):
     fields=[f['projection'] for f in row['fields'] if f['name']=='itype']
     grammar=', '.join(fields)
     head=re.sub(r'#[1-9]$','',row.get('headword',''))
-    parts=[p.strip() for p in re.split(r', | and ',grammar) if p.strip() not in ('3','and')]
+    parts=[p.strip() for p in re.split(r', (?:and )?| and ',grammar) if p.strip() not in ('3','and')]
     root=head[:-3] if head.endswith('i^o') else head[:-1]
     return {'grammar_shape':re.sub(r'[^ ,0-9]+','PART',grammar),
         'head_plain_length':len(plain(head)),'head_ascii_lower':bool(re.fullmatch(r'[a-z_^]+',head)),
