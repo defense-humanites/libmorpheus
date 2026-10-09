@@ -35,7 +35,7 @@ jobs:
 
   latin-header-filters:
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v5
 
@@ -610,6 +610,7 @@ jobs:
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-source-present-preverbs.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/search-latin-unjoined-preverb-source.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/diagnose-latin-preverb-identifiers.py
+          python3 test/qualify-latin-direct-present-control.py
           python3 test/probe-latin-terminal-conjugation.py
           cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -617,6 +618,7 @@ jobs:
           cmake --build "$RUNNER_TEMP/present-native" --parallel 2 \
             --target morpheus morpheus_stemlib_production_latin
           python3 test/qualify-latin-present-stages-native.py "$RUNNER_TEMP/present-native"
+          python3 test/qualify-latin-direct-present-control-native.py "$RUNNER_TEMP/present-native"
           python3 - <<'PY'
           import os
           from pathlib import Path
@@ -851,6 +853,29 @@ jobs:
             --expected-routes-sha256 461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627 \
             --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
             --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a
+
+      - name: Qualify a direct-present counterfactual with native composition disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 tools/qualify-latin-direct-present-control.py \
+            --source "$RUNNER_TEMP/latin-isolated-field-native-probe/trial-2/present.stems" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --forms "$RUNNER_TEMP/present-listall/LISTALL.distinct-literal.txt" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --opened "$RUNNER_TEMP/latin-isolated-field-native-probe/trial-2/present-native" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/latin-direct-present-control" \
+            --expected-forms 1033579 \
+            --expected-source-sha256 fa0fb3904e5c43bf6c95ed1cffa7b6072408ddc985025ffbc51669b1732677c4 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-forms-sha256 1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93 \
+            --expected-candidate-source-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-vbind-sha256 00fb4438695a8de07da3c2b28f3ac91dd510cca1dccfa3eb8b31e0420e10bd8a \
+            --expected-vside-sha256 1401f2885c3a2d44df8bbaaf4774dbecb9c42952e5ff6d924c7821c3d6315b50
 
   greek-header-filters:
     runs-on: ubuntu-24.04

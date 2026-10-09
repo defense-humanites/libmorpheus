@@ -4,6 +4,24 @@
 
 Ces résultats agrégés proviennent des qualifications CI de la PR nº 18. Les dossiers individuels restent privés. Ils ne constituent pas une approbation du remplacement du corpus.
 
+## Identifiants natifs de préverbes sur `40b6cd6` — diagnostic mesuré
+
+Le commit [`40b6cd6`](https://github.com/defense-humanites/libmorpheus/commit/40b6cd69ee1503c966eb77e60ba561a84c892303) distingue identifiants de composition natifs et identités lexicales source. `AddAnalysis` construit une clé préverbe–lemme, tente une résolution dans l’index des composés et conserve la clé construite si elle n’est pas remplacée. `Check_preverb` accepte actuellement la composition sans imposer l’existence d’une entrée lexicale ; ses anciennes vérifications sont désactivées. Ces comportements natifs sont inchangés.
+
+**Les trois workflows réussissent** : [Linux](https://github.com/defense-humanites/libmorpheus/actions/runs/37897038437), [plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37897038379), [recherche](https://github.com/defense-humanites/libmorpheus/actions/runs/37897032849), dont le [job latin](https://github.com/defense-humanites/libmorpheus/actions/runs/37897032849/job/113710609110). Les **105 tests unitaires ciblés et 10 tests natifs** passent. Les dossiers précédents sont reproduits à empreintes identiques ; le candidat final reste inchangé.
+
+**Les 123 lectures par préverbes correspondent toutes littéralement à la structure préverbe–lemme source**, numéro d’homographe conservé. Elles ont un seul identifiant de sortie et un seul couple (préverbe, préverbe brut). Chacune partage les champs grammaticaux, le radical, le suffixe et la désinence avec au moins une lecture directe ajoutée. Répartition : 33 lectures sans temps spécifié, 47 présentes, 26 imparfaites et 17 futures. Aucun autre type d’identifiant n’est observé dans ces ajouts.
+
+Ce contrôle démontre la structure de l’identifiant ; **il n’est pas une trace complète de la résolution dans la table des composés**, une correspondance un-à-un des formes, ni une preuve d’attestation. L’absence de résultat dans la recherche TEI précédente porte sur cet identifiant de composition et les variantes bornées examinées ; elle ne permet pas de le traiter silencieusement comme une identité lexicale source. La légitimité des formes préfixées et la productivité native restent à arbitrer.
+
+Dossier privé SHA-256 : `4cedccff96d5201c0884b6045f556b6d1e162dc2e9bb396b33a61468163d0ff5`. Les entrées sont vérifiées inchangées. [Méthode et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-preverb-identifier-diagnostic.md).
+
+### Contrôles synthétiques locaux distincts
+
+Sur la bibliothèque native locale existante, un verbe synthétique confirme l’identifiant composé avec homographe conservé et décomposition partagée au présent singulier. Un second contrôle sur treize cellules de présent confirme que le drapeau existant `not_in_comp` conserve leurs multisets directs et fait passer leurs lectures composées de **15 à zéro**. **Ces contrôles ne portent pas sur les 123 ajouts réels.** Le drapeau n’est appliqué à aucun candidat : il fournit seulement un moyen de construire ultérieurement une copie diagnostique qui sépare les lectures directes de la composition, sans inventer une propriété lexicale source.
+
+Les sorties lexicales restent privées. Aucun essai n’est promu ; PR en brouillon, production inchangée.
+
 ## Revue source des préverbes sur `f3f8c15` — qualification mesurée
 
 Le commit [`f3f8c15`](https://github.com/defense-humanites/libmorpheus/commit/f3f8c15df1725f9d76fe77181385a934f00e6a40) rapproche les ajouts par préverbes de leurs articles source, sans hériter de la conjugaison du verbe de base. Les dossiers privés sont liés aux empreintes qualifiées ; leur projection grammaticale est reproduite.
@@ -122,5 +140,3 @@ La revue des sept en-têtes comprend **16 parties déclarées**, dont **15 token
 Les contrôles précédents restent identiques : **418 anciennes lectures exactes récupérées, 510 encore manquantes**, 124 autres lectures dans l’essai présent isolé ; la comparaison essai complet → présent conserve 542 occurrences, en retire 99 et n’en ajoute aucune, sans changer les récupérations exactes. Les sources, index des essais et quatre index du candidat final gardent leurs empreintes précédentes. Aucun radical de production n’est modifié ; la PR reste en brouillon.
 
 Empreintes des dossiers privés : revue source `9e3069d518b375724350a2f5b5f083d7023605a252bd05c1220d69cf44533939` ; sondes présent enrichies `0cf33203944e6d277e1cbc5afa3365c3aad127055e74d5b28a2fddb339c1e278` ; sondes de l’essai complet inchangées `2d48ac575e8b0e6a8d708e5e9edea909096153569f8de42e6bcb569fef6f4093`. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés.
-
-
