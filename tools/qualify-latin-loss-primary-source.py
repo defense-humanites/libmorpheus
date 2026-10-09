@@ -14,7 +14,7 @@ changed=importlib.util.module_from_spec(spec);spec.loader.exec_module(changed)
 review=changed.review
 native=changed.reproduction.native
 supines=changed.reproduction.candidate.supines
-REPORT_SHA='35adc3a8abd1b570c3eb957dbb1cbfafdc8545a333fd07f131fd4863383dddd7'
+REPORT_SHA='6e11f1d278e2113b2c379da55667f5f32f403f8dec3f8bfa6596d0543e5d8ac1'
 
 
 def source_recipe(row):

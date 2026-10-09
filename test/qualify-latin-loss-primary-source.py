@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -17,6 +18,11 @@ def header(head,grammar):
 
 
 class PrimarySource(unittest.TestCase):
+    def test_public_aggregate_receipt_and_selected_inventory(self):
+        report=Path(__file__).resolve().parents[1]/'docs/qualification/latin-loss-source-review-8462af2.json'
+        self.assertEqual(tool.native.digest(report),tool.REPORT_SHA)
+        self.assertEqual(len(tool.inventory(json.loads(report.read_bytes()))),9)
+
     def test_first_active_root_and_homograph_are_literal(self):
         row=header('zzza_-xio#2','a_vi, a_tum, 1')
         branch,records=tool.source_recipe(row)
