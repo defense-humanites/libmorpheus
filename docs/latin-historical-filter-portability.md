@@ -196,3 +196,31 @@ counts, index receipts and private delta hashes. Thus the diagnostic filter
 comparison has not replaced the inputs of the existing qualification.
 No production lexer, runtime index, native policy or corpus is changed.
 
+## Private source review of the one-lemma delta
+
+`tools/review-latin-historical-filter-delta.py` binds the original output,
+diagnostic output, private delta, recovered headers and complete TEI to their
+qualified hashes. It independently reconstructs the delta from the two raw
+outputs, requires one changed lemma and the measured one-removal/two-addition
+inventory, then revalidates the recovered headers against the pinned TEI.
+The source join removes only historical notation while preserving case and
+homograph digits; phrases and projection errors are excluded. A missing or
+ambiguous literal join aborts the review.
+
+Only fixed directive categories are printed. Unknown lexical tokens cannot
+become public labels. For the two explicit alternative-perfect branches
+already recognized by the historical lexer, a bounded source recipe preserves
+the headword's quantities and constructs the expected present, alternative
+perfects and optional supine. The report measures missing and extra diagnostic
+directives; an unknown or ambiguous grammar is not marked as a match. This
+checks source consistency, not corpus promotion or runtime acceptability.
+The full header and before/after/expected directives remain in a private,
+exclusive dossier, whose hash alone is published.
+
+Six new synthetic unit tests cover categories, literal identity, quantities,
+ambiguous grammar, delta validation and input receipts. A dedicated workflow
+reconstructs the required source headers and four historical filters, repeats
+the pinned sanitizer comparison and runs the source review. It does not build
+or replace any candidate or runtime index. Its actual source-review results
+are pending.
+
