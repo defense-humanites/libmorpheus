@@ -11,6 +11,13 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class ReproductionReceipts(unittest.TestCase):
+    def test_private_dossier_must_be_a_sibling_of_comparison_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory).resolve();comparison=root/'comparison';comparison.mkdir()
+            candidate=root/'candidate';candidate.mkdir()
+            self.assertEqual(m.loss.private_target(root/'loss-dossier.jsonl',[comparison,candidate]),root/'loss-dossier.jsonl')
+            with self.assertRaises(ValueError):m.loss.private_target(comparison/'loss-dossier.jsonl',[comparison,candidate])
+
     def test_source_receipt_rejection_precedes_native_build_and_output_access(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);f=root/'input';f.write_bytes(b'synthetic')
