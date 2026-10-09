@@ -289,6 +289,28 @@ jobs:
             --language Latin --source-path stemsrc/ls.nom \
             --private-output "$RUNNER_TEMP/latin-full-compounds/nominal-reviewed.stems" --expected 44
 
+      - name: Probe historical Latin filter portability in a sanitizer-built private copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/probe-latin-historical-filter-portability.py
+          python3 test/probe-latin-historical-filter-portability-native.py
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-historical-portability-combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-historical-portability-splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-historical-portability-conj1.log" \
+            > "$RUNNER_TEMP/latin-historical-portability.input"
+          python3 tools/probe-latin-historical-filter-portability.py \
+            --lexer src/gkdict/latvb.l \
+            --input "$RUNNER_TEMP/latin-historical-portability.input" \
+            --reference "$RUNNER_TEMP/latin-full-compounds/verbal.stems" \
+            --expected-reference-sha256 22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479 \
+            --output "$RUNNER_TEMP/latin-historical-portability"
+
       - name: Qualify source-only regular derivative and principal-part repairs
         shell: bash
         run: |
