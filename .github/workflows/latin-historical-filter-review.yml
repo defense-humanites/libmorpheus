@@ -12,7 +12,7 @@ permissions:
 jobs:
   source-review:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - name: Install isolated lexer and source dependencies
@@ -102,3 +102,34 @@ jobs:
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --output "$RUNNER_TEMP/source-supine-families"
+      - name: Reconstruct the unchanged qualified full candidate privately
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-historical-source-candidate.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-latin-qualified-candidate.py \
+            --reference "$RUNNER_TEMP/historical.stems" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --output "$RUNNER_TEMP/qualified-candidate"
+      - name: Qualify the separate full source trial on all LISTALL forms
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+          with urllib.request.urlopen('https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip', timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'source-listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/source-listall.zip" --output "$RUNNER_TEMP/source-listall"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-historical-source-candidate.py \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --review "$RUNNER_TEMP/source-review/source-review.jsonl" \
+            --forms "$RUNNER_TEMP/source-listall/LISTALL.distinct-literal.txt" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/source-full-candidate"
