@@ -112,7 +112,16 @@ Native losses should be reviewed with their base dependencies; their
 composed lexical identity still requires source support. The 543 unclassified
 native readings require their own identifier/decomposition investigation.
 
-No new lexical recovery is qualified by this review. The earlier separate
+The later [coordinated-supine trial](latin-third-supine-alternatives.md)
+screens the 27 remaining third-conjugation headers and inserts three missing
+literal source supines across two lemmas in a separate candidate. It covers
+30 source-family cells and adds 649 LISTALL readings, with 171 newly recognized
+forms and no removed eleven-field readings. Of the additions, 215 are direct
+and 434 carry native preverbs; composed identities and reading-by-reading
+recovery of the old loss dossier remain unqualified. The other 25
+third-conjugation headers stay outside this bounded recipe.
+
+No new lexical recovery is qualified by this earlier read-only review. The earlier separate
 source trial and present-only composition control retain their own receipts
 and are not combined here. Other removed readings on still-recognized forms,
 equal-count multiset changes, the final source selector and corpus

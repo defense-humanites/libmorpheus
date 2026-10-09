@@ -112,3 +112,11 @@ tests, categorical/numeric reports and hashes are published. Source
 headwords, forms, stems, articles and individual dossiers stay private.
 The PR remains in draft and production is unchanged.
 
+
+The subsequent [coordinated-supine trial](latin-third-supine-alternatives.md)
+screens the 27 third-conjugation headers left outside these recipes. It adds
+three literal source supines in a separate candidate, with 30 family cells
+covered and a full LISTALL diagnostic. Its 434 native-preverb additions do
+not qualify composed lexical identities or settle the earlier base
+dependencies. The receipt above continues to describe the unchanged
+original candidate.
