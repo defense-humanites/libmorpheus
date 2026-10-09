@@ -355,5 +355,12 @@ source alternatives into a separate full candidate and requalifying its native
 and global comparisons remain open. The historical lexer and production
 corpus are unchanged; the PR stays draft.
 
+The next [full-candidate qualification](latin-historical-source-candidate.md)
+on `bca050d` reconstructs the original qualified candidate and measures a
+separate replacement of this one lemma's directives over all LISTALL forms.
+It retains 2,100,530 readings, adds 168 direct readings on 80 forms, and
+removes none. Recognized-form totals are unchanged. This subsequent result
+does not promote the isolated trial or resolve earlier corpus losses.
+
 
 
