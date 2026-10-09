@@ -14,6 +14,18 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class SourceReview(unittest.TestCase):
+    def test_grammar_shape_publishes_only_structure_and_receipt(self):
+        row={'fields':[{'name':'itype','projection':'zz_vi or zz^i, zz_tum, 3'},
+                       {'name':'pos','projection':'SECRET'}]}
+        shape=m.source_grammar_shape(row)
+        self.assertEqual(shape['terminal_conjugation_digit'],3)
+        self.assertEqual(shape['principal_part_like_tokens'],3)
+        self.assertEqual(shape['tokens_with_quantity_marks'],3)
+        self.assertEqual(shape['comma_separated_segments'],3)
+        self.assertNotIn('zz',json.dumps(shape));self.assertNotIn('SECRET',json.dumps(shape))
+        row['fields'][0]['projection']='SECRET 99'
+        self.assertIsNone(m.source_grammar_shape(row)['terminal_conjugation_digit'])
+
     def test_isolated_replay_measures_only_the_selected_literal_lemma(self):
         calls=[]
         def run(command,target,name,data):

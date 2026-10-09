@@ -76,6 +76,23 @@ def quantity_only_pairs(missing,extra):
     return sum((left&right).values())
 
 
+def source_grammar_shape(row):
+    """Only fixed structural categories and a receipt, never source tokens."""
+    fields=[f['projection'] for f in row['fields'] if f['name']=='itype']
+    grammar=', '.join(fields)
+    parts=re.split(r',\s*|\s+(?:or|and)\s+',grammar)
+    return {
+        'itype_fields':len(fields),
+        'bare_fourth_conjugation_fields':sum(v in {'4','i_re','i_re, 4'} for v in fields),
+        'fields_with_alternative_connector':sum(bool(re.search(r'\b(?:or|and)\b',v)) for v in fields),
+        'grammar_sha256':probe.digest(grammar.encode('utf-8')),
+        'comma_separated_segments':len(grammar.split(',')),
+        'principal_part_like_tokens':sum(bool(re.fullmatch(r'[A-Za-z_^]+',v)) for v in parts),
+        'tokens_with_quantity_marks':sum(bool(re.search(r'[_^]',v)) for v in parts),
+        'terminal_conjugation_digit':int(grammar[-1]) if re.search(r'(?:^|,\s*)[1-4]$',grammar) else None,
+    }
+
+
 def isolated_replay(row,lemma,filters,diagnostic_filter,target):
     recovery=sibling('recover-latin-initial-sense')
     data=recovery.render(row).encode('utf-8')
@@ -145,10 +162,7 @@ def prepare(args):
         'expected_source_directives':sum(expected.values()),'missing_source_directives':sum(missing.values()),
         'extra_diagnostic_directives':sum(extra.values()),
         'source_quantity_only_difference_pairs':quantity_only_pairs(missing,extra),
-        'source_header_shape':{
-            'itype_fields':sum(f['name']=='itype' for f in row['fields']),
-            'bare_fourth_conjugation_fields':sum(f['name']=='itype' and f['projection'] in {'4','i_re','i_re, 4'} for f in row['fields']),
-            'fields_with_alternative_connector':sum(f['name']=='itype' and bool(re.search(r'\b(?:or|and)\b',f['projection'])) for f in row['fields'])},
+        'source_header_shape':source_grammar_shape(row),
         'isolated_source_backend_alternative_type_rows':backend_branches,
         'isolated_source_selected_directives':sum(replayed.values()),
         'isolated_source_reproduces_full_diagnostic_multiset':replayed==after,
