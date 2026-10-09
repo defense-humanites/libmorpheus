@@ -47,24 +47,33 @@ def source_key(row):
 
 
 def source_expectations(row):
-    fields=[f['projection'] for f in row['fields'] if f['name']=='itype']
-    branches={
-        'i_vi, or i^i, i_tum, 4':'alternative_perfect_with_supine',
-        'i_vi, or i^i, 4':'alternative_perfect_without_supine'}
-    choices=[v for v in fields if v in branches]
-    if len(choices)!=1:return 'unclassified',Counter()
+    fields=[(i,f['projection']) for i,f in enumerate(row['fields']) if f['name']=='itype']
+    if not fields or any(b[0]!=a[0]+1 for a,b in zip(fields,fields[1:])):
+        return 'unclassified',Counter()
+    # combitype joins only adjacent itype fields. Preserve all source quantities.
+    grammar=', '.join(value for _,value in fields)
+    match=re.fullmatch(r'(i_vi|i\^i|ii),? (?:or|and) (i_vi|i\^i|ii), (?:(i_tum|i\^tum), )?(?:4|i_re)',grammar)
+    if not match or match[1]==match[2] or 'i_vi' not in (match[1],match[2]):
+        return 'unclassified',Counter()
     head=row['headword'].split('#')[0]
     if not head or head[-1].isdigit():return 'unclassified',Counter()
     stem=None
     for suffix in ('i^or','e^or','i^o','e^o','ior','eor','or','eo','it','et','io'):
         if head.endswith(suffix):stem=head[:-len(suffix)];break
     if stem is None:stem=head[:-1]
-    expected=[((':vs:'+stem).encode(),b'conj4'),
-              ((':vs:'+stem+'i_v').encode(),b'perfstem'),
-              ((':vs:'+stem+'i^').encode(),b'perfstem')]
-    if choices[0]== 'i_vi, or i^i, i_tum, 4':
-        expected.append(((':vs:'+stem+'i_t').encode(),b'pp4'))
-    return branches[choices[0]],Counter(expected)
+    expected=[((':vs:'+stem).encode(),b'conj4')]
+    expected.extend(((':vs:'+stem+part[:-1]).encode(),b'perfstem') for part in (match[1],match[2]))
+    if match[3]:expected.append(((':vs:'+stem+match[3][:-2]).encode(),b'pp4'))
+    return 'alternative_perfect_with_supine' if match[3] else 'alternative_perfect_without_supine',Counter(expected)
+
+
+def quantity_only_pairs(missing,extra):
+    def key(tokens):
+        return (tokens[0].translate(None,b'_^'),)+tokens[1:]
+    left,right=Counter(),Counter()
+    for tokens,n in missing.items():left[key(tokens)]+=n
+    for tokens,n in extra.items():right[key(tokens)]+=n
+    return sum((left&right).values())
 
 
 def validate_delta(data,left,right):
@@ -120,6 +129,7 @@ def prepare(args):
         'delta_classes':classes,'literal_source_header_matches':1,'source_branch':branch,
         'expected_source_directives':sum(expected.values()),'missing_source_directives':sum(missing.values()),
         'extra_diagnostic_directives':sum(extra.values()),
+        'source_quantity_only_difference_pairs':quantity_only_pairs(missing,extra),
         'diagnostic_matches_bounded_source_recipe':bool(expected) and not missing and not extra,
         'private_source_review_sha256':probe.digest(payload),'original_inputs_unchanged':True}
 

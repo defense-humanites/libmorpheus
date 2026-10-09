@@ -13,6 +13,23 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class SourceReview(unittest.TestCase):
+    def test_adjacent_source_fields_and_bare_quantity_remain_literal(self):
+        row={'headword':'zzzo','fields':[{'name':'itype','projection':'i_vi and ii, i_tum'},
+                                        {'name':'itype','projection':'4'}]}
+        branch,expected=m.source_expectations(row)
+        self.assertEqual(branch,'alternative_perfect_with_supine')
+        self.assertIn((b':vs:zzzi',b'perfstem'),expected)
+        self.assertNotIn((b':vs:zzzi^',b'perfstem'),expected)
+        row['fields'].insert(1,{'name':'pos','projection':'synthetic'})
+        self.assertEqual(m.source_expectations(row),('unclassified',m.Counter()))
+
+    def test_quantity_pair_diagnostic_is_not_identity_substitution(self):
+        missing=m.Counter({(b':vs:zzzi',b'perfstem'):1})
+        extra=m.Counter({(b':vs:zzzi^',b'perfstem'):1})
+        self.assertEqual(m.quantity_only_pairs(missing,extra),1)
+        self.assertNotEqual(missing,extra)
+        self.assertEqual(m.quantity_only_pairs(missing,m.Counter({(b':vs:zzother',b'perfstem'):1})),0)
+
     def test_classes_never_publish_unknown_tokens(self):
         self.assertEqual(m.classify(b':vs:zzstem perfstem SECRET'),'perfect')
         self.assertEqual(m.classify(b':vs:zzstem pp4'),'supine')

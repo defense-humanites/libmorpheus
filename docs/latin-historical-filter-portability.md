@@ -224,3 +224,20 @@ the pinned sanitizer comparison and runs the source review. It does not build
 or replace any candidate or runtime index. Its actual source-review results
 are pending.
 
+The [first dedicated review](https://github.com/defense-humanites/libmorpheus/actions/runs/37917103919/job/113775874413)
+on `20cec5f` completed. The [aggregate report](qualification/latin-historical-source-review-20cec5f.json)
+classifies the removal as one perfect directive and the additions as one
+perfect and one supine directive. It finds exactly one source header, but the
+initial two literal recipes classify its grammar as unknown. Zero expected
+directives in that report means the recipe was unsupported, not that the
+source contains no principal parts. No source consistency was approved.
+
+The next bounded recipe accepts explicitly coordinated alternative perfects,
+an optional explicit supine, and an explicit fourth-conjugation indication.
+Only adjacent `itype` fields may be joined, following the historical
+`combitype` boundary. It preserves the order-independent multiset and the
+source's actual quantity notation; it does not copy quantity inserted by
+historical normalization. Quantity-only missing/extra pairs are counted as
+a separate diagnostic and remain unequal in the literal comparison. Eight
+synthetic tests pass. The expanded recipe's real-source result is pending.
+
