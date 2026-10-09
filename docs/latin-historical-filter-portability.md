@@ -302,4 +302,58 @@ lemma, principal parts or private logs are published. The historical filter,
 qualified candidate and production corpus are unchanged. A complete candidate
 and its native/global qualification remain separate work.
 
+## Isolated native supine families qualified on `165f2d5`
+
+The [dedicated native review](https://github.com/defense-humanites/libmorpheus/actions/runs/37920347939/job/113786502895)
+completed successfully. The [full aggregate report](qualification/latin-historical-source-supines-165f2d5.json)
+binds the qualified private source dossier and diagnostic raw output to their
+receipts. Four trial unit tests and a native synthetic test pass, alongside
+the twelve source-review tests, nine portability tests and four sanitizer tests.
+The initial run on `3ad970e` stopped before real-source qualification because
+the Python system environment lacked the TEI dependency; `165f2d5` uses the
+existing isolated TEI environment.
+
+Two private isolated verbal sources contain the selected lemma's four
+mechanically reproduced directives and its five literal source expectations,
+respectively. Exactly one source supine is inserted. Both native builds retain
+the same nominal indexes and the same retained irregular verbal inputs.
+These isolated sources are not the previously qualified complete candidate.
+
+The family checks six engine-table cells per supine: two supine readings,
+two perfect-passive participles and two future-active participles. Twelve
+cells cover ten distinct quantity-free analysis inputs; source quantities
+and compound separators remain literal in the stem input. The historical
+engine labels its two supine cells nominative and dative. This diagnostic
+records those API codes without claiming a philological case correction.
+
+| Measured on ten family forms | Before | After |
+| --- | ---: | ---: |
+| Explicit expected cells covered | 6 | 12 |
+| Expected readings | 6 | 12 |
+| Recognized forms | 10 | 10 |
+| All native readings | 54 | 68 |
+
+The comparison retains all 54 readings and adds 14 on five forms, with zero
+removals and no equal-count multiset changes. The added readings are direct:
+two have unspecified tense (the supines), six future tense and six perfect
+tense. The 14 readings include grammatical alternatives beyond the six newly
+covered cells; these overlapping measurements must not be added together.
+All sixteen grammatical/decomposition fields are compared on these forms,
+and the eleven-field audit independently reproduces the same row totals.
+Every API status pair is `0,0`; used text fields are checked for truncation.
+The identical-root control retains 68 readings and changes none.
+
+The private family evidence has SHA-256
+`808b311202c8b8cc5f12c57abb99c14372b25127621b2c0a4da9e8fea0b3a200`,
+identical in the local macOS and Linux runs. Inputs and baseline indexes are
+verified unchanged. Lexical sources, forms, stems and native logs stay private.
+
+This qualifies the isolated family mechanism and its measured additions.
+It does not measure LISTALL, the complete verbal candidate, all inflections,
+source attestation of every generated form, or global losses. Integrating the
+source alternatives into a separate full candidate and requalifying its native
+and global comparisons remain open. The historical lexer and production
+corpus are unchanged; the PR stays draft.
+
+
 
