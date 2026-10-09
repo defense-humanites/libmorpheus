@@ -46,9 +46,13 @@ def recipe(row):
     else:
         return 'unclassified',Counter()
     stems=[p[:-2] for p in parts[1:]]
-    if (any(not plain(s).startswith(plain(root)) for s in stems)
-            or len(set(stems))!=len(stems) or root[0] in 'aeiou'):
+    base=plain(root)
+    ordinary=all(plain(s).startswith(base) for s in stems)
+    contraction=(triple is not None and len(base)==3 and base[1:]=='av'
+        and [plain(s) for s in stems]==[base[:-1]+'ut',base+'at',base[:-1]+'t'])
+    if (not (ordinary or contraction) or len(set(stems))!=len(stems) or root[0] in 'aeiou'):
         return 'unclassified',Counter()
+    if contraction:branch='literal_triple_supines_vowel_contraction'
     expected=Counter({((':vs:'+root).encode(),kind):1,
                       ((':vs:'+parts[0][:-1]).encode(),b'perfstem'):1})
     expected.update(((':vs:'+s).encode(),b'pp4') for s in stems)
@@ -60,7 +64,7 @@ def shape(row):
     head=re.sub(r'#[1-9]$','',row.get('headword',''))
     parts=[p.strip() for p in re.split(r', | and ',grammar) if p.strip() not in ('3','and')]
     root=head[:-3] if head.endswith('i^o') else head[:-1]
-    return {'grammar_shape':re.sub(r'[A-Za-z_^]+','PART',grammar),
+    return {'grammar_shape':re.sub(r'[^ ,0-9]+','PART',grammar),
         'head_plain_length':len(plain(head)),'head_ascii_lower':bool(re.fullmatch(r'[a-z_^]+',head)),
         'head_plain_o':head.endswith('o'),'head_io':head.endswith(('io','i^o')),
         'parts_plain_lengths':[len(plain(p)) for p in parts],

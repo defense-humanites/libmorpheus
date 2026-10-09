@@ -18,6 +18,17 @@ class Bounds(unittest.TestCase):
         self.assertEqual(branch,'literal_triple_supines')
         self.assertEqual(sum(expected.values()),5)
         self.assertIn((b':vs:bru_t',b'pp4'),expected)
+    def test_literal_contracted_triple(self):
+        branch,expected=trial.recipe(row('ba^vo','ba^vi, bau_tum, bavatum and ba_tum, 3'))
+        self.assertEqual(branch,'literal_triple_supines_vowel_contraction')
+        self.assertEqual(sum(expected.values()),5)
+        self.assertIn((b':vs:bau_t',b'pp4'),expected)
+        self.assertIn((b':vs:bavat',b'pp4'),expected)
+        self.assertIn((b':vs:ba_t',b'pp4'),expected)
+    def test_unrelated_contraction_withheld(self):
+        self.assertFalse(trial.recipe(row('bavo','bavi, bautum, bavatum and betum, 3'))[1])
+    def test_short_supine_withheld(self):
+        self.assertFalse(trial.recipe(row('bavo','bavi, utum, bavatum and batum, 3'))[1])
     def test_adjacent_fields(self):
         source=row('bruo','brui, brutum, bruitum and bruutum')
         source['fields'].append({'name':'itype','projection':'3'})
