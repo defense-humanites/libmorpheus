@@ -140,6 +140,20 @@ jobs:
               raise ValueError('primary candidate native receipts differ')
           print(json.dumps({'latin_primary_native_reference': {'source_sha256': source.native.digest(candidate), 'indexes_sha256': indexes}}, sort_keys=True))
           PY
+      - name: Prepare the pinned full literal LISTALL input
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+          with urllib.request.urlopen('https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip', timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'third-listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/third-listall.zip" --output "$RUNNER_TEMP/third-listall"
       - name: Qualify literal coordinated supine alternatives privately
         run: |
           set -euo pipefail
@@ -153,4 +167,5 @@ jobs:
             --native "$RUNNER_TEMP/primary-original-native" \
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --forms "$RUNNER_TEMP/third-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/third-supine-trial"

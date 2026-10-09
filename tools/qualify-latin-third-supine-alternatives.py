@@ -91,8 +91,12 @@ def append_missing(data,additions):
 
 def prepare(args):
     paths={n:getattr(args,n) for n in ('report','candidate','headers','tei')}
+    if args.forms is not None:
+        paths['forms']=args.forms
     receipts={'report':primary.REPORT_SHA,'candidate':changed.reproduction.candidate.CANDIDATE_SHA,
               'headers':review.RECEIPTS['headers'],'tei':review.RECEIPTS['tei']}
+    if args.forms is not None:
+        receipts['forms']='1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93'
     if any(native.digest(p)!=receipts[n] for n,p in paths.items()):
         raise ValueError('coordinated supine input receipt differs')
     report=json.loads(args.report.read_bytes())
@@ -114,6 +118,8 @@ def prepare(args):
         branch,expected=recipe(row)
         groups[branch]+=1
         if not expected:continue
+        if not case.get('literal_headword_identity'):
+            raise ValueError('coordinated supine literal identity differs')
         lemma=review.source_key(row)
         actual=changed.selected_tokens(definitions,lemma)
         missing=anchors(actual,expected)
@@ -139,7 +145,7 @@ def prepare(args):
     if any(index[n]!=indexes[n] for index in (trial_indexes,ref_indexes) for n in ('nomind','nomind.lindex')):
         raise ValueError('coordinated supine nominal indexes changed')
     readers={}
-    totals_before=Counter();totals_after=Counter();forms=set()
+    totals_before=Counter();totals_after=Counter();forms=set();sixteen=Counter();global_report=None
     try:
         for label,root in (('before',args.native),('after',target/'trial'),('reference',target/'reference')):
             readers[label]=supines.direct.StrictRows(args.library,root)
@@ -151,34 +157,54 @@ def prepare(args):
             totals_before.update(before);totals_after.update(after_counts)
             forms.update(f for f,_,_ in cells)
             private.append({'lemma':lemma.decode(),'before':evidence_before,'after':evidence_after})
+        for form in sorted(forms):
+            old=Counter(map(supines.direct.route,readers['before'].analyses(form,require_untruncated=True)))
+            new=Counter(map(supines.direct.route,readers['after'].analyses(form,require_untruncated=True)))
+            sixteen['retained_rows']+=sum((old&new).values())
+            sixteen['removed_rows']+=sum((old-new).values())
+            sixteen['added_rows']+=sum((new-old).values())
+            sixteen['changed_forms']+=bool(old-new or new-old)
+        if sixteen['removed_rows']:
+            raise ValueError('coordinated supine family removes native readings')
         native.write_private(target/'forms',b''.join(f+b'\n' for f in sorted(forms)))
         control=supines.direct.audit.audit(target/'forms',readers['after'],readers['after'],target/'control.jsonl',require_identical=True)
         delta=supines.direct.audit.audit(target/'forms',readers['before'],readers['after'],target/'delta.jsonl')
+        if (totals_before['covered_cells']!=12 or totals_after['expected_cells']!=30 or totals_after['covered_cells']!=30
+                or totals_after['reference_covered_cells']!=30 or totals_after['missing_reference_readings']):
+            raise ValueError('coordinated supine reference family differs')
+        if args.forms is not None:
+            global_control=supines.direct.audit.audit(args.forms,readers['after'],readers['after'],target/'global-control.jsonl',require_identical=True)
+            global_delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-delta.jsonl')
+            if (global_delta['counts']['distinct_forms']!=1033579
+                    or global_delta['analysis_rows']['curated']!=2100530
+                    or global_delta['global_eleven_field_multisets']['removed_rows']):
+                raise ValueError('coordinated supine global scope or retained readings differ')
+            global_report={'control':global_control,'comparison':global_delta}
     finally:
         for reader in readers.values():reader.close()
-    if (totals_before['covered_cells']!=12 or totals_after['expected_cells']!=30 or totals_after['covered_cells']!=30
-            or totals_after['reference_covered_cells']!=30 or totals_after['missing_reference_readings']):
-        raise ValueError('coordinated supine reference family differs')
     evidence=b''.join((json.dumps(r,sort_keys=True)+'\n').encode() for r in private)
     native.write_private(target/'source-evidence.jsonl',evidence)
     if any(native.digest(p)!=receipts[n] for n,p in paths.items()) or any(
             native.digest(args.native/'Latin/steminds'/n)!=indexes[n] or
             native.digest(args.baseline/'Latin/steminds'/n)!=baseline_indexes[n] for n in indexes):
         raise ValueError('coordinated supine changed an input')
-    return {'schema':1,'scope':'two literal coordinated supine source families in a separate full-source trial; no LISTALL qualification or production promotion',
+    return {'schema':1,'scope':'two literal coordinated supine source families in a separate full-source trial; optional LISTALL diagnostic; no production promotion',
+            'native_scope':'source generated diagnostic forms; exact literal lemma and sixteen native fields against isolated source reference; no independent form attestation',
+            'engine_supine_case_codes':'historical pp4 table nominative/dative; no philological case correction',
             'screened_third_cases':screened,'recipe_groups':dict(groups),'selected_lemmas':len(selected),
             'added_pp4_directives':3,'removed_directives':0,'input_sha256':receipts,
             'trial_source_sha256':native.digest(target/'after.stems'),
             'original_indexes_sha256':indexes,'trial_indexes_sha256':trial_indexes,
             'source_reference_indexes_sha256':ref_indexes,'source_reference_sha256':native.digest(target/'reference.stems'),
             'native_family_before':dict(totals_before),'native_family_after':dict(totals_after),
-            'distinct_family_forms':len(forms),'family_comparison':delta,'identical_root_control':control,
+            'distinct_family_forms':len(forms),'family_sixteen_field_multisets':dict(sixteen),'global_listall':global_report,'family_comparison':delta,'identical_root_control':control,
             'private_source_evidence_sha256':native.digest(target/'source-evidence.jsonl'),'original_inputs_unchanged':True}
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     for n in ('report','candidate','headers','tei','native','library','baseline','tools','output'):
         p.add_argument('--'+n,type=Path,required=True)
+    p.add_argument('--forms',type=Path)
     previous=os.umask(0o077)
     try:result=prepare(p.parse_args())
     finally:os.umask(previous)
