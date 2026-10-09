@@ -173,4 +173,20 @@ jobs:
             --candidate "$RUNNER_TEMP/complete-losses/candidate" \
             --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --output "$RUNNER_TEMP/lost-preverb-base-review"
+      - name: Qualify primary source directives of the nine verbal replay differences
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-loss-primary-source.py
+          python3 test/qualify-latin-loss-primary-source-native.py "$RUNNER_TEMP/supine-native"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-loss-primary-source.py \
+            --report docs/qualification/latin-loss-source-review-8462af2.json \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --native "$RUNNER_TEMP/complete-losses/candidate" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/loss-primary-source"
 
