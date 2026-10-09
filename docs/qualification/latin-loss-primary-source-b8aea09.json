@@ -1,0 +1,458 @@
+{
+  "schema": 1,
+  "qualified_commit": "b8aea0962a331cee56a742f04cb04b010fe4a094",
+  "workflow_run": 37932184461,
+  "workflow_job": 113825344939,
+  "conclusion": "success",
+  "targeted_tests": 45,
+  "qualification": {
+    "anonymous_cases": [
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 224,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "2ed9d020eb4b3bcd826191fea7116198dd7dfd030de574d718646a61d91aa41c"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 223,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "e1e61387ad353a8cff47dafbb7bac3f197cadb487713b148a6a840320dc39d17"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 224,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "d02f606a8c77d73924a619f05eb8b9b6a6d790b379edeafcde0b702f8f5735f6"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 178,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "2340b641736b887aa5544085e62efbe33cd4e5c74518375f36d90dba9c90e2c1"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 213,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "22cc1146af32881a6af1e17c0562738a00a36ef66c45df4a5f4a828e6666dee0"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 3,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 257,
+        "native_family": {
+          "covered_cells": 18,
+          "expected_cells": 18,
+          "matching_direct_readings": 18,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 18
+        },
+        "recipe": "explicit_compound_single_perfect_supine",
+        "source_header_sha256": "ad783877000f6be698bf798568f2b7d7e0810078d0116dd706aa501dc57e8d2c"
+      },
+      {
+        "additional_orth_directives_withheld": 1,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 151,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_deponent_primary",
+        "source_header_sha256": "77bdfe8333de631c862d8395a3e02e11100cf024e6550103f48eb42be9e35cb6"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 18,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "5428ec13c10bfb6c552dedb574d8374b6cfc88ab15b51cec38afd8fc9bedc5b1"
+      },
+      {
+        "additional_orth_directives_withheld": 1,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 8,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "fee70b06617709bb644910ccc2cc4cf0408022870f03e4fde1272d23a87be5fe"
+      },
+      {
+        "additional_orth_directives_withheld": 1,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 35,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "c7d95cd7bb55cbab69fe2b28fbbe5ce5ac3c1b04e22c735b27e11b589d9b478c"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 2,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "ebc034aefb67f2b031ac8816174ef21f67dec353c136634fbbdaa3610d1a6167"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 1,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "7d717b7554c550291e7964711a077aabac77c121c8d1d853ecc08c57e3f0a4d8"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": false,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 31,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+      },
+      {
+        "additional_orth_directives_withheld": 2,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 2,
+        "in_nine_verbal_replay_differences": true,
+        "lost_readings": 56,
+        "native_family": {
+          "covered_cells": 12,
+          "expected_cells": 12,
+          "matching_direct_readings": 12,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 12
+        },
+        "recipe": "explicit_fourth_perfect_without_supine",
+        "source_header_sha256": "a96809663d134c9dd58112f3dab5c38b68671618305a8346c174ccaef4b1b811"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 224,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "5ef8bd765eaad0049a9bea7d0790f9d679d9c471bd003f23801f24dcdb27a97c"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 209,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "b8b259562fde801ce283fcafd10fcd3c607f79eb08341b895b74a2e6a1588a74"
+      },
+      {
+        "additional_orth_directives_withheld": 0,
+        "candidate_matches_primary_recipe": true,
+        "diagnostic_matches_primary_recipe": true,
+        "expected_primary_directives": 1,
+        "in_nine_verbal_replay_differences": false,
+        "lost_readings": 171,
+        "native_family": {
+          "covered_cells": 6,
+          "expected_cells": 6,
+          "matching_direct_readings": 6,
+          "missing_reference_readings": 0,
+          "reference_covered_cells": 6
+        },
+        "recipe": "regular_first_active_primary",
+        "source_header_sha256": "7da020aeb81b8a11ff5d089903d12bf86fc42af805a66c92f02ed52c61548122"
+      }
+    ],
+    "counts": {
+      "additional_orth_directives_withheld": 5,
+      "candidate_matching_primary_directives": 20,
+      "diagnostic_matching_primary_directives": 12,
+      "expected_primary_directives": 20,
+      "lemmas": 17,
+      "lost_readings_in_selected_cases": 2225,
+      "lost_readings_in_verbal_replay_differences": 559,
+      "verbal_replay_difference_cases": 9
+    },
+    "family_control": {
+      "analysis_rows": {
+        "curated": 345,
+        "rebuilt": 345
+      },
+      "changed_analysis_counts": 0,
+      "changed_grammatical_multisets": 0,
+      "changed_multisets_at_equal_counts": 0,
+      "counts": {
+        "distinct_forms": 117,
+        "input_lines": 117,
+        "recognized_curated__recognized_rebuilt": 117
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [],
+        "removed": []
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 0,
+        "removed_rows": 0,
+        "retained_rows": 345
+      },
+      "identical_root_control": true,
+      "input_sha256": "f97db2f58553689281d8db7cde394b4d21a13c515f887f95aadfb9bcaebcfc2c",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {},
+        "forms": 0,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": []
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 117
+      }
+    },
+    "input_sha256": {
+      "candidate": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+      "diagnostic": "8f234062ffeaf58e15ceabe3c8a8f5ff2ea37ef0c62d90659ea5db581a5c85de",
+      "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+      "report": "6e11f1d278e2113b2c379da55667f5f32f403f8dec3f8bfa6596d0543e5d8ac1",
+      "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+    },
+    "native_family": {
+      "covered_cells": 120,
+      "expected_cells": 120,
+      "matching_direct_readings": 120,
+      "missing_reference_readings": 0,
+      "reference_covered_cells": 120
+    },
+    "native_indexes_sha256": {
+      "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+      "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+      "vbind": "d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4",
+      "vbind.lindex": "486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954"
+    },
+    "native_scope": "source generated diagnostic forms; direct reference readings retained on all sixteen recorded fields; no independent form attestation",
+    "original_inputs_unchanged": true,
+    "orth_scope": "additional orth directives withheld from this primary source review; no deletion or approval",
+    "private_source_primary_review_sha256": "b7ba408e16067fdeb8ac9f05052221414e99d1a51ed293fa02c1714a083ec18d",
+    "recipe_groups": [
+      {
+        "lemmas": 1,
+        "recipe": "explicit_compound_single_perfect_supine"
+      },
+      {
+        "lemmas": 1,
+        "recipe": "explicit_fourth_perfect_without_supine"
+      },
+      {
+        "lemmas": 14,
+        "recipe": "regular_first_active_primary"
+      },
+      {
+        "lemmas": 1,
+        "recipe": "regular_first_deponent_primary"
+      }
+    ],
+    "remaining_source_cases": {
+      "no_article_join": 1,
+      "nominal": 1,
+      "unclassified_verbal": 40
+    },
+    "schema": 1,
+    "scope": "bounded primary source review of changed-definition losses, including all nine verbal replay differences; no edit or recovery",
+    "source_reference_indexes_sha256": {
+      "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+      "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+      "vbind": "0e75d456fe1d93d87f5ee568a44c819b6fb70ab9042b6fce97350a123dc29c98",
+      "vbind.lindex": "eca43618c924c0aa886f6075b9404d4874e25f7ac57b8b693717edd3ece19c05"
+    },
+    "source_reference_sha256": "83bb9ce5caadddb5e973081198816c9838866f8ec188395d0dbe92bcb7cf3884"
+  },
+  "derived_summary": {
+    "remaining_cases": [
+      {
+        "category": "conjugation_2",
+        "lemmas": 5,
+        "lost_readings": 254
+      },
+      {
+        "category": "conjugation_3",
+        "lemmas": 27,
+        "lost_readings": 2171
+      },
+      {
+        "category": "conjugation_4",
+        "lemmas": 2,
+        "lost_readings": 212
+      },
+      {
+        "category": "conjugation_unclassified",
+        "lemmas": 6,
+        "lost_readings": 341
+      },
+      {
+        "category": "no_article_join",
+        "lemmas": 1,
+        "lost_readings": 188
+      },
+      {
+        "category": "nominal",
+        "lemmas": 1,
+        "lost_readings": 156
+      }
+    ],
+    "native_base_cross_reference": {
+      "native_identifier_cases": 6,
+      "lost_readings": 281,
+      "scope": "sole literal base header in qualified primary group only; no composed identity approval"
+    }
+  }
+}
+

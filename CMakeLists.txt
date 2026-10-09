@@ -1356,6 +1356,9 @@ target_compile_options(
 )
 
 if(BUILD_TESTING)
+  add_executable(morpheus_latin_spelling_test test/latin-spelling.c)
+  target_link_libraries(morpheus_latin_spelling_test PRIVATE morpheus_build_options)
+  add_test(NAME latin_spelling COMMAND morpheus_latin_spelling_test)
   add_executable(
     morpheus_analysis_output_context_test
     test/analysis-output-context.c

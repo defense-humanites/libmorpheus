@@ -1,0 +1,308 @@
+{
+  "qualified_commit": "bca050d00d47c2ab31d031b51373adeddb7b5465",
+  "workflow_run": 37921913936,
+  "workflow_job": 113791604037,
+  "conclusion": "success",
+  "latin_qualified_candidate_reconstruction": {
+    "candidate_source_sha256": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+    "original_inputs_unchanged": true,
+    "schema": 1,
+    "stages": [
+      {
+        "sha256": "2d50859e3ac2b0b27d039474a291cbfe982bb5addc93a248317cac42723f418b",
+        "stage": 0
+      },
+      {
+        "sha256": "e857385b7a517641cf737b71e73456f7deddc6ed77bbfc1cf9857550192d1af0",
+        "stage": 1
+      },
+      {
+        "sha256": "95a9883c7b4c43ee7fc1782718c9a9fc73c794026a8a5f0c1216179314d1128f",
+        "stage": 2
+      },
+      {
+        "sha256": "b14aadb1c5ee537532f467b3b3d21fd66b06a87728dbbb3e672d9e200f787854",
+        "stage": 3
+      },
+      {
+        "sha256": "a248a65b6f2053299ac6623354f48fefcedc07f4978c6e45e46f5f0d86096dce",
+        "stage": 4
+      },
+      {
+        "sha256": "36a07389a89c40bd9a0be5f3a6bf5f717d68eeba7b36623e82f48095a5497540",
+        "stage": 5
+      },
+      {
+        "sha256": "55d5467c0f3caea66dd3d42fc38304528dde412429730818c9e97be5962b541b",
+        "stage": 6
+      },
+      {
+        "sha256": "58ea0bac73b0a8b4a7f173aa790e58689dc4a938377359faf73cf340b24b1124",
+        "stage": 7
+      },
+      {
+        "sha256": "9551c20f9295e51b2662c6035aa2fa970b943a86e42407d697c3bfbdefcb45c1",
+        "stage": 8
+      },
+      {
+        "sha256": "0d1cb7bbed25ebec78a0a1dab0e076e1d1597b82f57f4d43c0074c85328fb8e3",
+        "stage": 9
+      },
+      {
+        "sha256": "ba7caeda7f08a556d6d193418d3cf816c3ad792bde6e7961ea6be1a03e6dd0f1",
+        "stage": 10
+      },
+      {
+        "sha256": "1ecb7a027abf1c85ae298c7aceedd34247cef76ef47929a5526be7e81f47d5c4",
+        "stage": 11
+      },
+      {
+        "sha256": "66dd12a665583a2498ad9383f0e8def4f06cc1dc727f46263109f668098e940e",
+        "stage": 12
+      },
+      {
+        "sha256": "65d73c230789a24aedb75cdb10927e3f023ff10831751f4c7ba8c75f121ecd97",
+        "stage": 13
+      },
+      {
+        "sha256": "4186fa48a4b53d3c6b36fbdb403f7eb319d377d3e3ccbe49e5e8bdb8ff6d046f",
+        "stage": 14
+      },
+      {
+        "sha256": "dec7f5ee0f03c0403df727e16ba80bf30603e454e46aa07272f2090640a7bd22",
+        "stage": 15
+      },
+      {
+        "sha256": "bb542429b05bd1fe91385a591c9f54a38dad56007e969b00dbd47bef7f72638c",
+        "stage": 16
+      },
+      {
+        "sha256": "400c28d887045100f9e8b1aa703345bfe19db562e3de454b5abf6c166831f1e6",
+        "stage": 17
+      },
+      {
+        "sha256": "3115fbe2580b39ed27fd705fc19fc5e82e76e627affdef5e01b7d87e78ce96f9",
+        "stage": 18
+      },
+      {
+        "sha256": "389b969799b4a47446a13ba60e390312940ccfcf92ff77edca9daec910413f8d",
+        "stage": 19
+      },
+      {
+        "sha256": "0481b80e25400c487ef5014a49342ae1cb8c07f00799ce60615c0e2666693d7a",
+        "stage": 20
+      },
+      {
+        "sha256": "309942cb9bf28580562c1dce26b43b9210089199119f190a87aa6ffa926b12ef",
+        "stage": 21
+      },
+      {
+        "sha256": "21ef57f299a60b078e17a124e9ebb7715c759f06e3ffaaab355a42ec8d80f0bf",
+        "stage": 22
+      },
+      {
+        "sha256": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+        "stage": 23
+      }
+    ]
+  },
+  "latin_historical_source_full_candidate": {
+    "candidate_to_source_trial": {
+      "analysis_rows": {
+        "curated": 2100530,
+        "rebuilt": 2100698
+      },
+      "changed_analysis_counts": 80,
+      "changed_grammatical_multisets": 80,
+      "changed_multisets_at_equal_counts": 0,
+      "counts": {
+        "absent_curated__absent_rebuilt": 185829,
+        "distinct_forms": 1033579,
+        "input_lines": 1033579,
+        "recognized_curated__recognized_rebuilt": 847750
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 4,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 66,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 80,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 12,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 6,
+            "tense": 7
+          }
+        ],
+        "removed": []
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 168,
+        "removed_rows": 0,
+        "retained_rows": 2100530
+      },
+      "identical_root_control": false,
+      "input_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {},
+        "forms": 0,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": []
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "b0913bdf8070e8196dff265fa5968ca19fb388ec42963387530a92f29c15a0b2",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 1033579
+      }
+    },
+    "global_identical_control": {
+      "analysis_rows": {
+        "curated": 2100698,
+        "rebuilt": 2100698
+      },
+      "changed_analysis_counts": 0,
+      "changed_grammatical_multisets": 0,
+      "changed_multisets_at_equal_counts": 0,
+      "counts": {
+        "absent_curated__absent_rebuilt": 185829,
+        "distinct_forms": 1033579,
+        "input_lines": 1033579,
+        "recognized_curated__recognized_rebuilt": 847750
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [],
+        "removed": []
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 0,
+        "removed_rows": 0,
+        "retained_rows": 2100698
+      },
+      "identical_root_control": true,
+      "input_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {},
+        "forms": 0,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": []
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 1033579
+      }
+    },
+    "indexes_sha256": {
+      "after": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "6c634ba6e3bf2a30424156cefcbc9534706761021a5819e1ded7cf12a4064856",
+        "vbind.lindex": "7e6f3b8556c5bef76304e28260d69be720d3d4240c534c672659bca96bbc78f0"
+      },
+      "before": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4",
+        "vbind.lindex": "486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954"
+      }
+    },
+    "input_sha256": {
+      "candidate": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+      "forms": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+      "review": "10d79072c4df8923acbb85fbd0cd28ec4a3e49b8a05cc2962ddb37cb03983023"
+    },
+    "original_inputs_unchanged": true,
+    "schema": 1,
+    "scope": "one source-alternative replacement in a separate full candidate; aggregate qualification, no production promotion",
+    "source_delta_classes": {
+      "added": {
+        "perfect": 1,
+        "supine": 2
+      },
+      "removed": {
+        "perfect": 1
+      }
+    },
+    "source_sha256": {
+      "after": "92965fed7e8d30632dc9eb4118cfa671fafb95918940265b54ef7abca2d28f77",
+      "before": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9"
+    },
+    "supine_family": {
+      "distinct_forms": 10,
+      "private_family_sha256": "9a0a71c87ee9096522e4ede10ea6204bacaf1bb1d0290aaa8ff01f8f5b11c886",
+      "sixteen_field_multisets": {
+        "added_rows": 28,
+        "changed_forms": 10,
+        "removed_rows": 0,
+        "retained_rows": 40
+      },
+      "source_cells": {
+        "covered_after": 12,
+        "covered_before": 0,
+        "expected_cells": 12,
+        "expected_readings_after": 12,
+        "expected_readings_before": 0
+      }
+    }
+  },
+  "macos_corrected_candidate_preflight": {
+    "scope": "corrected source and index receipts only; local starting source differs from qualified Linux reference, no local LISTALL comparison",
+    "source_sha256": "92965fed7e8d30632dc9eb4118cfa671fafb95918940265b54ef7abca2d28f77",
+    "indexes_sha256": {
+      "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+      "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+      "vbind": "6c634ba6e3bf2a30424156cefcbc9534706761021a5819e1ded7cf12a4064856",
+      "vbind.lindex": "7e6f3b8556c5bef76304e28260d69be720d3d4240c534c672659bca96bbc78f0"
+    }
+  }
+}

@@ -4,15 +4,38 @@ on:
   push:
     branches:
       - research/lexical-import
+      - research/lexical-arbitration-*
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  latin-listall-input:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate and stage the pinned historical LISTALL archive
+        run: |
+          python3 test/prepare-latin-listall.py
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+
+          url = 'https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/listall.zip" \
+            --output "$RUNNER_TEMP/listall-pinned"
+
   latin-header-filters:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v5
 
@@ -42,17 +65,34 @@ jobs:
 
       - name: Partition Latin headers using TEI evidence
         run: |
-          python3 test/partition-lexical-latin.py
-          python3 test/audit-latin-partition-gaps.py
-          python3 test/audit-lexical-stems.py
-          python3 tools/partition-lexical-latin.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" test/reconstruct-lexical-exports.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
+            --language Latin \
+            --lexica "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --output "$RUNNER_TEMP/standalone-latin-stage"
+          for name in headers.jsonl lemmata skipped.tsv; do
+            cmp "$RUNNER_TEMP/lexical-stage/Latin.$name" \
+                "$RUNNER_TEMP/standalone-latin-stage/Latin.$name"
+          done
+          "$RUNNER_TEMP/lexical-python/bin/python" test/partition-lexical-latin.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-partition-gaps.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-listall.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-lexical-stems.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
             --output "$RUNNER_TEMP/lexical-partition"
-          python3 tools/audit-latin-partition-gaps.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-partition-gaps.py \
             --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
             --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
             --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/prepare-latin-partition-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/prepare-latin-partition-review.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin \
+            --expected 393
 
       - name: Build historical header and nominal filters in isolation
         run: |
@@ -91,7 +131,7 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
             > "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -116,10 +156,10 @@ jobs:
           print(json.dumps({'projected_rows': rows, 'filter_output_lines': counts,
                             'unpartitioned_nominal_diagnostic': tags}, sort_keys=True))
           PY
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.nominal-diagnostic" \
             --baseline stemlib/Latin/stemsrc/ls.nom
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Latin.verbal-diagnostic" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
 
@@ -140,12 +180,724 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
             > "$RUNNER_TEMP/lexical-partition/verbal.stems"
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-partition/nominal.stems" \
             --baseline stemlib/Latin/stemsrc/ls.nom
-          python3 tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-partition/verbal.stems" \
             --baseline stemlib/Latin/stemsrc/vbs.latin
+
+      - name: Qualify source-backed first-sense Latin recovery separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-initial-sense.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-initial-sense.py \
+            --headers "$RUNNER_TEMP/lexical-stage/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/lexical-stage/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-source-recovered" \
+            --expected 630
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-source-recovered-partition"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-partition-gaps.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --nominal-baseline stemlib/Latin/stemsrc/ls.nom \
+            --verbal-baseline stemlib/Latin/stemsrc/vbs.latin
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-source-recovered/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latnom.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-source-recovered-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-source-recovered/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-source-recovered/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-source-recovered/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-source-recovered/latvb.log" \
+            > "$RUNNER_TEMP/latin-source-recovered/verbal.stems"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --baseline stemlib/Latin/stemsrc/ls.nom
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/verbal.stems" \
+            --baseline stemlib/Latin/stemsrc/vbs.latin
+          "$RUNNER_TEMP/lexical-python/bin/python" test/transfer-lexical-record-corrections.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-source-recovered/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-source-recovered/nominal-reviewed.stems" \
+            --expected 44
+
+      - name: Stage explicit full Latin compounds as a separate source trial
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-compound-headwords.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-compound-headwords.py \
+            --headers "$RUNNER_TEMP/latin-source-recovered/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-source-recovered/Latin.lemmata" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/latin-full-compounds" --expected 104
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/latin-full-compounds/Latin.lemmata" \
+            --output "$RUNNER_TEMP/latin-full-compounds-partition"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/nominal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/splitlems.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixhesc" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixhesc.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/fixgend" \
+              2> "$RUNNER_TEMP/latin-full-compounds/fixgend.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latnom" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latnom.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/nominal.stems"
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-full-compounds/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-full-compounds/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-full-compounds/conj1.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/latvb" \
+              2> "$RUNNER_TEMP/latin-full-compounds/latvb.log" \
+            > "$RUNNER_TEMP/latin-full-compounds/verbal.stems"
+          for kind in nominal verbal; do
+            baseline=stemlib/Latin/stemsrc/ls.nom
+            if [ "$kind" = verbal ]; then baseline=stemlib/Latin/stemsrc/vbs.latin; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-lexical-stems.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/$kind.stems" --baseline "$baseline"
+          done
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/transfer-lexical-record-corrections.py \
+            --candidate "$RUNNER_TEMP/latin-full-compounds/nominal.stems" \
+            --original stemlib/Latin/stemsrc/ls.nom \
+            --corrections tools/stemlib-lexical-corrections.tsv \
+            --language Latin --source-path stemsrc/ls.nom \
+            --private-output "$RUNNER_TEMP/latin-full-compounds/nominal-reviewed.stems" --expected 44
+
+      - name: Probe historical Latin filter portability in a sanitizer-built private copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/probe-latin-historical-filter-portability.py
+          python3 test/probe-latin-historical-filter-portability-native.py
+          timeout 120s "$RUNNER_TEMP/legacy-filters/combitype" \
+            < "$RUNNER_TEMP/latin-full-compounds-partition/verbal.lemmata" \
+            2> "$RUNNER_TEMP/latin-historical-portability-combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlat" \
+              2> "$RUNNER_TEMP/latin-historical-portability-splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/legacy-filters/conj1" \
+              2> "$RUNNER_TEMP/latin-historical-portability-conj1.log" \
+            > "$RUNNER_TEMP/latin-historical-portability.input"
+          python3 tools/probe-latin-historical-filter-portability.py \
+            --lexer src/gkdict/latvb.l \
+            --input "$RUNNER_TEMP/latin-historical-portability.input" \
+            --reference "$RUNNER_TEMP/latin-full-compounds/verbal.stems" \
+            --expected-reference-sha256 22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479 \
+            --output "$RUNNER_TEMP/latin-historical-portability"
+
+      - name: Qualify source-only regular derivative and principal-part repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-first-conjugation.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-principal-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-ingo-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-full-alternates.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-second-supines.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-jicio-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-regular-parts-alternates.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-combined-fourth-parts.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-untagged-inchoative-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-velar-suffix.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-cited-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-boundary-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-vowel-present.py
+          for tier in all letters-only; do
+            expected=220
+            if [ "$tier" = letters-only ]; then expected=50; fi
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-first-conjugation.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --tier "$tier" --expected "$expected"
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-principal-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-parts.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --proof-tier source-allomorphs --expected 20
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-ingo-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-allomorphs.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-ingo.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-alternates.stems" --expected 131
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-second-supines.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-full-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-supines.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --tier fourth-explicit-perfect --expected 2
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/repair-latin-jicio-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-fourth-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-jicio.stems" --expected 18
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-jicio.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-regular-alternates.stems" --expected 18
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-combined-fourth-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-regular-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-supine.stems" --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-combined-fourth-parts.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-supine.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
+              --tier perfect-only --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-combined-perfect.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --tier terminal-delimiter --expected 3
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-terminal-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --tier present-only --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-present-alternates.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-inchoative-present.stems" \
+              --tier inchoative-present --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-regular-parts-alternates.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-inchoative-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-present.stems" \
+              --tier velar-present --expected 3
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-untagged-inchoative-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-untagged-inchoative.stems" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-velar-suffix.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-untagged-inchoative.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-suffix.stems" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-cited-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-velar-suffix.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
+              --expected 11
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-cited-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --evidence future-imperative --expected 4
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-boundary-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-cited-future-imperative.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-boundary-present.stems" \
+              --expected 11
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-vowel-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-boundary-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --expected 4
+          done
+
+      - name: Rebuild the private remaining-present inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/audit-latin-remaining-presents.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.jsonl" \
+              --expected 15 \
+              > "$RUNNER_TEMP/latin-full-compounds/remaining-present-$tier.report.json"
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.jsonl" \
+              --grammar coordinated-supines --expected 16 --expected-articles 16 \
+              > "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.report.json"
+          done
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'latin-full-compounds'
+          reports = {tier: json.loads((stage / ('remaining-present-' + tier + '.report.json')).read_text())
+                     for tier in ('all', 'letters-only')}
+          left, right = reports.values()
+          if (left['counts'] != right['counts'] or
+                  left['private_inventory_sha256'] != right['private_inventory_sha256']):
+              raise ValueError('quantity treatments produce different remaining-present inventories')
+          broader = {tier: json.loads((stage / ('coordinated-present-' + tier + '.report.json')).read_text())
+                     for tier in ('all', 'letters-only')}
+          broad_left, broad_right = broader.values()
+          if (broad_left['counts'] != broad_right['counts'] or
+                  broad_left['private_inventory_sha256'] != broad_right['private_inventory_sha256']):
+              raise ValueError('coordinated diagnostic inventories differ between quantity treatments')
+          for tier in reports:
+              strict_rows = {row for row in (stage / ('remaining-present-' + tier + '.jsonl')).read_bytes().splitlines()}
+              broad_rows = {row for row in (stage / ('coordinated-present-' + tier + '.jsonl')).read_bytes().splitlines()}
+              if not strict_rows < broad_rows or len(broad_rows - strict_rows) != 1:
+                  raise ValueError('coordinated syntax does not explain exactly one additional dossier')
+          print(json.dumps({'remaining_present_audit': reports,
+                            'coordinated_supine_diagnostic': broader,
+                            'legacy_inventory_comparison': {
+                                'recorded_variants': 16, 'recorded_articles': 16,
+                                'strict_selector_variants': left['counts']['variants'],
+                                'strict_selector_articles': left['counts']['articles'],
+                                'identity_with_legacy_inventory': 'unresolved'}}, sort_keys=True))
+          PY
+
+      - name: Stage present alternates with independent reverse references
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-backlinked-present.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-backlinked-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-vowel-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --expected 9
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/post-backlinked-$tier.jsonl" \
+              --expected 6 --expected-articles 6
+          done
+
+      - name: Stage the quoted present with coordinated supines
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-coordinated-present.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-coordinated-present.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-backlinked-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-coordinated-present.stems" \
+              --private-witness "$RUNNER_TEMP/latin-full-compounds/coordinated-present-$tier.witness.jsonl" \
+              --expected 1
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-coordinated-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/post-coordinated-$tier.jsonl" \
+              --grammar coordinated-supines --expected 6 --expected-articles 6
+            cmp "$RUNNER_TEMP/latin-full-compounds/post-backlinked-$tier.jsonl" \
+                "$RUNNER_TEMP/latin-full-compounds/post-coordinated-$tier.jsonl"
+          done
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'latin-full-compounds'
+          witnesses = []
+          for tier in ('all', 'letters-only'):
+              rows = [json.loads(row) for row in (stage / ('coordinated-present-' + tier + '.witness.jsonl')).read_text().splitlines()]
+              if len(rows) != 1:
+                  raise ValueError('expected one source quotation witness')
+              witnesses.append([{key: value for key, value in row.items() if key != 'candidate_sha256'} for row in rows])
+          if witnesses[0] != witnesses[1]:
+              raise ValueError('quantity treatments produce different source quotation witnesses')
+          print(json.dumps({'coordinated_present_source_control': {'witnesses': 1, 'quantity_witnesses_equal': True,
+                            'remaining_inventories_unchanged': True}}, sort_keys=True))
+          PY
+
+      - name: Stage bounded whole-word present spellings
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-bounded-present-spellings.py
+          for tier in all letters-only; do
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-bounded-present-spellings.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-coordinated-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-bounded-present.stems" \
+              --private-witness "$RUNNER_TEMP/latin-full-compounds/bounded-present-$tier.witness.jsonl" \
+              --expected 5
+            "$RUNNER_TEMP/lexical-python/bin/python" tools/audit-latin-remaining-presents.py \
+              --candidate "$RUNNER_TEMP/latin-full-compounds/verbal-$tier-bounded-present.stems" \
+              --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+              --lexica "$RUNNER_TEMP/lexica" \
+              --private-output "$RUNNER_TEMP/latin-full-compounds/post-bounded-$tier.jsonl" \
+              --grammar coordinated-supines --expected 1 --expected-articles 1
+          done
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          stage = Path(os.environ['RUNNER_TEMP']) / 'latin-full-compounds'
+          witnesses, remaining = [], []
+          for tier in ('all', 'letters-only'):
+              rows = [json.loads(row) for row in (stage / ('bounded-present-' + tier + '.witness.jsonl')).read_text().splitlines()]
+              if len(rows) != 5 or len({row['rule'] for row in rows}) != 5 or sum(len(row['forms']) for row in rows) != 65:
+                  raise ValueError('expected five distinct spelling-rule families and sixty-five cells')
+              witnesses.append([{key: value for key, value in row.items() if key != 'candidate_sha256'} for row in rows])
+              previous = set((stage / ('post-coordinated-' + tier + '.jsonl')).read_bytes().splitlines())
+              current = set((stage / ('post-bounded-' + tier + '.jsonl')).read_bytes().splitlines())
+              if not current < previous or len(previous - current) != 5:
+                  raise ValueError('bounded trial does not resolve exactly five previous dossiers')
+              withheld = json.loads(next(iter(current)))
+              if hashlib.sha256(withheld['id'].encode()).hexdigest() != '8d311aea39f63d40f1e41a379b1c58447f35351d8e0c8a9a6a20421d3858be3a':
+                  raise ValueError('remaining article differs from the reviewed contextual abbreviation')
+              remaining.append((stage / ('post-bounded-' + tier + '.jsonl')).read_bytes())
+          if witnesses[0] != witnesses[1] or remaining[0] != remaining[1]:
+              raise ValueError('quantity treatments produce different families or remaining dossiers')
+          print(json.dumps({'bounded_present_source_control': {'source_families': 5, 'expected_cells': 65,
+                            'quantity_witnesses_equal': True, 'remaining_articles': 1,
+                            'private_remaining_sha256': hashlib.sha256(remaining[0]).hexdigest()}}, sort_keys=True))
+          PY
+
+      - name: Compare final readings globally with controlled nominal witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-present-stages.py
+          python3 test/audit-latin-global-readings.py
+          python3 test/diagnose-latin-lost-stems.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-missing-definitions.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-extraction-blockers.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/probe-latin-isolated-fields.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-isolated-source-present.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-source-present-preverbs.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/search-latin-unjoined-preverb-source.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/diagnose-latin-preverb-identifiers.py
+          python3 test/qualify-latin-direct-present-control.py
+          python3 test/probe-latin-terminal-conjugation.py
+          cmake -S . -B "$RUNNER_TEMP/present-native" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
+          cmake --build "$RUNNER_TEMP/present-native" --parallel 2 \
+            --target morpheus morpheus_stemlib_production_latin
+          python3 test/qualify-latin-present-stages-native.py "$RUNNER_TEMP/present-native"
+          python3 test/qualify-latin-direct-present-control-native.py "$RUNNER_TEMP/present-native"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+
+          url = 'https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip'
+          with urllib.request.urlopen(url, timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'present-listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/present-listall.zip" \
+            --output "$RUNNER_TEMP/present-listall"
+          python3 tools/qualify-latin-present-stages.py \
+            --forms "$RUNNER_TEMP/present-listall/LISTALL.distinct-literal.txt" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --stage "$RUNNER_TEMP/latin-full-compounds" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --private-output "$RUNNER_TEMP/present-qualification" \
+            --expected-forms 1033579 --include-bounded --global-readings-only
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          temp = Path(os.environ['RUNNER_TEMP'])
+          stage = temp / 'latin-full-compounds'
+          reference = json.loads(Path('tools/latin-final-present-reference.json').read_text())
+          report = json.loads((temp / 'present-qualification/report.json').read_text())
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          source = temp / 'lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml'
+          if (digest(source) != reference['source_sha256'] or
+                  digest(stage / 'Latin.headers.jsonl') != reference['headers_sha256']):
+              raise ValueError('selected source or recovered headers differ from qualified reference')
+          for tier in ('all', 'letters-only'):
+              if digest(stage / ('verbal-' + tier + '-bounded-present.stems')) != reference['candidate_sha256'][tier]:
+                  raise ValueError('final candidate differs from qualified reference')
+          if report['indexes']['bounded-present'] != reference['indexes_sha256']:
+              raise ValueError('final runtime indexes differ from qualified reference')
+          control = report['global_comparisons']['final-global-control']
+          delta = report['global_comparisons']['baseline-to-final-global']
+          if (control['input_sha256'] != reference['listall_sha256'] or
+                  delta['input_sha256'] != reference['listall_sha256'] or
+                  control['counts']['recognized_curated__recognized_rebuilt'] != reference['final_recognized_forms'] or
+                  control['analysis_rows']['curated'] != reference['final_analysis_rows'] or
+                  control['analysis_rows']['rebuilt'] != reference['final_analysis_rows']):
+              raise ValueError('full final-root recognition or reading totals differ from reference')
+          baseline_recognized = sum(delta['counts'].get(key, 0) for key in
+              ('recognized_curated__recognized_rebuilt', 'recognized_curated__absent_rebuilt'))
+          final_recognized = sum(delta['counts'].get(key, 0) for key in
+              ('recognized_curated__recognized_rebuilt', 'absent_curated__recognized_rebuilt'))
+          if (baseline_recognized != reference['baseline_recognized_forms'] or
+                  final_recognized != reference['final_recognized_forms'] or
+                  delta['analysis_rows'] != {'curated': reference['baseline_analysis_rows'], 'rebuilt': reference['final_analysis_rows']}):
+              raise ValueError('global comparison totals differ from qualified reference')
+          print(json.dumps({'global_reading_reference_control': {'reference_revision': reference['code_revision'],
+                            'candidate_and_indexes_identical': True, 'recognition_and_reading_totals_identical': True,
+                            'earlier_count_passes': 'qualified on reference revision; not repeated in global-only mode'}}, sort_keys=True))
+          PY
+
+      - name: Diagnose complete Latin losses against expanded stems and source articles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/diagnose-latin-lost-stems.py \
+            --comparison-dir "$RUNNER_TEMP/present-qualification" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --private-output "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --expected-forms 6789 --expected-lemmas 133 --expected-rows 11005 \
+            --expected-difference-sha256 08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52
+
+      - name: Review missing Latin definitions with isolated historical source replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-missing-definitions.py \
+            --dossier "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --final-expanded "$RUNNER_TEMP/present-qualification/bounded-present/Latin/lexical/present-trial.expanded" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --private-output "$RUNNER_TEMP/latin-missing-definition-review.jsonl" \
+            --expected-lemmas 30 --expected-rows 2672 \
+            --expected-dossier-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940
+
+      - name: Probe seven explicit terminal conjugation digits without changing the final candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/probe-latin-terminal-conjugation.py \
+            --review-dossier "$RUNNER_TEMP/latin-missing-definition-review.jsonl" \
+            --loss-dossier "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --output "$RUNNER_TEMP/latin-terminal-conjugation-probe" \
+            --expected-lemmas 7 --expected-rows 928 \
+            --expected-review-sha256 0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc \
+            --expected-loss-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-baseline-expanded-sha256 f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3
+
+      - name: Locate eight remaining source-backed Latin extraction blockers
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-extraction-blockers.py \
+            --review-dossier "$RUNNER_TEMP/latin-missing-definition-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --private-output "$RUNNER_TEMP/latin-extraction-blocker-review.jsonl" \
+            --expected-review-sha256 0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc \
+            --expected-lemmas 8 --expected-rows 914
+
+      - name: Probe successful isolated Latin source fields in separate native copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/probe-latin-isolated-fields.py \
+            --blocker-dossier "$RUNNER_TEMP/latin-extraction-blocker-review.jsonl" \
+            --loss-dossier "$RUNNER_TEMP/latin-complete-loss-review.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --baseline "$RUNNER_TEMP/present-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --output "$RUNNER_TEMP/latin-isolated-field-native-probe" \
+            --expected-cases 8 --expected-rows 914 --expected-trials 2 \
+            --expected-blocker-sha256 64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c \
+            --expected-loss-sha256 a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-baseline-expanded-sha256 f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3
+
+      - name: Qualify source-digit present coverage and global grammatical differences
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-isolated-source-present.py \
+            --blocker-dossier "$RUNNER_TEMP/latin-extraction-blocker-review.jsonl" \
+            --forms "$RUNNER_TEMP/present-listall/LISTALL.distinct-literal.txt" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --native-trials "$RUNNER_TEMP/latin-isolated-field-native-probe" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/latin-isolated-source-present-qualification" \
+            --expected-digit 1 --expected-forms 1033579 \
+            --expected-blocker-sha256 64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c \
+            --expected-forms-sha256 1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93 \
+            --expected-probe-sha256 5299af6c2e2fbb7f87f56e061d62d54f939cb1da22f94ce45a2196f620134f58 \
+            --expected-source-sha256 fa0fb3904e5c43bf6c95ed1cffa7b6072408ddc985025ffbc51669b1732677c4 \
+            --expected-vbind-sha256 00fb4438695a8de07da3c2b28f3ac91dd510cca1dccfa3eb8b31e0420e10bd8a \
+            --expected-vside-sha256 1401f2885c3a2d44df8bbaaf4774dbecb9c42952e5ff6d924c7821c3d6315b50 \
+            --expected-candidate-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9
+
+      - name: Review other-lemma native preverb additions against their source articles
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-source-present-preverbs.py \
+            --routes "$RUNNER_TEMP/latin-isolated-source-present-qualification/changed-routes.jsonl" \
+            --delta "$RUNNER_TEMP/latin-isolated-source-present-qualification/global-delta.jsonl" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --headers "$RUNNER_TEMP/latin-full-compounds/Latin.headers.jsonl" \
+            --expanded "$RUNNER_TEMP/present-qualification/bounded-present/Latin/lexical/present-trial.expanded" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --filters "$RUNNER_TEMP/legacy-filters" \
+            --private-output "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --expected-forms 188 --expected-rows 246 --expected-preverbs 123 \
+            --expected-routes-sha256 461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627 \
+            --expected-delta-sha256 b84e4cc77a9c8581285b3a47271277f917b1a52411a5355c39295997d419bbc3 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-headers-sha256 85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34 \
+            --expected-expanded-sha256 83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940 \
+            --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
+
+      - name: Search the complete Latin TEI for the unjoined preverb lemma
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/search-latin-unjoined-preverb-source.py \
+            --dossier "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --lexica "$RUNNER_TEMP/lexica" \
+            --private-output "$RUNNER_TEMP/latin-unjoined-preverb-source-search.jsonl" \
+            --expected-rows 123 \
+            --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a \
+            --expected-tei-sha256 ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee
+
+      - name: Diagnose native preverb identifiers without substituting lexical identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/diagnose-latin-preverb-identifiers.py \
+            --routes "$RUNNER_TEMP/latin-isolated-source-present-qualification/changed-routes.jsonl" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --dossier "$RUNNER_TEMP/latin-source-present-preverb-review.jsonl" \
+            --private-output "$RUNNER_TEMP/latin-preverb-identifier-diagnostic.jsonl" \
+            --expected-forms 188 --expected-rows 246 --expected-preverbs 123 \
+            --expected-routes-sha256 461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-dossier-sha256 8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a
+
+      - name: Qualify a direct-present counterfactual with native composition disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 tools/qualify-latin-direct-present-control.py \
+            --source "$RUNNER_TEMP/latin-isolated-field-native-probe/trial-2/present.stems" \
+            --family "$RUNNER_TEMP/latin-isolated-source-present-qualification/source-family.jsonl" \
+            --forms "$RUNNER_TEMP/present-listall/LISTALL.distinct-literal.txt" \
+            --candidate-source "$RUNNER_TEMP/latin-full-compounds/verbal-letters-only-bounded-present.stems" \
+            --candidate "$RUNNER_TEMP/present-qualification/bounded-present" \
+            --opened "$RUNNER_TEMP/latin-isolated-field-native-probe/trial-2/present-native" \
+            --tools "$RUNNER_TEMP/present-native" \
+            --library "$RUNNER_TEMP/present-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/latin-direct-present-control" \
+            --expected-forms 1033579 \
+            --expected-source-sha256 fa0fb3904e5c43bf6c95ed1cffa7b6072408ddc985025ffbc51669b1732677c4 \
+            --expected-family-sha256 908e52e24b67fa56e6b46435c763a03d053393808e45759f4b965f3f0fdeec91 \
+            --expected-forms-sha256 1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93 \
+            --expected-candidate-source-sha256 6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9 \
+            --expected-vbind-sha256 00fb4438695a8de07da3c2b28f3ac91dd510cca1dccfa3eb8b31e0420e10bd8a \
+            --expected-vside-sha256 1401f2885c3a2d44df8bbaaf4774dbecb9c42952e5ff6d924c7821c3d6315b50
 
   greek-header-filters:
     runs-on: ubuntu-24.04
@@ -196,12 +948,12 @@ jobs:
             | timeout 120s "$RUNNER_TEMP/legacy-filters/setquant" \
             | timeout 120s "$RUNNER_TEMP/legacy-filters/splitlems" \
             > "$RUNNER_TEMP/lexical-stage/Greek.split"
-          python3 tools/split-greek-lexical-headers.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/split-greek-lexical-headers.py \
             --input "$RUNNER_TEMP/lexical-stage/Greek.lemmata" \
             --output "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
           cmp -s "$RUNNER_TEMP/lexical-stage/Greek.split" \
             "$RUNNER_TEMP/lexical-stage/Greek.portable.split"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import hashlib
           import json
           import os
@@ -245,7 +997,7 @@ jobs:
           timeout 120s "$RUNNER_TEMP/legacy-filters/newlems" \
             < "$RUNNER_TEMP/lexical-stage/Greek.split" \
             > "$RUNNER_TEMP/lexical-stage/Greek.checked"
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           from collections import Counter
@@ -267,11 +1019,11 @@ jobs:
           grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.morph" \
             > "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic"
           cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --baseline stemsrc/lsj.nom \
             --greek-spelling-diagnostic
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
@@ -281,7 +1033,7 @@ jobs:
         run: |
           set -euo pipefail
           ulimit -c 0
-          python3 - <<'PY'
+          "$RUNNER_TEMP/lexical-python/bin/python" - <<'PY'
           import json
           import os
           import re
@@ -315,33 +1067,43 @@ jobs:
           grep -Fv '0:' "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.morph" \
             > "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal"
           cp /tmp/lsj.vbs "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
             --greek-spelling-diagnostic
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs \
             --greek-spelling-diagnostic
-          python3 ../../test/audit-greek-partial-novelty.py
-          python3 ../../tools/audit-greek-partial-novelty.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-partial-novelty.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-greek-partial-novelty.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --original-candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl"
-          python3 ../../test/audit-greek-disjoint-triage.py
-          python3 ../../test/prepare-greek-lexical-review.py
-          python3 ../../test/split-greek-lexical-headers.py
-          python3 ../../tools/audit-greek-disjoint-triage.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-disjoint-triage.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/prepare-greek-lexical-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/arbitrate-greek-lexical-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/triage-greek-quantity-residuals.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/arbitrate-greek-quantity-long.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/consolidate-greek-quantity-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-pron-ambiguity.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/prepare-greek-quantity-source-review.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/inspect-greek-quantity-open.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-open-diphthongs.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/compare-greek-cruncher-readings.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/audit-greek-generated-coverage.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../test/split-greek-lexical-headers.py
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-greek-disjoint-triage.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom \
             --headers "$RUNNER_TEMP/lexical-stage/Greek.headers.jsonl" \
             --split "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.split"
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.nominal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.nominal" \
             --baseline stemsrc/lsj.nom
-          python3 ../../tools/audit-lexical-stems.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" ../../tools/audit-lexical-stems.py \
             --candidate "$RUNNER_TEMP/lexical-stage/Greek.verbal-diagnostic" \
             --alternate-candidate "$RUNNER_TEMP/lexical-stage/Greek.no-first-quantity.verbal" \
             --baseline stemsrc/lsj.vbs

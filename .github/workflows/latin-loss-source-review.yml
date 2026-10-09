@@ -1,0 +1,192 @@
+name: Latin changed-definition loss source review
+
+on:
+  push:
+    branches:
+      - research/lexical-arbitration-*
+    paths:
+      - 'tools/**'
+      - 'test/**'
+      - 'src/**'
+      - 'stemlib/**'
+      - 'include/**'
+      - 'cmake/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/latin-loss-source-review.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install isolated lexer and source dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flex libfl-dev
+          python3 -m venv "$RUNNER_TEMP/lexical-python"
+          "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
+      - name: Fetch the pinned TEI
+        run: |
+          git clone --filter=blob:none --no-checkout \
+            https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
+          git -C "$RUNNER_TEMP/lexica" sparse-checkout set --no-cone \
+            '/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml'
+          git -C "$RUNNER_TEMP/lexica" checkout 56061ca127f4a2844980baffc5f2b6d1332897b3
+      - name: Reconstruct the qualified recovered headers privately
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
+            --language Latin --lexica "$RUNNER_TEMP/lexica" --output "$RUNNER_TEMP/projected"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-initial-sense.py \
+            --headers "$RUNNER_TEMP/projected/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/projected/Latin.lemmata" --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/initial-sense" --expected 630
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/recover-latin-compound-headwords.py \
+            --headers "$RUNNER_TEMP/initial-sense/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/initial-sense/Latin.lemmata" --lexica "$RUNNER_TEMP/lexica" \
+            --output "$RUNNER_TEMP/compounds" --expected 104
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/partition-lexical-latin.py \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --lemmata "$RUNNER_TEMP/compounds/Latin.lemmata" --output "$RUNNER_TEMP/partition"
+      - name: Reproduce the original and diagnostic filter outputs
+        run: |
+          set -euo pipefail
+          umask 077
+          ulimit -c 0
+          python3 test/probe-latin-historical-filter-portability.py
+          python3 test/probe-latin-historical-filter-portability-native.py
+          python3 test/review-latin-historical-filter-delta.py
+          mkdir "$RUNNER_TEMP/filters"
+          for scanner in combitype splitlat conj1 latvb; do
+            flex -o "$RUNNER_TEMP/filters/$scanner.c" "src/gkdict/$scanner.l"
+            gcc -std=gnu89 -w -o "$RUNNER_TEMP/filters/$scanner" \
+              "$RUNNER_TEMP/filters/$scanner.c" -lfl
+          done
+          timeout 120s "$RUNNER_TEMP/filters/combitype" \
+            < "$RUNNER_TEMP/partition/verbal.lemmata" 2> "$RUNNER_TEMP/combitype.log" \
+            | timeout 120s "$RUNNER_TEMP/filters/splitlat" 2> "$RUNNER_TEMP/splitlat.log" \
+            | timeout 120s "$RUNNER_TEMP/filters/conj1" 2> "$RUNNER_TEMP/conj1.log" \
+            > "$RUNNER_TEMP/latvb.input"
+          timeout 120s "$RUNNER_TEMP/filters/latvb" < "$RUNNER_TEMP/latvb.input" \
+            > "$RUNNER_TEMP/historical.stems" 2> "$RUNNER_TEMP/latvb.log"
+          python3 tools/probe-latin-historical-filter-portability.py \
+            --lexer src/gkdict/latvb.l --input "$RUNNER_TEMP/latvb.input" \
+            --reference "$RUNNER_TEMP/historical.stems" \
+            --expected-reference-sha256 22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479 \
+            --output "$RUNNER_TEMP/diagnostic"
+      - name: Review the exact changed lemma against the pinned TEI
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-historical-filter-delta.py \
+            --reference "$RUNNER_TEMP/historical.stems" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --delta "$RUNNER_TEMP/diagnostic/differences.jsonl" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --filters "$RUNNER_TEMP/filters" --diagnostic-filter "$RUNNER_TEMP/diagnostic/latvb" \
+            --output "$RUNNER_TEMP/source-review"
+      - name: Qualify isolated source supine families natively
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-historical-source-supines.py
+          cmake -S . -B "$RUNNER_TEMP/supine-native" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DMORPHEUS_BUILD_CRUNCHER=OFF -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON \
+            > "$RUNNER_TEMP/supine-configure.log" 2>&1
+          cmake --build "$RUNNER_TEMP/supine-native" --parallel 2 \
+            --target morpheus morpheus_stemlib_production_latin \
+            > "$RUNNER_TEMP/supine-build.log" 2>&1
+          python3 test/qualify-latin-historical-source-supines-native.py "$RUNNER_TEMP/supine-native"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-historical-source-supines.py \
+            --review "$RUNNER_TEMP/source-review/source-review.jsonl" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/source-supine-families"
+      - name: Reconstruct the unchanged qualified full candidate privately
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-historical-source-candidate.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-latin-qualified-candidate.py \
+            --reference "$RUNNER_TEMP/historical.stems" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --output "$RUNNER_TEMP/qualified-candidate"
+      - name: Reproduce the pinned complete-loss dossier
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-changed-definition-losses.py
+          python3 test/reproduce-latin-complete-losses.py
+          python3 test/diagnose-latin-lost-stems.py
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import urllib.request
+          with urllib.request.urlopen('https://downloads.sourceforge.net/project/wwwords/Whitaker/listall.zip', timeout=60) as response:
+              data = response.read(8_000_001)
+          (Path(os.environ['RUNNER_TEMP']) / 'loss-listall.zip').write_bytes(data)
+          PY
+          python3 tools/prepare-latin-listall.py \
+            --archive "$RUNNER_TEMP/loss-listall.zip" --output "$RUNNER_TEMP/loss-listall"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/reproduce-latin-complete-losses.py \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --forms "$RUNNER_TEMP/loss-listall/LISTALL.distinct-literal.txt" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/complete-losses"
+      - name: Review changed-definition losses against source and isolated filters
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-changed-definition-losses.py \
+            --dossier "$RUNNER_TEMP/complete-losses/loss-dossier.jsonl" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --filters "$RUNNER_TEMP/filters" --diagnostic-filter "$RUNNER_TEMP/diagnostic/latvb" \
+            --output "$RUNNER_TEMP/changed-definition-review"
+      - name: Review lost native identifiers against their literal bases
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/review-latin-lost-preverb-bases.py
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-lost-preverb-bases.py \
+            --dossier "$RUNNER_TEMP/complete-losses/loss-dossier.jsonl" \
+            --baseline-expanded "$RUNNER_TEMP/supine-native/stemlib-production/latin/Latin/lexical/verb.expanded" \
+            --final-expanded "$RUNNER_TEMP/complete-losses/candidate/Latin/lexical/present-trial.expanded" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --candidate "$RUNNER_TEMP/complete-losses/candidate" \
+            --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/lost-preverb-base-review"
+      - name: Qualify bounded primary source directives including the nine verbal replay differences
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 test/qualify-latin-loss-primary-source.py
+          python3 test/qualify-latin-loss-primary-source-native.py "$RUNNER_TEMP/supine-native"
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-loss-primary-source.py \
+            --report docs/qualification/latin-loss-source-review-8462af2.json \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --diagnostic "$RUNNER_TEMP/diagnostic/filter.stdout" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --native "$RUNNER_TEMP/complete-losses/candidate" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --output "$RUNNER_TEMP/loss-primary-source"
+

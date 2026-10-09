@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "qualified_commit": "6653c1d1760e1a0ac275b5314375acedeb2df81a",
+  "workflow_run": 37948879178,
+  "workflow_job": 113882184451,
+  "conclusion": "success",
+  "targeted_tests": {
+    "new_attribution_tests": 19,
+    "prior_checks": 51,
+    "total": 70
+  },
+  "qualification": {
+    "anonymous_source_cases": [
+      {
+        "old_complete_loss_readings": 91,
+        "remaining_old_eleven_field_readings": 91,
+        "restored_eleven_fields": 0,
+        "restored_sixteen_fields": 0,
+        "source_header_sha256": "557378f04ada9e69e3f4c962ef9842f6a18451b0c7677b6bc404ed43bc45c621"
+      },
+      {
+        "old_complete_loss_readings": 28,
+        "remaining_old_eleven_field_readings": 0,
+        "restored_eleven_fields": 28,
+        "restored_sixteen_fields": 28,
+        "source_header_sha256": "6f953fcbae2a8038700c6b6252e7e801fae4735d3443feeb5b67882f6d3941d7"
+      }
+    ],
+    "counts": {
+      "added_direct_readings": 215,
+      "added_eleven_field_readings": 649,
+      "added_native_preverb_readings": 434,
+      "added_sixteen_field_readings": 649,
+      "additions_beyond_historical_removed_multiset": 498,
+      "historical_readings_restored__complete_form_loss": 57,
+      "historical_readings_restored__still_recognized_form_loss": 94,
+      "historical_removed_readings_restored": 151,
+      "historical_sixteen_field_readings_restored": 151,
+      "retained_sixteen_field_readings": 138,
+      "selected_old_complete_loss_readings_restored_eleven_fields": 28,
+      "selected_old_complete_loss_readings_restored_sixteen_fields": 28
+    },
+    "dependency_scope": "literal recorded preverb boundary and nine grammatical plus three derivation fields; quantity/separator removal for diagnostic inputs only; no compound source identity or independent form attestation",
+    "distinct_added_native_identifiers": 9,
+    "distinct_literal_bases": 2,
+    "historical_scope": "baseline-minus-original intersections with added multisets; complete losses require original analyses empty; no extrapolation outside 245 changed forms",
+    "identical_root_changed_form_control": {
+      "analysis_rows": {
+        "curated": 787,
+        "rebuilt": 787
+      },
+      "changed_analysis_counts": 0,
+      "changed_grammatical_multisets": 0,
+      "changed_multisets_at_equal_counts": 0,
+      "counts": {
+        "distinct_forms": 245,
+        "input_lines": 245,
+        "recognized_curated__recognized_rebuilt": 245
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [],
+        "removed": []
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 0,
+        "removed_rows": 0,
+        "retained_rows": 787
+      },
+      "identical_root_control": true,
+      "input_sha256": "07a90091aaa35d1292d30aa08f7f80cc862bb81d6a1dcc6594fe3b21b628ce96",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {},
+        "forms": 0,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": []
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 245
+      }
+    },
+    "input_sha256": {
+      "baseline_expanded": "f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3",
+      "evidence": "4733872fc96c032a7b78a8b877c7204c85fc72cfbc55a9906a33d65e09859e43",
+      "qualification": "42e7bba524ee6cc76d23981c38e2d697984344240c48652c5ddd82b0b9ad3aba",
+      "reference_source": "8f9e1253bedc580b11de069d957eab54ef81c2925160dcf0d9b968a6d41457be",
+      "replay_forms": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+      "source": "f8aea78511720a5b1932a890db0ecc284c1b831dd0111a3d002e90b09d6bd476",
+      "source_report": "6e11f1d278e2113b2c379da55667f5f32f403f8dec3f8bfa6596d0543e5d8ac1"
+    },
+    "native_dependency_groups": [
+      {
+        "base_scope": "selected_source_base",
+        "baseline_peer": false,
+        "direct_peer_state": "after_direct_peer_only",
+        "rows": 194,
+        "source_reference_peer": true
+      },
+      {
+        "base_scope": "selected_source_base",
+        "baseline_peer": true,
+        "direct_peer_state": "after_direct_peer_only",
+        "rows": 80,
+        "source_reference_peer": true
+      },
+      {
+        "base_scope": "unclassified_identifier",
+        "baseline_peer": false,
+        "direct_peer_state": "no_direct_peer",
+        "rows": 160,
+        "source_reference_peer": false
+      }
+    ],
+    "native_indexes_sha256": {
+      "baseline": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "cda6088f50c2e5ba10ecafdd0ca261e126b3af7a143dec67d6c166a1f4558dcc",
+        "vbind.lindex": "e0fac809eaa705bdba44f462a46d1696f4c54744ff3043cfcabb383193e30353"
+      },
+      "original": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4",
+        "vbind.lindex": "486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954"
+      },
+      "reference": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "0115ec85f650016447ada16eaa5e3370ac3c5a7c1e9b911fe3283ab2336601f5",
+        "vbind.lindex": "4ee08d518ba8910dd722af73d0099cacd331d55efd30812807067d54fe23a3a2"
+      },
+      "trial": {
+        "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+        "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+        "vbind": "25a86b100288c7fbdd1a05769a1a417d53502826b9c2b8984ca06a8983376c28",
+        "vbind.lindex": "948743cf0018553f86f9450788e8de0d98eb54e9d37ff47e863e14a4c0116013"
+      }
+    },
+    "old_selected_complete_loss_readings": 119,
+    "original_inputs_unchanged": true,
+    "private_attribution_sha256": "13e73234aeb14e7327e8dfc466d7d883bdd211c46ef86fba7722b06a8eb99f6c",
+    "qualified_delta_sha256": "a3391afb13cfab636f50eacf2c19fe4b18a272a3ec642496733853cff3dd78f7",
+    "schema": 1,
+    "scope": "245 changed forms in the qualified separate supine trial; historical reading attribution and literal native base dependencies only",
+    "source_recipes": {
+      "literal_dual_supines_reduplicated_perfect": 1,
+      "literal_triple_supines": 1
+    },
+    "targeted_replay": {
+      "analysis_rows": {
+        "curated": 2817,
+        "rebuilt": 3466
+      },
+      "changed_analysis_counts": 245,
+      "changed_grammatical_multisets": 245,
+      "changed_multisets_at_equal_counts": 0,
+      "counts": {
+        "absent_curated__absent_rebuilt": 332,
+        "absent_curated__recognized_rebuilt": 171,
+        "distinct_forms": 1887,
+        "input_lines": 1887,
+        "recognized_curated__recognized_rebuilt": 1384
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 8,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 15,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 99,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 141,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 108,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 278,
+            "tense": 5
+          }
+        ],
+        "removed": []
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 649,
+        "removed_rows": 0,
+        "retained_rows": 2817
+      },
+      "identical_root_control": false,
+      "input_sha256": "368a170b24adf0411ef81fa39bec88e1cfee3e19682734bbdaabc0bf580f7773",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {},
+        "forms": 0,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": []
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "a3391afb13cfab636f50eacf2c19fe4b18a272a3ec642496733853cff3dd78f7",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 1887
+      }
+    }
+  },
+  "derived_summary": {
+    "historical_readings_restored": 151,
+    "complete_form_loss_readings_restored": 57,
+    "still_recognized_form_readings_restored": 94,
+    "selected_old_readings": 119,
+    "selected_restored": 28,
+    "selected_remaining": 91,
+    "literal_source_base_dependencies": 274,
+    "unclassified_native_identifier_readings": 160,
+    "independent_native_source_identity_approval": false,
+    "local_and_ci_private_evidence_match": true
+  }
+}

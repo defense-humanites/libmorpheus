@@ -1,0 +1,4968 @@
+{
+  "schema": 1,
+  "qualified_commit": "8462af283d245f08029c32d6d1827dc9442cd9cf",
+  "workflow_run": 37927335700,
+  "workflow_job": 113809311246,
+  "conclusion": "success",
+  "targeted_tests": 55,
+  "complete_loss_reproduction": {
+    "global_comparison": {
+      "analysis_rows": {
+        "curated": 2048328,
+        "rebuilt": 2100530
+      },
+      "changed_analysis_counts": 60937,
+      "changed_grammatical_multisets": 66927,
+      "changed_multisets_at_equal_counts": 5990,
+      "counts": {
+        "absent_curated__absent_rebuilt": 179040,
+        "absent_curated__recognized_rebuilt": 16549,
+        "distinct_forms": 1033579,
+        "input_lines": 1033579,
+        "recognized_curated__absent_rebuilt": 6789,
+        "recognized_curated__recognized_rebuilt": 831201
+      },
+      "delta_rows_by_pos_tense_provenance": {
+        "added": [
+          {
+            "part_of_speech": 1,
+            "provenance": "direct",
+            "rows": 7,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 11909,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 746,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 10603,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 11845,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 657,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 10537,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 6345,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 364,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 5151,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 9623,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 501,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 7012,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 8169,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 323,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 5841,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 1813,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 48,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 1007,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 931,
+            "tense": 7
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 24,
+            "tense": 7
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 520,
+            "tense": 7
+          }
+        ],
+        "removed": [
+          {
+            "part_of_speech": 1,
+            "provenance": "direct",
+            "rows": 24,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 5394,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 177,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 3291,
+            "tense": 0
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 4990,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 143,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 3887,
+            "tense": 1
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 2624,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 78,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 1803,
+            "tense": 2
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 4779,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 181,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 3571,
+            "tense": 3
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 4427,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 223,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 3789,
+            "tense": 5
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 980,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 72,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 535,
+            "tense": 6
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 487,
+            "tense": 7
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "mixed",
+            "rows": 36,
+            "tense": 7
+          },
+          {
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 252,
+            "tense": 7
+          },
+          {
+            "part_of_speech": 3,
+            "provenance": "direct",
+            "rows": 31,
+            "tense": 0
+          }
+        ]
+      },
+      "global_eleven_field_multisets": {
+        "added_rows": 93976,
+        "removed_rows": 41774,
+        "retained_rows": 2006554
+      },
+      "identical_root_control": false,
+      "input_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+      "lost_forms_diagnostic": {
+        "distinct_lemmas_by_pos": {
+          "2": 133
+        },
+        "forms": 6789,
+        "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+        "rows_by_pos_tense_provenance_source_membership": [
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 940,
+            "tense": 0
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 689,
+            "tense": 0
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 2,
+            "tense": 0
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 317,
+            "tense": 0
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 906,
+            "tense": 1
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 700,
+            "tense": 1
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 540,
+            "tense": 1
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 518,
+            "tense": 2
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 445,
+            "tense": 2
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 400,
+            "tense": 2
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 1325,
+            "tense": 3
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 488,
+            "tense": 3
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 33,
+            "tense": 3
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 745,
+            "tense": 3
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 1205,
+            "tense": 5
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 226,
+            "tense": 5
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 39,
+            "tense": 5
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 642,
+            "tense": 5
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 372,
+            "tense": 6
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 84,
+            "tense": 6
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 12,
+            "tense": 6
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 96,
+            "tense": 6
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 190,
+            "tense": 7
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "direct",
+            "rows": 40,
+            "tense": 7
+          },
+          {
+            "lemma_membership": "in_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 5,
+            "tense": 7
+          },
+          {
+            "lemma_membership": "outside_substituted_verbal_source",
+            "part_of_speech": 2,
+            "provenance": "native_preverb",
+            "rows": 46,
+            "tense": 7
+          }
+        ]
+      },
+      "mode": "literal ASCII forms; native options 0",
+      "private_difference_sha256": "08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52",
+      "schema": 1,
+      "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+      "signature_fields": [
+        "workword",
+        "lemma",
+        "part_of_speech",
+        "person",
+        "number",
+        "gender",
+        "grammatical_case",
+        "tense",
+        "mood",
+        "voice",
+        "degree"
+      ],
+      "status_pairs": {
+        "0,0": 1033579
+      }
+    },
+    "loss_diagnostic": {
+      "counts": {
+        "distinct_lemmas": 133,
+        "forms": 6789,
+        "nonverbal_readings": 0,
+        "readings": 11005
+      },
+      "definition_states": {
+        "lemmas": {
+          "changed_definition_multisets": 59,
+          "no_definitions_in_either": 44,
+          "no_final_definitions": 30
+        },
+        "readings": {
+          "changed_definition_multisets": 5547,
+          "no_definitions_in_either": 2786,
+          "no_final_definitions": 2672
+        }
+      },
+      "input_sha256": {
+        "Latin_TEI": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee",
+        "assembly_input_0": "b6d0bf77882d09cb0f0762b8514cc8ab87ab2a3f524e15d48f36acddea6a5a9f",
+        "assembly_input_1": "d69975f0a2acfb10f9fc2a897746ce6b73f3e039cd7a65e4d554ffd7f055d15b",
+        "assembly_input_2": "38e802ebeba3208f0c78b532a8f5a6a51d11ba349b2c9e5a90367fa56eefdc82",
+        "assembly_input_3": "ba75379f7ec83ae7a729b2074053774208d0b36dd6743b73a6066cb24c6ac570",
+        "baseline_expanded": "f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3",
+        "candidate_source": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+        "final_expanded": "83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940",
+        "global_difference": "08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52",
+        "global_report": "1ff8805a20c4cf670a46470a7b27eaae5ff34b999c39accc8408b6ce06976c1a",
+        "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+        "native_library": "2f0c4271af2229eacaed38b2b64c8d03eee8e9b90e1f5da651e9ea992a4da0c7"
+      },
+      "private_dossier_sha256": "a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a",
+      "reading_groups": [
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 68,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 66,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 66,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 693,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 28,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 19,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 35,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 334,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 94,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 222,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 4,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 2,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 226,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 28,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 63,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 0
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 26,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 94,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": true,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 2,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 47,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 47,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 654,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 36,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 32,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 57,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 283,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 143,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 8,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 177,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 401,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 20,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 1
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 119,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 1
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 24,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_exact",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 39,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 26,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 26,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 377,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 26,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 48,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 38,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 143,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 88,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 116,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 274,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 26,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 2
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 100,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 2
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 16,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_exact",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 184,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 17,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 17,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 727,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 34,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 330,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 32,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 58,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 166,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 60,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 8,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 98,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 66,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 33,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 625,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 17,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 103,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 3
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 14,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 189,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 695,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 18,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 289,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 9,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 33,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 77,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 9,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 14,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 22,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 62,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 39,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 594,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 5
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 48,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 5
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 6
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 60,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 6
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 276,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 6
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 24,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 36,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 12,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 6
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 12,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 84,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 6
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 12,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 6
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 6,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 7
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 29,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 7
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 145,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 7
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 10,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_notation_lead",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 5,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 18,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_exact__final_no_exact",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 5,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 6,
+          "source_join": "unique_article",
+          "source_partition": "nominal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_final_definitions",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "direct",
+          "rows": 6,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_notation_lead__final_no_notation_lead",
+          "tense": 7
+        },
+        {
+          "definition_state": "changed_definition_multisets",
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 5,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 40,
+          "source_join": "no_article_join",
+          "source_partition": "no_article_join",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 7
+        },
+        {
+          "definition_state": "no_definitions_in_either",
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "part_of_speech": 2,
+          "provenance": "native_preverb",
+          "rows": 6,
+          "source_join": "unique_article",
+          "source_partition": "verbal",
+          "stem_match": "baseline_stem_unmatched",
+          "tense": 7
+        }
+      ],
+      "schema": 1,
+      "scope": "complete losses only; literal definitions and stem/source review leads; no repair approval",
+      "source_joins": {
+        "lemmas": {
+          "no_article_join": 51,
+          "unique_article": 82
+        },
+        "readings": {
+          "no_article_join": 2981,
+          "unique_article": 8024
+        }
+      },
+      "source_membership_by_readings": [
+        {
+          "in_retained_sources": false,
+          "in_substituted_source": false,
+          "rows": 5458
+        },
+        {
+          "in_retained_sources": false,
+          "in_substituted_source": true,
+          "rows": 5545
+        },
+        {
+          "in_retained_sources": true,
+          "in_substituted_source": true,
+          "rows": 2
+        }
+      ],
+      "source_partitions": {
+        "lemmas": {
+          "no_article_join": 51,
+          "nominal": 5,
+          "verbal": 77
+        },
+        "readings": {
+          "no_article_join": 2981,
+          "nominal": 528,
+          "verbal": 7496
+        }
+      },
+      "source_revision": "56061ca127f4a2844980baffc5f2b6d1332897b3",
+      "stem_matches_by_readings": {
+        "baseline_exact__final_exact": 66,
+        "baseline_exact__final_no_exact": 2113,
+        "baseline_notation_lead__final_no_notation_lead": 5003,
+        "baseline_notation_lead__final_notation_lead": 176,
+        "baseline_stem_unmatched": 3647
+      }
+    },
+    "original_inputs_unchanged": true,
+    "schema": 1,
+    "scope": "exact reproduction of original complete losses; no source repair or promotion"
+  },
+  "changed_definition_source_review": {
+    "anonymous_cases": [
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 145,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 224
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "2ed9d020eb4b3bcd826191fea7116198dd7dfd030de574d718646a61d91aa41c",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 144,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 223
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "e1e61387ad353a8cff47dafbb7bac3f197cadb487713b148a6a840320dc39d17",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 145,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 224
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "d02f606a8c77d73924a619f05eb8b9b6a6d790b379edeafcde0b702f8f5735f6",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 128,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 178
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 2,
+          "present": 2
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "2340b641736b887aa5544085e62efbe33cd4e5c74518375f36d90dba9c90e2c1",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 4,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 139,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 213
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "22cc1146af32881a6af1e17c0562738a00a36ef66c45df4a5f4a828e6666dee0",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 7,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 26,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 66
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "07475e009a89b81462393b2909370954c09453ed44ac6e32007a593e080b2414",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "65fccecfa271e5b72bed66c46e1f3632299102a4708a8974527ff56efb2befa7",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 52,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 98
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 4,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "82e9660aa4107cbd394c7c47390fb58e209939a6c9088ce47f6508667f627c7f",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 3,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "419bb4ad01822d8ab7c74011151c10ccd9c73ff01fb01630d7971147077074d5",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 152,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 257
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 3,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3e8d9f4c977162475c0636e3ef35786c015ecc869f84c0926f375f61d7e35734",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "ad783877000f6be698bf798568f2b7d7e0810078d0116dd706aa501dc57e8d2c",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 2
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 4,
+        "literal_headword_identity": true,
+        "lost_forms": 26,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 34
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 2,
+          "supine": 2
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 5,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "9273d8fed5b6d8b308312824010218814039656a9895cc3bbe52520c4881093d",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 4,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "3aafe6b25f238e20d5dae94edff11228992d8617fbc4d490e4c9584f208623c3",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 5,
+        "literal_headword_identity": true,
+        "lost_forms": 27,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 68
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "b4783ea2c466a56da853f9b64c7c6c4d53da04f6eeeafd4cdabd45c9e002f156",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "80ba9495c11216072bad201b606fb339967e240c5af8fb6cdd13ca7141f4c4e3",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": false,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 0,
+        "literal_headword_identity": true,
+        "lost_forms": 103,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 156
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "itype_fields": 0,
+          "principal_part_like_tokens": 0,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "281d12602935621df53ea49c93c033a1d237f725ca4d09eb10b319dea905616e",
+        "source_join": "unique_article",
+        "source_partition": "nominal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 78,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 123
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "14eb5af1378e2805ef00e8f5c65989c1112635953c096d9af88ada00f1eee873",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "74a38248ca193c5a59faa3d4d6b4d6b87716541297dfa3baca530d971b2d8c76",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 83,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 151
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "fa27e0cb8d500725db2672105c008ebca9eb6d51e2a1cc7eafaeea299920eea8",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "77bdfe8333de631c862d8395a3e02e11100cf024e6550103f48eb42be9e35cb6",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 10,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 18
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "5428ec13c10bfb6c552dedb574d8374b6cfc88ab15b51cec38afd8fc9bedc5b1",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 74,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 124
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "b4550c22320a1c0c56da0d92fdbd33fa451588b6990a7d6595bf143ca1466ce5",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 4,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "bd0b1608249044dd6c74a88e0d0d5f064a425821e391ca08f1b19629328b4d66",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 103,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 156
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "e8ccfad7eafea4bfd82b88b5f67a8b979512933ef736841e4104da626344a5e4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "8ed4922380d910d56115d6c95dce0c2a0074d13251df94fdc57a063e0e7af2c6",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 22,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 26
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "6f82378be825e47e178df81cab8ee2d9e267cf2d0c90ef95b16593e4f2aae250",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "8da25254106ea6eb038fcc5196391a2c702757c7f84f9cdb7eb1695751312d9e",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 50,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "native_preverb": 91
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {},
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "2890b63350fad85ba9cedfd8e9bd6818d703779c57e4e6d73c35c19dcf0aad40",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 2,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "d0f7df724e655ba6aaba30b3ec53bdaa89782b70847f6ee2ec2a47b0a7876ff4",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 37,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 53
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "a82dc60c36910e930413ff72dfefc24fd48c266f5f6fb29593a32b80479b9db4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "15dc73352f4a140d518cfbc912b1f9f4f96dc3a1af5a6e05ef236f1b9470c484",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 2,
+          "present": 2
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 3,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 8
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "fee70b06617709bb644910ccc2cc4cf0408022870f03e4fde1272d23a87be5fe",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 43,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 68
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "a82dc60c36910e930413ff72dfefc24fd48c266f5f6fb29593a32b80479b9db4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "211d189b6e34e7240fd5a61b9d855e6525a77e4f8acf0b8cf7b14b8d2417f583",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 3,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 2,
+          "present": 2
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 25,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 35
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "af53243151c0d5387e93721e048a2aded6dcad2dbffc7ff31a18839ede7f8fb2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "c7d95cd7bb55cbab69fe2b28fbbe5ce5ac3c1b04e22c735b27e11b589d9b478c",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 2,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 2
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "9893dfa5cab5de3f3b8ea20c3d50e3dfd63854f30f439ddb9539287fb473bf95",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "ebc034aefb67f2b031ac8816174ef21f67dec353c136634fbbdaa3610d1a6167",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 32,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 33
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "81eb98d6ab43b8ad72ca9119038e64cc8da424a7a69250a874984c0f54531157",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "aeb2e9c3046b6c4bc692af43afa1163362cc2cf231f2bb7c1b225c7496ea2300",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 13,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 17
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "5ac7c6927acdd3f684dfaabcd024c2f2867d66877b05a9858024954b97ace62f",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "66c0eb93c767a7158498af6b952f84debf2d5d8763e9cd43358f89b6b7ee3453",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 54,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 100
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "a82dc60c36910e930413ff72dfefc24fd48c266f5f6fb29593a32b80479b9db4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "c5e29f415a850dc3e988118c4d329dfcbdc4e90f329c7b5d7d7a202ad461822e",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 5,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 23,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 54
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "452f5c65f3774f55c356cafca115809d13d673b4b5e2be5d84047f83ecd83858",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 2,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "e2deadc89dff28f16c7585105994df18e5ce67602a9515a2b255ce2acc951a5f",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 4,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 92,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 143
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "2198cebd4d095406e689585d21f8af599dc23fa2f1e3ae34e2391cdee88edba3",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "aee006b5ef3fbb70926d963fc15c0c23bf6aa1f53b227bfb129058d9fd59645b",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 2,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 2
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "b4783ea2c466a56da853f9b64c7c6c4d53da04f6eeeafd4cdabd45c9e002f156",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "09d674d50451863d95b914e8da330304faf910c8b8c10e7f9f549a4d0d86b759",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 112,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 182
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "f3e85edae38977e814313dfdc546637bfbf1dfb1d60bba7c539a37787c2e548b",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "02cb6abce5ab03b48054eab138a0178564e4aa860bb40b7335206dafa123d764",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 153,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 248
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 2,
+          "present": 2,
+          "supine": 2
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "4a8b9cbd46e96a3c785209b7f20c0ec544cc83b6b784f5f0dbfe422ee33aefd3",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "3e6c3d7988be6be46094ea16d846bce4fbe3c2be6c1018fd291c3466ae926e66",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 135,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 216
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 2
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "39b97356b20d8942c03910061930a8fce383152d19f01c3895bc6e3fba98e3c0",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "50c2325fe0ac806405c2d28883bab5cd4b17b4eb3f7d2a4da55886e39d585ab9",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 39,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 63
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "a82dc60c36910e930413ff72dfefc24fd48c266f5f6fb29593a32b80479b9db4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "8637a48cb31b8ba182f694c3c3fbdea4a01900c228b5477ea04cb3b67db4cbc7",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "lost_forms": 130,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 188
+        },
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1
+        },
+        "source_join": "no_article_join"
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 27,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 35
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "5cf3bf8e005735a18b2323e2c24fdc8a6561fe95da7eedcad7d042a6e1b205e1",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 2,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "2e3b2dad9c5dfa172a112c3c89c381fb4ecf84e1fb8c29a2fa7816e2abaa0d25",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 3,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 22,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 26
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "6f82378be825e47e178df81cab8ee2d9e267cf2d0c90ef95b16593e4f2aae250",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "928ab40058b699404d0f78a14b0f03a4fcffa66c336ef2103327e00392a1e386",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 1,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 1
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "7d717b7554c550291e7964711a077aabac77c121c8d1d853ecc08c57e3f0a4d8",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 69,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 91
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 4,
+          "fields_with_alternative_connector": 1,
+          "grammar_sha256": "3c0cc91a8f6d50a082bfeeef607f3d360394bbd9e5eea1fdb808c354060e593a",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 4,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 3
+        },
+        "source_header_sha256": "557378f04ada9e69e3f4c962ef9842f6a18451b0c7677b6bc404ed43bc45c621",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 22,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 31
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 50,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 91
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "1f57de379ce57c22c3169140133a21b4c8afc4e4985e2ae0785fa4b95b7c1fea",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "85557b86566acc16eac395c8aa3e49a4c53e38661bb7578ac1a197070106fd0b",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 3,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": false,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 24,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 56
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "ed4d7698e8e9e9e6cc3dec32c6eb75c7aaadf9ded3600cfe2a8fbe0aa85eac43",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 4,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "a96809663d134c9dd58112f3dab5c38b68671618305a8346c174ccaef4b1b811",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 145,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 224
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "5ef8bd765eaad0049a9bea7d0790f9d679d9c471bd003f23801f24dcdb27a97c",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 27,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 32
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "944b2ae1533574f7452ce7405e51278e81d690a7e4f13621fbe80d0197aa733f",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "509f7bc6d30544cf86555203dd645cce79894ef766d577c68dcb5cf29736d48e",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 27,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 68
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "91089ec4f145f0de26d6e1ccfd68dad023b5e3bcdf6d9adbb48baf7423fa36e6",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "a2c32580ea77eca51f00da114f9352bf1e487ad2bf1265a9dd5940415368344d",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 3,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 13,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 28
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 4,
+          "fields_with_alternative_connector": 1,
+          "grammar_sha256": "5ae1dd4d9a48ef5542bde3104a8b9a27818dc48ce84180ce702f146abc15887d",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "6f953fcbae2a8038700c6b6252e7e801fae4735d3443feeb5b67882f6d3941d7",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 13,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 28
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 1,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "62c70676753d1c18c88fbe3e018d232822f9704d72302f409cc5c9d2958f3c53",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "1dea7e0445f0a82d6245ac1579cc1efc312168ed5127a160f84ff5113b98b3f5",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 1,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 1
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "literal_verbal_word": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "b4783ea2c466a56da853f9b64c7c6c4d53da04f6eeeafd4cdabd45c9e002f156",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "648d1d01b65d86f7330e70049a0d27b808078750b4fe818d08455dbf295ba468",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 27,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 32
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 2,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 4,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "d24a88a9393650be5f169a0b224edd29dcedd9a7c1889438d652f6b3d258cec3",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 3,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "e4982b7a582d336346f7df853ec1110499eaf0f2951b6976e6be46f21916686d",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 54,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 100
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "a82dc60c36910e930413ff72dfefc24fd48c266f5f6fb29593a32b80479b9db4",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "474b829f779d5c1a13970aad10d269977fbc09ea145a24b107e4992c572fcc43",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 2,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 26,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 31
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "baa68e72884ad26d96e89fe16fc07b3658ab3b1d61ee6fb212111b8c44200d27",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "73d2c73ba9f9a3c14ac75a7b1b3ca883634a1ebd6e4d7c413df50905c00d38ba",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 32,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 33
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "81eb98d6ab43b8ad72ca9119038e64cc8da424a7a69250a874984c0f54531157",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "3c017fba1529a66309b7de7d5858ca2bff862e2a69d16053bc0ce81810c03795",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 131,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 209
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "b8b259562fde801ce283fcafd10fcd3c607f79eb08341b895b74a2e6a1588a74",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 51,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 88
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "34a9114fe6c804100dead7a134ac7c6507330ddeca721b2802f6e6adbef1ad93",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 4,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "32308a2053b191b4aff1b40fc97aba58dc137fc0f7447a008218bfbb206b6e44",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 9,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 67,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 130
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1,
+          "supine": 2
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "39850889a351e84744de80cc47838de4b743751cdc7eae2880d30ac752920505",
+          "itype_fields": 2,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 9,
+            "match": "literal",
+            "route": "latin_citation"
+          },
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "present": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 32,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 33
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 1,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "6e13998710acabd21a6a9e2ec3d2366cf7b083a11fc1a0e14acdc18cac161f3d",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": null,
+          "tokens_with_quantity_marks": 1
+        },
+        "source_header_sha256": "63fee35fa6a8ef8cb3f3f50854e3310153e9692d1b7120357810e6f7b348a18f",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 1,
+            "match": "notation_removed_lead",
+            "route": "full_orthography"
+          },
+          {
+            "forms": 7,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 2,
+        "literal_headword_identity": true,
+        "lost_forms": 51,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 92
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 2,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "88720c52544c2861eda1226a66f8e12073de9f5a86f5aadb791346a6a0d26dff",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 1,
+          "terminal_conjugation_digit": 3,
+          "tokens_with_quantity_marks": 0
+        },
+        "source_header_sha256": "d53092c1e051e1808f9f7e3c096317f20298623b9d4ab83f077280ca6365bc6b",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 2,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 4
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "present": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "15cd659f892163ab5226013d71da310197f9914528efb704bb2f12609d0f7e2f",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 2,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "7d382a6b8c2cccdd1f32a3b17786df6f365e5473dd12ab467eb71c5fd7e730df",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      },
+      {
+        "added_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 3,
+        "literal_headword_identity": true,
+        "lost_forms": 44,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 70
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "perfect": 1,
+          "supine": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "2890b63350fad85ba9cedfd8e9bd6818d703779c57e4e6d73c35c19dcf0aad40",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 2,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "66106bc92b4d65b744d4ad034c21043143e168003787db4f072ab7409cc44fa6",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": [
+          {
+            "forms": 4,
+            "match": "literal",
+            "route": "latin_citation"
+          }
+        ]
+      },
+      {
+        "added_definition_classes": {},
+        "expected_source_directives": 0,
+        "isolated_matches_full_diagnostic_multiset": true,
+        "isolated_matches_raw_candidate_multiset": true,
+        "isolated_selected_directives": 1,
+        "literal_headword_identity": true,
+        "lost_forms": 124,
+        "missing_recipe_directives_in_raw_candidate": null,
+        "quantity_only_definition_pairs": 0,
+        "readings": {
+          "direct": 171
+        },
+        "recipe_matches_raw_candidate": false,
+        "removed_definition_classes": {
+          "derivation": 1,
+          "present": 1
+        },
+        "source_grammar_shape": {
+          "bare_fourth_conjugation_fields": 0,
+          "comma_separated_segments": 3,
+          "fields_with_alternative_connector": 0,
+          "grammar_sha256": "3df0876a506a9cc165d5b183f661fc1465d2f7626e3b2553f03a09f2e7d50ff2",
+          "itype_fields": 1,
+          "principal_part_like_tokens": 2,
+          "terminal_conjugation_digit": 1,
+          "tokens_with_quantity_marks": 2
+        },
+        "source_header_sha256": "7da020aeb81b8a11ff5d089903d12bf86fc42af805a66c92f02ed52c61548122",
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified",
+        "surface_leads": []
+      }
+    ],
+    "changed_definition_lemmas": 59,
+    "groups": [
+      {
+        "rows": 1,
+        "source_join": "no_article_join",
+        "source_partition": "unclassified",
+        "source_recipe": "not_evaluated"
+      },
+      {
+        "rows": 1,
+        "source_join": "unique_article",
+        "source_partition": "nominal",
+        "source_recipe": "unclassified"
+      },
+      {
+        "rows": 57,
+        "source_join": "unique_article",
+        "source_partition": "verbal",
+        "source_recipe": "unclassified"
+      }
+    ],
+    "input_sha256": {
+      "candidate": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+      "diagnostic": "8f234062ffeaf58e15ceabe3c8a8f5ff2ea37ef0c62d90659ea5db581a5c85de",
+      "dossier": "a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a",
+      "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+      "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+    },
+    "lost_readings": 5547,
+    "original_inputs_unchanged": true,
+    "private_source_review_sha256": "a3f9c53ad990b6bdfd4d2112bf4f1a55a0e7af1b1d124d6bc681f911e756e05c",
+    "schema": 1,
+    "scope": "59 changed-definition complete-loss lemmas; source/replay and surface leads only, no automatic lexical repair",
+    "surface_lead_counts": [
+      {
+        "match": "literal",
+        "route": "full_orthography",
+        "rows": 1
+      },
+      {
+        "match": "notation_removed_lead",
+        "route": "full_orthography",
+        "rows": 5
+      },
+      {
+        "match": "literal",
+        "route": "latin_citation",
+        "rows": 86
+      },
+      {
+        "match": "notation_removed_lead",
+        "route": "latin_citation",
+        "rows": 1
+      }
+    ],
+    "surface_scope": "whole full orthographies, Latin-labelled quotation tokens and whole references only; notation leads are not literal identity; citation occurrence is not lemma/grammar attribution"
+  },
+  "lost_preverb_base_review": {
+    "anonymous_cases": [
+      {
+        "base_source_header_sha256": [
+          "9ba12ecb05a187743e3418b71e3de40761bc4118dbf4cf9357beb4170f128b8a"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 1
+          }
+        ],
+        "readings": 1
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "557378f04ada9e69e3f4c962ef9842f6a18451b0c7677b6bc404ed43bc45c621"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 182
+          }
+        ],
+        "readings": 182
+      },
+      {
+        "base_source_header_sha256": [
+          "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 35
+          }
+        ],
+        "readings": 35
+      },
+      {
+        "base_source_header_sha256": [
+          "8788fa19e819ee3e269e3c1808dd0b6858d403a742505e80c09690de9ed89c7a"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 64
+          }
+        ],
+        "readings": 64
+      },
+      {
+        "base_source_header_sha256": [
+          "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 132
+          }
+        ],
+        "readings": 132
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 64
+          }
+        ],
+        "readings": 64
+      },
+      {
+        "base_source_header_sha256": [
+          "3e3fba4bb835da82464b579c04002124b2a5c4d380cfbf970d121b81639c06ed"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 2
+          }
+        ],
+        "readings": 2
+      },
+      {
+        "base_source_header_sha256": [
+          "6f953fcbae2a8038700c6b6252e7e801fae4735d3443feeb5b67882f6d3941d7"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 19
+          }
+        ],
+        "readings": 19
+      },
+      {
+        "base_source_header_sha256": [
+          "1dea7e0445f0a82d6245ac1579cc1efc312168ed5127a160f84ff5113b98b3f5"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 19
+          }
+        ],
+        "readings": 19
+      },
+      {
+        "base_source_header_sha256": [
+          "88d3d4edea828922428956365b8803962794e31866663705293a06b55667cb15"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 2
+          }
+        ],
+        "readings": 2
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 91
+          }
+        ],
+        "readings": 91
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 64
+          }
+        ],
+        "readings": 64
+      },
+      {
+        "base_source_header_sha256": [
+          "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 35
+          }
+        ],
+        "readings": 35
+      },
+      {
+        "base_source_header_sha256": [
+          "a2c32580ea77eca51f00da114f9352bf1e487ad2bf1265a9dd5940415368344d"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 136
+          }
+        ],
+        "readings": 136
+      },
+      {
+        "base_source_header_sha256": [
+          "6f953fcbae2a8038700c6b6252e7e801fae4735d3443feeb5b67882f6d3941d7"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 10
+          }
+        ],
+        "readings": 10
+      },
+      {
+        "base_source_header_sha256": [
+          "1dea7e0445f0a82d6245ac1579cc1efc312168ed5127a160f84ff5113b98b3f5"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 10
+          }
+        ],
+        "readings": 10
+      },
+      {
+        "base_source_header_sha256": [
+          "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 183
+          }
+        ],
+        "readings": 183
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "3e3fba4bb835da82464b579c04002124b2a5c4d380cfbf970d121b81639c06ed"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 181
+          }
+        ],
+        "readings": 181
+      },
+      {
+        "base_source_header_sha256": [
+          "15dc73352f4a140d518cfbc912b1f9f4f96dc3a1af5a6e05ef236f1b9470c484"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 68
+          }
+        ],
+        "readings": 68
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 35
+          }
+        ],
+        "readings": 35
+      },
+      {
+        "base_source_header_sha256": [
+          "8788fa19e819ee3e269e3c1808dd0b6858d403a742505e80c09690de9ed89c7a"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "66106bc92b4d65b744d4ad034c21043143e168003787db4f072ab7409cc44fa6"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 89
+          }
+        ],
+        "readings": 89
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 91
+          }
+        ],
+        "readings": 91
+      },
+      {
+        "base_source_header_sha256": [
+          "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 104
+          }
+        ],
+        "readings": 104
+      },
+      {
+        "base_source_header_sha256": [
+          "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 115
+          }
+        ],
+        "readings": 115
+      },
+      {
+        "base_source_header_sha256": [
+          "15dc73352f4a140d518cfbc912b1f9f4f96dc3a1af5a6e05ef236f1b9470c484"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 100
+          }
+        ],
+        "readings": 100
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "2340b641736b887aa5544085e62efbe33cd4e5c74518375f36d90dba9c90e2c1"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 38
+          }
+        ],
+        "readings": 38
+      },
+      {
+        "base_source_header_sha256": [
+          "15dc73352f4a140d518cfbc912b1f9f4f96dc3a1af5a6e05ef236f1b9470c484"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 63
+          }
+        ],
+        "readings": 63
+      },
+      {
+        "base_source_header_sha256": [
+          "840a5eaaedaaff0c9e30cddf958b46840185adbf0edb306869d9134440a44e2c"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 34
+          }
+        ],
+        "readings": 34
+      },
+      {
+        "base_source_header_sha256": [
+          "8788fa19e819ee3e269e3c1808dd0b6858d403a742505e80c09690de9ed89c7a"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 36
+          }
+        ],
+        "readings": 36
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 224
+          }
+        ],
+        "readings": 224
+      },
+      {
+        "base_source_header_sha256": [
+          "15dc73352f4a140d518cfbc912b1f9f4f96dc3a1af5a6e05ef236f1b9470c484"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 100
+          }
+        ],
+        "readings": 100
+      },
+      {
+        "base_source_header_sha256": [
+          "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 66
+          }
+        ],
+        "readings": 66
+      },
+      {
+        "base_source_header_sha256": [
+          "df671e99213aa95ff477a15f468bc4348bf2f24438690a1d98ca06367328fe1b"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "no_final_definitions",
+            "base_definition_state": "no_final_definitions",
+            "base_source_join": "no_article_join",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 32
+          }
+        ],
+        "readings": 32
+      },
+      {
+        "base_source_header_sha256": [
+          "885d99fa65078d00a1f7ca270e481ac0456115a0442084f8025e120aba9e29ea"
+        ],
+        "distinct_literal_bases": 1,
+        "groups": [
+          {
+            "base_complete_loss_state": "changed_definition_multisets",
+            "base_definition_state": "changed_definition_multisets",
+            "base_source_join": "unique_article",
+            "peer_state": "baseline_direct_peer_only",
+            "rows": 68
+          }
+        ],
+        "readings": 68
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 1
+          }
+        ],
+        "readings": 1
+      },
+      {
+        "base_source_header_sha256": [],
+        "distinct_literal_bases": 0,
+        "groups": [
+          {
+            "base_complete_loss_state": "not_in_complete_loss_dossier",
+            "base_definition_state": "not_evaluated",
+            "base_source_join": "no_article_join",
+            "peer_state": "no_direct_peer_in_reconstructed_form",
+            "rows": 36
+          }
+        ],
+        "readings": 36
+      }
+    ],
+    "counts": {
+      "baseline_direct_peer_only": 2243,
+      "literal_preverb_base_identifier": 2243,
+      "no_direct_peer_in_reconstructed_form": 543,
+      "readings": 2786,
+      "unclassified_identifier": 543
+    },
+    "decomposition_scope": "quantity/separator removal for diagnostic reanalysis only; no source-form attestation; failure to find a peer is not absence proof",
+    "distinct_literal_bases": 16,
+    "distinct_native_identifiers": 44,
+    "groups": [
+      {
+        "base_complete_loss_state": "changed_definition_multisets",
+        "base_definition_state": "changed_definition_multisets",
+        "base_source_join": "unique_article",
+        "identifier_relation": "literal_preverb_base_identifier",
+        "peer_state": "baseline_direct_peer_only",
+        "rows": 1641
+      },
+      {
+        "base_complete_loss_state": "not_in_complete_loss_dossier",
+        "base_definition_state": "changed_definition_multisets",
+        "base_source_join": "unique_article",
+        "identifier_relation": "literal_preverb_base_identifier",
+        "peer_state": "baseline_direct_peer_only",
+        "rows": 215
+      },
+      {
+        "base_complete_loss_state": "no_final_definitions",
+        "base_definition_state": "no_final_definitions",
+        "base_source_join": "no_article_join",
+        "identifier_relation": "literal_preverb_base_identifier",
+        "peer_state": "baseline_direct_peer_only",
+        "rows": 256
+      },
+      {
+        "base_complete_loss_state": "no_final_definitions",
+        "base_definition_state": "no_final_definitions",
+        "base_source_join": "unique_article",
+        "identifier_relation": "literal_preverb_base_identifier",
+        "peer_state": "baseline_direct_peer_only",
+        "rows": 129
+      },
+      {
+        "base_complete_loss_state": "not_in_complete_loss_dossier",
+        "base_definition_state": "no_final_definitions",
+        "base_source_join": "unique_article",
+        "identifier_relation": "literal_preverb_base_identifier",
+        "peer_state": "baseline_direct_peer_only",
+        "rows": 2
+      },
+      {
+        "base_complete_loss_state": "not_in_complete_loss_dossier",
+        "base_definition_state": "not_evaluated",
+        "base_source_join": "no_article_join",
+        "identifier_relation": "unclassified_identifier",
+        "peer_state": "no_direct_peer_in_reconstructed_form",
+        "rows": 543
+      }
+    ],
+    "input_sha256": {
+      "baseline_expanded": "f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3",
+      "dossier": "a4be9ccc97383f48f4ba94bc4e23092e17b729a685eb01c5242d2bfac9c4ba1a",
+      "final_expanded": "83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940",
+      "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+      "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+    },
+    "original_inputs_unchanged": true,
+    "private_base_review_sha256": "eca0df17b98f95ce89c43e7ab64dd924d53a69ca06edc19216e86237fcfafc40",
+    "schema": 1,
+    "scope": "44 definition-free native composition losses; literal base and direct-peer diagnostics, no lexical identity or repair approval"
+  },
+  "derived_summary": {
+    "cases": 59,
+    "isolated_matches_full": 57,
+    "isolated_matches_raw": 48,
+    "literal_identity": 58,
+    "quantity_pairs": 0,
+    "cases_with_surface_leads": 31,
+    "removed_classes": {
+      "derivation": 18,
+      "present": 38,
+      "supine": 33,
+      "perfect": 31,
+      "literal_verbal_word": 1
+    },
+    "added_classes": {
+      "derivation": 12,
+      "present": 16,
+      "supine": 15,
+      "perfect": 16
+    },
+    "conjugations": {
+      "1": 14,
+      "2": 5,
+      "3": 28,
+      "4": 3,
+      "unknown": 9
+    },
+    "verbal_replay_raw_mismatches": 9,
+    "verbal_mismatch_lost_readings": 559
+  }
+}
