@@ -173,7 +173,7 @@ jobs:
             --candidate "$RUNNER_TEMP/complete-losses/candidate" \
             --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --output "$RUNNER_TEMP/lost-preverb-base-review"
-      - name: Qualify primary source directives of the nine verbal replay differences
+      - name: Qualify bounded primary source directives including the nine verbal replay differences
         run: |
           set -euo pipefail
           umask 077

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Check nine replay differences against primary source recipes, without edits."""
+"""Check bounded primary source recipes in the changed-loss group, without edits."""
 import argparse
 from collections import Counter
 import importlib.util
@@ -34,9 +34,14 @@ def source_recipe(row):
         return 'regular_first_deponent_primary',Counter({((':de:'+head[:-2]).encode(),b'are_vb',b'dep'):1})
     compound=re.fullmatch(r'([A-Za-z_^]+)-([A-Za-z_^]+)o',head)
     parts=re.fullmatch(r'([A-Za-z_^]+i), ([A-Za-z_^]+um), 3',grammar)
-    if compound and parts:
+    if compound and parts and not head.endswith(('io','i^o')):
         prefix,base=compound.groups();perfect,supine=parts.groups()
-        if base[0] not in 'aeioux' and perfect[0]==supine[0]==base[0]:
+        plain=lambda value:value.translate(str.maketrans('','','_^'))
+        # The perfect explicitly spells the complete present component.
+        # Short suffixes and changing/suppletive components need other proofs.
+        if (base[0] not in 'aeioux' and perfect[0]==supine[0]==base[0]
+                and len(plain(base))>=3 and plain(perfect[:-1])==plain(base)
+                and len(plain(supine[:-2]))>=len(plain(base))):
             boundary=prefix+'-'
             return 'explicit_compound_single_perfect_supine',Counter({
                 ((':vs:'+boundary+base).encode(),b'conj3'):1,
@@ -116,7 +121,9 @@ def prepare(args):
               'diagnostic':review.RECEIPTS['diagnostic'],'headers':review.RECEIPTS['headers'],'tei':review.RECEIPTS['tei']}
     if any(native.digest(p)!=receipts[n] for n,p in paths.items()):
         raise ValueError('primary source input receipt differs')
-    selected=inventory(json.loads(args.report.read_bytes()))
+    report=json.loads(args.report.read_bytes())
+    focused=inventory(report)
+    focus_hashes={c['source_header_sha256'] for c in focused}
     indexes={n:native.digest(args.native/'Latin/steminds'/n) for n in changed.reproduction.candidate.INDEXES}
     if indexes!=changed.reproduction.candidate.INDEXES:raise ValueError('primary source native indexes differ')
     first=review.sibling('repair-latin-first-conjugation')
@@ -126,6 +133,14 @@ def prepare(args):
         key=review.probe.digest(json.dumps(row,sort_keys=True).encode())
         if key in headers:raise ValueError('primary source duplicate header')
         headers[key]=row
+    selected=[]
+    for case in report['changed_definition_source_review']['anonymous_cases']:
+        if case.get('source_partition')!='verbal':continue
+        row=headers.get(case['source_header_sha256'])
+        if row is None:raise ValueError('primary source header missing')
+        if source_recipe(row)[1]:selected.append(case)
+    if len(selected)!=17 or not focus_hashes.issubset({c['source_header_sha256'] for c in selected}):
+        raise ValueError('primary source extended scope differs')
     baseline_indexes={n:native.digest(args.baseline/'Latin/steminds'/n) for n in indexes}
     target=changed.loss.private_target(args.output,[*paths.values(),args.native,args.library,args.baseline,args.tools]);target.mkdir(mode=0o700)
     raw=review.probe.definitions(args.candidate.read_bytes());diagnostic=review.probe.definitions(args.diagnostic.read_bytes())
@@ -160,8 +175,12 @@ def prepare(args):
             totals['diagnostic_matching_primary_directives']+=sum((expected&primary(replayed)).values())
             totals['additional_orth_directives_withheld']+=orth
             totals['lost_readings_in_selected_cases']+=sum(case['readings'].values())
+            if key in focus_hashes:
+                totals['verbal_replay_difference_cases']+=1
+                totals['lost_readings_in_verbal_replay_differences']+=sum(case['readings'].values())
             groups[branch]+=1
-            cases.append({'source_header_sha256':key,'recipe':branch,'expected_primary_directives':sum(expected.values()),
+            cases.append({'source_header_sha256':key,'recipe':branch,'in_nine_verbal_replay_differences':key in focus_hashes,
+                'expected_primary_directives':sum(expected.values()),
                 'candidate_matches_primary_recipe':not missing and not extra,
                 'diagnostic_matches_primary_recipe':primary(replayed)==expected,
                 'additional_orth_directives_withheld':orth,'native_family':coverage,'lost_readings':sum(case['readings'].values())})
@@ -173,8 +192,8 @@ def prepare(args):
         control=supines.direct.audit.audit(target/'forms',reader,reader,target/'control.jsonl',require_identical=True)
     finally:
         reader.close();reference.close()
-    if (native_totals['expected_cells']!=72 or native_totals['covered_cells']!=72 or
-            native_totals['reference_covered_cells']!=72 or native_totals['missing_reference_readings']):
+    if (native_totals['expected_cells']!=120 or native_totals['covered_cells']!=120 or
+            native_totals['reference_covered_cells']!=120 or native_totals['missing_reference_readings']):
         raise ValueError('primary source native family coverage differs')
     payload=b''.join((json.dumps(row,sort_keys=True)+'\n').encode() for row in private)
     native.write_private(target/'source-primary-review.jsonl',payload)
@@ -182,10 +201,11 @@ def prepare(args):
             native.digest(args.native/'Latin/steminds'/n)!=indexes[n] or
             native.digest(args.baseline/'Latin/steminds'/n)!=baseline_indexes[n] for n in indexes):
         raise ValueError('primary source review changed an input')
-    return {'schema':1,'scope':'nine verbal replay differences; primary source directives already in original candidate; no edit or recovery',
+    return {'schema':1,'scope':'bounded primary source review of changed-definition losses, including all nine verbal replay differences; no edit or recovery',
         'input_sha256':receipts,'native_indexes_sha256':indexes,'source_reference_indexes_sha256':reference_indexes,
         'source_reference_sha256':native.digest(target/'source-primary.stems'),'counts':dict(totals),
         'recipe_groups':[{'recipe':k,'lemmas':n} for k,n in sorted(groups.items())],
+        'remaining_source_cases':{'unclassified_verbal':40,'nominal':1,'no_article_join':1},
         'native_family':dict(native_totals),'family_control':control,'anonymous_cases':cases,
         'orth_scope':'additional orth directives withheld from this primary source review; no deletion or approval',
         'native_scope':'source generated diagnostic forms; direct reference readings retained on all sixteen recorded fields; no independent form attestation',

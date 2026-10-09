@@ -36,7 +36,9 @@ class PrimarySource(unittest.TestCase):
         self.assertEqual(records,Counter({(b':vs:zzza_-max',b'conj3'):1,
             (b':vs:zzza_-ma_x',b'perfstem'):1,(b':vs:zzza_-ma_x',b'pp4'):1}))
         for head,g in [('zzzamaxo','ma_xi, ma_xum, 3'),('zzza-maxo','na_xi, ma_xum, 3'),
-                       ('zzza-amo','a_xi, a_xum, 3'),('zzza-maxo','ma_xi or maxi, ma_xum, 3')]:
+                       ('zzza-amo','a_xi, a_xum, 3'),('zzza-maxo','ma_xi or maxi, ma_xum, 3'),
+                       ('zzza-maxi^o','ma_xi, ma_xum, 3'),('zzza-maxio','ma_xi, ma_xum, 3'),
+                       ('zzza-maxo','mi_xi, ma_xum, 3'),('zzza-maxo','ma_xi, mum, 3')]:
             self.assertFalse(tool.source_recipe(header(head,g))[1])
 
     def test_fourth_perfect_does_not_create_supine(self):
