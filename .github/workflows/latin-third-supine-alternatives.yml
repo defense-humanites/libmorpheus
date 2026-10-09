@@ -169,7 +169,6 @@ jobs:
             --native "$RUNNER_TEMP/primary-original-native" \
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
-            --forms "$RUNNER_TEMP/third-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/third-supine-trial"
       - name: Attribute added native bases and historical reading recoveries
         run: |
@@ -183,6 +182,7 @@ jobs:
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
             --original "$RUNNER_TEMP/primary-original-native" \
             --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --replay-forms "$RUNNER_TEMP/third-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/third-supine-attribution"
   source-profile:
     runs-on: ubuntu-24.04

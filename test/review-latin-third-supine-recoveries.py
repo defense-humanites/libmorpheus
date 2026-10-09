@@ -106,6 +106,24 @@ class Attribution(unittest.TestCase):
         for count in (0,-1,True,1.5):
             with self.assertRaisesRegex(ValueError,'signature scope'):
                 m.deserialized([{'signature':[0]*11,'multiplicity':count}])
+    def test_unjoined_case_does_not_have_a_header_receipt(self):
+        evidence=[];cases=[{'source_partition':'no_article_join'}]
+        for head,grammar,count in [('bavo','bavi, bautum, bavatum and batum, 3',77),
+                                   ('bati^o#2','bebeti, battum, and batitum, 3',42)]:
+            source={'headword':head,'projection_error':None,'fields':[{'name':'itype','projection':grammar}]}
+            key=m.trial.review.probe.digest(json.dumps(source,sort_keys=True).encode())
+            cases.append({'source_header_sha256':key,'source_partition':'verbal','literal_headword_identity':True,'readings':{'direct':count}})
+            evidence.append({'source_header':source,'lemma':m.trial.review.source_key(source).decode()})
+        selected,_=m.source_cases(evidence,{'changed_definition_source_review':{'anonymous_cases':cases}})
+        self.assertEqual(sum(c['old_complete_loss_readings'] for c in selected.values()),119)
+    def test_filter_preserves_original_quantity_and_case_bytes(self):
+        lines=[b'BA_TTUM\n',b'abbattum\n',b'unrelated\n']
+        self.assertEqual(m.filtered_forms(lines,{b'batt'}),lines[:2])
+    def test_replay_bounds_do_not_accept_other_directives(self):
+        with self.assertRaisesRegex(ValueError,'directive scope'):
+            m.replay_needles([{'missing':[[':vs:bat','perfstem']]}])
+        with self.assertRaisesRegex(ValueError,'alternative count'):
+            m.replay_needles([{'missing':[[':vs:bat','pp4']]}])
 
 
 if __name__=='__main__':unittest.main()

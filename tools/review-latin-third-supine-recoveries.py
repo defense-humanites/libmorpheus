@@ -105,7 +105,8 @@ def inspect_dependency(row,readers,selected):
 
 
 def source_cases(evidence,report):
-    old={c['source_header_sha256']:c for c in report['changed_definition_source_review']['anonymous_cases']}
+    old={c['source_header_sha256']:c for c in report['changed_definition_source_review']['anonymous_cases']
+         if c.get('source_header_sha256')}
     selected={};groups=Counter()
     for item in evidence:
         if 'source_header' not in item:continue
@@ -122,36 +123,67 @@ def source_cases(evidence,report):
     return selected,groups
 
 
+def replay_needles(evidence):
+    result=set();count=0
+    for item in evidence:
+        for tokens in item.get('missing',[]):
+            if len(tokens)!=2 or tokens[1]!='pp4' or not tokens[0].startswith(':vs:'):
+                raise ValueError('supine replay directive scope differs')
+            value=tokens[0][4:].encode('ascii').translate(None,b'_^-' ).lower()
+            if len(value)<3:raise ValueError('supine replay stem bound differs')
+            result.add(value);count+=1
+    if count!=3:raise ValueError('supine replay alternative count differs')
+    return result
+
+
+def filtered_forms(raw_lines,needles):
+    return [raw for raw in raw_lines if any(needle in raw.rstrip(b'\r\n').translate(None,b'_^-' ).lower() for needle in needles)]
+
+
 def prepare(args):
     if native.digest(args.qualification)!=QUALIFICATION_SHA or native.digest(args.source_report)!=trial.primary.REPORT_SHA:
         raise ValueError('supine attribution public receipts differ')
     qualification=json.loads(args.qualification.read_bytes())['qualification']
     paths={'qualification':args.qualification,'source_report':args.source_report,
-           'delta':args.trial/'global-delta.jsonl','evidence':args.trial/'source-evidence.jsonl',
+           'evidence':args.trial/'source-evidence.jsonl',
            'source':args.trial/'after.stems','reference_source':args.trial/'reference.stems',
            'baseline_expanded':args.baseline/'Latin/lexical/verb.expanded'}
     receipts={'qualification':QUALIFICATION_SHA,'source_report':trial.primary.REPORT_SHA,
-              'delta':qualification['global_listall']['comparison']['private_difference_sha256'],
               'evidence':qualification['private_source_evidence_sha256'],
               'source':qualification['trial_source_sha256'],
               'reference_source':qualification['source_reference_sha256'],
               'baseline_expanded':BASELINE_EXPANDED_SHA}
+    expected_delta=qualification['global_listall']['comparison']['private_difference_sha256']
+    if args.replay_forms is not None:
+        paths['replay_forms']=args.replay_forms
+        receipts['replay_forms']=qualification['global_listall']['comparison']['input_sha256']
+    else:
+        paths['delta']=args.trial/'global-delta.jsonl';receipts['delta']=expected_delta
     if any(native.digest(p)!=receipts[n] for n,p in paths.items()):
         raise ValueError('supine attribution private input receipt differs')
-    selected,recipes=source_cases([json.loads(l) for l in paths['evidence'].read_bytes().splitlines()],json.loads(args.source_report.read_bytes()))
-    records=[json.loads(l) for l in paths['delta'].read_bytes().splitlines()]
-    forms=[r['form'].encode('ascii') for r in records]
-    if len(forms)!=245 or len(set(forms))!=245 or any(not f or any(c<33 or c>126 for c in f) for f in forms):
-        raise ValueError('supine attribution changed-form scope differs')
+    evidence=[json.loads(l) for l in paths['evidence'].read_bytes().splitlines()]
+    selected,recipes=source_cases(evidence,json.loads(args.source_report.read_bytes()))
     roots={'baseline':args.baseline,'original':args.original,'trial':args.trial/'trial','reference':args.trial/'reference'}
     indexes={label:{n:native.digest(root/'Latin/steminds'/n) for n in BASELINE_INDEXES} for label,root in roots.items()}
     if (indexes['baseline']!=BASELINE_INDEXES or indexes['original']!=qualification['original_indexes_sha256']
             or indexes['trial']!=qualification['trial_indexes_sha256'] or indexes['reference']!=qualification['source_reference_indexes_sha256']):
         raise ValueError('supine attribution native indexes differ')
     target=loss.private_target(args.output,[*paths.values(),*roots.values(),args.library]);target.mkdir(mode=0o700)
-    readers={};totals=Counter();cases=Counter();dependencies=Counter();identifiers=set();base_set=set();private=[]
+    readers={};totals=Counter();cases=Counter();dependencies=Counter();identifiers=set();base_set=set();private=[];replay=None
     try:
         for label,root in roots.items():readers[label]=supines.direct.StrictRows(args.library,root)
+        delta=paths.get('delta')
+        if args.replay_forms is not None:
+            candidates=filtered_forms(args.replay_forms.read_bytes().splitlines(keepends=True),replay_needles(evidence))
+            native.write_private(target/'replay-forms',b''.join(candidates))
+            delta=target/'replayed-delta.jsonl'
+            replay=supines.direct.audit.audit(target/'replay-forms',readers['original'],readers['trial'],delta)
+            if native.digest(delta)!=expected_delta:
+                raise ValueError('supine targeted replay differs from full qualified delta')
+        records=[json.loads(l) for l in delta.read_bytes().splitlines()]
+        forms=[r['form'].encode('ascii') for r in records]
+        if len(forms)!=245 or len(set(forms))!=245 or any(not f or any(c<33 or c>126 for c in f) for f in forms):
+            raise ValueError('supine attribution changed-form scope differs')
         for record,form in zip(records,forms):
             snapshots={label:readers[label].analyses(form,require_untruncated=True) for label in ('baseline','original','trial')}
             counts,case_counts,additions,evidence=compare(record,snapshots['original'],snapshots['trial'],snapshots['baseline'],selected)
@@ -184,6 +216,7 @@ def prepare(args):
         raise ValueError('supine attribution changed an input')
     return {'schema':1,'scope':'245 changed forms in the qualified separate supine trial; historical reading attribution and literal native base dependencies only',
             'input_sha256':receipts,'native_indexes_sha256':indexes,'counts':dict(totals),
+            'qualified_delta_sha256':expected_delta,'targeted_replay':replay,
             'source_recipes':dict(recipes),'old_selected_complete_loss_readings':119,'anonymous_source_cases':anonymous,
             'native_dependency_groups':loss.grouped(dependencies,('base_scope','direct_peer_state','source_reference_peer','baseline_peer')),
             'distinct_added_native_identifiers':len(identifiers),'distinct_literal_bases':len(base_set),
@@ -197,6 +230,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('qualification','source-report','trial','baseline','original','library','output'):
         p.add_argument('--'+name,type=Path,required=True)
+    p.add_argument('--replay-forms',type=Path)
     previous=os.umask(0o077)
     try:report=prepare(p.parse_args())
     finally:os.umask(previous)
