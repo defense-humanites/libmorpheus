@@ -76,6 +76,20 @@ def quantity_only_pairs(missing,extra):
     return sum((left&right).values())
 
 
+def isolated_replay(row,lemma,filters,diagnostic_filter,target):
+    recovery=sibling('recover-latin-initial-sense')
+    data=recovery.render(row).encode('utf-8')
+    known_types={b'i_vi, or i^i, i_tum, 4',b'i_vi, or i^i, 4'}
+    for name in ('combitype','splitlat','conj1'):
+        data=probe.run_private([str(filters/name)],target,'replay-'+name,data)
+    branch_rows=sum(value in known_types for value in re.findall(rb'<itype>([^<]+)</itype>',data))
+    data=probe.run_private([str(diagnostic_filter)],target,'replay-latvb',data)
+    selected=Counter()
+    for (key,line),n in probe.definitions(data).items():
+        if key==lemma:selected[tuple(line.split())]+=n
+    return selected,branch_rows
+
+
 def validate_delta(data,left,right):
     records={'removed':Counter(),'added':Counter()}
     for line in data.splitlines():
@@ -117,6 +131,7 @@ def prepare(args):
         classes[label]=dict(sorted(counts.items()))
     target=first.private_target(args.reference,args.headers,args.tei,args.output)
     target.mkdir(mode=0o700)
+    replayed,backend_branches=isolated_replay(row,lemma,args.filters,args.diagnostic_filter,target)
     dossier={'lemma':lemma.decode(),'source_header':row,'source_branch':branch,
              'before':[{'directive':line.decode(),'multiplicity':n} for (key,line),n in sorted(left.items()) if key==lemma],
              'after':[{'directive':line.decode(),'multiplicity':n} for (key,line),n in sorted(right.items()) if key==lemma],
@@ -130,13 +145,20 @@ def prepare(args):
         'expected_source_directives':sum(expected.values()),'missing_source_directives':sum(missing.values()),
         'extra_diagnostic_directives':sum(extra.values()),
         'source_quantity_only_difference_pairs':quantity_only_pairs(missing,extra),
+        'source_header_shape':{
+            'itype_fields':sum(f['name']=='itype' for f in row['fields']),
+            'bare_fourth_conjugation_fields':sum(f['name']=='itype' and f['projection'] in {'4','i_re','i_re, 4'} for f in row['fields']),
+            'fields_with_alternative_connector':sum(f['name']=='itype' and bool(re.search(r'\b(?:or|and)\b',f['projection'])) for f in row['fields'])},
+        'isolated_source_backend_alternative_type_rows':backend_branches,
+        'isolated_source_selected_directives':sum(replayed.values()),
+        'isolated_source_reproduces_full_diagnostic_multiset':replayed==after,
         'diagnostic_matches_bounded_source_recipe':bool(expected) and not missing and not extra,
         'private_source_review_sha256':probe.digest(payload),'original_inputs_unchanged':True}
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    for n in (*RECEIPTS,'output'):p.add_argument('--'+n,type=Path,required=True)
+    for n in (*RECEIPTS,'output','filters','diagnostic-filter'):p.add_argument('--'+n,type=Path,required=True)
     previous=os.umask(0o077)
     try:report=prepare(p.parse_args())
     finally:os.umask(previous)

@@ -6,6 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec=importlib.util.spec_from_file_location('review',Path(__file__).resolve().parents[1]/
                                          'tools/review-latin-historical-filter-delta.py')
@@ -13,6 +14,25 @@ m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 
 class SourceReview(unittest.TestCase):
+    def test_isolated_replay_measures_only_the_selected_literal_lemma(self):
+        calls=[]
+        def run(command,target,name,data):
+            calls.append(name)
+            return (b':le:zzselected#2\n:vs:zzstem perfstem\n:le:zzother\n:vs:zzother conj4\n'
+                    if name=='replay-latvb' else b'zzsynthetic <itype>i_vi, or i^i, i_tum, 4</itype>\n')
+        with patch.object(m,'sibling',return_value=SimpleNamespace(render=lambda row:'synthetic header\n')):
+            with patch.object(m.probe,'run_private',side_effect=run):
+                records,branches=m.isolated_replay({},b'zzselected#2',Path('/filters'),Path('/diagnostic'),Path('/private'))
+        self.assertEqual(calls,['replay-combitype','replay-splitlat','replay-conj1','replay-latvb'])
+        self.assertEqual(records,m.Counter({(b':vs:zzstem',b'perfstem'):1}))
+        self.assertEqual(branches,1)
+
+    def test_unrecognized_backend_grammar_is_not_counted_as_a_known_branch(self):
+        with patch.object(m,'sibling',return_value=SimpleNamespace(render=lambda row:'synthetic\n')):
+            with patch.object(m.probe,'run_private',return_value=b'synthetic echo'):
+                records,branches=m.isolated_replay({},b'zzselected',Path('/filters'),Path('/diagnostic'),Path('/private'))
+        self.assertFalse(records);self.assertEqual(branches,0)
+
     def test_adjacent_source_fields_and_bare_quantity_remain_literal(self):
         row={'headword':'zzzo','fields':[{'name':'itype','projection':'i_vi and ii, i_tum'},
                                         {'name':'itype','projection':'4'}]}

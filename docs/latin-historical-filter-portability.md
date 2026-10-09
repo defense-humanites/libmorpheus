@@ -241,3 +241,13 @@ historical normalization. Quantity-only missing/extra pairs are counted as
 a separate diagnostic and remain unequal in the literal comparison. Eight
 synthetic tests pass. The expanded recipe's real-source result is pending.
 
+The expanded recipe on `3f02c7f` still classifies the changed lemma's grammar
+as unsupported and approves no literal principal-part reconstruction. The
+next trace records only counts of source type fields, bare conjugation fields
+and alternative connectors. It also replays that exact revalidated header
+through the first three filters and the diagnostic lexer, comparing its
+selected-lemma multiset with the complete stream. This distinguishes isolated
+source reproduction from stream context without publishing a header or form.
+Ten synthetic tests cover these mechanisms. A matching historical replay is
+mechanical evidence and cannot replace literal source attestation.
+

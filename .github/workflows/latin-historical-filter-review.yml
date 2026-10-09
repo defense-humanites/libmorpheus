@@ -81,4 +81,5 @@ jobs:
             --delta "$RUNNER_TEMP/diagnostic/differences.jsonl" \
             --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
             --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --filters "$RUNNER_TEMP/filters" --diagnostic-filter "$RUNNER_TEMP/diagnostic/latvb" \
             --output "$RUNNER_TEMP/source-review"
