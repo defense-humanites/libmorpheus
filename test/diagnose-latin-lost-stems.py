@@ -118,7 +118,7 @@ class LossDiagnostics(unittest.TestCase):
                 with self.assertRaises(ValueError): m.private_target(target,[source])
             link=p/'link'; link.symlink_to(p/'absent')
             with self.assertRaises(FileExistsError): m.private_target(link,[source])
-            self.assertEqual(m.private_target(p/'private',[source]),p/'private')
+            self.assertEqual(m.private_target(p/'private',[source]),(p/'private').resolve())
 
     def test_global_difference_receipt_is_required_before_source_or_native_loading(self):
         with tempfile.TemporaryDirectory() as directory:
