@@ -266,7 +266,40 @@ supine. The literal source recipe remains unclassified. Its zero expected
 directives and zero quantity-only pairs are absence of a supported recipe,
 not evidence of absent principal parts or quantity agreement. Four mechanically
 reproduced directives do not count as four source-validated directives.
-Reconstruction of a separate candidate remains withheld pending interpretation
-of the actual source grammar and its quantities. No original output receipt,
+At this stage reconstruction of a separate candidate was withheld pending
+interpretation of the actual source grammar and its quantities. No original output receipt,
 qualified candidate, runtime index or production corpus is replaced.
+
+## Explicit source alternatives qualified on `3bf22f4`
+
+The [dedicated review](https://github.com/defense-humanites/libmorpheus/actions/runs/37919452849/job/113783585748)
+completed successfully with twelve synthetic source-review tests, nine
+portability tests and four native sanitizer tests. The [aggregate report](qualification/latin-historical-source-alternatives-3bf22f4.json)
+revalidates all five pinned inputs and the unique literal source join.
+
+The source grammar is now classified as an explicitly divided compound with
+third-conjugation indication, two alternative perfects and two alternative
+supines. The compound boundary supplies the prefix; the recipe does not infer
+that boundary from the historical backwards consonant search. It preserves
+all literal source quantity notation and both alternatives in each slot.
+This bounded recipe applies only to one explicit compound boundary, an active
+present ending, matching initial consonants, distinct alternatives and the
+specified conjugation. Other cases remain unclassified.
+
+The recipe expects five directives: one present, two perfects and two supines.
+The diagnostic output has four, with one missing expectation and no extra
+directive; no quantity-only difference pair is found. A local comparison of
+the same pinned diagnostic output identifies the missing expectation as the
+second supine. The isolated header still reproduces the complete-stream
+four-directive multiset. Thus portable reproduction remains incomplete
+against this source recipe and is not lexical approval.
+
+The private source-review dossier now has SHA-256
+`10d79072c4df8923acbb85fbd0cd28ec4a3e49b8a05cc2962ddb37cb03983023`.
+Its changed hash records the additional source expectations; input receipts,
+raw output and historical delta receipts remain identical. No source tokens,
+lemma, principal parts or private logs are published. The historical filter,
+qualified candidate and production corpus are unchanged. A complete candidate
+and its native/global qualification remain separate work.
+
 
