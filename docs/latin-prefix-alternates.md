@@ -2,6 +2,13 @@
 
 # Abbreviated prefix alternates the historical filter discards
 
+Qualified code: `9e1f809ff129863fd34851d8e9eec0dbe3343071`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/38977462871)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-prefix-alternates-9e1f809.json)
+records counts, categories and SHA-256 values only. Linux CI and the
+platform/release qualification also succeed on this commit.
+
 The [screen of the 25 third-conjugation headers](latin-third-supine-alternatives.md#remaining-arbitration)
 left outside the earlier recipes groups five of them under one defect of the
 historical importer rather than a grammar interpretation. Their source
@@ -85,10 +92,36 @@ are exact sixteen-field historical readings and 5,211 lie beyond the
 historical multiset; the family forms are a small sample of each paradigm,
 so these are not the complete-loss recoveries. Seven of the 59
 changed-definition loss cases have a changed block: the five third-conjugation
-cases screened above and two others. Their complete historical readings are
-measured on LISTALL by the dedicated workflow, which also provides the global
-recognition and eleven-field comparison; see the aggregate receipt linked
-from the pull request once that run is qualified.
+cases screened above and two others.
+
+## Full LISTALL diagnostic
+
+| Metric | Original candidate | Prefix alternate trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 851,434 |
+| Native analysis rows | 2,100,530 | 2,138,586 |
+| Lost recognized forms | — | 0 |
+| Removed eleven-field readings | — | 8 |
+| Added eleven-field readings | — | 38,064 |
+| Changed grammatical multisets | — | 23,758 |
+| Equal-count multiset changes | — | 0 |
+
+Of the 38,064 additions, 35,840 are direct readings, 356 carry native
+preverbs and 1,868 occur on forms with both. By API tense they are 8,582
+without tense, 8,352 present, 4,570 imperfect, 7,479 future, 6,667 perfect,
+1,608 pluperfect and 806 future perfect. The identical-root control over the
+same 1,033,579 forms changes nothing; all status pairs are `0,0`.
+
+The eight removed readings are on forms that remain recognized: three native
+preverb present readings, four part-of-speech-3 and one part-of-speech-4
+direct readings. Their per-form mechanism is not identified by this receipt;
+the earlier alternate trial recorded the same kind of change when a new direct
+analysis displaces the analyzer's suffix-retry fallback. They are measured, not
+explained, and remain to be reviewed individually before any promotion.
+
+The complete historical readings of the seven changed loss cases are not
+isolated by this global comparison; the family-form restoration above is the
+only historical attribution so far.
 
 ## Remaining arbitration
 

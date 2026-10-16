@@ -2,6 +2,13 @@
 
 # Labiovelar short-suffix repair
 
+Qualified code: `9e1f809ff129863fd34851d8e9eec0dbe3343071`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/38977462776)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-velar-short-suffix-9e1f809.json)
+records counts, categories and SHA-256 values only. Linux CI and the
+platform/release qualification also succeed on this commit.
+
 Five of the 25 third-conjugation headers left outside the earlier recipes
 share one source shape: an active headword in `-quo` with the abbreviated
 parts `xi, ctum, 3`. They account for 384 historical complete-loss readings.
@@ -60,9 +67,29 @@ identical-root control changes nothing.
 Against the controlled rebuilt baseline, 260 of the 280 additions are exact
 sixteen-field historical readings; the 20 additions beyond the baseline belong
 to the `-guo` block, whose curated witness kept the defective stems. Five of
-the 59 changed-definition loss cases have a repaired block; their complete
-historical readings and the global recognition and eleven-field comparison on
-LISTALL are measured by the dedicated workflow.
+the 59 changed-definition loss cases have a repaired block.
+
+## Full LISTALL diagnostic
+
+| Metric | Original candidate | Labiovelar repair trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 847,977 |
+| Native analysis rows | 2,100,530 | 2,101,647 |
+| Lost recognized forms | — | 0 |
+| Removed eleven-field readings | — | 0 |
+| Added eleven-field readings | — | 1,117 |
+| Changed grammatical multisets | — | 385 |
+| Equal-count multiset changes | — | 0 |
+
+The removed defective stems generate no LISTALL form, so all 2,100,530
+original readings are retained. Of the 1,117 additions, 514 are direct and
+603 carry native preverbs; by API tense they are 22 without tense, 364 future,
+533 perfect, 132 pluperfect and 66 future perfect. The identical-root control
+over the same forms changes nothing; all status pairs are `0,0`. The native
+preverb additions do not qualify composed identities. The complete historical
+readings of the five repaired loss cases are not isolated by this global
+comparison; the 260 family-form readings above are the historical attribution
+so far.
 
 ## Remaining arbitration
 
