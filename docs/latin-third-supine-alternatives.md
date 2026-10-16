@@ -93,7 +93,10 @@ hashes. It publishes no lexical values.
 The other 25 third-conjugation headers remain outside this recipe. Five of
 them carry an abbreviated prefix alternate that the historical filter
 discards; a [separate bounded trial](latin-prefix-alternates.md) stages those
-alternates over the whole candidate. The earlier second/fourth/unclassified
+alternates over the whole candidate. Five others share a defective labiovelar
+perfect and supine after literal `xi, ctum` parts; a
+[separate bounded repair](latin-velar-short-suffix.md) replaces exactly those
+records. The earlier second/fourth/unclassified
 conjugation, nominal and unjoined dossiers, missing-definition lemmas, native
 base dependencies and other grammatical losses remain open.
 

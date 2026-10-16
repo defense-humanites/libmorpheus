@@ -161,7 +161,7 @@ jobs:
           set -euo pipefail
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-prefix-alternates.py
-          python3 test/qualify-latin-prefix-alternates.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-prefix-alternates.py
           "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-prefix-alternates.py \
             --report docs/qualification/latin-loss-source-review-8462af2.json \
             --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
