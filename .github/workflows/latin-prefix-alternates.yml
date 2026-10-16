@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   source-review:
@@ -171,4 +172,27 @@ jobs:
             --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --forms "$RUNNER_TEMP/prefix-listall/LISTALL.distinct-literal.txt" \
-            --output "$RUNNER_TEMP/prefix-alternate-trial"
+            --output "$RUNNER_TEMP/prefix-alternate-trial" \
+            | tee "$RUNNER_TEMP/prefix-alternates-receipt.json"
+      - name: Publish the aggregate receipt on the open pull request
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECEIPT: ${{ runner.temp }}/prefix-alternates-receipt.json
+        run: |
+          set -euo pipefail
+          number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$number" ] || { echo "no open pull request for $GITHUB_REF_NAME; receipt stays in this log"; exit 0; }
+          python3 - "$RECEIPT" "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY'
+          import base64, gzip, json, sys
+          receipt, workflow, sha, run = sys.argv[1:5]
+          data = json.loads(open(receipt, 'rb').read().splitlines()[-1])
+          compact = json.dumps(data, sort_keys=True, separators=(',', ':'))
+          head = f"<!-- aggregate-receipt {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}` - aggregate receipt from run {run}: counts, categories and SHA-256 only, no lexical values.\n\n"
+          if len(compact) < 60000:
+              print(head + "<details><summary>receipt.json</summary>\n\n```json\n" + compact + "\n```\n\n</details>")
+          else:
+              blob = base64.b64encode(gzip.compress(compact.encode())).decode()
+              print(head + "The compact receipt exceeds the comment size; it is gzip+base64 below.\n\n<details><summary>receipt.json.gz.b64</summary>\n\n```\n" + blob + "\n```\n\n</details>")
+          PY
+          gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
