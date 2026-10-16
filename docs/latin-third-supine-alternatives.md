@@ -90,10 +90,12 @@ hashes. It publishes no lexical values.
 
 ## Remaining arbitration
 
-The other 25 third-conjugation headers remain outside this recipe. The
-earlier second/fourth/unclassified conjugation, nominal and unjoined dossiers,
-missing-definition lemmas, native base dependencies and other grammatical
-losses remain open.
+The other 25 third-conjugation headers remain outside this recipe. Five of
+them carry an abbreviated prefix alternate that the historical filter
+discards; a [separate bounded trial](latin-prefix-alternates.md) stages those
+alternates over the whole candidate. The earlier second/fourth/unclassified
+conjugation, nominal and unjoined dossiers, missing-definition lemmas, native
+base dependencies and other grammatical losses remain open.
 
 The two selected headers account for 119 readings in the old complete-loss
 snapshot. The [separate attribution review](latin-third-supine-recovery-attribution.md)
