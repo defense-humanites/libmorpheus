@@ -92,6 +92,22 @@ class Transform(unittest.TestCase):
             self.assertEqual(output, RAW, reason); self.assertEqual(counts.get(reason), 1, reason)
 
 
+class Quotation(unittest.TestCase):
+    def test_whole_quoted_present_form_of_the_block_class(self):
+        quoted = lambda text, lang=b'la': MAIN.replace(b'<sense>x</sense>', b'<sense><quote lang="' + lang + b'">' + text + b'</quote></sense>')
+        unlinked = REF.replace(b'v. bafeteo.', b'other text.')
+        rows, entries = rows_and_entries(quoted(b'illa bafoetent'), unlinked)
+        self.assertEqual(m.transform(RAW, rows, entries, 'backlink')[1].get('withheld_entry_not_a_bare_reference'), 1)
+        data, counts = m.transform(RAW, rows, entries, 'quotation')
+        self.assertEqual(data, FIXED); self.assertEqual(counts['added_records'], 1)
+        for text, lang in [(b'bafoetentur', b'la'), (b'bafoetebat', b'la'), (b'bafoe tent', b'la'), (b'bafoetent', b'greek')]:
+            rows, entries = rows_and_entries(quoted(text, lang), unlinked)
+            output, counts = m.transform(RAW, rows, entries, 'quotation')
+            self.assertEqual(output, RAW, text); self.assertEqual(counts.get('withheld_no_whole_quoted_present_form'), 1, text)
+        with self.assertRaises(ValueError):
+            m.transform(RAW, rows, entries, 'other')
+
+
 class Preparation(unittest.TestCase):
     def test_private_output_expected_count_and_no_overwrite(self):
         rows, entries = rows_and_entries()

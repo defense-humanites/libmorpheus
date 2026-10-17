@@ -14,7 +14,7 @@ primary=importlib.util.module_from_spec(spec);spec.loader.exec_module(primary)
 spec=importlib.util.spec_from_file_location('recover',Path(__file__).with_name('recover-latin-backlinked-present-classes.py'))
 recover=importlib.util.module_from_spec(spec);spec.loader.exec_module(recover)
 changed=primary.changed;review=primary.review;native=primary.native;supines=primary.supines
-EXPECTED_COUNTS={'added_records':19,'changed_lemma_blocks':19}
+EXPECTED_COUNTS={'backlink':{'added_records':19,'changed_lemma_blocks':19},'quotation':{'added_records':15,'changed_lemma_blocks':14}}
 FORMS_SHA='1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93'
 # Engine present and perfect endings by stem class; the pp4 cells come from the
 # historical supine table already used by the earlier source-family checks.
@@ -116,12 +116,12 @@ def prepare(args):
     indexes={n:native.digest(args.native/'Latin/steminds'/n) for n in baseline_indexes}
     if indexes!=changed.reproduction.candidate.INDEXES:
         raise ValueError('backlinked present original native receipt differs')
-    recovery=recover.prepare(args.candidate,args.headers,args.tei,target/'after.stems')
-    if any(recovery['counts'].get(k)!=v for k,v in EXPECTED_COUNTS.items()):
+    recovery=recover.prepare(args.candidate,args.headers,args.tei,target/'after.stems',None,args.proof)
+    if any(recovery['counts'].get(k)!=v for k,v in EXPECTED_COUNTS[args.proof].items()):
         raise ValueError('backlinked present recovery counts differ from the qualified trial')
     before=args.candidate.read_bytes();after=(target/'after.stems').read_bytes()
     records=added_records(before,after)
-    if len(records)!=EXPECTED_COUNTS['added_records']:raise ValueError('backlinked present record inventory differs')
+    if len(records)!=EXPECTED_COUNTS[args.proof]['added_records']:raise ValueError('backlinked present record inventory differs')
     trial_indexes=native.build_trial(args.baseline,target/'after.stems',args.tools,target/'trial')
     if any(trial_indexes[n]!=indexes[n] for n in ('nomind','nomind.lindex')):
         raise ValueError('backlinked present trial changes nominal indexes')
@@ -191,7 +191,7 @@ def prepare(args):
             'scope':'abbreviated backlinked presents outside the four lexer-handled literals, staged over the full source candidate; family cells and optional LISTALL diagnostic; no production promotion',
             'native_scope':'engine-generated present, perfect and supine cells of each added record under its exact lemma and stem; historical restoration measured against the controlled rebuilt baseline on those forms only; no independent form attestation',
             'lexer_limit':'latvb.l set_orth() expands only adf-, adl-, adn-, ads- and discards other abbreviated alternates',
-            'recovery':recovery,'added_record_classes':classes,'input_sha256':receipts,
+            'proof':args.proof,'recovery':recovery,'added_record_classes':classes,'input_sha256':receipts,
             'trial_source_sha256':native.digest(target/'after.stems'),
             'original_indexes_sha256':indexes,'trial_indexes_sha256':trial_indexes,
             'native_family_before':before_counts,'native_family_after':after_counts,
@@ -208,10 +208,12 @@ def main():
     for n in ('report','candidate','headers','tei','native','library','baseline','tools','output'):
         p.add_argument('--'+n,type=Path,required=True)
     p.add_argument('--forms',type=Path)
+    p.add_argument('--proof',choices=['backlink','quotation'],default='backlink')
+    args=p.parse_args()
     previous=os.umask(0o077)
-    try:result=prepare(p.parse_args())
+    try:result=prepare(args)
     finally:os.umask(previous)
-    print(json.dumps({'latin_backlinked_present_classes':result},sort_keys=True))
+    print(json.dumps({'latin_backlinked_present_classes_'+args.proof:result},sort_keys=True))
 
 
 if __name__=='__main__':main()

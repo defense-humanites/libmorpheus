@@ -157,13 +157,13 @@ jobs:
           PY
           python3 tools/prepare-latin-listall.py \
             --archive "$RUNNER_TEMP/backlink-listall.zip" --output "$RUNNER_TEMP/backlink-listall"
-      - name: Qualify all-class backlinked presents privately
+      - name: Qualify all-class backlinked presents privately (standalone reference proof)
         run: |
           set -euo pipefail
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" test/recover-latin-backlinked-present-classes.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-backlinked-present-classes.py
-          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-backlinked-present-classes.py \
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-backlinked-present-classes.py --proof backlink \
             --report docs/qualification/latin-loss-source-review-8462af2.json \
             --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
             --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
@@ -174,6 +174,21 @@ jobs:
             --forms "$RUNNER_TEMP/backlink-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/backlinked-present-trial" \
             | tee "$RUNNER_TEMP/backlinked-present-classes-receipt.json"
+      - name: Qualify all-class quoted presents privately (whole quoted form proof)
+        run: |
+          set -euo pipefail
+          umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-backlinked-present-classes.py --proof quotation \
+            --report docs/qualification/latin-loss-source-review-8462af2.json \
+            --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \
+            --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
+            --tei "$RUNNER_TEMP/lexica/CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml" \
+            --native "$RUNNER_TEMP/primary-original-native" \
+            --baseline "$RUNNER_TEMP/supine-native/stemlib-production/latin" \
+            --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
+            --forms "$RUNNER_TEMP/backlink-listall/LISTALL.distinct-literal.txt" \
+            --output "$RUNNER_TEMP/quoted-present-trial" \
+            | tee "$RUNNER_TEMP/quoted-present-classes-receipt.json"
       - name: Publish the aggregate receipt on the open pull request
         if: success()
         env:
@@ -183,7 +198,29 @@ jobs:
           set -euo pipefail
           number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
           [ -n "$number" ] || { echo "no open pull request for $GITHUB_REF_NAME; receipt stays in this log"; exit 0; }
-          python3 - "$RECEIPT" "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY'
+          python3 - "$RECEIPT" "$GITHUB_WORKFLOW (reference proof)" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY'
+          import base64, gzip, json, sys
+          receipt, workflow, sha, run = sys.argv[1:5]
+          data = json.loads(open(receipt, 'rb').read().splitlines()[-1])
+          compact = json.dumps(data, sort_keys=True, separators=(',', ':'))
+          head = f"<!-- aggregate-receipt {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}` - aggregate receipt from run {run}: counts, categories and SHA-256 only, no lexical values.\n\n"
+          if len(compact) < 60000:
+              print(head + "<details><summary>receipt.json</summary>\n\n```json\n" + compact + "\n```\n\n</details>")
+          else:
+              blob = base64.b64encode(gzip.compress(compact.encode())).decode()
+              print(head + "The compact receipt exceeds the comment size; it is gzip+base64 below.\n\n<details><summary>receipt.json.gz.b64</summary>\n\n```\n" + blob + "\n```\n\n</details>")
+          PY
+          gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
+      - name: Publish the quoted-present receipt on the open pull request
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECEIPT: ${{ runner.temp }}/quoted-present-classes-receipt.json
+        run: |
+          set -euo pipefail
+          number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$number" ] || { echo "no open pull request for $GITHUB_REF_NAME; receipt stays in this log"; exit 0; }
+          python3 - "$RECEIPT" "$GITHUB_WORKFLOW (quotation proof)" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY'
           import base64, gzip, json, sys
           receipt, workflow, sha, run = sys.argv[1:5]
           data = json.loads(open(receipt, 'rb').read().splitlines()[-1])

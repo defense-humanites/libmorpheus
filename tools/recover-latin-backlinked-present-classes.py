@@ -9,7 +9,10 @@ entry whose sole full orthography is the alternate and whose text is a bare
 conjugation, regular first-conjugation and ``-ire`` derivatives, deponents,
 and headers whose only inflection field is an infinitive. It stages one
 present record per alternate under the lemma's existing present class and
-supplies no perfect or supine. Lexical values stay private.
+supplies no perfect or supine. A second proof tier admits an alternate when
+one of the article's own Latin quotations contains a whole word of the
+alternate's bounded present paradigm, as the earlier cited-present recipe did
+for class three. Lexical values stay private.
 """
 import argparse
 from collections import Counter, defaultdict
@@ -33,6 +36,21 @@ ENDINGS = {b'conj2': r'e[_^]?o', b'conj3': r'(?<![ei][_^])(?<![ei])o', b'conj3_i
 COMPATIBLE = {b'conj2': {'e_re', 'ere', '2', 'e_ri'}, b'conj3': {'e^re', 'ere', '3', 'i'},
               b'conj3_io': {'e^re', 'ere', '3', 'i'}, b'conj4': {'i_re', 'ire', '4', 'i_ri'},
               b'ire_vb': {'i_re', 'ire', '4', 'i_ri'}, b'are_vb': {'a_re', 'are', '1', 'a_ri'}, b'conj1': {'a_re', 'are', '1', 'a_ri'}}
+# Bounded present paradigm per class: indicative, infinitive and subjunctive.
+ACTIVE_PARADIGM = {b'conj2': 'eo es et emus etis ent ere eam eas eat eamus eatis eant',
+                   b'conj3': 'o is it imus itis unt ere am as at amus atis ant',
+                   b'conj3_io': 'io is it imus itis iunt ere iam ias iat iamus iatis iant',
+                   b'conj4': 'io is it imus itis iunt ire iam ias iat iamus iatis iant',
+                   b'ire_vb': 'io is it imus itis iunt ire iam ias iat iamus iatis iant',
+                   b'are_vb': 'o as at amus atis ant are em es et emus etis ent',
+                   b'conj1': 'o as at amus atis ant are em es et emus etis ent'}
+DEPONENT_PARADIGM = {b'conj2': 'eor eris etur emur emini entur eri ear earis eatur eamur eamini eantur',
+                     b'conj3': 'or eris itur imur imini untur i ar aris atur amur amini antur',
+                     b'conj3_io': 'ior eris itur imur imini iuntur i iar iaris iatur iamur iamini iantur',
+                     b'conj4': 'ior iris itur imur imini iuntur iri iar iaris iatur iamur iamini iantur',
+                     b'ire_vb': 'ior iris itur imur imini iuntur iri iar iaris iatur iamur iamini iantur',
+                     b'are_vb': 'or aris atur amur amini antur ari er eris etur emur emini entur',
+                     b'conj1': 'or aris atur amur amini antur ari er eris etur emur emini entur'}
 RECORD = re.compile(rb'(:vs:|:de:)([^\s]+)[ \t]+(conj2|conj3_io|conj3|conj4|ire_vb|are_vb|conj1)((?: [a-z_]+)*)(\r?\n)?$')
 
 
@@ -87,6 +105,24 @@ def backlink(entry, target):
     return fields if match and match[1] == target else None
 
 
+def quoted_words(entry):
+    """Whole words of the article's own Latin quotations, letters only, lowercased."""
+    words = set()
+    for quote in entry.iter('quote'):
+        if quote.get('lang') != 'la':
+            continue
+        for word in re.findall(r'[^\W\d_]+', ''.join(quote.itertext()), re.UNICODE):
+            projected = first.review.projection.normalize(word, 'Latin')
+            if projected is not None:
+                words.add(letters(projected.encode()).lower())
+    return words
+
+
+def quoted(stem, tag, deponent, words):
+    paradigm = (DEPONENT_PARADIGM if deponent else ACTIVE_PARADIGM)[tag].split()
+    return any(letters(stem + ending.encode()).lower() in words for ending in paradigm)
+
+
 def blocks(candidate):
     lines = candidate.splitlines(keepends=True)
     presents = defaultdict(list); stems = defaultdict(set); counts = Counter(); lemma = None
@@ -103,7 +139,9 @@ def blocks(candidate):
     return lines, presents, stems, counts
 
 
-def transform(candidate, rows, entries):
+def transform(candidate, rows, entries, proof='backlink'):
+    if proof not in {'backlink', 'quotation'}:
+        raise ValueError('unsupported proof tier')
     index = defaultdict(list)
     for entry in entries.values():
         head = full_head(entry)
@@ -131,15 +169,21 @@ def transform(candidate, rows, entries):
                 counts['withheld_alternate_outside_present_class'] += 1; continue
             if letters(alt.encode()) == head_letters:
                 counts['withheld_notation_only'] += 1; continue
-            matches = index[letters(alt.encode())]
-            if len(matches) != 1 or matches[0].get('id') == row['id']:
-                counts['withheld_no_unique_standalone_entry'] += 1; continue
-            fields = backlink(matches[0], row['source_key'])
-            if fields is None:
-                counts['withheld_entry_not_a_bare_reference'] += 1; continue
-            if any(f not in COMPATIBLE[tag] for f in fields):
-                counts['withheld_reference_class_differs'] += 1; continue
             stem = alt_root.encode()
+            if proof == 'quotation':
+                if row['id'] not in entries:
+                    raise ValueError('missing source article')
+                if not quoted(stem, tag, deponent, quoted_words(entries[row['id']])):
+                    counts['withheld_no_whole_quoted_present_form'] += 1; continue
+            else:
+                matches = index[letters(alt.encode())]
+                if len(matches) != 1 or matches[0].get('id') == row['id']:
+                    counts['withheld_no_unique_standalone_entry'] += 1; continue
+                fields = backlink(matches[0], row['source_key'])
+                if fields is None:
+                    counts['withheld_entry_not_a_bare_reference'] += 1; continue
+                if any(f not in COMPATIBLE[tag] for f in fields):
+                    counts['withheld_reference_class_differs'] += 1; continue
             if letters(stem) in stems[lemma]:
                 counts['already_present'] += 1; continue
             stems[lemma].add(letters(stem))
@@ -158,18 +202,18 @@ def transform(candidate, rows, entries):
     return b''.join(output), dict(sorted(counts.items()))
 
 
-def prepare(candidate, headers, lexica, output, expected=None):
+def prepare(candidate, headers, lexica, output, expected=None, proof='backlink'):
     target = first.private_target(candidate, headers, lexica, output)
     rows, source, revision = regular.alternates.source_alternates(headers, lexica)
     entries, second_source, second_revision = first.review.load_entries(lexica)
     if (source, revision) != (second_source, second_revision):
         raise ValueError('source changed during validation')
-    data, counts = transform(candidate.read_bytes(), rows, entries)
+    data, counts = transform(candidate.read_bytes(), rows, entries, proof)
     if expected is not None and counts.get('added_records', 0) != expected:
-        raise ValueError('unexpected backlinked present count')
+        raise ValueError('unexpected admitted present count')
     report = {'schema': 1,
-              'scope': 'complete same-article present alternates of any verbal class, confirmed by a unique standalone reverse reference; present record only',
-              'source_revision': revision, 'counts': counts,
+              'scope': 'complete same-article present alternates of any verbal class, confirmed by a unique standalone reverse reference or by a whole quoted present form of the article; present record only',
+              'proof': proof, 'source_revision': revision, 'counts': counts,
               'input_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (candidate, headers, source)},
               'output_sha256': hashlib.sha256(data).hexdigest()}
     first.write_private(target, data)
@@ -181,8 +225,9 @@ def main():
     for name in ('candidate', 'headers', 'lexica', 'private-output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--expected', type=int)
+    parser.add_argument('--proof', choices=['backlink', 'quotation'], default='backlink')
     args = parser.parse_args()
-    print(json.dumps(prepare(args.candidate, args.headers, args.lexica, args.private_output, args.expected), sort_keys=True))
+    print(json.dumps(prepare(args.candidate, args.headers, args.lexica, args.private_output, args.expected, args.proof), sort_keys=True))
 
 
 if __name__ == '__main__':
