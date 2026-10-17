@@ -2,6 +2,12 @@
 
 # Combined Latin candidate
 
+Qualified code: `6d0f7668d25dbc096da066799d88509c78ffa84d`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39054628293)
+succeeds with four full LISTALL passes; the
+[aggregate receipt](qualification/latin-combined-candidate-6d0f766.json)
+records counts, categories and SHA-256 values only.
+
 Each of the recent trials was staged and measured on the unchanged full
 source candidate `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`,
 so that every receipt isolates one bounded recipe. The trials also interact:
@@ -57,13 +63,50 @@ identical-root control changes nothing.
 
 ## Full LISTALL diagnostics
 
-The dedicated workflow compares the combination with the original candidate
-(eleven fields, with the enclitic displacement review), runs the
-identical-root control, and compares both the original candidate and the
-combination with the controlled rebuilt baseline, so that the historical
-readings no longer removed and the completely lost forms no longer lost are
-measured globally rather than on family forms. See the aggregate receipt
-linked from the pull request once that run is qualified.
+Against the original candidate:
+
+| Metric | Original candidate | Combined candidate |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 852,926 |
+| Native analysis rows | 2,100,530 | 2,145,245 |
+| Lost recognized forms | — | 0 |
+| Removed eleven-field readings | — | 16 |
+| Added eleven-field readings | — | 44,731 |
+| Changed grammatical multisets | — | 27,493 |
+| Equal-count multiset changes | — | 0 |
+
+Of the 44,731 additions, 40,550 are direct, 1,886 carry native preverbs and
+2,295 occur on forms with both. The 16 removed readings, on eight forms that
+stay recognized, are all enclitic retries displaced by a new direct
+analysis: the displacement review reproduces every one on the input without
+its `-dum`. The identical-root control over the same forms changes nothing.
+The sum of the separate trials' additions (38,064 + 1,117 + 1,152 + 2,538 +
+2,427) is 45,298; the combination adds 44,731 because the two present
+proofs overlap and because a repaired or reclassed record replaces readings
+another trial would have added beside the defective one.
+
+Against the controlled rebuilt baseline, which the earlier global
+qualification used as the historical witness, the run reproduces the
+original candidate's comparison exactly (2,006,554 readings retained,
+41,774 removed, 93,976 added; 6,789 forms completely lost under 133 lemmas)
+and then measures the combination:
+
+| Controlled baseline → | Original candidate | Combined candidate |
+| --- | ---: | ---: |
+| Readings retained | 2,006,554 | 2,010,262 |
+| Readings removed | 41,774 | 38,066 |
+| Readings added | 93,976 | 134,983 |
+| Forms recognized by both | 831,201 | 832,224 |
+| Forms completely lost | 6,789 | 5,766 |
+| Lemmas with completely lost forms | 133 | 114 |
+
+The combination therefore stops removing **3,708** historical readings and
+**1,023** completely lost forms are recognized again, under 19 fewer lemmas.
+These are exact eleven-field matches with the historical witness on
+LISTALL, not family-form estimates. The 38,066 readings still removed and the
+5,766 forms still lost remain the arbitration backlog; the 134,983 additions
+include the native-preverb readings whose composed identities are
+unqualified.
 
 ## Remaining arbitration
 
