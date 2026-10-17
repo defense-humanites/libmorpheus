@@ -114,10 +114,17 @@ same 1,033,579 forms changes nothing; all status pairs are `0,0`.
 
 The eight removed readings are on forms that remain recognized: three native
 preverb present readings, four part-of-speech-3 and one part-of-speech-4
-direct readings. Their per-form mechanism is not identified by this receipt;
-the earlier alternate trial recorded the same kind of change when a new direct
-analysis displaces the analyzer's suffix-retry fallback. They are measured, not
-explained, and remain to be reviewed individually before any promotion.
+direct readings. The analyzer tries the Latin enclitic retries of
+`src/anal/checkstring.c` (`-que`, `-ne`, `-dum`, …) only while no direct
+analysis exists, so a new direct reading on the orth stem displaces a fallback
+reading obtained from the stripped surface. A synthetic probe of 58,991 forms
+built from the 581 added stems finds eleven such forms, all with a direct
+gerundive or present after the trial; their 24 removed readings are all
+reproduced by the trial runtime on the input without its enclitic (22 via
+`-dum`, 2 via `-ne`). The qualification tool now applies that displacement
+review to the global delta; its counts on the eight LISTALL readings are
+recorded by the dedicated workflow on the next qualified commit. This accounts
+for the selection change without removing a lexical entry.
 
 The complete historical readings of the seven changed loss cases are not
 isolated by this global comparison; the family-form restoration above is the

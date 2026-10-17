@@ -114,7 +114,8 @@ def prepare(args):
                     or global_delta['analysis_rows']['curated']!=2100530
                     or global_delta['counts'].get('recognized_curated__absent_rebuilt',0)):
                 raise ValueError('editor attribution global scope differs or loses recognized forms')
-            global_report={'control':global_control,'comparison':global_delta}
+            global_report={'control':global_control,'comparison':global_delta,
+                           'removed_reading_displacement':prefix.displacement_review(target/'global-delta.jsonl',readers['after'])}
     finally:
         for reader in readers.values():reader.close()
     native.write_private(target/'family-evidence.jsonl',b''.join((json.dumps(r,sort_keys=True)+'\n').encode() for r in private))

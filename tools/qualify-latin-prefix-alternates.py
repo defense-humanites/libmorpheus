@@ -61,6 +61,35 @@ def family_cells(records):
     return cells,dict(classes)
 
 
+# Latin enclitic retries of src/anal/checkstring.c LatinSuff; the analyzer tries
+# them only while no direct analysis exists, so a new direct reading can
+# displace a fallback reading on the same surface form.
+ENCLITICS=(b'que',b'cumque',b'cunque',b'ne',b've',b'ue',b'libet',b'vis',b'piam',b'dem',b'dum',b'met')
+
+
+def displacement_review(delta_path,after):
+    """Explain removed readings as enclitic-retry fallbacks displaced by a direct analysis."""
+    counts=Counter();by_enclitic=Counter()
+    for line in delta_path.read_bytes().splitlines():
+        row=json.loads(line)
+        removed=Counter({tuple(v.encode() if isinstance(v,str) else v for v in r['signature']):r['multiplicity'] for r in row['removed']})
+        if not removed:continue
+        form=row['form'].encode('ascii');counts['forms_with_removed_readings']+=1
+        counts['removed_readings']+=sum(removed.values())
+        rows=after.analyses(form,require_untruncated=True)
+        if any(r.preverb for r in rows) or not rows:
+            counts['removed_readings_on_forms_without_direct_after_analysis']+=sum(removed.values());continue
+        explained=False
+        for enclitic in sorted(ENCLITICS,key=len,reverse=True):
+            if not form.endswith(enclitic) or len(form)<=len(enclitic):continue
+            stripped=Counter(map(supines.direct.loss.signature,after.analyses(form[:-len(enclitic)],require_untruncated=True)))
+            if not removed-stripped:
+                by_enclitic[enclitic.decode()]+=sum(removed.values());explained=True;break
+        counts['removed_readings_reproduced_on_enclitic_stripped_input_after' if explained else 'removed_readings_unexplained']+=sum(removed.values())
+    return {'scope':'removed eleven-field readings on forms recognized before and after; enclitic retry displaced by a new direct analysis; no lexical value published',
+            'counts':dict(sorted(counts.items())),'reproduced_by_enclitic':dict(sorted(by_enclitic.items()))}
+
+
 def check_cells(reader,cells):
     counts=Counter();covered=set()
     for form,signature,lemma,stem,kind in cells:
@@ -149,7 +178,8 @@ def prepare(args):
                     or global_delta['analysis_rows']['curated']!=2100530
                     or global_delta['counts'].get('recognized_curated__absent_rebuilt',0)):
                 raise ValueError('prefix alternate global scope differs or loses recognized forms')
-            global_report={'control':global_control,'comparison':global_delta}
+            global_report={'control':global_control,'comparison':global_delta,
+                           'removed_reading_displacement':displacement_review(target/'global-delta.jsonl',readers['after'])}
     finally:
         for reader in readers.values():reader.close()
     evidence=b''.join((json.dumps(r,sort_keys=True)+'\n').encode() for r in private)
