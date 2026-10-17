@@ -99,7 +99,12 @@ comparisons are measured by the dedicated workflow.
 
 ## Remaining arbitration
 
-Alternates of another class or voice, alternates with an embedded or
-annotated reference, and the perfect and supine systems of the added
-spellings remain open. No selector, corpus or production source is promoted;
+After both proofs, **40** complete same-class alternates with a unique
+verbal block remain admitted by neither: none of them is in the curated
+witness, five have a standalone entry whose text carries more than the bare
+reference (`etc., v. X, etc.`, `v. the preced. art.`, a reference without its
+period) and the others have no standalone entry and no whole quoted present
+form. `extent="full"` alone does not admit them; they stay for individual
+review. Alternates of another class or voice, and the perfect and supine
+systems of the added spellings, also remain open. No selector, corpus or production source is promoted;
 the PR remains a draft.
