@@ -2,6 +2,15 @@
 
 # Backlinked complete present alternates of every verbal class
 
+Qualified code: `b94e180c61969cd8f8629d23a1078f2836f1b28e`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39023969432)
+succeeds with the full LISTALL diagnostic for both proofs; the
+[reference-proof receipt](qualification/latin-backlinked-present-classes-backlink-b94e180.json)
+and the
+[quotation-proof receipt](qualification/latin-backlinked-present-classes-quotation-b94e180.json)
+record counts, categories and SHA-256 values only. Linux CI and the
+platform/release qualification also succeed on this commit.
+
 The [earlier backlinked-present recipe](latin-backlinked-present-qualification.md)
 admits a complete same-article alternate only when the source also holds a
 standalone entry for that spelling whose whole text is a bare `v. TARGET.`
@@ -94,8 +103,31 @@ changed-definition loss cases has a changed block.
 In the quotation trial the 15 records give 90 cells on 90 forms, six covered
 before and all 90 after; 81 readings retained, 90 added, none removed, 41
 forms newly recognized, and 24 of the additions are exact historical
-readings. Both identical-root controls change nothing. The global LISTALL
-comparisons are measured by the dedicated workflow.
+readings. Both identical-root controls change nothing.
+
+## Full LISTALL diagnostics
+
+| Metric | Original candidate | Reference proof | Quotation proof |
+| --- | ---: | ---: | ---: |
+| Recognized literal forms | 847,750 | 848,530 | 848,453 |
+| Native analysis rows | 2,100,530 | 2,103,062 | 2,102,955 |
+| Lost recognized forms | — | 0 | 0 |
+| Removed eleven-field readings | — | 6 | 2 |
+| Added eleven-field readings | — | 2,538 | 2,427 |
+| Changed grammatical multisets | — | 1,712 | 1,679 |
+| Equal-count multiset changes | — | 0 | 0 |
+
+In the reference trial 1,849 additions are direct and 689 carry native
+preverbs; in the quotation trial 1,444 are direct, 859 carry native preverbs
+and 124 occur on forms with both. Both profiles are dominated by the present
+system (no tense, present, imperfect and future), as a present-only recipe
+implies; the few perfect-system additions arise from native composition with
+existing bases. The removed readings, six nominal direct readings on two
+forms and two on one form, are enclitic retries displaced by a new direct
+gerundive: the displacement review reproduces all of them on the input
+without its `-dum`. Both identical-root controls over the same forms change
+nothing; all status pairs are `0,0`. Native preverb additions do not qualify
+composed identities.
 
 ## Remaining arbitration
 
