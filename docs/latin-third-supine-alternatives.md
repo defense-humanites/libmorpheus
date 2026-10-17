@@ -96,7 +96,9 @@ discards; a [separate bounded trial](latin-prefix-alternates.md) stages those
 alternates over the whole candidate. Five others share a defective labiovelar
 perfect and supine after literal `xi, ctum` parts; a
 [separate bounded repair](latin-velar-short-suffix.md) replaces exactly those
-records. The earlier second/fourth/unclassified
+records. Two more carry an editor attribution tagged as an inflection field;
+a [separate replay](latin-editor-attributions.md) removes that field before
+the unchanged historical filters. The earlier second/fourth/unclassified
 conjugation, nominal and unjoined dossiers, missing-definition lemmas, native
 base dependencies and other grammatical losses remain open.
 
