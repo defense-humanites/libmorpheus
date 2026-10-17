@@ -2,10 +2,10 @@
 
 # Labiovelar short-suffix repair
 
-Qualified code: `9e1f809ff129863fd34851d8e9eec0dbe3343071`. The
-[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/38977462776)
-succeeds with the full LISTALL diagnostic; the
-[aggregate receipt](qualification/latin-velar-short-suffix-9e1f809.json)
+Qualified code: `ad814035e92d83ab884368075bb00a6c90bb5812`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39021056495)
+succeeds with the full LISTALL diagnostic, reproducing the `9e1f809` results; the
+[aggregate receipt](qualification/latin-velar-short-suffix-ad81403.json)
 records counts, categories and SHA-256 values only. Linux CI and the
 platform/release qualification also succeed on this commit.
 

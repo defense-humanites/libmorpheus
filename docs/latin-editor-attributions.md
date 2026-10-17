@@ -2,6 +2,13 @@
 
 # Editor attributions tagged as inflection fields
 
+Qualified code: `ad814035e92d83ab884368075bb00a6c90bb5812`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39021056468)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-editor-attributions-ad81403.json)
+records counts, categories and SHA-256 values only. Linux CI and the
+platform/release qualification also succeed on this commit.
+
 Two of the 25 third-conjugation headers left outside the earlier recipes,
 and thirteen other verbal headers of the full candidate, share a markup
 accident of the archival Lewis & Short TEI: an editor name or a citation is
@@ -79,9 +86,28 @@ nothing.
 
 Against the controlled rebuilt baseline, 80 of the additions on these forms
 are exact sixteen-field historical readings and 42 lie beyond the historical
-multiset. Two of the 59 changed-definition loss cases have a replaced block;
-their complete historical readings and the global LISTALL comparison are
-measured by the dedicated workflow.
+multiset. Two of the 59 changed-definition loss cases have a replaced block.
+
+## Full LISTALL diagnostic
+
+| Metric | Original candidate | Editor attribution trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 847,926 |
+| Native analysis rows | 2,100,530 | 2,101,682 |
+| Lost recognized forms | — | 0 |
+| Removed eleven-field readings | — | 0 |
+| Added eleven-field readings | — | 1,152 |
+| Changed grammatical multisets | — | 618 |
+| Equal-count multiset changes | — | 0 |
+
+All 2,100,530 original readings are retained: the reclassed presents keep
+their LISTALL readings. Of the 1,152 additions, 882 are direct, 68 carry
+native preverbs and 202 occur on forms with both; by API tense they are 27
+without tense, 330 future, 597 perfect, 132 pluperfect and 66 future perfect.
+The identical-root control over the same forms changes nothing; all status
+pairs are `0,0`. The complete historical readings of the two replaced loss
+cases are not isolated by this global comparison; the 80 family-form
+readings above are the historical attribution so far.
 
 ## Remaining arbitration
 

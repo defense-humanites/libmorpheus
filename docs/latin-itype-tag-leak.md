@@ -2,6 +2,12 @@
 
 # Supine records that contain the leaked `</itype>` tag
 
+Qualified code: `4c22be1447d022859c45d15b11884b3d5ba5c9b1`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39021447343)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-itype-tag-leak-4c22be1.json)
+records counts and SHA-256 values only.
+
 Thirteen blocks of the full source candidate hold a `pp4` record whose stem
 ends in `/ityp`. Three of them are also in the curated witness, so the defect
 predates this reconstruction. One of the thirteen is among the six
@@ -39,10 +45,11 @@ headers carry a bare one-token perfect; 13 produce a leaked record and all
 candidate, checks its index receipts, builds the trial and requires unchanged
 nominal indexes. The 13 deleted stems generate 78 supine cells on 65 inputs,
 every one containing the slash: all are covered before the deletion and none
-after, 224 readings disappear on those inputs and none is added. The dedicated
-workflow requires that the full LISTALL comparison removes and adds no
-reading and loses no recognized form, and that the identical-root control
-changes nothing.
+after, 224 readings disappear on those inputs and none is added. On the full
+LISTALL comparison the trial recognizes the same 847,750 forms and returns the
+same 2,100,530 readings with no removal, addition or count change, and the
+identical-root control changes nothing: the deletion is invisible to Latin
+surface forms.
 
 ## Remaining arbitration
 

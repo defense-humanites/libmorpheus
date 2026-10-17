@@ -2,10 +2,10 @@
 
 # Abbreviated prefix alternates the historical filter discards
 
-Qualified code: `9e1f809ff129863fd34851d8e9eec0dbe3343071`. The
-[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/38977462871)
+Qualified code: `ad814035e92d83ab884368075bb00a6c90bb5812`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39021056433)
 succeeds with the full LISTALL diagnostic; the
-[aggregate receipt](qualification/latin-prefix-alternates-9e1f809.json)
+[aggregate receipt](qualification/latin-prefix-alternates-ad81403.json)
 records counts, categories and SHA-256 values only. Linux CI and the
 platform/release qualification also succeed on this commit.
 
@@ -121,10 +121,11 @@ reading obtained from the stripped surface. A synthetic probe of 58,991 forms
 built from the 581 added stems finds eleven such forms, all with a direct
 gerundive or present after the trial; their 24 removed readings are all
 reproduced by the trial runtime on the input without its enclitic (22 via
-`-dum`, 2 via `-ne`). The qualification tool now applies that displacement
-review to the global delta; its counts on the eight LISTALL readings are
-recorded by the dedicated workflow on the next qualified commit. This accounts
-for the selection change without removing a lexical entry.
+`-dum`, 2 via `-ne`). The qualification tool applies that displacement review
+to the global delta: on LISTALL, all eight removed readings lie on five forms
+whose trial analysis is direct, and all eight are reproduced by the trial
+runtime on the input without its `-dum`. This accounts for the selection
+change without removing a lexical entry.
 
 The complete historical readings of the seven changed loss cases are not
 isolated by this global comparison; the family-form restoration above is the
