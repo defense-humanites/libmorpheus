@@ -2,6 +2,12 @@
 
 # Screen of the curated verbal lemmas still without definitions
 
+Qualified code: `545281b6bfec845266d99483723b4a9bb3f7d979`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39154567379)
+reproduces the combined candidate and screens both candidates; the
+[aggregate receipt](qualification/latin-witness-backlog-screen-545281b.json)
+records categories, counts and SHA-256 values only.
+
 The [combined candidate](latin-combined-candidate.md) leaves 5,766 LISTALL
 forms completely lost against the controlled rebuilt baseline, under 114
 lemmas. The earlier loss diagnostic partitions the 133 original lemmas into
