@@ -13,6 +13,8 @@ spec=importlib.util.spec_from_file_location('prefix',Path(__file__).with_name('q
 prefix=importlib.util.module_from_spec(spec);spec.loader.exec_module(prefix)
 spec=importlib.util.spec_from_file_location('combine',Path(__file__).with_name('reconstruct-latin-combined-candidate.py'))
 combine=importlib.util.module_from_spec(spec);spec.loader.exec_module(combine)
+spec=importlib.util.spec_from_file_location('identity',Path(__file__).with_name('review-latin-removed-lemma-identity.py'))
+identity=importlib.util.module_from_spec(spec);spec.loader.exec_module(identity)
 primary=prefix.primary;changed=prefix.changed;review=prefix.review;native=prefix.native;supines=prefix.supines
 COMBINED_SHA='f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
 STAGE_SHA={
@@ -31,6 +33,14 @@ def record_delta(before,after):
     parse=lambda counter:[(lemma,line.split()[0][4:],line.split()[1],tuple(line.split()[2:]))
                           for (lemma,line),count in sorted(counter.items()) for _ in range(count)]
     return parse(Counter(old-new)),parse(Counter(new-old))
+
+
+def text_readings(reader):
+    """The candidate's eleven-field readings of a form, as text tuples for the lemma-identity review."""
+    def readings(form):
+        return [tuple(v.decode() if isinstance(v,bytes) else v for v in supines.direct.loss.signature(r))
+                for r in reader.analyses(form.encode('ascii'),require_untruncated=True)]
+    return readings
 
 
 def classify_removed(gone):
@@ -119,7 +129,13 @@ def prepare(args):
             # original candidate and no longer removed by the combined one.
             baseline_original=supines.direct.audit.audit(args.forms,readers['baseline'],readers['before'],target/'baseline-original.jsonl')
             baseline_combined=supines.direct.audit.audit(args.forms,readers['baseline'],readers['after'],target/'baseline-combined.jsonl')
+            # Readings the combination still removes that the candidate carries under
+            # another lemma: the lemma-identity share of the remaining backlog, on the
+            # original candidate for reference and on the combined one.
+            lemma_identity={'original':identity.review(target/'baseline-original.jsonl',text_readings(readers['before']),target/'identity-original.jsonl'),
+                            'combined':identity.review(target/'baseline-combined.jsonl',text_readings(readers['after']),target/'identity-combined.jsonl')}
             global_report={'control':global_control,'comparison':global_delta,'removed_reading_displacement':displacement,
+                           'removed_reading_lemma_identity':lemma_identity,
                            'controlled_baseline_to_original':{k:baseline_original[k] for k in ('counts','analysis_rows','global_eleven_field_multisets','changed_analysis_counts','lost_forms_diagnostic')},
                            'controlled_baseline_to_combined':{k:baseline_combined[k] for k in ('counts','analysis_rows','global_eleven_field_multisets','changed_analysis_counts','lost_forms_diagnostic')},
                            'historical_readings_no_longer_removed':baseline_original['global_eleven_field_multisets']['removed_rows']-baseline_combined['global_eleven_field_multisets']['removed_rows'],
@@ -132,7 +148,7 @@ def prepare(args):
             native.digest(args.baseline/'Latin/steminds'/n)!=baseline_indexes[n] for n in indexes):
         raise ValueError('combined candidate qualification changed an input')
     return {'schema':1,
-            'scope':'the six separately qualified trials and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline; no production promotion',
+            'scope':'the six separately qualified trials and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline, with the lemma-identity review of the readings still removed; no production promotion',
             'native_scope':'engine-generated cells of each added record under its exact lemma and class; historical restoration on those forms and, with LISTALL, globally against the controlled rebuilt baseline; no independent form attestation',
             'combination':combination,'added_record_classes':classes,'removed_record_classes':classify_removed(gone),
             'added_records':len(came),'removed_records':len(gone),'input_sha256':receipts,

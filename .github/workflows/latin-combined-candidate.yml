@@ -10,6 +10,8 @@ on:
       - 'test/reconstruct-latin-combined-candidate.py'
       - 'tools/qualify-latin-combined-candidate.py'
       - 'test/qualify-latin-combined-candidate.py'
+      - 'tools/review-latin-removed-lemma-identity.py'
+      - 'test/review-latin-removed-lemma-identity.py'
       - '.github/workflows/latin-combined-candidate.yml'
   workflow_dispatch:
 
@@ -163,6 +165,7 @@ jobs:
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" test/reconstruct-latin-combined-candidate.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-combined-candidate.py
+          "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-removed-lemma-identity.py
           "$RUNNER_TEMP/lexical-python/bin/python" tools/qualify-latin-combined-candidate.py \
             --report docs/qualification/latin-loss-source-review-8462af2.json \
             --candidate "$RUNNER_TEMP/qualified-candidate/candidate.stems" \

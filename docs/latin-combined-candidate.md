@@ -108,9 +108,46 @@ LISTALL, not family-form estimates. The 38,066 readings still removed and the
 include the native-preverb readings whose composed identities are
 unqualified.
 
+## Lemma identity among the readings still removed
+
+The eleven-field comparison counts a reading as removed when any field
+differs, the lemma included. The [witness backlog screen](latin-witness-backlog-screen.md)
+found that the curated witness kept voice variants, alternate spellings and
+homograph numberings as lemmas of their own where the dictionary has one
+article: a candidate that recognizes the same form with the same grammar
+under the article still shows a removed reading under the witness's lemma,
+whether the article's reading is new or was already in the baseline beside
+the witness's.
+
+`tools/review-latin-removed-lemma-identity.py` re-reads the private
+per-form difference file of the baseline comparison and, for each removed
+reading on a form the candidate still recognizes, asks the candidate for the
+form's readings: a reading agrees at **ten fields** when only the lemma
+differs (the workword compared without vowel-length notation, which belongs
+to the stem spelling) and at **nine fields** when the voice differs as
+well. The relation between the two lemma spellings is classified by shape
+only — homograph numbering, active lemma matched by its deponent or the
+reverse, native preverb composition (exact or with one assimilated letter),
+single-letter spelling, other — and the closest relation is kept when
+several readings agree. Readings on the completely lost forms agree with
+nothing by definition and are counted apart. The qualification tool runs
+the review on the original and on the combined candidate; the receipt
+publishes counts, relation categories, voice pairs and the SHA-256 of the
+private pair file.
+
+On a local sample of 130 engine-generated forms of the 21 voice-variant
+lemmas, 146 of the 165 removed readings on recognized forms agree at ten
+fields with a reading under the article's lemma, 134 of them with a reading
+the baseline already carried: the engine reports the passive of an active
+lemma and the deponent of its article with the same voice value, so the
+voice variants need no nine-field tier. The LISTALL figures are those of the
+dedicated workflow run.
+
 ## Remaining arbitration
 
 The combination is a measured candidate, not a selector or a production
 source. Composed identities from native preverbs, the residual complete
 alternates without proof, the remaining loss dossiers and the other open
-questions of the separate trials are unchanged. The PR remains a draft.
+questions of the separate trials are unchanged. Whether a reading matched
+under the article's lemma counts as lost is a lemma-identity policy the
+review measures and does not decide. The PR remains a draft.
