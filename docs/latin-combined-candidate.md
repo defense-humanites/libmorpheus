@@ -2,11 +2,14 @@
 
 # Combined Latin candidate
 
-Qualified code: `6d0f7668d25dbc096da066799d88509c78ffa84d`. The
-[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39054628293)
+Qualified code: `b925a88ef2919530235302827cff3a5fcfd2edcb` (lemma-identity review added to the receipt;
+the candidate, the stage chain and every LISTALL figure below are unchanged
+from `6d0f7668d25dbc096da066799d88509c78ffa84d`). The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39271717038)
 succeeds with four full LISTALL passes; the
-[aggregate receipt](qualification/latin-combined-candidate-6d0f766.json)
-records counts, categories and SHA-256 values only.
+[aggregate receipt](qualification/latin-combined-candidate-b925a88.json)
+records counts, categories and SHA-256 values only (the earlier receipt
+[`6d0f766`](qualification/latin-combined-candidate-6d0f766.json) is kept).
 
 Each of the recent trials was staged and measured on the unchanged full
 source candidate `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`,
@@ -135,13 +138,37 @@ the review on the original and on the combined candidate; the receipt
 publishes counts, relation categories, voice pairs and the SHA-256 of the
 private pair file.
 
-On a local sample of 130 engine-generated forms of the 21 voice-variant
-lemmas, 146 of the 165 removed readings on recognized forms agree at ten
-fields with a reading under the article's lemma, 134 of them with a reading
-the baseline already carried: the engine reports the passive of an active
-lemma and the deponent of its article with the same voice value, so the
-voice variants need no nine-field tier. The LISTALL figures are those of the
-dedicated workflow run.
+On LISTALL, of the **38,066** readings the combined candidate still removes
+against the controlled baseline, 9,033 lie on the 5,766 completely lost forms
+and 29,033 on forms the candidate recognizes. Of those 29,033, **24,170**
+(83 %) agree at ten fields with a reading the candidate carries under another
+lemma; 4,863 agree with nothing. No reading needs the nine-field tier: the
+engine reports the passive of an active lemma and the deponent of its article
+with the same voice value. By relation of the two spellings:
+
+| Relation of the witness's lemma to the candidate's | Readings |
+| --- | ---: |
+| Active lemma matched by its deponent article | 5,911 |
+| Deponent lemma matched by its active article | 4,132 |
+| Homograph numbering | 5,386 |
+| Native preverb composition, exact (`de-coquo` ↔ `decoquo`) | 2,143 |
+| Native preverb composition, one assimilated letter (`con-manduco` ↔ `commanduco`) | 3,009 |
+| Single-letter spelling | 2,019 |
+| Other | 1,570 |
+
+For 16,768 of the matched readings the article's reading was already in the
+baseline beside the witness's (the witness had labelled the same grammar
+twice); 7,402 agree with a reading the candidate adds. The 38,066 removed
+readings fall under 404 lemmas: 123 are matched completely, 74 in part, 207
+not at all. On the original candidate the same review matches 25,406 of
+41,774 removed readings; the combination moved 1,236 of them into exact
+retained readings and reduced the unmatched readings from 5,363 to 4,863.
+
+The 10,043 voice-variant readings are therefore not losses of grammar but of
+a lemma label the witness duplicated; the homograph and composition
+categories are the lemma-numbering and preverb-identifier questions already
+open. What remains without any lemma match is 4,863 readings on recognized
+forms and the 9,033 readings on completely lost forms.
 
 ## Remaining arbitration
 
