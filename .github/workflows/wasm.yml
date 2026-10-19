@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+name: WebAssembly
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    paths:
+      - ".github/workflows/wasm.yml"
+      - "CMakeLists.txt"
+      - "cmake/EmscriptenTesting.cmake"
+      - "cmake/emscripten-test-env.js"
+      - "cmake/stamp-wasm-module.cmake"
+      - "bindings/js/wasm/**"
+      - "include/**"
+      - "src/**"
+      - "test/**"
+      - "tools/gener-source-preparer.c"
+      - "tools/gener-index-builder.c"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  wasm:
+    name: Emscripten module and test suite
+    runs-on: ubuntu-latest
+    container: emscripten/emsdk:4.0.15
+    timeout-minutes: 30
+    steps:
+      - name: Check out sources and stemlib
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install supported CMake
+        run: |
+          python3 -m pip install --user cmake==3.31.6
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Configure WebAssembly build with the native test suite
+        run: >-
+          emcmake cmake -S . -B build/wasm -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DMORPHEUS_BUILD_CRUNCHER=OFF
+
+      - name: Build module and test programs
+        run: cmake --build build/wasm
+
+      - name: Run the C test suite under Node.js
+        run: ctest --test-dir build/wasm --output-on-failure -j 4
+
+      - name: Run the JavaScript facade tests
+        env:
+          MORPHEUS_WASM_MODULE: build/wasm/wasm/morpheus.mjs
+          MORPHEUS_STEMLIB: stemlib
+          MORPHEUS_GENER_STEMLIB: build/wasm/test-public-generation/stemlib
+        run: node --test bindings/js/wasm/test/*.test.js
+
+      - name: Record module digests
+        run: |
+          cd build/wasm/wasm
+          sha256sum morpheus.mjs morpheus.wasm | tee SHA256SUMS
+          ls -l morpheus.mjs morpheus.wasm
+
+      - name: Upload module
+        uses: actions/upload-artifact@v4
+        with:
+          name: libmorpheus-wasm
+          path: |
+            build/wasm/wasm/morpheus.mjs
+            build/wasm/wasm/morpheus.wasm
+            build/wasm/wasm/SHA256SUMS
+          if-no-files-found: error

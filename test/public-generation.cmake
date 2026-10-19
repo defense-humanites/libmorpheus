@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# MORPHEUS_TEST_LAUNCHER is empty for native builds; cross builds (Emscripten)
+# pass the emulator that runs the compiled programs.
 
 foreach(required IN ITEMS
     MORPHEUS_GENER_INDEX_BUILDER
@@ -17,7 +19,7 @@ file(MAKE_DIRECTORY "${root}")
 file(COPY "${MORPHEUS_STEMLIB}/Greek" DESTINATION "${root}")
 
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
           "${root}/gener.index" "${MORPHEUS_GENERATION_SOURCE}"
   RESULT_VARIABLE build_result
   OUTPUT_VARIABLE build_output
@@ -30,7 +32,7 @@ if(NOT build_result EQUAL 0)
 endif()
 
 execute_process(
-  COMMAND "${MORPHEUS_PUBLIC_GENERATION_TEST}" "${root}" "${MORPHEUS_STEMLIB}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_PUBLIC_GENERATION_TEST}" "${root}" "${MORPHEUS_STEMLIB}"
   RESULT_VARIABLE test_result
   OUTPUT_VARIABLE test_output
   ERROR_VARIABLE test_error

@@ -9,6 +9,28 @@ the corpus.
 
 ## [Unreleased]
 
+### Added
+
+- Experimental WebAssembly distribution. Configuring with Emscripten
+  (`emcmake cmake`) builds the complete public C API (`morpheus.h` and
+  `compat.h`) into `morpheus.mjs` plus `morpheus.wasm` through the new
+  `MORPHEUS_BUILD_WASM` option, and compiles the native C test suite to
+  WebAssembly so `ctest` runs it under Node.js against the same object code.
+  A JavaScript facade under `bindings/js/wasm/` marshals the fixed-layout
+  result structures for browsers, workers, Node.js, Deno and Bun. The module
+  contains no linguistic data. See `docs/wasm.md`.
+
+### Changed
+
+- The runtime now builds cleanly on ILP32 targets (32-bit `long`, as on
+  wasm32): `morphkeys.c` casts the stem-type word explicitly and
+  `retrentry.c` refuses a pre-index offset that `long` cannot represent
+  instead of narrowing it silently. LP64 behaviour is unchanged.
+- The internal Emscripten generation preparer honours an explicit `MORPHLIB`
+  instead of overriding it, so the same program runs under the host file
+  system in the WebAssembly test build. The checked-in Deno and Node.js
+  preparer modules are regenerated from the updated sources.
+
 ## [0.4.2] - 2026-09-28
 
 Target project version: **0.4.2**. C ABI: **2**. Shared-library SONAME: **1**.
