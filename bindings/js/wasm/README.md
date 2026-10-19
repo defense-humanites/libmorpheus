@@ -111,7 +111,7 @@ async function loadStemlib(directory) {
   return entries; // filter to the runtime subset above if the tree is larger
 }
 
-const morpheus = await createMorpheus();                          // ./dist/morpheus.mjs
+const morpheus = await createMorpheus();           // ./dist/morpheus.mjs
 const root = morpheus.writeStemlib(await loadStemlib("/srv/stemlib"));
 const contexts = {
   greek: morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek }),
@@ -119,7 +119,7 @@ const contexts = {
 };
 
 export function analyze(language, betaCode) {
-  return contexts[language].analyze(betaCode);                     // synchronous
+  return contexts[language].analyze(betaCode);     // synchronous
 }
 ```
 
@@ -133,7 +133,7 @@ worker:
 ```js
 // main thread
 const wasmModule = await WebAssembly.compile(await readFile("dist/morpheus.wasm"));
-worker.postMessage({ wasmModule, entries });                      // structured clone
+worker.postMessage({ wasmModule, entries });       // structured clone
 // worker
 const morpheus = await createMorpheus({ wasmModule });
 ```
@@ -189,10 +189,10 @@ fallthrough = true
 
 ```js
 // src/worker.mjs
-import createMorpheusModule from "@libmorpheus/wasm/module";   // dist/morpheus.mjs
-import wasmModule from "@libmorpheus/wasm/morpheus.wasm";       // WebAssembly.Module
+import createMorpheusModule from "@libmorpheus/wasm/module";  // dist/morpheus.mjs
+import wasmModule from "@libmorpheus/wasm/morpheus.wasm";     // WebAssembly.Module
 import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
-import { stemlibEntries } from "./stemlib-manifest.mjs";       // [[path, ArrayBuffer], ...]
+import { stemlibEntries } from "./stemlib-manifest.mjs";      // [[path, ArrayBuffer], ...]
 
 let ready;
 function init() {
