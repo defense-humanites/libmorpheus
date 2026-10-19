@@ -10,6 +10,16 @@ on:
       - "node-v*"
       - "python-v*"
   pull_request:
+    # Research-only changes (Python tools and their tests, research
+    # workflows, documentation) do not touch the runtime contract this
+    # workflow qualifies; skipping them keeps ten jobs per push off the
+    # organization's shared Actions quota.
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/*.py'
+      - 'test/*.py'
+      - '.github/workflows/latin-*.yml'
+      - '.github/workflows/lexical-import-research.yml'
 
 permissions:
   contents: read

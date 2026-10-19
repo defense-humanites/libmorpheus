@@ -1,9 +1,10 @@
 name: Historical Latin filter source review
 
+# Manual dispatch only: this qualification is archived at pinned commits
+# under docs/qualification/ and re-running it on every research push cost
+# most of the organization's Actions minutes. Dispatch it when its inputs
+# or tools change.
 on:
-  push:
-    branches:
-      - research/lexical-arbitration-*
   workflow_dispatch:
 
 permissions:

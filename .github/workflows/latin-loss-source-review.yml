@@ -1,18 +1,8 @@
 name: Latin changed-definition loss source review
 
+# Manual dispatch only: archived at pinned commits under docs/qualification/;
+# the broad path filter re-ran it on nearly every research push.
 on:
-  push:
-    branches:
-      - research/lexical-arbitration-*
-    paths:
-      - 'tools/**'
-      - 'test/**'
-      - 'src/**'
-      - 'stemlib/**'
-      - 'include/**'
-      - 'cmake/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/latin-loss-source-review.yml'
   workflow_dispatch:
 
 permissions:
