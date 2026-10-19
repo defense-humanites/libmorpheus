@@ -225,6 +225,8 @@ export interface CreateMorpheusOptions {
   factory?: (options?: Record<string, unknown>) => Promise<MorpheusEmscriptenModule>;
   /** Location of `morpheus.mjs` when `factory` is omitted. */
   moduleUrl?: string | URL;
+  /** Precompiled module to instantiate instead of fetching and compiling `morpheus.wasm`. */
+  wasmModule?: WebAssembly.Module;
   /** Options forwarded to the Emscripten factory (`locateFile`, `wasmBinary`, ...). */
   moduleOptions?: Record<string, unknown>;
 }

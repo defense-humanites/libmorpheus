@@ -11,6 +11,31 @@ if(NOT DEFINED MORPHEUS_WASM_VERSION OR NOT DEFINED MORPHEUS_WASM_ABI_VERSION)
   message(FATAL_ERROR "MORPHEUS_WASM_VERSION and MORPHEUS_WASM_ABI_VERSION are required")
 endif()
 file(READ "${MORPHEUS_WASM_MODULE}" content)
+
+# Emscripten treats any runtime with process.versions.node as Node.js and then
+# calls createRequire(import.meta.url) and reads files through node:fs. Edge
+# runtimes with Node compatibility (Cloudflare Workers) present such a process
+# object but no import.meta.url, so the Node branch throws before the module
+# can be instantiated from a precompiled WebAssembly.Module. Restrict the Node
+# branch to runtimes that really expose a module URL; everything else takes
+# the generic path, where Module.instantiateWasm supplies the module.
+set(node_detection_original
+  "ENVIRONMENT_IS_NODE=typeof process==\"object\"&&process.versions?.node&&process.type!=\"renderer\";")
+set(node_detection_portable
+  "ENVIRONMENT_IS_NODE=typeof process==\"object\"&&process.versions?.node&&process.type!=\"renderer\"&&typeof import.meta.url==\"string\";")
+string(FIND "${content}" "${node_detection_original}" node_detection_at)
+if(node_detection_at EQUAL -1)
+  string(FIND "${content}" "${node_detection_portable}" node_detection_at)
+  if(node_detection_at EQUAL -1)
+    message(FATAL_ERROR
+      "Emscripten output no longer contains the expected Node.js detection")
+  endif()
+else()
+  string(REPLACE
+    "${node_detection_original}" "${node_detection_portable}"
+    content "${content}")
+endif()
+
 string(CONCAT header
   "// SPDX-License-Identifier: AGPL-3.0-or-later AND MPL-2.0 AND MIT\n"
   "// libmorpheus ${MORPHEUS_WASM_VERSION} WebAssembly module, "

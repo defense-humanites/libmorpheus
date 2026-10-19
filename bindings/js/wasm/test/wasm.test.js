@@ -55,6 +55,30 @@ test("module reports the expected ABI and layouts", async () => {
   assert.equal(morpheus.statusMessage(MorpheusStatus.Ok).length > 0, true);
 });
 
+test("a precompiled WebAssembly.Module is instantiated without fetching", async () => {
+  const wasmModule = await WebAssembly.compile(
+    readFileSync(new URL("./morpheus.wasm", moduleUrl)),
+  );
+  const { default: factory } = await import(moduleUrl.href);
+  const morpheus = await createMorpheus({
+    factory,
+    wasmModule,
+    moduleOptions: {
+      locateFile: () => {
+        throw new Error("the loader must not look for morpheus.wasm");
+      },
+    },
+  });
+  assert.equal(morpheus.abiVersion, ABI_VERSION);
+  const root = morpheus.mountDirectory(stemlibRoot);
+  const context = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
+  try {
+    assert.equal(context.analyze("lupus")[0].lemma, "lupus#1");
+  } finally {
+    context.close();
+  }
+});
+
 test("Latin analysis over a mounted host directory", async () => {
   const morpheus = await createMorpheus({ moduleUrl });
   const root = morpheus.mountDirectory(stemlibRoot);

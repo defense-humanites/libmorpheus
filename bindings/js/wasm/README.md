@@ -36,30 +36,116 @@ Configuring with `-DBUILD_TESTING=ON` additionally compiles the native C test
 suite to WebAssembly so that `ctest` runs it under Node.js against the same
 object code; see [docs/wasm.md](../../../docs/wasm.md).
 
-## Node.js
+## What the application sets up
+
+The package is deliberately small: a loader, a module and a facade. Four
+things are the application's responsibility, whichever runtime it targets.
+
+1. **The two module files.** `morpheus.mjs` and `morpheus.wasm` travel
+   together; the loader resolves the `.wasm` next to the `.mjs`. Where the
+   runtime cannot resolve that (no `import.meta.url`, no `fetch` of relative
+   URLs, or a platform that forbids compiling WebAssembly from bytes), import
+   the `.wasm` through the platform's own mechanism and pass it as
+   `wasmModule`; the loader then neither fetches nor compiles anything.
+2. **The stemlib.** Nothing is bundled. Acquire a dataset as described in
+   [Acquiring runtime data](../../../docs/runtime-data.md), check the
+   [redistribution policy](../../../docs/stemlib-redistribution.md) for what
+   you ship, and give the module the **whole runtime subset** of each language
+   you serve (see [Which files](#which-files)).
+3. **Data placement.** On a server, write the files into the module's memory
+   (`writeStemlib()`) rather than mounting a host directory
+   (`mountDirectory()`): a mounted directory turns every historical
+   `open`/`seek`/`read`/`close` into a system call reached through
+   JavaScript, which the [benchmark](../../../docs/wasm.md#performance-against-the-native-ffi-path)
+   shows is the slow placement. Mounting is for development and tests.
+4. **Instance lifetime and concurrency.** One instance costs tens of
+   milliseconds to create and holds its own copy of the data, so create it
+   once and keep it. A context is cheap, synchronous and single-threaded:
+   open one per language at start-up and reuse it for every request; since
+   `analyze()` and `generate()` never yield, concurrent requests in one event
+   loop cannot interleave inside a call. For more than one core, run one
+   instance per worker thread and share the compiled `WebAssembly.Module`
+   between them through `postMessage`, passing it as `wasmModule`; memories
+   stay separate, which is the same model as the native bindings
+   (contexts are thread-affine).
+
+### Which files
+
+`Morpheus.requiredFiles(language)` lists the files that `open()` validates.
+Beyond those, analysis reads lazily `endtables/out/*.out` (by stem class),
+`derivs/indices/derivind`, `stemsrc/vbs.cmp.ml` (compound verbs) and
+`stemsrc/lemlist` (dictionary entries); Greek generation reads `gener.index`
+at the stemlib root. A missing lazy file surfaces as `InternalError` on the
+forms that need it, so ship the whole set under `<root>/<Language>/`:
+
+```text
+rule_files/*
+steminds/nomind  steminds/nomind.lindex  steminds/vbind  steminds/vbind.lindex
+endtables/indices/*  endtables/out/*
+derivs/indices/derivind
+stemsrc/vbs.cmp.ml  stemsrc/lemlist        (when the dataset has them)
+```
+
+plus `<root>/gener.index` for Greek generation. In the Perseids stemlib that is
+about 3 MiB for Latin and 8 MiB for Greek; the qualified Greek generation index
+adds 11 MiB. Publish a manifest of those paths next to the data; the facade
+takes any iterable of `[path, bytes]`.
+
+## Node.js, Deno and Bun
+
+A long-lived server keeps one instance (or one per worker thread) with the
+data in memory and one context per language:
 
 ```js
+import { readFile, readdir } from "node:fs/promises";
+import { join, relative } from "node:path";
 import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
 
-const morpheus = await createMorpheus();
-const root = morpheus.mountDirectory("/path/to/stemlib"); // contains Greek/ and Latin/
-const latin = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
-for (const analysis of latin.analyze("amavimus")) {
-  console.log(analysis.lemma, analysis.tense, analysis.person, analysis.number);
+async function loadStemlib(directory) {
+  const entries = [];
+  for (const entry of await readdir(directory, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const path = join(entry.parentPath, entry.name);
+    entries.push([relative(directory, path), await readFile(path)]);
+  }
+  return entries; // filter to the runtime subset above if the tree is larger
 }
-latin.close();
+
+const morpheus = await createMorpheus();                          // ./dist/morpheus.mjs
+const root = morpheus.writeStemlib(await loadStemlib("/srv/stemlib"));
+const contexts = {
+  greek: morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek }),
+  latin: morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin }),
+};
+
+export function analyze(language, betaCode) {
+  return contexts[language].analyze(betaCode);                     // synchronous
+}
 ```
 
 Beta Code in, Beta Code out: the analyzer expects the historical transliteration
-(`lo/gos`, `e)/dwken`).
+(`lo/gos`, `e)/dwken`). For a quick script or a test, `mountDirectory()` reads
+the host tree directly instead of copying it.
+
+For several cores, compile once in the main thread and hand the module to each
+worker:
+
+```js
+// main thread
+const wasmModule = await WebAssembly.compile(await readFile("dist/morpheus.wasm"));
+worker.postMessage({ wasmModule, entries });                      // structured clone
+// worker
+const morpheus = await createMorpheus({ wasmModule });
+```
 
 ## Browsers
 
-Serve `morpheus.mjs`, `morpheus.wasm` and the stemlib tree as static files,
-then load the files the analyzer needs into the module's in-memory file system:
+Serve `morpheus.mjs`, `morpheus.wasm` (with the `application/wasm` media type,
+so the browser can compile it while it streams) and the stemlib files as static
+assets, then fetch the manifest into the module's memory:
 
 ```js
-import { createMorpheus, Morpheus, MorpheusLanguage } from "@libmorpheus/wasm";
+import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
 
 const morpheus = await createMorpheus({
   moduleUrl: new URL("./morpheus.mjs", import.meta.url),
@@ -69,20 +155,104 @@ const root = await morpheus.fetchStemlib("./stemlib/", manifest);
 const latin = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
 ```
 
-`Morpheus.requiredFiles(language)` lists the files that `open()` validates.
-Beyond those, analysis reads lazily `endtables/out/*.out` (by stem class),
-`derivs/indices/derivind`, `stemsrc/vbs.cmp.ml` (compound verbs) and
-`stemsrc/lemlist` (dictionary entries); Greek generation reads `gener.index`
-at the stemlib root. A missing lazy file surfaces as `InternalError` on the
-forms that need it, so ship the whole set: roughly 3 MiB for Latin and 8 MiB
-for Greek in the Perseids stemlib (`rule_files/`,
-`steminds/{nomind,vbind}{,.lindex}`, `endtables/indices/`, `endtables/out/`,
-`derivs/indices/derivind`, `stemsrc/{vbs.cmp.ml,lemlist}`). Publish a manifest
-of those paths next to the data and pass it to `fetchStemlib()`.
+Run this in a Web Worker so that analysis never blocks the page, keep the
+instance for the life of the page, and let the browser cache the data (long
+`Cache-Control` on immutable, versioned paths, or the Cache API). No
+cross-origin isolation headers are needed: the module uses no threads and no
+shared memory.
 
-For a very large stemlib or a long-lived page, run the module in a web worker
-and cache the files with the Cache API; the facade is indifferent to how bytes
-reach `writeStemlib()`.
+## Cloudflare Workers
+
+Workers forbid compiling WebAssembly from bytes at run time and expose no
+`import.meta.url`, so the two platform mechanisms replace the loader's own
+discovery: the `.wasm` is imported as a module and passed as `wasmModule`, and
+the factory is imported statically. The stemlib files are bundled as Data
+modules so the Worker needs no network access to start. This configuration
+was exercised with `wrangler dev` (the local `workerd` runtime); it has not yet
+been run on the hosted platform.
+
+```toml
+# wrangler.toml
+name = "morpheus"
+main = "src/worker.mjs"
+compatibility_date = "2026-10-01"
+
+[[rules]]
+type = "Data"
+globs = [
+  "**/*.table", "**/nomind", "**/nomind.lindex", "**/vbind", "**/vbind.lindex",
+  "**/nendind", "**/vbendind", "**/*.out", "**/derivind",
+  "**/vbs.cmp.ml", "**/lemlist", "**/gener.index",
+]
+fallthrough = true
+```
+
+```js
+// src/worker.mjs
+import createMorpheusModule from "@libmorpheus/wasm/module";   // dist/morpheus.mjs
+import wasmModule from "@libmorpheus/wasm/morpheus.wasm";       // WebAssembly.Module
+import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
+import { stemlibEntries } from "./stemlib-manifest.mjs";       // [[path, ArrayBuffer], ...]
+
+let ready;
+function init() {
+  ready ??= (async () => {
+    const morpheus = await createMorpheus({ factory: createMorpheusModule, wasmModule });
+    const root = morpheus.writeStemlib(stemlibEntries.map(([path, data]) => [path, new Uint8Array(data)]));
+    return {
+      greek: morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek }),
+      latin: morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin }),
+    };
+  })();
+  return ready;
+}
+
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
+    const contexts = await init();
+    const context = url.pathname.startsWith("/latin/") ? contexts.latin : contexts.greek;
+    return Response.json(context.analyze(url.searchParams.get("w") ?? ""));
+  },
+};
+```
+
+`stemlib-manifest.mjs` is a generated file with one `import` per data file and
+the `[path, buffer]` array; generate it from the directory listing of the
+language trees you ship. Points that matter on this platform:
+
+- **Initialize once per isolate.** The memoized `init()` above runs on the
+  first request and is reused by every later request in that isolate.
+  Instantiating at module top level is also allowed, but global-scope
+  execution is capped at one second and cannot perform I/O, so the memoized
+  form is the safer default and keeps a slow start from failing the deploy.
+  Locally, creating the instance, writing the Latin subset and opening its
+  context took about 30 ms.
+- **Size.** Workers count the uncompressed bundle, with a 64 MiB limit and no
+  compressed limit. The Latin subset bundles to about 2.9 MiB in total
+  (measured with `wrangler deploy --dry-run`); Latin plus Greek plus the Greek
+  generation index stays around 22 MiB. Data modules keep the data versioned
+  with the code; for larger datasets, R2 or Static Assets fetched at `init()`
+  are the alternative, at the price of network time on the first request.
+- **Memory.** An isolate has 128 MB for the JavaScript heap and WebAssembly
+  memory together. One instance with both languages holds about 11 MiB of
+  data plus the analyzer's working memory; keep a single instance per isolate
+  and do not create per-request contexts.
+- **CPU time.** A warm analysis is on the order of a millisecond; the first
+  request also pays initialization. On the Free plan the limit is 10 ms per
+  request, which the first request exceeds; the Paid plan defaults to 30 s.
+  Measure with Workers observability rather than `performance.now()`, whose
+  clock does not advance during a request's CPU work on this platform.
+- **No Node compatibility is required.** The module only uses `fetch` or
+  `node:fs` to locate `morpheus.wasm`, which `wasmModule` makes unnecessary.
+  The stamped `morpheus.mjs` ignores a Node-like `process` object when
+  `import.meta.url` is absent, so the `nodejs_compat` flag neither helps nor
+  hurts it.
+
+Limits quoted here are from Cloudflare's documentation at the time of writing
+(see the [platform limits](https://developers.cloudflare.com/workers/platform/limits/)
+and [WebAssembly in Workers](https://developers.cloudflare.com/workers/platform/webassembly/javascript))
+and change over time; check them before sizing a deployment.
 
 ## Testing
 

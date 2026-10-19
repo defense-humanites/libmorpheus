@@ -66,7 +66,12 @@ is produced by the `morpheus_wasm` target, enabled by `MORPHEUS_BUILD_WASM`
 
 `cmake/stamp-wasm-module.cmake` prefixes the generated `morpheus.mjs` with its
 SPDX expression (`AGPL-3.0-or-later AND MPL-2.0 AND MIT`) and the libmorpheus
-release that produced it. `MORPHEUS_WASM_OUTPUT_DIRECTORY` (default
+release that produced it, and narrows Emscripten's Node.js detection to
+runtimes that expose `import.meta.url`: edge runtimes with Node compatibility
+(Cloudflare Workers) present a Node-like `process` but no module URL, and the
+unpatched loader throws in `createRequire(undefined)` before a precompiled
+module can be instantiated. The stamp refuses to run if the expected
+detection line changes in a future Emscripten. `MORPHEUS_WASM_OUTPUT_DIRECTORY` (default
 `build/wasm/wasm`) chooses where both files land. In the Release
 configuration `morpheus.wasm` is about 150 KiB and `morpheus.mjs` about
 70 KiB.
@@ -201,5 +206,8 @@ cost it targets.
 - The module is produced by CI as a build artifact; publishing it (npm, JSR,
   GitHub Release asset) and the version/receipt discipline the other bindings
   follow are deliberately left to a separate release change.
-- The facade has been exercised under Node.js; a browser smoke test (fetching
-  a stemlib manifest into MEMFS) belongs in the release qualification.
+- The facade has been exercised under Node.js, Deno (benchmark) and the local
+  Cloudflare Workers runtime (`wrangler dev`, see the
+  [binding README](../bindings/js/wasm/README.md#cloudflare-workers)); a
+  browser smoke test (fetching a stemlib manifest into MEMFS) and a hosted
+  Workers deployment belong in the release qualification.

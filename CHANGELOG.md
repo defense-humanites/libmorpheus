@@ -24,6 +24,12 @@ the corpus.
   a pool of Deno workers sharing one compiled module, cold instantiation, and
   both data placements (`--wasm-data memfs,nodefs`). WebAssembly measurements
   are optional in baseline comparisons.
+- The WebAssembly facade accepts a precompiled `wasmModule`, which is how a
+  Cloudflare Worker (`.wasm` import) or a worker pool (one compile, shared by
+  `postMessage`) instantiates it; the stamped `morpheus.mjs` no longer takes
+  Emscripten's Node.js path on runtimes without `import.meta.url`. The binding
+  README documents the recommended configuration for servers, browsers and
+  Cloudflare Workers, the latter exercised with `wrangler dev`.
 
 ### Changed
 

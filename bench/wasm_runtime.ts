@@ -138,35 +138,20 @@ async function mountStemlibDirectories(
 }
 
 /**
- * Instantiate the facade. With `compiledModule`, Emscripten's
- * `instantiateWasm` hook instantiates that module instead of compiling the
- * bytes again, which is the sharing model for a worker pool.
+ * Instantiate the facade. With `compiledModule`, the facade instantiates that
+ * module instead of compiling the bytes again, which is the sharing model for
+ * a worker pool.
  */
 export async function createWasmInstance(
   options: WasmInstanceOptions,
 ): Promise<WasmInstance> {
-  const moduleOptions: Record<string, unknown> = {
-    print: () => undefined,
-    printErr: () => undefined,
-  };
-  const compiled = options.compiledModule;
-  if (compiled) {
-    moduleOptions.instantiateWasm = (
-      imports: WebAssembly.Imports,
-      receive: (
-        instance: WebAssembly.Instance,
-        module: WebAssembly.Module,
-      ) => void,
-    ) => {
-      WebAssembly.instantiate(compiled, imports).then((instance) =>
-        receive(instance, compiled)
-      );
-      return {};
-    };
-  }
   const morpheus = await createMorpheus({
     moduleUrl: options.moduleUrl,
-    moduleOptions,
+    wasmModule: options.compiledModule,
+    moduleOptions: {
+      print: () => undefined,
+      printErr: () => undefined,
+    },
   });
   if (options.dataMode === "nodefs") {
     return {

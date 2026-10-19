@@ -689,10 +689,15 @@ export class Morpheus {
 /**
  * Instantiate the module. By default the factory is imported from
  * `./dist/morpheus.mjs` next to this file; pass `moduleUrl` or an already
- * imported `factory` to load it from elsewhere. `moduleOptions` reaches the
+ * imported `factory` to load it from elsewhere. `wasmModule` supplies an
+ * already compiled `WebAssembly.Module` (a Cloudflare Workers `.wasm` import,
+ * or one compiled once and shared with a worker pool) so the loader neither
+ * fetches nor compiles `morpheus.wasm`. `moduleOptions` reaches the
  * Emscripten factory (for example `locateFile` or `wasmBinary`).
  */
-export async function createMorpheus({ factory, moduleUrl, moduleOptions = {} } = {}) {
+export async function createMorpheus(
+  { factory, moduleUrl, wasmModule, moduleOptions = {} } = {},
+) {
   let create = factory;
   if (!create) {
     const url = moduleUrl ?? new URL("./dist/morpheus.mjs", import.meta.url);
@@ -702,7 +707,22 @@ export async function createMorpheus({ factory, moduleUrl, moduleOptions = {} } 
   if (typeof create !== "function") {
     throw new TypeError("the module factory must be the default export of morpheus.mjs");
   }
-  const module = await create({ noInitialRun: true, ...moduleOptions });
+  const options = { noInitialRun: true, ...moduleOptions };
+  if (wasmModule) {
+    if (!(wasmModule instanceof WebAssembly.Module)) {
+      throw new TypeError("wasmModule must be a WebAssembly.Module");
+    }
+    options.instantiateWasm = (imports, receive) => {
+      WebAssembly.instantiate(wasmModule, imports).then(
+        (instance) => receive(instance, wasmModule),
+        (error) => {
+          throw error;
+        },
+      );
+      return {};
+    };
+  }
+  const module = await create(options);
   return new Morpheus(module);
 }
 
