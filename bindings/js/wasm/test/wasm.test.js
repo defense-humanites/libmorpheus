@@ -105,7 +105,10 @@ test("in-memory stemlib written from host bytes", async () => {
   const morpheus = await createMorpheus({ moduleUrl });
   const latinDirectory = join(stemlibRoot, "Latin");
   const entries = listFiles(latinDirectory)
-    .filter((path) => /\/(rule_files|steminds|endtables\/(indices|out)|derivs\/indices)\//.test(path))
+    .filter((path) =>
+      /\/(rule_files|steminds|endtables\/(indices|out)|derivs\/indices)\//.test(path) ||
+      /\/stemsrc\/(vbs\.cmp\.ml|lemlist)$/.test(path)
+    )
     .map((path) => [`Latin/${relative(latinDirectory, path)}`, readFileSync(path)]);
   const root = morpheus.writeStemlib(entries, "/memory-stemlib");
   for (const required of Morpheus.requiredFiles(MorpheusLanguage.Latin)) {

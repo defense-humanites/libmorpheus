@@ -58,6 +58,53 @@ The wrapper uses the checksummed complete index produced by the `gener_corpus`
 CTest and exposes it through a temporary stemlib root. It never writes
 `gener.index` into the tracked stemlib or the pinned Alpheios submodule.
 
+## WebAssembly execution models
+
+Setting `MORPHEUS_WASM_MODULE` to a built `morpheus.mjs` (see
+[wasm.md](wasm.md)) adds the WebAssembly module to the same run, on the same
+corpus, context counts and generation lemmas, so the native and WebAssembly
+numbers in one report are directly comparable:
+
+```sh
+MORPHEUS_LIBRARY="$PWD/build/release/libmorpheus.so" \
+MORPHEUS_STEMLIB="$PWD/stemlib" \
+MORPHEUS_CRUNCHER="$PWD/build/release/cruncher" \
+MORPHEUS_WASM_MODULE="$PWD/build/wasm/wasm/morpheus.mjs" \
+deno run --allow-env --allow-ffi --allow-read --allow-run \
+  bench/compare.ts --iterations 20 --warmup 2 --contexts 1,2,4
+```
+
+The module is measured under both data placements the facade offers, selected
+with `--wasm-data memfs,nodefs` (default both):
+
+- `memfs`: the Greek runtime subset of the stemlib (`rule_files/`, the stem
+  and ending indices, `endtables/out/`, `derivs/indices/derivind`,
+  `stemsrc/{vbs.cmp.ml,lemlist}`, and `gener.index` when present) is read once
+  by the main thread and written into each instance's memory. Every `read()`
+  the runtime makes is a copy inside the module; no system call is involved.
+  This is the placement a server deployment should use.
+- `nodefs`: each language directory is mounted from the host, so every
+  `open`/`seek`/`read`/`close` of the historical lookup pattern is a real
+  system call reached through Emscripten's JavaScript file system layer.
+
+Warm measurements (`wasm-<mode>`, `wasm-<mode>-generation-<lemma>-warm`) run
+over a pool of Deno workers, one WebAssembly instance and one Greek context per
+worker, with the `WebAssembly.Module` compiled once and shared through
+structured cloning (`bench/wasm_pool.ts`, `bench/wasm_worker.ts`); word
+assignment is identical to the FFI model operation for operation. Their
+`startup_ms` covers worker spawn, instantiation, data placement and context
+creation. Cold measurements (`wasm-<mode>-cold`,
+`wasm-<mode>-generation-<lemma>-cold`) compile and instantiate the module from
+its bytes, place the data, open one context and run one operation per sample
+in the main thread, the counterpart of `cruncher-cold`.
+
+The report records `wasmModule`, `wasmModuleSha256` and `wasmRuntimeBytes` (the
+MEMFS payload per instance). WebAssembly measurements are optional additions:
+`--baseline` compares them only when the baseline contains the same engine and
+context count, and the release validation does not require them.
+`bench/release.sh` passes the variable through unchanged, so exporting
+`MORPHEUS_WASM_MODULE` before running it adds the models to a release report.
+
 Pass a previous report as the second argument to add the normalized comparison:
 
 ```sh

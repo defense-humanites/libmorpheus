@@ -70,12 +70,15 @@ const latin = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin })
 ```
 
 `Morpheus.requiredFiles(language)` lists the files that `open()` validates.
-Beyond those, analysis reads `endtables/out/*.out` lazily by stem class and
-`derivs/indices/derivind`; Greek generation reads `Greek/gener.index`. The
-full set the runtime can touch is roughly 3 MiB for Latin and 7 MiB for Greek
-in the Perseids stemlib (`rule_files/`, `steminds/{nomind,vbind}{,.lindex}`,
-`endtables/indices/`, `endtables/out/`, `derivs/indices/derivind`). Publish a
-manifest of those paths next to the data and pass it to `fetchStemlib()`.
+Beyond those, analysis reads lazily `endtables/out/*.out` (by stem class),
+`derivs/indices/derivind`, `stemsrc/vbs.cmp.ml` (compound verbs) and
+`stemsrc/lemlist` (dictionary entries); Greek generation reads `gener.index`
+at the stemlib root. A missing lazy file surfaces as `InternalError` on the
+forms that need it, so ship the whole set: roughly 3 MiB for Latin and 8 MiB
+for Greek in the Perseids stemlib (`rule_files/`,
+`steminds/{nomind,vbind}{,.lindex}`, `endtables/indices/`, `endtables/out/`,
+`derivs/indices/derivind`, `stemsrc/{vbs.cmp.ml,lemlist}`). Publish a manifest
+of those paths next to the data and pass it to `fetchStemlib()`.
 
 For a very large stemlib or a long-lived page, run the module in a web worker
 and cache the files with the Cache API; the facade is indifferent to how bytes

@@ -76,8 +76,10 @@ export const MorpheusCompatFlag = Object.freeze({
 
 /**
  * Files that `open()` requires under `<root>/<Language>/`. The analyzer also
- * reads `endtables/out/*.out` tables and `derivs/indices/derivind` lazily,
- * and Greek generation reads `<root>/<Language>/gener.index`.
+ * reads lazily, by stem class and analysis path: `endtables/out/*.out`,
+ * `derivs/indices/derivind`, `stemsrc/vbs.cmp.ml` (compound verbs) and
+ * `stemsrc/lemlist` (dictionary entries); Greek generation reads
+ * `<root>/gener.index`.
  */
 export const REQUIRED_STEMLIB_FILES = Object.freeze({
   common: Object.freeze([
@@ -438,7 +440,7 @@ export class MorpheusContext {
 
   /**
    * Generate Greek Beta Code forms for one lemma (experimental). Requires
-   * `<root>/Greek/gener.index`.
+   * `<root>/gener.index`.
    */
   generate(lemma, options = {}) {
     const context = this.#require();

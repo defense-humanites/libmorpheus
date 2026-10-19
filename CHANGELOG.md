@@ -19,6 +19,11 @@ the corpus.
   A JavaScript facade under `bindings/js/wasm/` marshals the fixed-layout
   result structures for browsers, workers, Node.js, Deno and Bun. The module
   contains no linguistic data. See `docs/wasm.md`.
+- `bench/compare.ts` measures the WebAssembly module next to the native FFI
+  path when `MORPHEUS_WASM_MODULE` is set: warm analysis and generation over
+  a pool of Deno workers sharing one compiled module, cold instantiation, and
+  both data placements (`--wasm-data memfs,nodefs`). WebAssembly measurements
+  are optional in baseline comparisons.
 
 ### Changed
 

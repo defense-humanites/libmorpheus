@@ -117,14 +117,79 @@ above in the `emscripten/emsdk:4.0.15` container and uploads `morpheus.mjs`,
 The module validates the same required files as the native library when a
 context is opened (`rule_files/*.table`, `steminds/{nomind,vbind}{,.lindex}`,
 `endtables/indices/{nendind,vbendind}`, plus `rule_files/ppasslist.table` for
-Greek) and then reads `endtables/out/*.out` tables lazily by stem class,
-`derivs/indices/derivind`, and `Greek/gener.index` for generation. Measured on
-the Perseids stemlib, everything analysis can touch is about 3 MiB for Latin
-and 7 MiB for Greek. Under Node.js the facade mounts a host directory
+Greek) and then reads lazily, by stem class and analysis path,
+`endtables/out/*.out`, `derivs/indices/derivind`, `stemsrc/vbs.cmp.ml`
+(compound verbs) and `stemsrc/lemlist` (dictionary entries), plus
+`gener.index` at the stemlib root for generation. A missing lazy file surfaces
+as an internal error on the forms that need it, so applications ship the whole
+set. Measured on the Perseids stemlib, that is about 3 MiB for Latin and 8 MiB
+for Greek. Under Node.js the facade mounts a host directory
 (NODEFS); in a browser it writes fetched bytes into MEMFS from a manifest of
 paths. The distribution boundary is unchanged: neither the module nor the
 facade package embeds a stemlib, and the [redistribution
 policy](stemlib-redistribution.md) applies to any application that serves one.
+
+## Performance against the native FFI path
+
+`bench/compare.ts` measures the module next to the Deno FFI binding on the same
+corpus when `MORPHEUS_WASM_MODULE` is set; [benchmarks.md](benchmarks.md)
+describes the execution models. The run below is **indicative only**: a shared
+2-vCPU Linux sandbox, the 24 Greek fixture words, native Release build with
+GCC, Emscripten 4.0.15 at `-O2`, Deno 2.9.6, Alpheios stemlib with the
+complete qualified `gener.index` (17.8 MiB runtime subset per MEMFS instance,
+of which the index is 11.2 MiB). Two runs (20 and 50 iterations) are shown
+because run-to-run noise on that host is around ±20 %.
+
+| Engine | Contexts | Mean µs (run 1 / run 2) | Startup ms |
+| --- | --- | --- | --- |
+| `ffi` | 1 | 1316 / 1237 | 4 / 3 |
+| `wasm-memfs` | 1 | 1166 / 939 | 130 / 118 |
+| `wasm-nodefs` | 1 | 1081 / 1189 | 75 / 76 |
+| `ffi` | 2 | 837 / 828 | 3 / 2 |
+| `wasm-memfs` | 2 | 728 / 762 | 151 / 123 |
+| `wasm-nodefs` | 2 | 972 / 867 | 133 / 140 |
+| `cruncher-cold` | 0 | 6028 / 5280 | 6 / 5 |
+| `wasm-memfs-cold` | 0 | 33181 / 37699 | 33 / 38 |
+| `generation-small-warm` (`lo/gos`) | 1 | 689 / 624 | 2 / 2 |
+| `wasm-memfs-generation-small-warm` | 1 | 148 / 114 | 77 / 111 |
+| `generation-maximal-warm` (`i(/hmi`) | 1 | 27815 / 26887 | 3 / 2 |
+| `wasm-memfs-generation-maximal-warm` | 1 | 26722 / 20400 | 97 / 108 |
+| `generation-maximal-warm` | 2 | 32688 / 39327 | 3 / 2 |
+| `wasm-memfs-generation-maximal-warm` | 2 | 13070 / 13158 | 157 / 158 |
+| `generation-maximal-cold` | 0 | 53420 / 53062 | 53 / 53 |
+| `wasm-memfs-generation-maximal-cold` | 0 | 76834 / 82104 | 77 / 82 |
+
+What the numbers say, within that noise:
+
+- **Warm analysis is at parity.** Per word, the module in a worker with MEMFS
+  is as fast as the native library behind Deno's FFI, and it scales with a
+  second worker the way a second native context does. The historical lookup
+  pattern (`MorphFopen` → `fseek` → `fgets` loop → `fclose` per stem lookup)
+  makes analysis I/O-bound rather than compute-bound: with MEMFS each of those
+  calls is a copy inside the module, cheaper than a system call, which offsets
+  the slower scalar code. NODEFS pays the system call *and* the JavaScript
+  layer; it is slower and scales worse, as expected, and is not a deployment
+  option.
+- **Warm generation is at parity or better.** The FFI model dispatches each
+  call to Deno's blocking pool; the module runs synchronously inside its
+  worker. With two workers the maximal lemma generates in less than half the
+  FFI time on this host.
+- **Start-up is the cost.** Instantiating the module, placing 18 MiB of data
+  and opening a context takes 30–40 ms cold against 5–6 ms for a `cruncher`
+  process, and a worker pool adds 100–150 ms before its first answer. A
+  server should keep instances alive; a browser pays it once per page.
+- **Memory is per instance.** Each worker is a V8 isolate plus its own MEMFS
+  copy of the runtime subset; the process-wide peak RSS during the pool
+  measurements was 350–500 MiB against about 60 MiB for the FFI model. The
+  figure is order-dependent within a run (RSS does not shrink between
+  models), so use `rss_growth` per measurement rather than `peak_rss` for
+  attribution.
+
+The decisive comparison is on a quiet multi-core host with the release
+procedure; the harness is in place for it. The result also answers whether a
+per-context file-descriptor cache in the C runtime is worth pursuing: it would
+help native and NODEFS deployments, while MEMFS already removes most of the
+cost it targets.
 
 ## Known limits and follow-ups
 
