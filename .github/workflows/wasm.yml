@@ -46,6 +46,14 @@ jobs:
           python3 -m pip install --user cmake==3.31.6
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Trust the mounted checkout and its submodule
+        # The workspace is mounted into the container under another owner;
+        # the stemlib redistribution test reads tree ids through git, which
+        # otherwise refuses with "dubious ownership" in both repositories.
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/vendor/alpheios-morpheus"
+
       - name: Configure WebAssembly build with the native test suite
         run: >-
           emcmake cmake -S . -B build/wasm

@@ -57,6 +57,7 @@ jobs:
             exit 1
           fi
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/vendor/alpheios-morpheus"
           git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
           release_sha="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
           test "$(git rev-parse HEAD)" = "$release_sha"
