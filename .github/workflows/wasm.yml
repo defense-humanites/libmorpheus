@@ -59,6 +59,23 @@ jobs:
       - name: Run the C test suite under Node.js
         run: ctest --test-dir build/wasm --output-on-failure -j 4
 
+      - name: Report failed tests as annotations
+        # Job logs are not always reachable from automated review sessions;
+        # check-run annotations are. One annotation per failed test carries
+        # the tail of that test's output from CTest's own log.
+        if: failure()
+        run: |
+          failed=build/wasm/Testing/Temporary/LastTestsFailed.log
+          log=build/wasm/Testing/Temporary/LastTest.log
+          test -f "$failed" || { echo "::error title=ctest::no LastTestsFailed.log"; exit 0; }
+          while IFS=: read -r number name; do
+            excerpt="$(awk -v test="$name" '
+              /^[0-9]+\/[0-9]+ Testing: / { current = ($3 == test) }
+              current { print }
+            ' "$log" | grep -v '^var Module' | tail -n 25 | cut -c1-300 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=ctest ${number} ${name}::${excerpt:-no output captured}"
+          done < "$failed"
+
       - name: Run the JavaScript facade tests
         env:
           MORPHEUS_WASM_MODULE: build/wasm/wasm/morpheus.mjs
