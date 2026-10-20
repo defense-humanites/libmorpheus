@@ -284,8 +284,11 @@ Alpheios fixture suites must run where their data prerequisites are available.
   `node bindings/js/wasm/tools/bootstrap-npm.mjs --output <dir>`, inspect
   `npm pack --dry-run` in that directory (license texts, NOTICE, README,
   `package.json`; no code, no module), and publish it interactively once with
-  `npm publish --access public --tag bootstrap`. The placeholder must never
-  carry the `latest` tag. Then configure trusted publishing on
+  `npm publish --access public --tag bootstrap`. npm nevertheless assigns
+  `latest` to the first version of a package whatever tag is requested, and
+  a single-version package cannot drop it; the first versioned publication
+  moves `latest` off the placeholder, so do not announce the package before
+  it. Then configure trusted publishing on
   `@libmorpheus/wasm` with GitHub organization `defense-humanites`,
   repository `libmorpheus`, workflow filename `wasm-release.yml` and
   `npm publish` permission; the versioned workflow needs no token.
