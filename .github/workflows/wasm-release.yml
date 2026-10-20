@@ -42,21 +42,29 @@ jobs:
           ref: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
 
       - name: Install supported CMake, Node.js and Deno
+        # GITHUB_PATH prepends: the last directory written ends up first.
+        # Order matters here: the emsdk image ships a Node.js whose npm is
+        # too old for OIDC publication and a cmake older than the project's
+        # minimum, both ahead of /usr/bin on its PATH. /usr/bin (Node.js 24)
+        # must beat the image, and ~/.local/bin (cmake 3.31.6) must beat
+        # /usr/bin. emcc resolves its own Node.js through its configuration.
         run: |
-          python3 -m pip install --user cmake==3.31.6
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          # The emsdk image ships its own Node.js for Emscripten, with an npm
-          # too old for OIDC publication, and its directories precede
-          # /usr/bin on PATH. Install a current Node.js and put it first for
-          # every later step; emcc keeps using the image's Node through its
-          # own configuration.
           curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
           apt-get install -y nodejs
           echo "/usr/bin" >> "$GITHUB_PATH"
-          /usr/bin/node --version
-          /usr/bin/npm --version
+          python3 -m pip install --user cmake==3.31.6
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           curl -fsSL https://deno.land/install.sh | DENO_INSTALL="$HOME/.deno" sh -s v2.9.5
           echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
+
+      - name: Show the tools later steps will use
+        run: |
+          echo "PATH=$PATH"
+          command -v cmake node npm deno emcc
+          cmake --version | head -n 1
+          node --version
+          npm --version
+          deno --version | head -n 1
 
       - name: Verify binding version, tree version and ABI
         id: metadata
