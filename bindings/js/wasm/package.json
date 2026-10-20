@@ -45,6 +45,7 @@
     "internal/version.mjs"
   ],
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "bootstrap-npm": "node tools/bootstrap-npm.mjs"
   }
 }

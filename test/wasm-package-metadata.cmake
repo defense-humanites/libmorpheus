@@ -234,10 +234,12 @@ endif()
 # dist/ is produced by the release workflow and never tracked; every other
 # packaged path must exist in the tree. The binding root is closed: a new
 # file there is a packaging decision, so it must be added here deliberately.
+# tools/ and test/ are development-only and appear in neither manifest.
 foreach(required IN ITEMS
         LICENSE LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt NOTICE README.md
         index.d.ts index.mjs internal/version.mjs jsr.json jsr.json.license
-        package.json package.json.license)
+        package.json package.json.license tools/bootstrap-npm.mjs
+        test/bootstrap-npm.test.js test/wasm.test.js)
   if(NOT EXISTS "${binding_dir}/${required}")
     message(FATAL_ERROR "Missing WebAssembly package source: ${required}")
   endif()
@@ -305,5 +307,15 @@ foreach(manifest IN ITEMS "${npm_config}" "${jsr_config}")
   if(manifest MATCHES "stemlib|steminds|endtables|rule_files|gener\\.index")
     message(FATAL_ERROR
       "WebAssembly package manifests must not reference linguistic data")
+  endif()
+endforeach()
+# The packaging lists were matched entry for entry above; this guards the
+# expectation lists themselves against a future edit that would ship
+# development files.
+foreach(packaged IN ITEMS LICENSE LICENSES NOTICE README.md dist/morpheus.mjs
+        dist/morpheus.wasm index.d.ts index.mjs internal/version.mjs)
+  if(packaged MATCHES "^(tools|test)/")
+    message(FATAL_ERROR
+      "WebAssembly package lists must not ship tools/ or test/: ${packaged}")
   endif()
 endforeach()

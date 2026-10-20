@@ -277,10 +277,18 @@ Alpheios fixture suites must run where their data prerequisites are available.
   compatible compiled runtime. A recovery dispatch may reuse only the existing
   immutable tag and skips files already accepted by PyPI.
 - Before the first WebAssembly publication, link `@libmorpheus/wasm` to
-  `defense-humanites/libmorpheus` in the package's JSR settings, and configure
-  npm trusted publishing on `@libmorpheus/wasm` with workflow filename
-  `wasm-release.yml` after reserving the package name as for the Node.js
-  track.
+  `defense-humanites/libmorpheus` in the package's JSR settings (done for
+  the 0.1.0 preparation). npm, unlike JSR, cannot reserve a name without a
+  publication and grants a trusted publisher only to an existing package, so
+  stage the inert placeholder with
+  `node bindings/js/wasm/tools/bootstrap-npm.mjs --output <dir>`, inspect
+  `npm pack --dry-run` in that directory (license texts, NOTICE, README,
+  `package.json`; no code, no module), and publish it interactively once with
+  `npm publish --access public --tag bootstrap`. The placeholder must never
+  carry the `latest` tag. Then configure trusted publishing on
+  `@libmorpheus/wasm` with GitHub organization `defense-humanites`,
+  repository `libmorpheus`, workflow filename `wasm-release.yml` and
+  `npm publish` permission; the versioned workflow needs no token.
 - For a WebAssembly release, build `dist/` locally with the pinned Emscripten,
   run `deno publish --dry-run` and `npm pack --dry-run --ignore-scripts` from
   `bindings/js/wasm`, and inspect both file lists: the loader, the module, the

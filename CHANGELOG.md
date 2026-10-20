@@ -41,7 +41,9 @@ the corpus.
   manifests, the version coupling to the tree, the closed file set and the
   absence of linguistic data; `wasm-release.yml` publishes on `wasm-v*` tags
   after rebuilding the module and requiring byte-for-byte reproduction of the
-  qualified artifact.
+  qualified artifact. `bindings/js/wasm/tools/bootstrap-npm.mjs` stages the
+  inert `0.0.0` placeholder that the one-time manual npm reservation needs
+  before trusted publishing can be configured, as the Node.js track does.
 
 ### Changed
 
