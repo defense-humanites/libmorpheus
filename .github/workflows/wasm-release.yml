@@ -257,8 +257,28 @@ jobs:
           fi
 
       - name: Publish JSR package
+        # Like the npm step, skip an exact version JSR already holds, so a
+        # recovery dispatch after a timed-out run reaches the release step.
+        # deno publish returns only once JSR has processed the upload; when
+        # JSR queues it for long, the job may time out after npm succeeded.
         working-directory: bindings/js/wasm
-        run: deno publish
+        env:
+          BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
+        run: |
+          status="$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://jsr.io/@libmorpheus/wasm/${BINDING_VERSION}_meta.json" || echo 000)"
+          case "$status" in
+            200)
+              echo "@libmorpheus/wasm@$BINDING_VERSION is already published on JSR."
+              ;;
+            404)
+              deno publish
+              ;;
+            *)
+              echo "::error title=jsr::unexpected HTTP $status from JSR for version $BINDING_VERSION"
+              exit 1
+              ;;
+          esac
 
       - name: Publish binding release with the module and its digests
         uses: actions/github-script@v8

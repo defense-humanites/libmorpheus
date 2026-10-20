@@ -305,11 +305,13 @@ Alpheios fixture suites must run where their data prerequisites are available.
   JSR, then attaches `morpheus.mjs`, `morpheus.wasm` and `SHA256SUMS` to a
   pre-release GitHub release named by the tag. The package never contains
   linguistic data; `wasm_package_metadata` enforces that at every CI run.
-- If one registry accepts the version and the other rejects it, do not move
-  the tag. Fix only package metadata on `main` if the rejected registry
-  requires it and manually dispatch `Publish WebAssembly binding` with the
-  existing tag; npm publication is skipped for an exact version already
-  present, and JSR refuses a duplicate on its own.
+- If one registry accepts the version and the other rejects it, or the job
+  times out while JSR is still processing the upload (`deno publish` returns
+  only once JSR has processed it, and JSR may queue it for long), do not move
+  the tag. Fix only package metadata on `main` if a registry requires it and
+  manually dispatch `Publish WebAssembly binding` with the existing tag; both
+  the npm and the JSR steps skip an exact version already present, so the
+  dispatch resumes at the GitHub release.
 - Apply the digest-verification step only if container publication has been
   authorized under the data-distribution policy.
 - Preserve the CI run, version/ABI decision, source-data revisions, artifact
