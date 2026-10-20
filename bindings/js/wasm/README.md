@@ -19,6 +19,32 @@ C structures (`MorpheusRawAnalysis`, `MorpheusRawGeneration`) rather than the
 named decoding offered by the Deno and Node.js bindings. The module is
 single-threaded; use one instance per worker for parallel work.
 
+## Installing
+
+The package is published as `@libmorpheus/wasm` on npm and on JSR from the
+same sources, with the compiled module included:
+
+```sh
+npm install @libmorpheus/wasm        # Node.js, Bun, bundlers
+deno add jsr:@libmorpheus/wasm       # Deno
+```
+
+```js
+import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
+```
+
+Each release declares the libmorpheus runtime and C ABI compiled into its
+module and the Emscripten release that reproduces it
+(`MORPHEUS_NATIVE_VERSION`, `MORPHEUS_NATIVE_ABI_VERSION`,
+`MORPHEUS_EMSCRIPTEN_VERSION`, exported next to `MORPHEUS_WASM_VERSION`). The
+same `morpheus.mjs` and `morpheus.wasm`, with their SHA-256 digests, are
+attached to the `wasm-v<version>` GitHub release for deployments that serve
+the files themselves.
+
+When the package is served from a registry rather than installed on disk (JSR
+under Deno, say), `createMorpheus()` fetches and compiles `morpheus.wasm`
+next to the loader itself; nothing changes for the caller.
+
 ## Building the module
 
 The facade imports `./dist/morpheus.mjs` by default. Build it from the

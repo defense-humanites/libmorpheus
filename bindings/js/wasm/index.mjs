@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// @ts-self-types="./index.d.ts"
 //
 // JavaScript facade for the libmorpheus WebAssembly module.
 //
@@ -12,8 +13,22 @@
 // module's virtual file system, either by mounting a host directory (Node.js)
 // or by writing fetched bytes into memory (browsers).
 
+import {
+  MORPHEUS_EMSCRIPTEN_VERSION,
+  MORPHEUS_NATIVE_ABI_VERSION,
+  MORPHEUS_NATIVE_VERSION,
+  MORPHEUS_WASM_VERSION,
+} from "./internal/version.mjs";
+
+export {
+  MORPHEUS_EMSCRIPTEN_VERSION,
+  MORPHEUS_NATIVE_ABI_VERSION,
+  MORPHEUS_NATIVE_VERSION,
+  MORPHEUS_WASM_VERSION,
+};
+
 /** ABI version this facade understands. */
-export const ABI_VERSION = 2;
+export const ABI_VERSION = MORPHEUS_NATIVE_ABI_VERSION;
 
 /** Numeric language selectors accepted by `open()`. */
 export const MorpheusLanguage = Object.freeze({
@@ -687,22 +702,59 @@ export class Morpheus {
 }
 
 /**
+ * Compile `morpheus.wasm` next to a remotely served `morpheus.mjs`. The
+ * Emscripten loader locates the `.wasm` through `node:fs` on Node-like
+ * runtimes and through `fetch` elsewhere; a module served from a registry
+ * (JSR's `https://jsr.io/...`) to Node.js, Deno or Bun falls between the two,
+ * so the facade fetches and compiles it itself.
+ */
+async function compileRemoteModule(wasmUrl) {
+  if (typeof fetch !== "function") {
+    throw new Error(`fetch is unavailable to load ${wasmUrl.href}`);
+  }
+  const response = await fetch(wasmUrl);
+  if (!response.ok) {
+    throw new MorpheusError(
+      MorpheusStatus.InternalError,
+      `fetching ${wasmUrl.href} failed with HTTP ${response.status}`,
+    );
+  }
+  if (
+    typeof WebAssembly.compileStreaming === "function" &&
+    response.headers.get("content-type")?.split(";")[0].trim() === "application/wasm"
+  ) {
+    return await WebAssembly.compileStreaming(response);
+  }
+  return await WebAssembly.compile(await response.arrayBuffer());
+}
+
+/**
  * Instantiate the module. By default the factory is imported from
  * `./dist/morpheus.mjs` next to this file; pass `moduleUrl` or an already
- * imported `factory` to load it from elsewhere. `wasmModule` supplies an
- * already compiled `WebAssembly.Module` (a Cloudflare Workers `.wasm` import,
- * or one compiled once and shared with a worker pool) so the loader neither
- * fetches nor compiles `morpheus.wasm`. `moduleOptions` reaches the
- * Emscripten factory (for example `locateFile` or `wasmBinary`).
+ * imported `factory` to load it from elsewhere. When the module URL is not a
+ * `file:` URL (a package served from JSR, say), the facade fetches and
+ * compiles `morpheus.wasm` itself. `wasmModule` supplies an already compiled
+ * `WebAssembly.Module` (a Cloudflare Workers `.wasm` import, or one compiled
+ * once and shared with a worker pool) so the loader neither fetches nor
+ * compiles `morpheus.wasm`. `moduleOptions` reaches the Emscripten factory
+ * (for example `locateFile` or `wasmBinary`).
  */
 export async function createMorpheus(
   { factory, moduleUrl, wasmModule, moduleOptions = {} } = {},
 ) {
   let create = factory;
   if (!create) {
-    const url = moduleUrl ?? new URL("./dist/morpheus.mjs", import.meta.url);
-    const imported = await import(/* @vite-ignore */ url.href ?? String(url));
+    // The literal specifier keeps the default import analyzable by bundlers
+    // and by JSR's publish-time rewriting; an explicit moduleUrl is loaded
+    // as an absolute URL, which JSR reports as unanalyzable and leaves as is.
+    const url = new URL(moduleUrl ?? new URL("./dist/morpheus.mjs", import.meta.url));
+    const imported = moduleUrl === undefined
+      ? await import("./dist/morpheus.mjs")
+      : await import(/* @vite-ignore */ url.href);
     create = imported.default;
+    if (!wasmModule && url.protocol !== "file:" && !moduleOptions.wasmBinary) {
+      wasmModule = await compileRemoteModule(new URL("./morpheus.wasm", url));
+    }
   }
   if (typeof create !== "function") {
     throw new TypeError("the module factory must be the default export of morpheus.mjs");

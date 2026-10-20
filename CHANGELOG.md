@@ -30,6 +30,18 @@ the corpus.
   Emscripten's Node.js path on runtimes without `import.meta.url`. The binding
   README documents the recommended configuration for servers, browsers and
   Cloudflare Workers, the latter exercised with `wrangler dev`.
+- WebAssembly binding release track. `bindings/js/wasm/` is packaged as
+  `@libmorpheus/wasm` for npm (`package.json`) and JSR (`jsr.json`) from one
+  directory; `internal/version.mjs` declares the binding version, the
+  libmorpheus release and ABI compiled into the module, and the Emscripten
+  release that reproduces it, which the module header now also records. The
+  facade loads `morpheus.wasm` itself when the package is served from a
+  registry, and the stamped loader takes Emscripten's Node.js path only for
+  modules loaded from `file:` URLs. `wasm_package_metadata` checks both
+  manifests, the version coupling to the tree, the closed file set and the
+  absence of linguistic data; `wasm-release.yml` publishes on `wasm-v*` tags
+  after rebuilding the module and requiring byte-for-byte reproduction of the
+  qualified artifact.
 
 ### Changed
 

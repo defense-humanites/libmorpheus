@@ -77,6 +77,15 @@ if(BUILD_TESTING)
       "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
       -P "${PROJECT_SOURCE_DIR}/test/python-package-metadata.cmake"
   )
+  add_test(
+    NAME wasm_package_metadata
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+      "-DMORPHEUS_PROJECT_VERSION=${PROJECT_VERSION}"
+      "-DMORPHEUS_ABI_VERSION=${MORPHEUS_ABI_VERSION}"
+      -P "${PROJECT_SOURCE_DIR}/test/wasm-package-metadata.cmake"
+  )
 endif()
 
 option(MORPHEUS_BUILD_CRUNCHER "Build the legacy-compatible cruncher CLI" ON)
@@ -1813,6 +1822,7 @@ if(MORPHEUS_BUILD_WASM)
       "-DMORPHEUS_WASM_MODULE=$<TARGET_FILE:morpheus_wasm>"
       "-DMORPHEUS_WASM_VERSION=${PROJECT_VERSION}"
       "-DMORPHEUS_WASM_ABI_VERSION=${MORPHEUS_ABI_VERSION}"
+      "-DMORPHEUS_WASM_EMSCRIPTEN_VERSION=${EMSCRIPTEN_VERSION}"
       -P "${PROJECT_SOURCE_DIR}/cmake/stamp-wasm-module.cmake"
     COMMENT "Stamping morpheus.mjs with its SPDX and provenance header"
   )

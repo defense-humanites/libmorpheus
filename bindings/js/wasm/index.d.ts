@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+/** Version of the WebAssembly binding and of its npm and JSR packages. */
+export const MORPHEUS_WASM_VERSION: string;
+/** libmorpheus release compiled into the packaged module. */
+export const MORPHEUS_NATIVE_VERSION: string;
+/** C ABI implemented by the packaged module. */
+export const MORPHEUS_NATIVE_ABI_VERSION: 2;
+/** Emscripten release that reproduces the packaged module. */
+export const MORPHEUS_EMSCRIPTEN_VERSION: string;
+
 /** ABI version this facade understands. */
 export const ABI_VERSION: 2;
 

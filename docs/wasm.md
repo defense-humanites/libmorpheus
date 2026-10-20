@@ -203,9 +203,12 @@ cost it targets.
 - The facade returns the numeric codes of the C structures. The named decoding
   (part-of-speech, dialect and morph-flag names) exists in the Deno binding
   and can be shared with the WebAssembly facade in a later change.
-- The module is produced by CI as a build artifact; publishing it (npm, JSR,
-  GitHub Release asset) and the version/receipt discipline the other bindings
-  follow are deliberately left to a separate release change.
+- Publication follows the `wasm-v<version>` track described in
+  [releasing.md](releasing.md): `bindings/js/wasm/` is one package for npm
+  and JSR, `wasm_package_metadata` guards its manifests, and
+  `wasm-release.yml` publishes only a module that reproduces the qualified
+  CI artifact byte for byte. The first publication still needs the registry
+  side set up (JSR link, npm trusted publisher).
 - The facade has been exercised under Node.js, Deno (benchmark) and the local
   Cloudflare Workers runtime (`wrangler dev`, see the
   [binding README](../bindings/js/wasm/README.md#cloudflare-workers)); a
