@@ -8,6 +8,7 @@ on:
       - main
     tags:
       - "v*"
+      - "wasm-v*"
   pull_request:
     paths:
       - ".github/workflows/wasm.yml"

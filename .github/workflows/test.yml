@@ -9,6 +9,7 @@ on:
       - "deno-v*"
       - "node-v*"
       - "python-v*"
+      - "wasm-v*"
   pull_request:
 
 permissions:

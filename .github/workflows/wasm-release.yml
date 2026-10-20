@@ -28,6 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     container: emscripten/emsdk:4.0.15
     timeout-minutes: 40
+    defaults:
+      run:
+        # Inside a job container the default shell is sh; the verification
+        # step uses bash conditionals and here-strings.
+        shell: bash
     steps:
       - name: Check out the binding tag
         uses: actions/checkout@v5
