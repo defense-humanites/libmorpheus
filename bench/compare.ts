@@ -5,6 +5,15 @@ import {
   MorpheusLibrary,
   MorpheusOption,
 } from "../bindings/js/deno/mod.ts";
+import {
+  compileWasmModule,
+  createWasmInstance,
+  readGreekRuntimeFiles,
+  runtimeBytes,
+  WASM_DATA_MODES,
+  type WasmDataMode,
+} from "./wasm_runtime.ts";
+import { WasmPool } from "./wasm_pool.ts";
 
 interface Fixture {
   readonly input: string;
@@ -25,6 +34,7 @@ interface Configuration {
   readonly compiler: string | null;
   readonly generationSmallLemma: string | null;
   readonly generationMaximalLemma: string | null;
+  readonly wasmDataModes: readonly WasmDataMode[];
 }
 
 export interface Measurement {
@@ -60,6 +70,11 @@ export interface BenchmarkReport {
   readonly generationSmallLemma: string | null;
   readonly generationMaximalLemma: string | null;
   readonly generationIndexSha256: string | null;
+  /** WebAssembly module measured alongside the native paths, when any. */
+  readonly wasmModule?: string | null;
+  readonly wasmModuleSha256?: string | null;
+  /** Bytes of the Greek runtime subset loaded into MEMFS per instance. */
+  readonly wasmRuntimeBytes?: number | null;
   readonly measurements: readonly Measurement[];
 }
 
@@ -113,6 +128,7 @@ function parseArguments(arguments_: readonly string[]): Configuration {
   let compiler: string | null = null;
   let generationSmallLemma: string | null = null;
   let generationMaximalLemma: string | null = null;
+  let wasmDataModes: readonly WasmDataMode[] = WASM_DATA_MODES;
 
   for (let index = 0; index < arguments_.length; index++) {
     const argument = arguments_[index];
@@ -144,6 +160,16 @@ function parseArguments(arguments_: readonly string[]): Configuration {
       case "--compiler": compiler = next(); break;
       case "--generation-small": generationSmallLemma = next(); break;
       case "--generation-maximal": generationMaximalLemma = next(); break;
+      case "--wasm-data": {
+        const modes = next().split(",");
+        for (const mode of modes) {
+          if (!(WASM_DATA_MODES as readonly string[]).includes(mode)) {
+            throw new Error(`${argument} accepts ${WASM_DATA_MODES.join(",")}`);
+          }
+        }
+        wasmDataModes = [...new Set(modes)] as WasmDataMode[];
+        break;
+      }
       case "--json": json = true; break;
       default: throw new Error(`unknown argument: ${argument}`);
     }
@@ -167,6 +193,7 @@ function parseArguments(arguments_: readonly string[]): Configuration {
     compiler,
     generationSmallLemma,
     generationMaximalLemma,
+    wasmDataModes,
   };
 }
 
@@ -200,6 +227,10 @@ async function fileSha256(path: string): Promise<string> {
     await Deno.readFile(path),
   ));
   return [...digest].map((value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+export function isWasmEngine(engine: string): boolean {
+  return engine === "wasm" || engine.startsWith("wasm-");
 }
 
 function percentageChange(current: number, baseline: number): number {
@@ -254,14 +285,18 @@ export function compareReports(
       }
       return [measurement, previous] as const;
     })
-    : current.measurements.map((measurement) => {
+    : current.measurements.flatMap((measurement) => {
       const previous = baselineMeasurements.get(key(measurement));
       if (!previous) {
+        // WebAssembly measurements are optional additions to a report; a
+        // baseline recorded without the module simply yields no comparison
+        // for them. Every native configuration must still be present.
+        if (isWasmEngine(measurement.engine)) return [];
         throw new Error(
           `baseline lacks ${measurement.engine} with ${measurement.contexts} contexts`,
         );
       }
-      return [measurement, previous] as const;
+      return [[measurement, previous] as const];
     });
 
   return comparisons.map(([measurement, previous]) => {
@@ -586,6 +621,277 @@ async function benchmarkColdGeneration(
   );
 }
 
+interface WasmShared {
+  readonly moduleUrl: URL;
+  readonly stemlibPath: string;
+  readonly compiledModule: WebAssembly.Module;
+  readonly files: ReadonlyMap<string, Uint8Array>;
+}
+
+async function sampleRss<T>(body: () => Promise<T>): Promise<[T, number]> {
+  let peakRss = Deno.memoryUsage().rss;
+  const sampler = setInterval(() => {
+    peakRss = Math.max(peakRss, Deno.memoryUsage().rss);
+  }, 5);
+  try {
+    const value = await body();
+    peakRss = Math.max(peakRss, Deno.memoryUsage().rss);
+    return [value, peakRss];
+  } finally {
+    clearInterval(sampler);
+  }
+}
+
+/**
+ * Analysis over a pool of `contextCount` workers, one WebAssembly instance
+ * and one Greek context each, with the compiled module and (for MEMFS) the
+ * stemlib bytes shared through structured cloning. Word assignment matches
+ * the FFI benchmark operation for operation. Startup covers worker spawn,
+ * instantiation, data placement and context creation.
+ */
+async function benchmarkWasmAnalysis(
+  shared: WasmShared,
+  dataMode: WasmDataMode,
+  words: readonly string[],
+  configuration: Configuration,
+  contextCount: number,
+): Promise<Measurement> {
+  const baselineRss = Deno.memoryUsage().rss;
+  const startupStart = performance.now();
+  const pool = await WasmPool.start({
+    size: contextCount,
+    moduleUrl: shared.moduleUrl,
+    dataMode,
+    stemlibPath: shared.stemlibPath,
+    compiledModule: shared.compiledModule,
+    files: dataMode === "memfs" ? shared.files : null,
+  });
+  const startupMs = performance.now() - startupStart;
+  try {
+    for (let iteration = 0; iteration < configuration.warmupIterations; iteration++) {
+      await pool.analyze(words, words.length);
+    }
+    const operations = configuration.iterations * words.length;
+    const start = performance.now();
+    const [results, peakRss] = await sampleRss(() => pool.analyze(words, operations));
+    const durationMs = performance.now() - start;
+    return summarize(
+      `wasm-${dataMode}`,
+      "analysis",
+      null,
+      contextCount,
+      operations,
+      durationMs,
+      startupMs,
+      results,
+      peakRss,
+      baselineRss,
+    );
+  } finally {
+    await pool.close();
+  }
+}
+
+/**
+ * Cold start in the main thread: compile the module from its bytes, place the
+ * stemlib, open a context and analyze one word, once per sample. This is the
+ * WebAssembly counterpart of `cruncher-cold`.
+ */
+async function benchmarkWasmCold(
+  shared: WasmShared,
+  dataMode: WasmDataMode,
+  words: readonly string[],
+  samples: number,
+): Promise<Measurement | null> {
+  if (!samples) return null;
+  const baselineRss = Deno.memoryUsage().rss;
+  let results = 0;
+  const start = performance.now();
+  const [, peakRss] = await sampleRss(async () => {
+    for (let sample = 0; sample < samples; sample++) {
+      const { morpheus, root } = await createWasmInstance({
+        moduleUrl: shared.moduleUrl,
+        dataMode,
+        stemlibPath: shared.stemlibPath,
+        files: dataMode === "memfs" ? shared.files : undefined,
+      });
+      const context = morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek });
+      try {
+        results += context.analyze(words[sample % words.length]).length;
+      } finally {
+        context.close();
+      }
+    }
+  });
+  const durationMs = performance.now() - start;
+  return summarize(
+    `wasm-${dataMode}-cold`,
+    "analysis",
+    null,
+    0,
+    samples,
+    durationMs,
+    durationMs / samples,
+    results,
+    peakRss,
+    baselineRss,
+  );
+}
+
+async function benchmarkWasmWarmGeneration(
+  shared: WasmShared,
+  dataMode: WasmDataMode,
+  lemma: string,
+  label: "small" | "maximal",
+  configuration: Configuration,
+  contextCount: number,
+): Promise<Measurement> {
+  const baselineRss = Deno.memoryUsage().rss;
+  const startupStart = performance.now();
+  const pool = await WasmPool.start({
+    size: contextCount,
+    moduleUrl: shared.moduleUrl,
+    dataMode,
+    stemlibPath: shared.stemlibPath,
+    compiledModule: shared.compiledModule,
+    files: dataMode === "memfs" ? shared.files : null,
+  });
+  const startupMs = performance.now() - startupStart;
+  try {
+    await pool.generate(lemma, 1 + configuration.warmupIterations);
+    const operations = configuration.iterations * contextCount;
+    const start = performance.now();
+    const [results, peakRss] = await sampleRss(() =>
+      pool.generate(lemma, configuration.iterations)
+    );
+    const durationMs = performance.now() - start;
+    return summarize(
+      `wasm-${dataMode}-generation-${label}-warm`,
+      "generation",
+      lemma,
+      contextCount,
+      operations,
+      durationMs,
+      startupMs,
+      results,
+      peakRss,
+      baselineRss,
+    );
+  } finally {
+    await pool.close();
+  }
+}
+
+async function benchmarkWasmColdGeneration(
+  shared: WasmShared,
+  dataMode: WasmDataMode,
+  lemma: string,
+  label: "small" | "maximal",
+  samples: number,
+): Promise<Measurement | null> {
+  if (!samples) return null;
+  const baselineRss = Deno.memoryUsage().rss;
+  let results = 0;
+  const start = performance.now();
+  const [, peakRss] = await sampleRss(async () => {
+    for (let sample = 0; sample < samples; sample++) {
+      const { morpheus, root } = await createWasmInstance({
+        moduleUrl: shared.moduleUrl,
+        dataMode,
+        stemlibPath: shared.stemlibPath,
+        files: dataMode === "memfs" ? shared.files : undefined,
+      });
+      const context = morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek });
+      try {
+        results += context.generate(lemma, { resultLimit: 65_536 }).length;
+      } finally {
+        context.close();
+      }
+    }
+  });
+  const durationMs = performance.now() - start;
+  return summarize(
+    `wasm-${dataMode}-generation-${label}-cold`,
+    "generation",
+    lemma,
+    0,
+    samples,
+    durationMs,
+    durationMs / samples,
+    results,
+    peakRss,
+    baselineRss,
+  );
+}
+
+async function benchmarkWasm(
+  wasmModulePath: string,
+  stemlibPath: string,
+  words: readonly string[],
+  configuration: Configuration,
+): Promise<{ measurements: Measurement[]; runtimeBytes: number }> {
+  const moduleUrl = new URL(wasmModulePath, `file://${Deno.cwd()}/`);
+  const shared: WasmShared = {
+    moduleUrl,
+    stemlibPath,
+    compiledModule: await compileWasmModule(moduleUrl),
+    files: await readGreekRuntimeFiles(stemlibPath),
+  };
+  const measurements: Measurement[] = [];
+  for (const dataMode of configuration.wasmDataModes) {
+    for (const contextCount of configuration.contextCounts) {
+      measurements.push(await benchmarkWasmAnalysis(
+        shared,
+        dataMode,
+        words,
+        configuration,
+        contextCount,
+      ));
+    }
+    const cold = await benchmarkWasmCold(
+      shared,
+      dataMode,
+      words,
+      configuration.coldSamples,
+    );
+    if (cold) measurements.push(cold);
+    if (
+      configuration.generationSmallLemma !== null &&
+      configuration.generationMaximalLemma !== null
+    ) {
+      for (const contextCount of configuration.contextCounts) {
+        for (const [lemma, label] of [
+          [configuration.generationSmallLemma, "small"],
+          [configuration.generationMaximalLemma, "maximal"],
+        ] as const) {
+          measurements.push(await benchmarkWasmWarmGeneration(
+            shared,
+            dataMode,
+            lemma,
+            label,
+            configuration,
+            contextCount,
+          ));
+        }
+      }
+      for (const [lemma, label] of [
+        [configuration.generationSmallLemma, "small"],
+        [configuration.generationMaximalLemma, "maximal"],
+      ] as const) {
+        const generationCold = await benchmarkWasmColdGeneration(
+          shared,
+          dataMode,
+          lemma,
+          label,
+          configuration.coldSamples,
+        );
+        if (generationCold) measurements.push(generationCold);
+      }
+    }
+  }
+  return { measurements, runtimeBytes: runtimeBytes(shared.files) };
+}
+
 function printable(measurement: Measurement) {
   return {
     engine: measurement.engine,
@@ -691,6 +997,14 @@ if (import.meta.main) {
     }
   }
 
+  const wasmModulePath = Deno.env.get("MORPHEUS_WASM_MODULE") ?? null;
+  let wasmRuntimeBytes: number | null = null;
+  if (wasmModulePath) {
+    const wasm = await benchmarkWasm(wasmModulePath, stemlibPath, words, configuration);
+    measurements.push(...wasm.measurements);
+    wasmRuntimeBytes = wasm.runtimeBytes;
+  }
+
   const report: BenchmarkReport = {
     schemaVersion: 2,
     generatedAt: new Date().toISOString(),
@@ -714,6 +1028,11 @@ if (import.meta.main) {
     generationIndexSha256: configuration.generationSmallLemma === null
       ? null
       : await fileSha256(`${stemlibPath}/gener.index`),
+    wasmModule: wasmModulePath,
+    wasmModuleSha256: wasmModulePath === null
+      ? null
+      : await fileSha256(new URL("./morpheus.wasm", new URL(wasmModulePath, `file://${Deno.cwd()}/`)).pathname),
+    wasmRuntimeBytes,
     measurements,
   };
   const comparison = configuration.baselinePath

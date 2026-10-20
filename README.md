@@ -51,6 +51,7 @@ Bindings expose the native C API to other language ecosystems.
 | Deno 2 | Typed TypeScript API for analysis and experimental Greek generation, published on JSR | [Deno binding guide](bindings/js/deno/README.md) |
 | Node.js 20+ | ESM facade over an asynchronous Node-API addon | [Node.js binding guide](bindings/js/node/README.md) |
 | Python 3.11+ | Pure-Python `ctypes` facade over the stable C ABI | [Python binding guide](bindings/python/README.md) |
+| WebAssembly (experimental) | Emscripten build of the complete C ABI for browsers, workers and JavaScript runtimes; no native toolchain at run time | [WebAssembly guide](bindings/js/wasm/README.md), [build and qualification](docs/wasm.md) |
 
 Native consumers should instead use the [public C API](docs/public-api.md).
 

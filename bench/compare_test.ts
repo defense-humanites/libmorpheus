@@ -154,3 +154,28 @@ Deno.test("schema 1 baseline requires every historical configuration", () => {
   }
   if (!rejected) throw new Error("missing historical configuration was accepted");
 });
+
+Deno.test("WebAssembly measurements absent from the baseline are skipped", () => {
+  const comparison = compareReports(
+    report([measurement("ffi", 1, 100, 10)]),
+    report([
+      measurement("ffi", 1, 110, 9),
+      measurement("wasm-memfs", 1, 90, 11),
+      measurement("wasm-nodefs-cold", 0, 20, 50),
+    ]),
+  );
+  if (comparison.length !== 1 || comparison[0].engine !== "ffi") {
+    throw new Error("optional WebAssembly measurements were not skipped");
+  }
+});
+
+Deno.test("WebAssembly measurements present in the baseline are compared", () => {
+  const comparison = compareReports(
+    report([measurement("ffi", 1, 100, 10), measurement("wasm-memfs", 1, 50, 20)]),
+    report([measurement("ffi", 1, 100, 10), measurement("wasm-memfs", 1, 100, 10)]),
+  );
+  const wasm = comparison.find((entry) => entry.engine === "wasm-memfs");
+  if (!wasm || wasm.throughputChangePercent !== 100) {
+    throw new Error("WebAssembly measurement was not compared");
+  }
+});

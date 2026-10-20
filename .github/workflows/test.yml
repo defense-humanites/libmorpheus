@@ -231,7 +231,7 @@ jobs:
             bindings/js/deno/native.ts bindings/js/deno/test/native_test.ts \
             bindings/js/deno/setup.ts bindings/js/deno/test/setup_test.ts \
             bindings/js/deno/test/gener_preparer_test.ts \
-            bench/compare.ts bench/compare_test.ts \
+            bench/compare.ts bench/compare_test.ts bench/wasm_worker.ts \
             bench/validate.ts bench/validate_test.ts
 
       - name: Test binding

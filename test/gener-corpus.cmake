@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# MORPHEUS_TEST_LAUNCHER is empty for native builds; cross builds (Emscripten)
+# pass the emulator that runs the compiled programs.
 
 foreach(required IN ITEMS MORPHEUS_GENER_SOURCE_PREPARER
                           MORPHEUS_GENER_INDEX_BUILDER
@@ -32,7 +34,7 @@ set(second_index "${MORPHEUS_GENER_CORPUS_WORK_DIR}/second.mgi")
 
 foreach(run IN ITEMS first second)
   execute_process(
-    COMMAND "${MORPHEUS_GENER_SOURCE_PREPARER}"
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
             --exceptions "${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
             "${${run}_source}" ${inputs}
     RESULT_VARIABLE prepare_result
@@ -45,7 +47,7 @@ foreach(run IN ITEMS first second)
       "${prepare_output}${prepare_error}")
   endif()
   execute_process(
-    COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}"
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
             "${${run}_index}" "${${run}_source}"
     RESULT_VARIABLE index_result
     OUTPUT_VARIABLE index_output
@@ -81,7 +83,7 @@ if(NOT source_compare EQUAL 0 OR NOT index_compare EQUAL 0)
 endif()
 
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_READER_TEST}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
           "${first_index}" 106422 108215 129097
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output

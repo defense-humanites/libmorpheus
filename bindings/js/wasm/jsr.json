@@ -1,0 +1,23 @@
+{
+  "name": "@libmorpheus/wasm",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "nodeModulesDir": "none",
+  "publish": {
+    "include": [
+      "LICENSE",
+      "LICENSES/EMSCRIPTEN.txt",
+      "LICENSES/MPL-2.0.txt",
+      "NOTICE",
+      "README.md",
+      "dist/morpheus.mjs",
+      "dist/morpheus.wasm",
+      "index.d.ts",
+      "index.mjs",
+      "internal/version.mjs"
+    ]
+  }
+}

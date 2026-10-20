@@ -1,0 +1,51 @@
+{
+  "name": "@libmorpheus/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly build of the libmorpheus morphological analyzer for browsers and JavaScript runtimes",
+  "keywords": [
+    "morpheus",
+    "morphology",
+    "ancient-greek",
+    "latin",
+    "webassembly",
+    "wasm"
+  ],
+  "type": "module",
+  "types": "./index.d.ts",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defense-humanites/libmorpheus.git",
+    "directory": "bindings/js/wasm"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    },
+    "./module": "./dist/morpheus.mjs",
+    "./morpheus.wasm": "./dist/morpheus.wasm"
+  },
+  "sideEffects": false,
+  "files": [
+    "LICENSE",
+    "LICENSES",
+    "NOTICE",
+    "README.md",
+    "dist/morpheus.mjs",
+    "dist/morpheus.wasm",
+    "index.d.ts",
+    "index.mjs",
+    "internal/version.mjs"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "bootstrap-npm": "node tools/bootstrap-npm.mjs"
+  }
+}

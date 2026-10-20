@@ -1,0 +1,15 @@
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+libmorpheus WebAssembly binding
+Copyright (C) 2026 Antoine Boquet
+
+This package is licensed under the GNU Affero General Public License version 3
+or later. It contains a JavaScript facade over the libmorpheus WebAssembly
+module. The module itself (dist/morpheus.mjs and dist/morpheus.wasm) is built
+from the libmorpheus runtime, a mixed AGPL-3.0-or-later and MPL-2.0 work,
+together with the MIT-licensed Emscripten runtime support code. The
+corresponding texts are under LICENSES/.
+
+No linguistic stem-library data is included. Consult the runtime
+distribution's licensing documentation and provenance records before
+redistributing a stemlib alongside this package.

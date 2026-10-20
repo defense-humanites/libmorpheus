@@ -1,0 +1,117 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+name: WebAssembly
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    paths:
+      - ".github/workflows/wasm.yml"
+      - "CMakeLists.txt"
+      - "cmake/EmscriptenTesting.cmake"
+      - "cmake/emscripten-test-env.js"
+      - "cmake/stamp-wasm-module.cmake"
+      - "bindings/js/wasm/**"
+      - "include/**"
+      - "src/**"
+      - "test/**"
+      - "tools/gener-source-preparer.c"
+      - "tools/gener-index-builder.c"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  wasm:
+    name: Emscripten module and test suite
+    runs-on: ubuntu-latest
+    container: emscripten/emsdk:4.0.15
+    timeout-minutes: 30
+    steps:
+      - name: Check out sources and stemlib
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install supported CMake
+        run: |
+          python3 -m pip install --user cmake==3.31.6
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Trust the mounted checkout and its submodule
+        # The workspace is mounted into the container under another owner;
+        # the stemlib redistribution test reads tree ids through git, which
+        # otherwise refuses with "dubious ownership" in both repositories.
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/vendor/alpheios-morpheus"
+
+      - name: Configure WebAssembly build with the native test suite
+        run: >-
+          emcmake cmake -S . -B build/wasm
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DMORPHEUS_BUILD_CRUNCHER=OFF
+
+      - name: Build module and test programs
+        run: cmake --build build/wasm --parallel
+
+      - name: Run the C test suite under Node.js
+        run: ctest --test-dir build/wasm --output-on-failure -j 4
+
+      - name: Report failed tests as annotations
+        # Job logs are not always reachable from automated review sessions;
+        # check-run annotations are. One annotation per failed test carries
+        # the tail of that test's output from CTest's own log.
+        if: failure()
+        run: |
+          failed=build/wasm/Testing/Temporary/LastTestsFailed.log
+          log=build/wasm/Testing/Temporary/LastTest.log
+          test -f "$failed" || { echo "::error title=ctest::no LastTestsFailed.log"; exit 0; }
+          while IFS=: read -r number name; do
+            excerpt="$(awk -v test="$name" '
+              /^[0-9]+\/[0-9]+ Testing: / { current = ($3 == test) }
+              current { print }
+            ' "$log" | grep -v '^var Module' | tail -n 25 | cut -c1-300 | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=ctest ${number} ${name}::${excerpt:-no output captured}"
+          done < "$failed"
+
+      - name: Run the JavaScript facade tests
+        env:
+          MORPHEUS_WASM_MODULE: build/wasm/wasm/morpheus.mjs
+          MORPHEUS_STEMLIB: stemlib
+          MORPHEUS_GENER_STEMLIB: build/wasm/test-public-generation/stemlib
+        run: node --test bindings/js/wasm/test/*.test.js
+
+      - name: Verify both package manifests against the built module
+        working-directory: bindings/js/wasm
+        run: |
+          curl -fsSL https://deno.land/install.sh | DENO_INSTALL="$HOME/.deno" sh -s v2.9.5
+          export PATH="$HOME/.deno/bin:$PATH"
+          mkdir -p dist
+          cp ../../../build/wasm/wasm/morpheus.mjs ../../../build/wasm/wasm/morpheus.wasm dist/
+          deno check index.mjs
+          deno publish --dry-run
+          npm pack --dry-run --ignore-scripts .
+          rm -r dist
+
+      - name: Record module digests
+        run: |
+          cd build/wasm/wasm
+          sha256sum morpheus.mjs morpheus.wasm | tee SHA256SUMS
+          ls -l morpheus.mjs morpheus.wasm
+
+      - name: Upload module
+        uses: actions/upload-artifact@v4
+        with:
+          name: libmorpheus-wasm
+          path: build/wasm/wasm/
+          if-no-files-found: error

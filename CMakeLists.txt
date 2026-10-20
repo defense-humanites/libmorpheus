@@ -77,6 +77,15 @@ if(BUILD_TESTING)
       "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
       -P "${PROJECT_SOURCE_DIR}/test/python-package-metadata.cmake"
   )
+  add_test(
+    NAME wasm_package_metadata
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+      "-DMORPHEUS_PROJECT_VERSION=${PROJECT_VERSION}"
+      "-DMORPHEUS_ABI_VERSION=${MORPHEUS_ABI_VERSION}"
+      -P "${PROJECT_SOURCE_DIR}/test/wasm-package-metadata.cmake"
+  )
 endif()
 
 option(MORPHEUS_BUILD_CRUNCHER "Build the legacy-compatible cruncher CLI" ON)
@@ -90,6 +99,29 @@ option(
   "Build internal stemlib-production tools by default"
   OFF
 )
+if(EMSCRIPTEN)
+  set(MORPHEUS_BUILD_WASM_DEFAULT ON)
+else()
+  set(MORPHEUS_BUILD_WASM_DEFAULT OFF)
+endif()
+option(
+  MORPHEUS_BUILD_WASM
+  "Build the WebAssembly distribution module (requires Emscripten)"
+  ${MORPHEUS_BUILD_WASM_DEFAULT}
+)
+if(MORPHEUS_BUILD_WASM AND NOT EMSCRIPTEN)
+  message(FATAL_ERROR "MORPHEUS_BUILD_WASM requires the Emscripten toolchain")
+endif()
+if(EMSCRIPTEN)
+  # Emscripten links a single WebAssembly module; the runtime archive feeds
+  # that link instead of being installed as a shared object.
+  set(MORPHEUS_LIBRARY_TYPE STATIC)
+  if(BUILD_TESTING)
+    include(cmake/EmscriptenTesting.cmake)
+  endif()
+else()
+  set(MORPHEUS_LIBRARY_TYPE SHARED)
+endif()
 set(
   MORPHEUS_STEMLIB_QUALIFICATION_PROFILE
   "portable"
@@ -1066,6 +1098,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_INDEX_READER_TEST=$<TARGET_FILE:morpheus_gener_index_reader_test>
       -DMORPHEUS_GENER_INDEX_SOURCE=${PROJECT_SOURCE_DIR}/test/gener-index-source.txt
       -DMORPHEUS_GENER_INDEX_READER_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-index-reader
+      "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/gener-index-reader.cmake"
   )
   if(MORPHEUS_ENABLE_SANITIZERS)
@@ -1092,6 +1125,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_INDEX_SOURCE=${PROJECT_SOURCE_DIR}/test/gener-index-source.txt
       -DMORPHEUS_GENER_INDEX_UNEXPANDED_SOURCE=${PROJECT_SOURCE_DIR}/test/gener-index-unexpanded.txt
       -DMORPHEUS_GENER_INDEX_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-index
+      "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/gener-index.cmake"
   )
   add_test(
@@ -1107,6 +1141,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_DERIVATION_EXPECTED=${PROJECT_SOURCE_DIR}/test/gener-derivation-oracle.expected
       -DMORPHEUS_GENER_DERIVATION_INVALID=${PROJECT_SOURCE_DIR}/test/gener-derivation-invalid.txt
       -DMORPHEUS_GENER_SOURCE_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-source-preparer
+      "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/gener-source-preparer.cmake"
   )
   set_tests_properties(
@@ -1140,6 +1175,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_CORPUS_MANIFEST=${PROJECT_SOURCE_DIR}/tools/gener-corpus-manifest.tsv
       -DMORPHEUS_GENER_CORPUS_EXCEPTIONS=${PROJECT_SOURCE_DIR}/tools/gener-corpus-exceptions.tsv
       -DMORPHEUS_GENER_CORPUS_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-corpus
+      "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/gener-corpus.cmake"
   )
   set_tests_properties(
@@ -1280,6 +1316,7 @@ if(BUILD_TESTING)
         -DMORPHEUS_GENERATION_SERVICE_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-service-${service_mode}
         -DMORPHEUS_GENERATION_SERVICE_MODE=${service_mode}
         -DMORPHEUS_GENERATION_FIXTURES=${PROJECT_SOURCE_DIR}/test/gener-fixture.tsv
+        "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -P "${PROJECT_SOURCE_DIR}/test/generation-service.cmake"
     )
   endforeach()
@@ -1296,6 +1333,11 @@ if(BUILD_TESTING)
     gener_service_normalization
     PROPERTIES ENVIRONMENT "MORPHLIB=${MORPHEUS_STEMLIB_DIR}"
   )
+  if(EMSCRIPTEN)
+    # The isolation mode exercises pthreads, which the single-threaded
+    # WebAssembly build does not provide (see public_parallel_contexts).
+    set_tests_properties(gener_service_isolation PROPERTIES DISABLED TRUE)
+  endif()
   if(MORPHEUS_ENABLE_SANITIZERS)
     set_property(
       TEST dictionary_entry_workspace APPEND PROPERTY ENVIRONMENT
@@ -1641,7 +1683,7 @@ if(BUILD_TESTING)
 endif()
 
 add_library(
-  morpheus SHARED
+  morpheus ${MORPHEUS_LIBRARY_TYPE}
   src/api/context.c
   src/api/result.c
   src/api/analyze.c
@@ -1679,7 +1721,113 @@ set_target_properties(
     SOVERSION ${MORPHEUS_SOVERSION}
     EXPORT_NAME morpheus
 )
-if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER)
+
+if(MORPHEUS_BUILD_WASM)
+  # WebAssembly distribution module: the complete public C API (morpheus.h and
+  # compat.h) linked into one ES module plus a side .wasm file. The module
+  # carries no linguistic data; callers supply a stemlib through the
+  # Emscripten file system (MEMFS in browsers, NODEFS under Node.js).
+  set(
+    MORPHEUS_WASM_OUTPUT_DIRECTORY
+    "${PROJECT_BINARY_DIR}/wasm"
+    CACHE PATH
+    "Directory receiving morpheus.mjs and morpheus.wasm"
+  )
+  set(morpheus_wasm_exported_functions
+    _malloc
+    _free
+    _morpheus_abi_version
+    _morpheus_analysis_size
+    _morpheus_analyze
+    _morpheus_close
+    _morpheus_compat_analyze
+    _morpheus_compat_output_analysis_count
+    _morpheus_compat_output_data
+    _morpheus_compat_output_free
+    _morpheus_compat_output_lemma_count
+    _morpheus_compat_output_length
+    _morpheus_generate
+    _morpheus_generation_result_copy
+    _morpheus_generation_result_count
+    _morpheus_generation_result_free
+    _morpheus_generation_result_get
+    _morpheus_generation_result_truncated_fields
+    _morpheus_generation_size
+    _morpheus_open
+    _morpheus_open_path
+    _morpheus_result_copy
+    _morpheus_result_count
+    _morpheus_result_free
+    _morpheus_result_get
+    _morpheus_result_truncated_fields
+    _morpheus_status_message
+    _morpheus_wasm_module_version
+  )
+  set(morpheus_wasm_runtime_methods
+    FS
+    HEAPU8
+    UTF8ToString
+    stringToUTF8
+    lengthBytesUTF8
+    getValue
+    setValue
+  )
+  list(JOIN morpheus_wasm_exported_functions "," morpheus_wasm_exported_functions)
+  list(JOIN morpheus_wasm_runtime_methods "," morpheus_wasm_runtime_methods)
+  add_executable(morpheus_wasm src/wasm/module.c)
+  target_include_directories(
+    morpheus_wasm PRIVATE "${PROJECT_SOURCE_DIR}/include"
+  )
+  target_compile_definitions(
+    morpheus_wasm
+    PRIVATE
+      MORPHEUS_BUILDING_LIBRARY
+      "MORPHEUS_WASM_VERSION=${PROJECT_VERSION}"
+  )
+  target_link_libraries(
+    morpheus_wasm PRIVATE morpheus morpheus_build_options
+  )
+  set_target_properties(
+    morpheus_wasm
+    PROPERTIES
+      OUTPUT_NAME morpheus
+      SUFFIX ".mjs"
+      RUNTIME_OUTPUT_DIRECTORY "${MORPHEUS_WASM_OUTPUT_DIRECTORY}"
+      # Replace the directory-wide NODERAWFS test policy inherited from
+      # cmake/EmscriptenTesting.cmake with the portable module policy.
+      LINK_OPTIONS ""
+  )
+  target_link_options(
+    morpheus_wasm
+    PRIVATE
+      "-O2"
+      "--no-entry"
+      "-sMODULARIZE=1"
+      "-sEXPORT_ES6=1"
+      "-sEXPORT_NAME=createMorpheusModule"
+      "-sENVIRONMENT=web,worker,node"
+      "-sALLOW_MEMORY_GROWTH=1"
+      "-sSTACK_SIZE=4194304"
+      "-sEXIT_RUNTIME=0"
+      "-sFORCE_FILESYSTEM=1"
+      "-sWASM_BIGINT=1"
+      "-lnodefs.js"
+      "-sEXPORTED_FUNCTIONS=${morpheus_wasm_exported_functions}"
+      "-sEXPORTED_RUNTIME_METHODS=${morpheus_wasm_runtime_methods}"
+  )
+  add_custom_command(
+    TARGET morpheus_wasm POST_BUILD
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_WASM_MODULE=$<TARGET_FILE:morpheus_wasm>"
+      "-DMORPHEUS_WASM_VERSION=${PROJECT_VERSION}"
+      "-DMORPHEUS_WASM_ABI_VERSION=${MORPHEUS_ABI_VERSION}"
+      "-DMORPHEUS_WASM_EMSCRIPTEN_VERSION=${EMSCRIPTEN_VERSION}"
+      -P "${PROJECT_SOURCE_DIR}/cmake/stamp-wasm-module.cmake"
+    COMMENT "Stamping morpheus.mjs with its SPDX and provenance header"
+  )
+endif()
+if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER AND NOT EMSCRIPTEN)
   install(
     TARGETS morpheus
     EXPORT MorpheusTargets
@@ -1711,7 +1859,7 @@ write_basic_package_version_file(
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion
 )
-if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER)
+if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER AND NOT EMSCRIPTEN)
   install(
     EXPORT MorpheusTargets
     NAMESPACE Morpheus::
@@ -1787,6 +1935,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENERATION_SOURCE=${PROJECT_SOURCE_DIR}/test/generation-service-source.txt
       -DMORPHEUS_STEMLIB=${PROJECT_SOURCE_DIR}/stemlib
       -DMORPHEUS_PUBLIC_GENERATION_WORK_DIR=${PROJECT_BINARY_DIR}/test-public-generation
+      "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/public-generation.cmake"
   )
   add_executable(morpheus_runtime_error_test test/runtime-error.c)
@@ -1801,7 +1950,7 @@ if(BUILD_TESTING)
     PRIVATE morpheus_morphlib morpheus_build_options
   )
   add_test(NAME runtime_error COMMAND morpheus_runtime_error_test)
-  if(CMAKE_NM AND UNIX)
+  if(CMAKE_NM AND UNIX AND NOT EMSCRIPTEN)
     add_test(
       NAME public_symbols
       COMMAND
@@ -1962,8 +2111,15 @@ if(BUILD_TESTING)
     NAME public_parallel_contexts
     COMMAND morpheus_public_parallel_context_test
   )
+  if(EMSCRIPTEN)
+    # The WebAssembly module is single-threaded; pthread_create() fails
+    # without -pthread and shared memory. Contexts stay independent, so
+    # concurrent use means one module instance per worker.
+    set_tests_properties(public_parallel_contexts PROPERTIES DISABLED TRUE)
+  endif()
   if(NOT MORPHEUS_ENABLE_SANITIZERS AND
-     NOT MORPHEUS_ENABLE_THREAD_SANITIZER)
+     NOT MORPHEUS_ENABLE_THREAD_SANITIZER AND
+     NOT EMSCRIPTEN)
     add_test(
       NAME installed_package_consumer
       COMMAND
@@ -2085,6 +2241,18 @@ if(BUILD_TESTING)
           $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-UNDEBUG>
           $<$<COMPILE_LANG_AND_ID:C,MSVC>:/UNDEBUG>
       )
+    endif()
+    if(EMSCRIPTEN AND NOT morpheus_directory_target STREQUAL "morpheus_wasm")
+      get_target_property(
+        morpheus_directory_target_type "${morpheus_directory_target}" TYPE
+      )
+      if(morpheus_directory_target_type STREQUAL "EXECUTABLE")
+        # The pre-js is linked into every test program; relink when it changes.
+        set_property(
+          TARGET "${morpheus_directory_target}" APPEND PROPERTY
+          LINK_DEPENDS "${MORPHEUS_EMSCRIPTEN_TEST_PRE_JS}"
+        )
+      endif()
     endif()
   endforeach()
 endif()
