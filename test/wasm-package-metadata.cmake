@@ -83,6 +83,13 @@ if(EXISTS "${binding_dir}/dist/morpheus.mjs")
       "ABI ${native_abi}, Emscripten ${emscripten_version}")
   endif()
 endif()
+# Every binding version has a release decision; the publication workflow
+# uses it as the GitHub release body.
+if(NOT EXISTS "${MORPHEUS_SOURCE_DIR}/docs/release-wasm-${wasm_version}.md")
+  message(FATAL_ERROR
+    "Missing WebAssembly release decision: docs/release-wasm-${wasm_version}.md")
+endif()
+
 foreach(workflow IN ITEMS wasm.yml wasm-release.yml)
   file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/${workflow}"
        workflow_contents)
