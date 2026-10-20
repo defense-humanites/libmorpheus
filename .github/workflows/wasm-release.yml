@@ -57,14 +57,21 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
         run: |
+          # Every check below is silent on success; on failure, name the
+          # command and line in a check-run annotation.
+          trap 'echo "::error title=verify (line $LINENO)::$BASH_COMMAND"' ERR
           if ! [[ "$RELEASE_TAG" =~ ^wasm-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "Invalid release tag: $RELEASE_TAG" >&2
             exit 1
           fi
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global --add safe.directory "$GITHUB_WORKSPACE/vendor/alpheios-morpheus"
-          git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
+          # The checkout step resolves the tag to a commit; make sure the tag
+          # ref itself exists locally before verifying it.
+          git fetch --no-tags origin "+refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          git show-ref --verify "refs/tags/$RELEASE_TAG"
           release_sha="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
+          echo "tag $RELEASE_TAG -> $release_sha; HEAD $(git rev-parse HEAD)"
           test "$(git rev-parse HEAD)" = "$release_sha"
 
           metadata="$(node --input-type=module -e '
@@ -77,15 +84,19 @@ jobs:
             console.log(`${MORPHEUS_WASM_VERSION} ${MORPHEUS_NATIVE_VERSION} ${MORPHEUS_NATIVE_ABI_VERSION} ${MORPHEUS_EMSCRIPTEN_VERSION}`);
           ')"
           read -r binding_version native_version native_abi emscripten_version <<<"$metadata"
+          echo "binding $binding_version; runtime $native_version ABI $native_abi; Emscripten $emscripten_version"
           test "$RELEASE_TAG" = "wasm-v$binding_version"
           test "$(node -p 'require("./bindings/js/wasm/package.json").version')" = "$binding_version"
           test "$(node -p 'require("./bindings/js/wasm/jsr.json").version')" = "$binding_version"
 
           tree_version="$(sed -n 's/^  VERSION \([0-9.]*\)$/\1/p' CMakeLists.txt)"
           tree_abi="$(sed -n 's/^set(MORPHEUS_ABI_VERSION \([0-9]*\))$/\1/p' CMakeLists.txt)"
+          echo "tree $tree_version ABI $tree_abi"
           test "$native_version" = "$tree_version"
           test "$native_abi" = "$tree_abi"
-          test "$(emcc --version | sed -n '1s/.* \([0-9][0-9.]*\) (.*/\1/p')" = "$emscripten_version"
+          emcc_version="$(emcc --version 2>/dev/null | sed -n 's/^emcc .* \([0-9][0-9.]*\) (.*/\1/p' | head -n 1)"
+          echo "emcc $emcc_version; node $(node --version); npm $(npm --version)"
+          test "$emcc_version" = "$emscripten_version"
 
           cmake \
             -DMORPHEUS_SOURCE_DIR="$GITHUB_WORKSPACE" \
