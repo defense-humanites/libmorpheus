@@ -159,9 +159,9 @@ jobs:
         env:
           QUALIFIED: ${{ runner.temp }}/qualified-wasm
         run: |
-          emcmake cmake -S . -B build/wasm-release -G Ninja \
+          emcmake cmake -S . -B build/wasm-release \
             -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
-          cmake --build build/wasm-release --target morpheus_wasm
+          cmake --build build/wasm-release --target morpheus_wasm --parallel
           cd build/wasm-release/wasm
           sha256sum morpheus.mjs morpheus.wasm > SHA256SUMS
           diff "$QUALIFIED/SHA256SUMS" SHA256SUMS
