@@ -11,6 +11,21 @@ on:
       - "python-v*"
       - "wasm-v*"
   pull_request:
+    # Lexical research files (the Latin and Greek Python tools and their
+    # tests, the research workflows, their reference receipts and the
+    # documentation) do not touch the runtime contract this workflow
+    # qualifies. tools/assemble-stemlib-qualification.py is used below and
+    # stays covered.
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/*-latin-*.py'
+      - 'tools/*-greek-*.py'
+      - 'tools/*lexical*.py'
+      - 'tools/latin-*.json'
+      - 'test/*.py'
+      - '.github/workflows/latin-*.yml'
+      - '.github/workflows/lexical-import-research.yml'
+      - '.github/workflows/documentation-license.yml'
 
 permissions:
   contents: read
