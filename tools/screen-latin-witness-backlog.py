@@ -61,7 +61,8 @@ def grammar_shape(grammars, literal):
     return 'other_grammar'
 
 
-def screen(candidate, witness, rows):
+def classify(candidate, witness, rows):
+    """Per-lemma category of every curated verbal lemma; private, used for counts only."""
     literal = literal_grammars()
     by_head = defaultdict(list); by_alternate = defaultdict(set)
     for row in rows:
@@ -71,14 +72,12 @@ def screen(candidate, witness, rows):
         for alternate in row.get('full_alternates', []):
             by_alternate[alternate.translate(NOTATION)].add(row['headword'])
     candidate_blocks = blocks(candidate); witness_blocks = blocks(witness)
-    counts = Counter(); joined = Counter()
+    categories = {}
     for lemma, records in sorted(witness_blocks.items()):
         if not records:
             continue
-        counts['witness_verbal_lemmas'] += 1
         if candidate_blocks.get(lemma):
-            counts['with_candidate_definitions'] += 1; continue
-        counts['without_candidate_definitions'] += 1
+            categories[lemma] = 'with_candidate_definitions'; continue
         key = lemma.decode('ascii', 'replace'); base = re.sub(r'#?\d$', '', key)
         heads = by_head.get(key, [])
         if not heads:
@@ -87,14 +86,28 @@ def screen(candidate, witness, rows):
             elif base.endswith('or') and base[:-2] + 'o' in by_head: reason = 'active_article_for_deponent_lemma'
             elif base.endswith('o') and base[:-1] + 'or' in by_head: reason = 'deponent_article_for_active_lemma'
             else: reason = 'no_projected_header'
-            counts['unjoined:' + reason] += 1; continue
+            categories[lemma] = 'unjoined:' + reason; continue
         if len(heads) > 1:
-            counts['joined:ambiguous_headers'] += 1; continue
-        row = heads[0]
-        grammars = [f['projection'] for f in row['fields'] if f['name'] == 'itype']
-        joined[grammar_shape(grammars, literal)] += 1
+            categories[lemma] = 'joined:ambiguous_headers'; continue
+        grammars = [f['projection'] for f in heads[0]['fields'] if f['name'] == 'itype']
+        categories[lemma] = 'joined:' + grammar_shape(grammars, literal)
+    return categories
+
+
+def screen(candidate, witness, rows):
+    categories = classify(candidate, witness, rows)
+    counts = Counter(); joined = Counter()
+    for lemma, category in categories.items():
+        counts['witness_verbal_lemmas'] += 1
+        if category == 'with_candidate_definitions':
+            counts['with_candidate_definitions'] += 1; continue
+        counts['without_candidate_definitions'] += 1
+        if category.startswith('joined:') and category != 'joined:ambiguous_headers':
+            joined[category[len('joined:'):]] += 1
+        else:
+            counts[category] += 1
     return {'counts': dict(sorted(counts.items())), 'joined_grammar_shapes': dict(sorted(joined.items())),
-            'literal_table_size': len(literal)}
+            'literal_table_size': len(literal_grammars())}
 
 
 def prepare(candidate, witness, headers, lexica):
