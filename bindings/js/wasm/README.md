@@ -46,8 +46,8 @@ under Deno, say), `createMorpheus()` fetches and compiles `morpheus.wasm`
 next to the loader itself; nothing changes for the caller. JSR also rewrites
 the module's import names into relative specifiers on publish, which the
 facade maps back onto the loader's imports. **Version 0.1.0 predates that
-mapping and fails to instantiate from JSR**; install it from npm, or use
-0.1.1 or later from either registry.
+mapping and fails to instantiate from JSR**; use 0.1.1 or later from either
+registry, or 0.1.0 from npm.
 
 ## Building the module
 
