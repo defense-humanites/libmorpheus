@@ -158,6 +158,13 @@ with its companion SHA-256 file. It compares the corrected allocation path
 against 0.4.1 on the same controlled Apple Silicon host; see the 0.4.2 release
 decision for the reviewed results and the short warm-generation measurement.
 
+The accepted 0.4.3 report is retained at
+[`bench/release-evidence/benchmark-0.4.3.json`](../bench/release-evidence/benchmark-0.4.3.json)
+with its companion SHA-256 file. It measures the provenance release against
+0.4.2 on the same controlled Apple Silicon host; the native paths are
+unchanged and the 0.4.3 release decision records the within-noise comparison
+and identical result counts.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be
