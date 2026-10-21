@@ -124,10 +124,12 @@ takes any iterable of `[path, bytes]`.
 ## Node.js, Deno and Bun
 
 A long-lived server keeps one instance (or one per worker thread) with the
-data in memory and one context per language:
+data in memory and one context per language. The example reads a stemlib
+tree placed next to the script (`./stemlib/Greek`, `./stemlib/Latin`):
 
 ```js
 import { readFile, readdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { createMorpheus, MorpheusLanguage } from "@libmorpheus/wasm";
 
@@ -141,8 +143,9 @@ async function loadStemlib(directory) {
   return entries; // filter to the runtime subset above if the tree is larger
 }
 
+const stemlib = fileURLToPath(new URL("./stemlib", import.meta.url));
 const morpheus = await createMorpheus();           // ./dist/morpheus.mjs
-const root = morpheus.writeStemlib(await loadStemlib("/srv/stemlib"));
+const root = morpheus.writeStemlib(await loadStemlib(stemlib));
 const contexts = {
   greek: morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek }),
   latin: morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin }),
@@ -151,6 +154,46 @@ const contexts = {
 export function analyze(language, betaCode) {
   return contexts[language].analyze(betaCode);     // synchronous
 }
+
+console.log(analyze("greek", "e)/kstasis"));
+```
+
+Run as is, the script prints one analysis, a noun (`partOfSpeech: 1`) in the
+feminine (`gender: 2`) singular (`number: 1`) nominative (`grammaticalCase:
+16`), with the numeric codes of `include/morpheus/morpheus.h`:
+
+```js
+[
+  {
+    structSize: 852,
+    partOfSpeech: 1,
+    dialect: 0,
+    geographicRegion: 0,
+    person: 0,
+    number: 1,
+    gender: 2,
+    grammaticalCase: 16,
+    tense: 0,
+    mood: 0,
+    voice: 0,
+    degree: 0,
+    raw: "e)/kstasis",
+    workword: "e)/kstasis",
+    lemma: "e)/kstasis",
+    preverb: "",
+    augment: "",
+    stem: "e)kstas",
+    suffix: "",
+    ending: "is",
+    crasis: "",
+    dictionaryForm: "",
+    englishForm: "",
+    rawPreverb: "",
+    domains: "",
+    morphFlags: Uint8Array(11) [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    truncatedFields: 0
+  }
+]
 ```
 
 Beta Code in, Beta Code out: the analyzer expects the historical transliteration

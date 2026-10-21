@@ -29,8 +29,8 @@ this separation and used one `v<version>` tag for the native and Deno tracks.
 
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
-`release-node-0.1.0.md` or `release-wasm-0.1.1.md`. The current native
-candidate is recorded in `release-0.4.3.md`; the earlier decisions remain
+`release-node-0.1.0.md` or `release-wasm-0.1.1.md`. The most recent native
+release is recorded in `release-0.4.3.md`; the earlier decisions remain
 historical evidence.
 
 ## 1. Version and compatibility decisions
@@ -149,6 +149,12 @@ contracts first.
 
 Do not qualify from a partial rerun that omits a failing job. Both Perseids and
 Alpheios fixture suites must run where their data prerequisites are available.
+A job that built and tested successfully and failed only while uploading its
+artifact (the hosted runner could not reach GitHub's artifact storage during
+the `v0.4.3` run) is a different case: re-run the failed jobs of the same run
+(`gh run rerun <id> --failed`) rather than retagging. The successful jobs keep
+their results and artifacts, the re-run job repeats its whole build and test,
+and the publication job then runs on the same attempt. The tag never moves.
 
 ## 4. ABI and consumer checks
 
@@ -312,6 +318,13 @@ Alpheios fixture suites must run where their data prerequisites are available.
   manually dispatch `Publish WebAssembly binding` with the existing tag; both
   the npm and the JSR steps skip an exact version already present, so the
   dispatch resumes at the GitHub release.
+- After publication, exercise the package from JSR itself (`deno add
+  jsr:@libmorpheus/wasm@<version>`, then the README's Node.js/Deno example
+  against a local stemlib) and record the outcome in the release decision.
+  JSR transforms published files (it rewrites `.wasm` import names and
+  resolves README links against its own pages), so neither the qualification
+  workflow nor a local static server stands in for it; 0.1.0 passed both and
+  failed from JSR.
 - Apply the digest-verification step only if container publication has been
   authorized under the data-distribution policy.
 - Preserve the CI run, version/ABI decision, source-data revisions, artifact

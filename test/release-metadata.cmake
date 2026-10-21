@@ -333,3 +333,34 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.2")
     message(FATAL_ERROR "Accepted 0.4.2 benchmark digest differs")
   endif()
 endif()
+
+if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.3")
+  foreach(expected_patch_release_value IN ITEMS
+          "Previous release tag: `v0.4.2`"
+          "Benchmark evidence: **accepted**"
+          "7892e7f14805348c2629154ef2bfe033adead256"
+          "39ff48435c8574d84f39dc20833754db015063192d5bfdc6d87a750f299ac96d"
+          "This native release changes no analysis or generation result.")
+    string(FIND "${release_decision}" "${expected_patch_release_value}"
+                patch_release_value_at)
+    if(patch_release_value_at EQUAL -1)
+      message(FATAL_ERROR
+        "release-0.4.3.md is missing: ${expected_patch_release_value}")
+    endif()
+  endforeach()
+  set(benchmark_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.3.json")
+  set(benchmark_checksum
+      "39ff48435c8574d84f39dc20833754db015063192d5bfdc6d87a750f299ac96d")
+  if(NOT EXISTS "${benchmark_path}" OR
+     NOT EXISTS "${benchmark_path}.sha256")
+    message(FATAL_ERROR "Accepted 0.4.3 benchmark evidence is missing")
+  endif()
+  file(SHA256 "${benchmark_path}" actual_benchmark_checksum)
+  file(READ "${benchmark_path}.sha256" recorded_benchmark_checksum)
+  if(NOT actual_benchmark_checksum STREQUAL benchmark_checksum OR
+     NOT recorded_benchmark_checksum MATCHES
+       "^${benchmark_checksum}  benchmark-0.4.3.json")
+    message(FATAL_ERROR "Accepted 0.4.3 benchmark digest differs")
+  endif()
+endif()
