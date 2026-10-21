@@ -1,9 +1,16 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 name: Latin residual loss attribution
 
-# Manual dispatch only (one LISTALL pass, about 25 minutes): the diagnostic
-# reads the qualified combined candidate and changes nothing.
+# One LISTALL pass, about 25 minutes: the diagnostic reads the qualified
+# combined candidate and changes nothing. It runs on manual dispatch, and on
+# push only when this file itself changes (GitHub registers a workflow for
+# dispatch only after it has run once).
 on:
+  push:
+    branches:
+      - research/lexical-arbitration-*
+    paths:
+      - '.github/workflows/latin-residual-loss-attribution.yml'
   workflow_dispatch:
 
 permissions:
