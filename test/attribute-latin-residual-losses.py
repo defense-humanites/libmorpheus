@@ -27,14 +27,15 @@ BLOCKS = {b'perdo': [b':vs:perd\tconj3'], b'calvor': [b':vs:calv\tconj3'], b'amo
 
 class Categories(unittest.TestCase):
     def test_lemma_categories_follow_the_open_decisions(self):
-        category = lambda lemma, pos=2: attribution.lemma_category(lemma, pos, CATEGORIES, BLOCKS)
-        self.assertEqual(category('con-manduco#1'), 'native_preverb_identifier')
+        category = lambda lemma, pos=2: attribution.lemma_category(lemma, pos, CATEGORIES, BLOCKS, {b'defatiscor'})
+        self.assertEqual(category('con-manduco#1'), 'native_preverb_identifier:hyphenated')
+        self.assertEqual(category('defatiscor'), 'native_preverb_identifier:mapped_composition')
         self.assertEqual(category('perdo'), 'curated_lemma_with_candidate_definition')
         self.assertEqual(category('calvo'), 'curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma')
         self.assertEqual(category('eo#2'), 'curated_lemma_without_definition:joined:vowel_initial_digit_grammar')
         self.assertEqual(category('amo'), 'candidate_lemma_outside_curated_witness')
         self.assertEqual(category('nemo'), 'lemma_outside_curated_witness_and_candidate')
-        self.assertEqual(category('rosa', pos=1), 'non_verbal_reading:pos_1')
+        self.assertEqual(category('rosa', pos=1), 'lemma_outside_curated_witness_and_candidate')
 
     def test_differing_fields_take_the_closest_reading_and_ignore_workword_notation(self):
         removed = signature('amat', 'amo')
@@ -42,6 +43,8 @@ class Categories(unittest.TestCase):
         self.assertEqual(attribution.differing_fields(removed, after), 'tense')
         self.assertEqual(attribution.differing_fields(removed, [signature('amat', 'amo', pos=1)]), 'part_of_speech')
         self.assertEqual(attribution.differing_fields(removed, []), 'no_candidate_reading')
+        self.assertEqual(attribution.differing_fields(removed, [signature('ama_t', 'amo')]), 'identical_reading_at_lower_multiplicity')
+        self.assertEqual(attribution.difference_size('identical_reading_at_lower_multiplicity'), 'identical_reading_at_lower_multiplicity')
 
 
 class Attribution(unittest.TestCase):
@@ -65,7 +68,8 @@ class Attribution(unittest.TestCase):
         self.assertEqual(report['completely_lost_forms_by_lemma_category'], {
             'curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma': {'readings': 2, 'forms': 2, 'lemmas': 1},
             'curated_lemma_without_definition:unjoined:no_projected_header': {'readings': 1, 'forms': 1, 'lemmas': 1},
-            'native_preverb_identifier': {'readings': 1, 'forms': 1, 'lemmas': 1}})
+            'native_preverb_identifier:hyphenated': {'readings': 1, 'forms': 1, 'lemmas': 1}})
+        self.assertEqual(report['readings_by_part_of_speech'], {'completely_lost_forms': {'2': 4}, 'unmatched_on_recognized_forms': {'2': 2}})
         self.assertEqual(report['unmatched_readings_by_lemma_category'], {
             'candidate_lemma_outside_curated_witness': {'readings': 1, 'lemmas': 1},
             'curated_lemma_with_candidate_definition': {'readings': 1, 'lemmas': 1}})

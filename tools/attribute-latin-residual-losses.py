@@ -30,6 +30,8 @@ from pathlib import Path
 import re
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parent
+COMPOUNDS = REPO / 'stemlib/Latin/stemsrc/vbs.cmp.ml'
 
 
 def sibling(name):
@@ -46,13 +48,23 @@ FIELDS = ('workword', 'lemma', 'part_of_speech', 'person', 'number', 'gender',
 NOTATION = str.maketrans('', '', '_^-')
 
 
-def lemma_category(lemma, pos, categories, candidate_blocks):
-    """Decision category of one removed reading, from its lemma and part of speech."""
-    if pos != 2:
-        return 'non_verbal_reading:pos_%s' % pos
+def composed_lemmas(compounds=COMPOUNDS):
+    """Lemma names the engine reports for native preverb compositions (vbs.cmp.ml, second column)."""
+    names = set()
+    for line in compounds.read_bytes().splitlines():
+        parts = line.split()
+        if len(parts) == 2:
+            names.add(parts[1])
+    return names
+
+
+def lemma_category(lemma, pos, categories, candidate_blocks, composed=frozenset()):
+    """Decision category of one removed reading, from its lemma; the part of speech is counted apart."""
     key = lemma.encode('ascii', 'replace')
     if '-' in re.sub(r'#\d+$', '', lemma):
-        return 'native_preverb_identifier'
+        return 'native_preverb_identifier:hyphenated'
+    if key in composed:
+        return 'native_preverb_identifier:mapped_composition'
     category = categories.get(key)
     if category == 'with_candidate_definitions':
         return 'curated_lemma_with_candidate_definition'
@@ -71,12 +83,14 @@ def differing_fields(removed, after):
                   if (left.translate(NOTATION) != right.translate(NOTATION) if name == 'workword' else left != right)]
         if best is None or len(fields) < len(best):
             best = fields
-    return '+'.join(best) if best else 'no_candidate_reading'
+    if best is None:
+        return 'no_candidate_reading'
+    return '+'.join(best) if best else 'identical_reading_at_lower_multiplicity'
 
 
 def difference_size(fields):
     """Coarse size of a difference: how many grammatical fields, and whether the lemma differs too."""
-    if fields == 'no_candidate_reading':
+    if fields in ('no_candidate_reading', 'identical_reading_at_lower_multiplicity'):
         return fields
     names = fields.split('+'); grammatical = [n for n in names if n not in ('workword', 'lemma')]
     size = ('one_grammatical_field' if len(grammatical) == 1 else 'two_or_three_grammatical_fields'
@@ -84,10 +98,10 @@ def difference_size(fields):
     return size + ('_and_lemma' if 'lemma' in names else '')
 
 
-def attribute(delta_path, after_signatures, categories, candidate_blocks):
+def attribute(delta_path, after_signatures, categories, candidate_blocks, composed=frozenset()):
     lost = {'readings': Counter(), 'forms': Counter(), 'lemmas': {}}
     unmatched = {'readings': Counter(), 'lemmas': {}}
-    by_fields = Counter(); fields_by_category = Counter(); by_size = Counter(); counts = Counter()
+    by_fields = Counter(); fields_by_category = Counter(); by_size = Counter(); counts = Counter(); by_pos = Counter()
     for line in delta_path.read_bytes().splitlines():
         row = json.loads(line)
         removed = Counter({tuple(r['signature']): r['multiplicity'] for r in row['removed']})
@@ -97,7 +111,8 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks):
             counts['completely_lost_forms'] += 1
             seen = set()
             for signature, count in removed.items():
-                category = lemma_category(signature[1], signature[2], categories, candidate_blocks)
+                category = lemma_category(signature[1], signature[2], categories, candidate_blocks, composed)
+                by_pos[('lost', str(signature[2]))] += count
                 lost['readings'][category] += count; counts['readings_on_completely_lost_forms'] += count
                 lost['lemmas'].setdefault(category, set()).add(signature[1])
                 if category not in seen:
@@ -111,7 +126,8 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks):
             if tier is not None:
                 counts['removed_readings_matched_by_lemma_identity'] += count; continue
             counts['unmatched_readings_on_recognized_forms'] += count
-            category = lemma_category(signature[1], signature[2], categories, candidate_blocks)
+            category = lemma_category(signature[1], signature[2], categories, candidate_blocks, composed)
+            by_pos[('unmatched', str(signature[2]))] += count
             unmatched['readings'][category] += count
             unmatched['lemmas'].setdefault(category, set()).add(signature[1])
             fields = differing_fields(signature, after)
@@ -123,6 +139,8 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks):
     return {'counts': dict(sorted(counts.items())),
             'completely_lost_forms_by_lemma_category': table(lost),
             'unmatched_readings_by_lemma_category': table(unmatched),
+            'readings_by_part_of_speech': {'completely_lost_forms': {p: n for (k, p), n in sorted(by_pos.items()) if k == 'lost'},
+                                           'unmatched_on_recognized_forms': {p: n for (k, p), n in sorted(by_pos.items()) if k == 'unmatched'}},
             'unmatched_readings_by_difference_size': dict(sorted(by_size.items())),
             'unmatched_readings_by_differing_fields': dict(sorted(by_fields.items(), key=lambda i: (-i[1], i[0]))),
             'unmatched_readings_by_category_and_fields': [
@@ -149,6 +167,7 @@ def prepare(args):
     rows, _, _ = screen.alternates.source_alternates(args.headers, args.tei)
     categories = screen.classify(stems.read_bytes(), args.witness.read_bytes(), rows)
     candidate_blocks = screen.blocks(stems.read_bytes())
+    composed = composed_lemmas(args.compounds)
     readers = {}
     try:
         readers['baseline'] = supines.direct.StrictRows(args.library, args.baseline)
@@ -158,7 +177,7 @@ def prepare(args):
         if (comparison['global_eleven_field_multisets']['removed_rows'] != expected['removed_rows']
                 or comparison['lost_forms_diagnostic']['forms'] != expected['forms']):
             raise ValueError('residual loss attribution baseline comparison differs from the qualified receipt')
-        report = attribute(target / 'baseline-combined.jsonl', combined.text_readings(readers['after']), categories, candidate_blocks)
+        report = attribute(target / 'baseline-combined.jsonl', combined.text_readings(readers['after']), categories, candidate_blocks, composed)
     finally:
         for reader in readers.values():
             reader.close()
@@ -167,7 +186,7 @@ def prepare(args):
         raise ValueError('residual loss attribution changed an input')
     return {'schema': 1,
             'scope': 'readings of the controlled rebuilt baseline that the combined candidate removes on LISTALL and that lemma identity does not explain, attributed by lemma category of the open decisions and by differing fields; witness used for membership only; no candidate changed, no production promotion',
-            'input_sha256': receipts, 'witness_sha256': native.digest(args.witness),
+            'input_sha256': receipts, 'witness_sha256': native.digest(args.witness), 'compounds_sha256': native.digest(args.compounds),
             'combined_source_sha256': native.digest(stems), 'trial_indexes_sha256': trial_indexes,
             'baseline_comparison': {k: comparison[k] for k in ('counts', 'global_eleven_field_multisets')},
             'lemma_categories': dict(sorted(Counter(categories.values()).items())),
@@ -178,6 +197,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('candidate', 'headers', 'tei', 'library', 'baseline', 'tools', 'filters', 'forms', 'witness', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--compounds', type=Path, default=COMPOUNDS,
+                        help='vbs.cmp.ml: the lemma names the engine reports for native preverb compositions')
     args = parser.parse_args()
     previous = os.umask(0o077)
     try:
