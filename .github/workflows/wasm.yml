@@ -20,6 +20,8 @@ on:
       - "include/**"
       - "src/**"
       - "test/**"
+      # The lexical research tests are Python and never reach the module.
+      - "!test/*.py"
       - "tools/gener-source-preparer.c"
       - "tools/gener-index-builder.c"
 

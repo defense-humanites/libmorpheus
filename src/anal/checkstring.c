@@ -1,6 +1,7 @@
 #include "anal_internal.h"
 #include "../morphlib/runtime_context_internal.h"
 #include "checkstring.proto.h"
+#include "latin_spelling_internal.h"
 static int checkstring4(gk_word *);
 static void add_apostrvowel(char *, char *, char *);
 static int set_prefixed_workword(gk_word *, const char *, const char *);
@@ -682,7 +683,7 @@ int checkstring3(gk_word *Gkword)
       /*
        * don't look for "cupjo"
        */
-      if( *a == 'i' && *(a+2) && strchr("aeiou",*(a+1)) ) {
+      if( morpheus_latin_can_retry_j(a) ) {
 	*a = 'j';
 
 	set_workword(Gkword,workword);
@@ -707,19 +708,9 @@ int checkstring3(gk_word *Gkword)
   {
     if (strncmp(workword_of(Gkword), "ex", 2) == 0)
     {
-      char* p_word = NULL;
-      char* p_tail = NULL;
-      char* p_start = NULL;
       Xstrcpy(workword, workword_of(Gkword));
-      p_word = workword;
-      p_word += 2;
-      switch (*p_word)
+      if (morpheus_latin_expand_ex(workword,sizeof workword))
       {
-	case 'c': case 'p': case 't':
-	  p_start = p_word;
-	  p_tail = p_word + 1;
-	  memmove(p_tail, p_word, strlen(p_word));
-	  *p_start = 's';
 	  set_workword(Gkword, workword);
 	  rval = checkstring3(Gkword);
 	  if (rval)
@@ -727,8 +718,6 @@ int checkstring3(gk_word *Gkword)
 	    set_workword(Gkword, saveword);
 	    return(rval);
 	  }
-        default:
-	  break;
       }
     }
   }
