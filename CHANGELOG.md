@@ -9,6 +9,17 @@ the corpus.
 
 ## [Unreleased]
 
+### Fixed
+
+- The WebAssembly facade instantiates a module whose import module names a
+  registry rewrote into relative specifiers. JSR does this to every
+  published `.wasm` (`env` becomes `./env`), so `@libmorpheus/wasm` 0.1.0
+  from JSR failed in `WebAssembly.instantiate()` while the same version from
+  npm and the GitHub release worked. The facade now maps such names back
+  onto the loader's imports; a test exercises a rewritten module. The
+  binding README links to repository documents by absolute URL, since JSR
+  resolves relative links against its own pages.
+
 ### Added
 
 - Experimental WebAssembly distribution. Configuring with Emscripten

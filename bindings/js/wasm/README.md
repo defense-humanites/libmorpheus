@@ -9,7 +9,7 @@ forms without a native toolchain or a server.
 
 The package contains **no linguistic data**. Applications provide a compiled
 stem library at runtime, exactly as the native library does. See
-[Acquiring runtime data](../../../docs/runtime-data.md).
+[Acquiring runtime data](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md).
 
 ## Status
 
@@ -43,7 +43,11 @@ the files themselves.
 
 When the package is served from a registry rather than installed on disk (JSR
 under Deno, say), `createMorpheus()` fetches and compiles `morpheus.wasm`
-next to the loader itself; nothing changes for the caller.
+next to the loader itself; nothing changes for the caller. JSR also rewrites
+the module's import names into relative specifiers on publish, which the
+facade maps back onto the loader's imports. **Version 0.1.0 predates that
+mapping and fails to instantiate from JSR**; install it from npm, or use
+0.1.1 or later from either registry.
 
 ## Building the module
 
@@ -60,7 +64,7 @@ cp build/wasm/wasm/morpheus.mjs build/wasm/wasm/morpheus.wasm bindings/js/wasm/d
 `morpheus.wasm` is about 150 KiB; `morpheus.mjs` is the Emscripten loader.
 Configuring with `-DBUILD_TESTING=ON` additionally compiles the native C test
 suite to WebAssembly so that `ctest` runs it under Node.js against the same
-object code; see [docs/wasm.md](../../../docs/wasm.md).
+object code; see [docs/wasm.md](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md).
 
 ## What the application sets up
 
@@ -74,15 +78,15 @@ things are the application's responsibility, whichever runtime it targets.
    the `.wasm` through the platform's own mechanism and pass it as
    `wasmModule`; the loader then neither fetches nor compiles anything.
 2. **The stemlib.** Nothing is bundled. Acquire a dataset as described in
-   [Acquiring runtime data](../../../docs/runtime-data.md), check the
-   [redistribution policy](../../../docs/stemlib-redistribution.md) for what
+   [Acquiring runtime data](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md), check the
+   [redistribution policy](https://github.com/defense-humanites/libmorpheus/blob/main/docs/stemlib-redistribution.md) for what
    you ship, and give the module the **whole runtime subset** of each language
    you serve (see [Which files](#which-files)).
 3. **Data placement.** On a server, write the files into the module's memory
    (`writeStemlib()`) rather than mounting a host directory
    (`mountDirectory()`): a mounted directory turns every historical
    `open`/`seek`/`read`/`close` into a system call reached through
-   JavaScript, which the [benchmark](../../../docs/wasm.md#performance-against-the-native-ffi-path)
+   JavaScript, which the [benchmark](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md#performance-against-the-native-ffi-path)
    shows is the slow placement. Mounting is for development and tests.
 4. **Instance lifetime and concurrency.** One instance costs tens of
    milliseconds to create and holds its own copy of the data, so create it
@@ -295,6 +299,6 @@ Set `MORPHEUS_GENER_STEMLIB` to a prepared Greek directory holding
 The facade is AGPL-3.0-or-later. The built module combines the
 AGPL-3.0-or-later and MPL-2.0 runtime sources with the MIT-licensed Emscripten
 support code; the corresponding texts are under `LICENSES/`. See the
-repository's [licensing](../../../docs/licensing.md) and
-[provenance](../../../docs/provenance.md) documents before redistributing a
+repository's [licensing](https://github.com/defense-humanites/libmorpheus/blob/main/docs/licensing.md) and
+[provenance](https://github.com/defense-humanites/libmorpheus/blob/main/docs/provenance.md) documents before redistributing a
 stemlib with an application.

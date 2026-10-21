@@ -54,6 +54,7 @@ set(agpl_files
     bindings/js/wasm/index.mjs
     bindings/js/wasm/internal/version.mjs
     bindings/js/wasm/test/bootstrap-npm.test.js
+    bindings/js/wasm/test/rewrite-wasm-imports.py
     bindings/js/wasm/test/wasm.test.js
     bindings/js/wasm/tools/bootstrap-npm.mjs
     cmake/emscripten-test-env.js
