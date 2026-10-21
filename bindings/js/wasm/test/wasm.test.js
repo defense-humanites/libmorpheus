@@ -10,7 +10,9 @@
 // gener.index to exercise generation as well.
 
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import process from "node:process";
@@ -76,6 +78,37 @@ test("a precompiled WebAssembly.Module is instantiated without fetching", async 
     assert.equal(context.analyze("lupus")[0].lemma, "lupus#1");
   } finally {
     context.close();
+  }
+});
+
+test("a module whose import names a registry rewrote still instantiates", async () => {
+  // JSR rewrites .wasm import module names into relative specifiers
+  // ("./env"); the facade must map them back onto the loader's imports.
+  const directory = mkdtempSync(join(tmpdir(), "libmorpheus-wasm-imports-"));
+  try {
+    const rewritten = join(directory, "morpheus.wasm");
+    execFileSync("python3", [
+      "-I",
+      new URL("./rewrite-wasm-imports.py", import.meta.url).pathname,
+      new URL("./morpheus.wasm", moduleUrl).pathname,
+      rewritten,
+    ]);
+    const wasmModule = await WebAssembly.compile(readFileSync(rewritten));
+    assert.deepEqual(
+      [...new Set(WebAssembly.Module.imports(wasmModule).map((entry) => entry.module))],
+      ["./env", "./wasi_snapshot_preview1"],
+    );
+    const { default: factory } = await import(moduleUrl.href);
+    const morpheus = await createMorpheus({ factory, wasmModule });
+    const root = morpheus.mountDirectory(stemlibRoot);
+    const context = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
+    try {
+      assert.equal(context.analyze("amavimus")[0].lemma, "amo");
+    } finally {
+      context.close();
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
   }
 });
 

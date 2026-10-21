@@ -246,7 +246,8 @@ foreach(required IN ITEMS
         LICENSE LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt NOTICE README.md
         index.d.ts index.mjs internal/version.mjs jsr.json jsr.json.license
         package.json package.json.license tools/bootstrap-npm.mjs
-        test/bootstrap-npm.test.js test/wasm.test.js)
+        test/bootstrap-npm.test.js test/rewrite-wasm-imports.py
+        test/wasm.test.js)
   if(NOT EXISTS "${binding_dir}/${required}")
     message(FATAL_ERROR "Missing WebAssembly package source: ${required}")
   endif()

@@ -729,6 +729,24 @@ async function compileRemoteModule(wasmUrl) {
 }
 
 /**
+ * Match the import object the Emscripten loader built against the import
+ * module names the compiled module actually declares. Registries that treat
+ * `.wasm` files as ES modules (JSR) rewrite those names into relative
+ * specifiers on publish, so a module served from there imports `./env`
+ * where the loader supplies `env`. Names the loader already provides are
+ * passed through unchanged.
+ */
+function alignImports(wasmModule, imports) {
+  const aligned = { ...imports };
+  for (const { module: name } of WebAssembly.Module.imports(wasmModule)) {
+    if (name in aligned) continue;
+    const plain = name.replace(/^(\.\.?\/)+/, "");
+    if (plain in imports) aligned[name] = imports[plain];
+  }
+  return aligned;
+}
+
+/**
  * Instantiate the module. By default the factory is imported from
  * `./dist/morpheus.mjs` next to this file; pass `moduleUrl` or an already
  * imported `factory` to load it from elsewhere. When the module URL is not a
@@ -765,7 +783,7 @@ export async function createMorpheus(
       throw new TypeError("wasmModule must be a WebAssembly.Module");
     }
     options.instantiateWasm = (imports, receive) => {
-      WebAssembly.instantiate(wasmModule, imports).then(
+      WebAssembly.instantiate(wasmModule, alignImports(wasmModule, imports)).then(
         (instance) => receive(instance, wasmModule),
         (error) => {
           throw error;
