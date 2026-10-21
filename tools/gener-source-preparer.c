@@ -905,7 +905,9 @@ main(int argc, char **argv)
 	int result = EXIT_FAILURE;
 
 #ifdef __EMSCRIPTEN__
-	if (setenv("MORPHLIB","/morphlib",1)) {
+	/* The packaged module serves the stemlib from MEMFS at /morphlib. An
+	 * explicit MORPHLIB (the Emscripten test build under NODERAWFS) wins. */
+	if (setenv("MORPHLIB","/morphlib",0)) {
 		report_errno("cannot configure","MORPHLIB");
 		return EXIT_FAILURE;
 	}

@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# MORPHEUS_TEST_LAUNCHER is empty for native builds; cross builds (Emscripten)
+# pass the emulator that runs the compiled programs.
 
 foreach(required IN ITEMS MORPHEUS_GENER_SOURCE_PREPARER
                           MORPHEUS_GENER_INDEX_BUILDER
@@ -19,7 +21,7 @@ set(derivation "${MORPHEUS_GENER_SOURCE_WORK_DIR}/derivation.txt")
 set(derivation_index "${MORPHEUS_GENER_SOURCE_WORK_DIR}/derivation.mgi")
 file(REMOVE "${derivation}" "${derivation_index}")
 execute_process(
-  COMMAND "${MORPHEUS_GENER_SOURCE_PREPARER}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
           "${derivation}" "${MORPHEUS_GENER_DERIVATION_SOURCE}"
   RESULT_VARIABLE derivation_result
   OUTPUT_VARIABLE derivation_output
@@ -38,7 +40,7 @@ if(NOT derivation_compare_result EQUAL 0)
   message(FATAL_ERROR "derivation expansion differs from the historical full oracle")
 endif()
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
           "${derivation_index}" "${derivation}"
   RESULT_VARIABLE derivation_index_result
   OUTPUT_VARIABLE derivation_index_output
@@ -56,7 +58,7 @@ file(REMOVE "${first}" "${second}" "${index}")
 
 foreach(output IN ITEMS "${first}" "${second}")
   execute_process(
-    COMMAND "${MORPHEUS_GENER_SOURCE_PREPARER}"
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
             "${output}" "${MORPHEUS_GENER_SOURCE_INPUT}"
     RESULT_VARIABLE prepare_result
     OUTPUT_VARIABLE prepare_output
@@ -79,7 +81,7 @@ foreach(expected IN ITEMS "${MORPHEUS_GENER_SOURCE_EXPECTED}" "${second}")
 endforeach()
 
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}" "${index}" "${first}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}" "${index}" "${first}"
   RESULT_VARIABLE index_result
   OUTPUT_VARIABLE index_output
   ERROR_VARIABLE index_error
@@ -94,7 +96,7 @@ foreach(rejected IN ITEMS "${MORPHEUS_GENER_SOURCE_ORPHAN}"
   set(rejected_output "${MORPHEUS_GENER_SOURCE_WORK_DIR}/rejected.txt")
   file(REMOVE "${rejected_output}")
   execute_process(
-    COMMAND "${MORPHEUS_GENER_SOURCE_PREPARER}"
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
             "${rejected_output}" "${rejected}"
     RESULT_VARIABLE rejected_result
     OUTPUT_QUIET

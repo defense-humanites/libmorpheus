@@ -67,6 +67,14 @@ corpus manifest and compiled preparer under `bindings/js/*/internal/`. The
 compiled preparer also contains the permissively licensed Emscripten runtime;
 its accompanying license text is included in each standalone binding package.
 
+The WebAssembly binding package (`bindings/js/wasm/`, published as
+`@libmorpheus/wasm`) is the one package that ships the compiled runtime. Its
+`dist/morpheus.mjs` and `dist/morpheus.wasm` combine the AGPL-3.0-or-later and
+MPL-2.0 runtime sources with the Emscripten runtime support code and are
+stamped `AGPL-3.0-or-later AND MPL-2.0 AND MIT`; the package carries the MPL
+and Emscripten license texts under `LICENSES/` next to the AGPL `LICENSE`.
+Like every other package, it contains no stem-library data.
+
 The root `LICENSE` remains the default for every unmarked file. Explicit MPL
 notices on boundary files prevent their accidental inclusion in the AGPL set.
 The root `LICENSE-AGPL-3.0-or-later` mirrors the canonical text under

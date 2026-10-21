@@ -1,0 +1,354 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+name: Publish WebAssembly binding
+
+on:
+  push:
+    tags:
+      - 'wasm-v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing WebAssembly binding tag to publish or recover
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+
+concurrency:
+  group: wasm-release-${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish-wasm:
+    name: Build reproducibly, then publish to npm and JSR
+    runs-on: ubuntu-latest
+    container: emscripten/emsdk:4.0.15
+    timeout-minutes: 40
+    defaults:
+      run:
+        # Inside a job container the default shell is sh; the verification
+        # step uses bash conditionals and here-strings.
+        shell: bash
+    steps:
+      - name: Check out the binding tag
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          ref: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+
+      - name: Install supported CMake, Node.js and Deno
+        # GITHUB_PATH prepends: the last directory written ends up first.
+        # Order matters here: the emsdk image ships a Node.js whose npm is
+        # too old for OIDC publication and a cmake older than the project's
+        # minimum, both ahead of /usr/bin on its PATH. /usr/bin (Node.js 24)
+        # must beat the image, and ~/.local/bin (cmake 3.31.6) must beat
+        # /usr/bin. emcc resolves its own Node.js through its configuration.
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+          apt-get install -y nodejs
+          echo "/usr/bin" >> "$GITHUB_PATH"
+          python3 -m pip install --user cmake==3.31.6
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          curl -fsSL https://deno.land/install.sh | DENO_INSTALL="$HOME/.deno" sh -s v2.9.5
+          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
+
+      - name: Show the tools later steps will use
+        run: |
+          echo "PATH=$PATH"
+          command -v cmake node npm deno emcc
+          cmake --version | head -n 1
+          node --version
+          npm --version
+          deno --version | head -n 1
+
+      - name: Verify binding version, tree version and ABI
+        id: metadata
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+        run: |
+          # Every check below is silent on success; on failure, name the
+          # command and line in a check-run annotation.
+          trap 'echo "::error title=verify (line $LINENO)::$BASH_COMMAND"' ERR
+          if ! [[ "$RELEASE_TAG" =~ ^wasm-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Invalid release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/vendor/alpheios-morpheus"
+          # The checkout step resolves the tag to a commit; make sure the tag
+          # ref itself exists locally before verifying it.
+          git fetch --no-tags origin "+refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          git show-ref --verify "refs/tags/$RELEASE_TAG"
+          release_sha="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
+          echo "tag $RELEASE_TAG -> $release_sha; HEAD $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$release_sha"
+
+          metadata="$(node --input-type=module -e '
+            import {
+              MORPHEUS_EMSCRIPTEN_VERSION,
+              MORPHEUS_NATIVE_ABI_VERSION,
+              MORPHEUS_NATIVE_VERSION,
+              MORPHEUS_WASM_VERSION,
+            } from "./bindings/js/wasm/internal/version.mjs";
+            console.log(`${MORPHEUS_WASM_VERSION} ${MORPHEUS_NATIVE_VERSION} ${MORPHEUS_NATIVE_ABI_VERSION} ${MORPHEUS_EMSCRIPTEN_VERSION}`);
+          ')"
+          read -r binding_version native_version native_abi emscripten_version <<<"$metadata"
+          echo "binding $binding_version; runtime $native_version ABI $native_abi; Emscripten $emscripten_version"
+          test "$RELEASE_TAG" = "wasm-v$binding_version"
+          test "$(node -p 'require("./bindings/js/wasm/package.json").version')" = "$binding_version"
+          test "$(node -p 'require("./bindings/js/wasm/jsr.json").version')" = "$binding_version"
+
+          tree_version="$(sed -n 's/^  VERSION \([0-9.]*\)$/\1/p' CMakeLists.txt)"
+          tree_abi="$(sed -n 's/^set(MORPHEUS_ABI_VERSION \([0-9]*\))$/\1/p' CMakeLists.txt)"
+          echo "tree $tree_version ABI $tree_abi"
+          test "$native_version" = "$tree_version"
+          test "$native_abi" = "$tree_abi"
+          emcc_version="$(emcc --version 2>/dev/null | sed -n 's/^emcc .* \([0-9][0-9.]*\) (.*/\1/p' | head -n 1)"
+          echo "emcc $emcc_version; node $(node --version); npm $(npm --version)"
+          test "$emcc_version" = "$emscripten_version"
+
+          cmake \
+            -DMORPHEUS_SOURCE_DIR="$GITHUB_WORKSPACE" \
+            -DMORPHEUS_PROJECT_VERSION="$tree_version" \
+            -DMORPHEUS_ABI_VERSION="$tree_abi" \
+            -P test/wasm-package-metadata.cmake
+
+          npm_version="$(npm --version)"
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) process.exit(1);
+          ' "$npm_version"
+
+          echo "release-sha=$release_sha" >> "$GITHUB_OUTPUT"
+          echo "binding-version=$binding_version" >> "$GITHUB_OUTPUT"
+          echo "native-version=$native_version" >> "$GITHUB_OUTPUT"
+          echo "native-abi=$native_abi" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for tagged qualification
+        id: qualification
+        uses: actions/github-script@v8
+        env:
+          RELEASE_SHA: ${{ steps.metadata.outputs.release-sha }}
+        with:
+          script: |
+            const required = [
+              { workflow: 'test.yml', label: 'Linux CI' },
+              { workflow: 'wasm.yml', label: 'WebAssembly qualification' },
+            ]
+            const deadline = Date.now() + 20 * 60 * 1000
+            while (Date.now() < deadline) {
+              let pending = false
+              for (const item of required) {
+                const result = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: item.workflow,
+                  event: 'push',
+                  head_sha: process.env.RELEASE_SHA,
+                  per_page: 10,
+                })
+                const run = result.data.workflow_runs.find((candidate) =>
+                  candidate.head_sha === process.env.RELEASE_SHA
+                )
+                if (run?.status !== 'completed') {
+                  pending = true
+                  core.info(run === undefined
+                    ? `Waiting for ${item.label} to appear.`
+                    : `Waiting for ${item.label} ${run.html_url}: ${run.status}.`)
+                  continue
+                }
+                if (run.conclusion !== 'success') {
+                  throw new Error(
+                    `${item.label} ${run.html_url} concluded ${run.conclusion}`,
+                  )
+                }
+                core.info(`${item.label} passed: ${run.html_url}`)
+                if (item.workflow === 'wasm.yml') {
+                  core.setOutput('wasm-run-id', String(run.id))
+                }
+              }
+              if (!pending) return
+              await new Promise((resolve) => setTimeout(resolve, 15000))
+            }
+            throw new Error('Timed out waiting for tagged qualification')
+
+      - name: Download the qualified module
+        uses: actions/download-artifact@v5
+        with:
+          name: libmorpheus-wasm
+          path: ${{ runner.temp }}/qualified-wasm
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.qualification.outputs.wasm-run-id }}
+
+      - name: Build the module again and require byte-for-byte reproduction
+        env:
+          QUALIFIED: ${{ runner.temp }}/qualified-wasm
+        run: |
+          emcmake cmake -S . -B build/wasm-release \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build build/wasm-release --target morpheus_wasm --parallel
+          cd build/wasm-release/wasm
+          sha256sum morpheus.mjs morpheus.wasm > SHA256SUMS
+          diff "$QUALIFIED/SHA256SUMS" SHA256SUMS
+          cmp "$QUALIFIED/morpheus.mjs" morpheus.mjs
+          cmp "$QUALIFIED/morpheus.wasm" morpheus.wasm
+
+      - name: Stage dist/ and verify both package manifests
+        working-directory: bindings/js/wasm
+        run: |
+          mkdir -p dist
+          cp ../../../build/wasm-release/wasm/morpheus.mjs \
+             ../../../build/wasm-release/wasm/morpheus.wasm dist/
+          deno check index.mjs
+          deno publish --dry-run
+          npm pack --dry-run --ignore-scripts .
+
+      - name: Test the packaged facade from an npm tarball
+        env:
+          BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
+        run: |
+          pack_root="$RUNNER_TEMP/wasm-pack"
+          consumer_root="$RUNNER_TEMP/wasm-consumer"
+          mkdir -p "$pack_root" "$consumer_root"
+          tarball="$(npm pack --silent --ignore-scripts \
+            --pack-destination "$pack_root" ./bindings/js/wasm)"
+          cd "$consumer_root"
+          npm init --yes
+          npm install --ignore-scripts "$pack_root/$tarball"
+          MORPHEUS_STEMLIB="$GITHUB_WORKSPACE/stemlib" node --input-type=module -e '
+            import { createMorpheus, MorpheusLanguage, MORPHEUS_WASM_VERSION } from "@libmorpheus/wasm";
+            import wasmFactory from "@libmorpheus/wasm/module";
+            if (MORPHEUS_WASM_VERSION !== process.env.BINDING_VERSION) process.exit(1);
+            if (typeof wasmFactory !== "function") process.exit(1);
+            const morpheus = await createMorpheus();
+            const root = morpheus.mountDirectory(process.env.MORPHEUS_STEMLIB);
+            const latin = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
+            const greek = morpheus.open({ stemlib: root, language: MorpheusLanguage.Greek });
+            if (latin.analyze("amavimus")[0]?.lemma !== "amo") process.exit(1);
+            if (greek.analyze("e)/dwken")[0]?.lemma !== "di/dwmi") process.exit(1);
+            morpheus.closeAll();
+          '
+
+      - name: Run the facade test suite against the staged module
+        env:
+          MORPHEUS_WASM_MODULE: bindings/js/wasm/dist/morpheus.mjs
+          MORPHEUS_STEMLIB: stemlib
+        run: node --test bindings/js/wasm/test/*.test.js
+
+      - name: Publish npm package
+        # Trusted publishing: npm exchanges the job's OIDC token for the
+        # publish grant configured on the package, as the Node.js track does.
+        env:
+          BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
+        run: |
+          published="$(npm view "@libmorpheus/wasm@$BINDING_VERSION" version \
+            2>/dev/null || true)"
+          if test -n "$published"; then
+            test "$published" = "$BINDING_VERSION"
+            echo "@libmorpheus/wasm@$BINDING_VERSION is already published."
+          else
+            npm publish ./bindings/js/wasm --access public --provenance
+          fi
+
+      - name: Publish JSR package
+        # Like the npm step, skip an exact version JSR already holds, so a
+        # recovery dispatch after a timed-out run reaches the release step.
+        # deno publish returns only once JSR has processed the upload; when
+        # JSR queues it for long, the job may time out after npm succeeded.
+        working-directory: bindings/js/wasm
+        env:
+          BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
+        run: |
+          status="$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://jsr.io/@libmorpheus/wasm/${BINDING_VERSION}_meta.json" || echo 000)"
+          case "$status" in
+            200)
+              echo "@libmorpheus/wasm@$BINDING_VERSION is already published on JSR."
+              ;;
+            404)
+              deno publish
+              ;;
+            *)
+              echo "::error title=jsr::unexpected HTTP $status from JSR for version $BINDING_VERSION"
+              exit 1
+              ;;
+          esac
+
+      - name: Publish binding release with the module and its digests
+        uses: actions/github-script@v8
+        env:
+          BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
+          NATIVE_VERSION: ${{ steps.metadata.outputs.native-version }}
+          NATIVE_ABI: ${{ steps.metadata.outputs.native-abi }}
+          MODULE_DIR: build/wasm-release/wasm
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const tag = `wasm-v${process.env.BINDING_VERSION}`
+            const expected = ['morpheus.mjs', 'morpheus.wasm', 'SHA256SUMS']
+            let existing
+            try {
+              existing = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              })
+            } catch (error) {
+              if (error.status !== 404) throw error
+            }
+            if (existing === undefined) {
+              const notesPath = `docs/release-wasm-${process.env.BINDING_VERSION}.md`
+              const body = fs.existsSync(notesPath)
+                ? fs.readFileSync(notesPath, 'utf8')
+                : `Compiled from libmorpheus ${process.env.NATIVE_VERSION} (ABI ${process.env.NATIVE_ABI}). Contains no linguistic data.`
+              existing = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                target_commitish: context.sha,
+                name: `libmorpheus WebAssembly binding ${process.env.BINDING_VERSION}`,
+                body,
+                draft: true,
+                prerelease: true,
+              })
+            }
+            if (existing.data.draft) {
+              const uploaded = new Set(existing.data.assets.map((asset) => asset.name))
+              for (const name of expected.filter((name) => !uploaded.has(name))) {
+                const data = fs.readFileSync(path.join(process.env.MODULE_DIR, name))
+                await github.rest.repos.uploadReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: existing.data.id,
+                  name,
+                  data,
+                  headers: {
+                    'content-type': 'application/octet-stream',
+                    'content-length': data.length,
+                  },
+                })
+              }
+              existing = await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: existing.data.id,
+                draft: false,
+                make_latest: 'false',
+              })
+            }
+            if (existing.data.draft) {
+              throw new Error(`Binding release remains a draft: ${existing.data.html_url}`)
+            }
+            const published = new Set(existing.data.assets.map((asset) => asset.name))
+            const missing = expected.filter((name) => !published.has(name))
+            if (missing.length !== 0) {
+              throw new Error(`Binding release is missing: ${missing.join(', ')}`)
+            }
+            core.info(`Published binding release: ${existing.data.html_url}`)

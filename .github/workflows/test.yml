@@ -9,17 +9,23 @@ on:
       - "deno-v*"
       - "node-v*"
       - "python-v*"
+      - "wasm-v*"
   pull_request:
-    # Research-only changes (Python tools and their tests, research
-    # workflows, documentation) do not touch the runtime contract this
-    # workflow qualifies; skipping them keeps ten jobs per push off the
-    # organization's shared Actions quota.
+    # Lexical research files (the Latin and Greek Python tools and their
+    # tests, the research workflows, their reference receipts and the
+    # documentation) do not touch the runtime contract this workflow
+    # qualifies. tools/assemble-stemlib-qualification.py is used below and
+    # stays covered.
     paths-ignore:
       - 'docs/**'
-      - 'tools/*.py'
+      - 'tools/*-latin-*.py'
+      - 'tools/*-greek-*.py'
+      - 'tools/*lexical*.py'
+      - 'tools/latin-*.json'
       - 'test/*.py'
       - '.github/workflows/latin-*.yml'
       - '.github/workflows/lexical-import-research.yml'
+      - '.github/workflows/documentation-license.yml'
 
 permissions:
   contents: read
@@ -241,7 +247,7 @@ jobs:
             bindings/js/deno/native.ts bindings/js/deno/test/native_test.ts \
             bindings/js/deno/setup.ts bindings/js/deno/test/setup_test.ts \
             bindings/js/deno/test/gener_preparer_test.ts \
-            bench/compare.ts bench/compare_test.ts \
+            bench/compare.ts bench/compare_test.ts bench/wasm_worker.ts \
             bench/validate.ts bench/validate_test.ts
 
       - name: Test binding

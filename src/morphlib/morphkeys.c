@@ -613,7 +613,10 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 			fprintf(stdout,"could not recognize [%s]\n", decl );
 			targs[i].morph_flags = (stemnum );
 		} else */
-			targs[i].morph_flags = (stemnum | declnum);
+			/* Stemtype is a 32-bit disk word; the cast keeps the
+			 * assignment explicit where long is also 32 bits (ILP32,
+			 * wasm32). */
+			targs[i].morph_flags = (Morph_flags)(stemnum | declnum);
 		targs[i].add_val = curfunc;
 
 /*

@@ -11,6 +11,8 @@ set(agpl_files
     .github/workflows/platform.yml
     .github/workflows/pypi-smoke.yml
     .github/workflows/python-release.yml
+    .github/workflows/wasm.yml
+    .github/workflows/wasm-release.yml
     CHANGELOG.md
     CMakeLists.txt
     docs/release-node-0.1.0.md
@@ -46,6 +48,17 @@ set(agpl_files
     bindings/js/node/test/main-module.test.js
     bindings/js/node/test/native.test.js
     bindings/js/node/test/setup.test.js
+    bindings/js/wasm/NOTICE
+    bindings/js/wasm/README.md
+    bindings/js/wasm/index.d.ts
+    bindings/js/wasm/index.mjs
+    bindings/js/wasm/internal/version.mjs
+    bindings/js/wasm/test/bootstrap-npm.test.js
+    bindings/js/wasm/test/rewrite-wasm-imports.py
+    bindings/js/wasm/test/wasm.test.js
+    bindings/js/wasm/tools/bootstrap-npm.mjs
+    cmake/emscripten-test-env.js
+    src/wasm/module.c
     bindings/python/NOTICE
     bindings/python/README.md
     bindings/python/pyproject.toml
@@ -192,6 +205,24 @@ string(FIND "${presets_license}"
 if(presets_spdx_at EQUAL -1)
   message(FATAL_ERROR
           "AGPL SPDX sidecar missing for CMakePresets.json")
+endif()
+
+file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/wasm/package.json.license"
+     wasm_package_license)
+string(FIND "${wasm_package_license}"
+       "SPDX-License-Identifier: AGPL-3.0-or-later" wasm_package_spdx_at)
+if(wasm_package_spdx_at EQUAL -1)
+  message(FATAL_ERROR
+          "AGPL SPDX sidecar missing for bindings/js/wasm/package.json")
+endif()
+
+file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/wasm/jsr.json.license"
+     wasm_jsr_license)
+string(FIND "${wasm_jsr_license}"
+       "SPDX-License-Identifier: AGPL-3.0-or-later" wasm_jsr_spdx_at)
+if(wasm_jsr_spdx_at EQUAL -1)
+  message(FATAL_ERROR
+          "AGPL SPDX sidecar missing for bindings/js/wasm/jsr.json")
 endif()
 
 file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/deno/jsr.json.license"

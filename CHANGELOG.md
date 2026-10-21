@@ -9,6 +9,76 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-21
+
+Target project version: **0.4.3**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release carries no change to analysis or generation results.
+It regularizes the provenance of the WebAssembly binding: `@libmorpheus/wasm`
+0.1.0 was compiled from a `main` commit whose runtime sources differ from
+`v0.4.2` by the two ILP32 corrections below. 0.4.3 is the native release
+those sources belong to, and WebAssembly binding 0.1.1 is compiled from it.
+
+### Fixed
+
+- The WebAssembly facade instantiates a module whose import module names a
+  registry rewrote into relative specifiers. JSR does this to every
+  published `.wasm` (`env` becomes `./env`), so `@libmorpheus/wasm` 0.1.0
+  from JSR failed in `WebAssembly.instantiate()` while the same version from
+  npm and the GitHub release worked. The facade now maps such names back
+  onto the loader's imports; a test exercises a rewritten module. The
+  binding README links to repository documents by absolute URL, since JSR
+  resolves relative links against its own pages.
+
+### Added
+
+- Experimental WebAssembly distribution. Configuring with Emscripten
+  (`emcmake cmake`) builds the complete public C API (`morpheus.h` and
+  `compat.h`) into `morpheus.mjs` plus `morpheus.wasm` through the new
+  `MORPHEUS_BUILD_WASM` option, and compiles the native C test suite to
+  WebAssembly so `ctest` runs it under Node.js against the same object code.
+  A JavaScript facade under `bindings/js/wasm/` marshals the fixed-layout
+  result structures for browsers, workers, Node.js, Deno and Bun. The module
+  contains no linguistic data. See `docs/wasm.md`.
+- `bench/compare.ts` measures the WebAssembly module next to the native FFI
+  path when `MORPHEUS_WASM_MODULE` is set: warm analysis and generation over
+  a pool of Deno workers sharing one compiled module, cold instantiation, and
+  both data placements (`--wasm-data memfs,nodefs`). WebAssembly measurements
+  are optional in baseline comparisons.
+- The WebAssembly facade accepts a precompiled `wasmModule`, which is how a
+  Cloudflare Worker (`.wasm` import) or a worker pool (one compile, shared by
+  `postMessage`) instantiates it; the stamped `morpheus.mjs` no longer takes
+  Emscripten's Node.js path on runtimes without `import.meta.url`. The binding
+  README documents the recommended configuration for servers, browsers and
+  Cloudflare Workers, the latter exercised with `wrangler dev`.
+- WebAssembly binding 0.1.1, compiled from this release, with the JSR
+  import-name mapping above. 0.1.0 remains usable from npm.
+- WebAssembly binding release track. `bindings/js/wasm/` is packaged as
+  `@libmorpheus/wasm` for npm (`package.json`) and JSR (`jsr.json`) from one
+  directory; `internal/version.mjs` declares the binding version, the
+  libmorpheus release and ABI compiled into the module, and the Emscripten
+  release that reproduces it, which the module header now also records. The
+  facade loads `morpheus.wasm` itself when the package is served from a
+  registry, and the stamped loader takes Emscripten's Node.js path only for
+  modules loaded from `file:` URLs. `wasm_package_metadata` checks both
+  manifests, the version coupling to the tree, the closed file set and the
+  absence of linguistic data; `wasm-release.yml` publishes on `wasm-v*` tags
+  after rebuilding the module and requiring byte-for-byte reproduction of the
+  qualified artifact. `bindings/js/wasm/tools/bootstrap-npm.mjs` stages the
+  inert `0.0.0` placeholder that the one-time manual npm reservation needs
+  before trusted publishing can be configured, as the Node.js track does.
+
+### Changed
+
+- The runtime now builds cleanly on ILP32 targets (32-bit `long`, as on
+  wasm32): `morphkeys.c` casts the stem-type word explicitly and
+  `retrentry.c` refuses a pre-index offset that `long` cannot represent
+  instead of narrowing it silently. LP64 behaviour is unchanged.
+- The internal Emscripten generation preparer honours an explicit `MORPHLIB`
+  instead of overriding it, so the same program runs under the host file
+  system in the WebAssembly test build. The checked-in Deno and Node.js
+  preparer modules are regenerated from the updated sources.
+
 ## [0.4.2] - 2026-09-28
 
 Target project version: **0.4.2**. C ABI: **2**. Shared-library SONAME: **1**.

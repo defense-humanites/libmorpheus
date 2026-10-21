@@ -111,9 +111,20 @@ ChckPreIndex(endtags *etags, char *tag, int ntags, int exact_match,
 
 	if( ! rval )
 		roff = 0;
-	else
-		roff = tagoffset_of(etags+rval);
-	
+	else {
+		/* The pre-index stores 32-bit offsets. Callers treat a negative
+		 * value as failure, so refuse an offset that long cannot hold
+		 * where long is also 32 bits (ILP32, wasm32). */
+		morpheus_stemlib_offset tagoffset = tagoffset_of(etags+rval);
+#if LONG_MAX < UINT32_MAX
+		if (tagoffset > (morpheus_stemlib_offset)LONG_MAX) {
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+			return((long) -1 );
+		}
+#endif
+		roff = (long)tagoffset;
+	}
+
 return( roff  );
 }
 

@@ -3,13 +3,15 @@
 # Release qualification
 
 This checklist defines the independent native-runtime, Deno-binding,
-Node.js-binding, and Python-binding release tracks. Native releases cover the C
+Node.js-binding, Python-binding, and WebAssembly-binding release tracks. Native releases cover the C
 library, installed metadata, containers, `cruncher`, and pinned fixture data.
 Deno releases cover the TypeScript binding, its acquisition commands,
 standalone archive, and JSR package. Node.js releases cover the ESM facade,
 acquisition commands, and three optional Node-API addon packages on npm. Python
-releases cover the pure-Python `ctypes` facade on PyPI. Historical standalone
-utilities are outside these release contracts.
+releases cover the pure-Python `ctypes` facade on PyPI. WebAssembly releases
+cover the Emscripten-compiled runtime module and its JavaScript facade,
+published as one package on npm and JSR. Historical standalone utilities are
+outside these release contracts.
 
 Native releases use `v<version>` tags. Deno binding releases use
 `deno-v<version>` tags and declare the compatible native release and ABI in
@@ -17,13 +19,19 @@ Native releases use `v<version>` tags. Deno binding releases use
 `node-v<version>` tags and declare native compatibility in
 `bindings/js/node/internal/native-manifest.js`. Python binding releases use
 `python-v<version>` tags and declare compatibility in
-`bindings/python/src/libmorpheus/_version.py`. Releases through `0.3.2` predate
+`bindings/python/src/libmorpheus/_version.py`. WebAssembly binding releases
+use `wasm-v<version>` tags and declare, in
+`bindings/js/wasm/internal/version.mjs`, the libmorpheus release and ABI
+compiled into the module and the Emscripten release that reproduces it;
+unlike the other bindings, this package ships the runtime, so its declared
+native version must equal the tagged tree's own. Releases through `0.3.2` predate
 this separation and used one `v<version>` tag for the native and Deno tracks.
 
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
-`release-node-0.1.0.md`. The current native candidate is recorded in
-`release-0.4.2.md`; the earlier decisions remain historical evidence.
+`release-node-0.1.0.md` or `release-wasm-0.1.1.md`. The most recent native
+release is recorded in `release-0.4.3.md`; the earlier decisions remain
+historical evidence.
 
 ## 1. Version and compatibility decisions
 
@@ -48,6 +56,15 @@ Each native release records its version and ABI decision in
 - For a Python release, update `bindings/python/pyproject.toml` and
   `MORPHEUS_PYTHON_VERSION` together, then independently review
   `MORPHEUS_NATIVE_VERSION` and `MORPHEUS_NATIVE_ABI_VERSION`.
+- For a WebAssembly release, update `bindings/js/wasm/package.json`,
+  `bindings/js/wasm/jsr.json` and `MORPHEUS_WASM_VERSION` together. Keep
+  `MORPHEUS_NATIVE_VERSION` equal to `project(VERSION ...)` and
+  `MORPHEUS_NATIVE_ABI_VERSION` equal to `MORPHEUS_ABI_VERSION`; a runtime
+  change therefore needs a native release first and a WebAssembly release
+  after it, from the same commit or a descendant with an unchanged runtime.
+  Change `MORPHEUS_EMSCRIPTEN_VERSION` only together with the `emsdk` image
+  pinned in `wasm.yml`, `wasm-release.yml` and `test.yml`, and regenerate the
+  checked-in preparer modules with it.
 - Write release notes that distinguish code changes from stemlib data changes.
 - Move the candidate notes in `CHANGELOG.md` from `Unreleased` to a dated
   version heading without changing their technical scope during packaging.
@@ -132,6 +149,12 @@ contracts first.
 
 Do not qualify from a partial rerun that omits a failing job. Both Perseids and
 Alpheios fixture suites must run where their data prerequisites are available.
+A job that built and tested successfully and failed only while uploading its
+artifact (the hosted runner could not reach GitHub's artifact storage during
+the `v0.4.3` run) is a different case: re-run the failed jobs of the same run
+(`gh run rerun <id> --failed`) rather than retagging. The successful jobs keep
+their results and artifacts, the re-run job repeats its whole build and test,
+and the publication job then runs on the same attempt. The tag never moves.
 
 ## 4. ABI and consumer checks
 
@@ -260,6 +283,48 @@ Alpheios fixture suites must run where their data prerequisites are available.
   Latin multiple interpretations, and Greek dual generation against the
   compatible compiled runtime. A recovery dispatch may reuse only the existing
   immutable tag and skips files already accepted by PyPI.
+- Before the first WebAssembly publication, link `@libmorpheus/wasm` to
+  `defense-humanites/libmorpheus` in the package's JSR settings (done for
+  the 0.1.0 preparation). npm, unlike JSR, cannot reserve a name without a
+  publication and grants a trusted publisher only to an existing package, so
+  stage the inert placeholder with
+  `node bindings/js/wasm/tools/bootstrap-npm.mjs --output <dir>`, inspect
+  `npm pack --dry-run` in that directory (license texts, NOTICE, README,
+  `package.json`; no code, no module), and publish it interactively once with
+  `npm publish --access public --tag bootstrap`. npm nevertheless assigns
+  `latest` to the first version of a package whatever tag is requested, and
+  a single-version package cannot drop it; the first versioned publication
+  moves `latest` off the placeholder, so do not announce the package before
+  it. Then configure trusted publishing on
+  `@libmorpheus/wasm` with GitHub organization `defense-humanites`,
+  repository `libmorpheus`, workflow filename `wasm-release.yml` and
+  `npm publish` permission; the versioned workflow needs no token.
+- For a WebAssembly release, build `dist/` locally with the pinned Emscripten,
+  run `deno publish --dry-run` and `npm pack --dry-run --ignore-scripts` from
+  `bindings/js/wasm`, and inspect both file lists: the loader, the module, the
+  facade, its types, the version module, licenses and README, and nothing
+  else. Tag the exact qualified commit as `wasm-v<version>`. The dedicated
+  workflow waits for tagged Linux CI and the WebAssembly qualification,
+  rebuilds the module in the pinned `emsdk` container and requires it to
+  reproduce the qualified artifact byte for byte, tests the facade from an
+  `npm pack` tarball, publishes to npm through OIDC with provenance and to
+  JSR, then attaches `morpheus.mjs`, `morpheus.wasm` and `SHA256SUMS` to a
+  pre-release GitHub release named by the tag. The package never contains
+  linguistic data; `wasm_package_metadata` enforces that at every CI run.
+- If one registry accepts the version and the other rejects it, or the job
+  times out while JSR is still processing the upload (`deno publish` returns
+  only once JSR has processed it, and JSR may queue it for long), do not move
+  the tag. Fix only package metadata on `main` if a registry requires it and
+  manually dispatch `Publish WebAssembly binding` with the existing tag; both
+  the npm and the JSR steps skip an exact version already present, so the
+  dispatch resumes at the GitHub release.
+- After publication, exercise the package from JSR itself (`deno add
+  jsr:@libmorpheus/wasm@<version>`, then the README's Node.js/Deno example
+  against a local stemlib) and record the outcome in the release decision.
+  JSR transforms published files (it rewrites `.wasm` import names and
+  resolves README links against its own pages), so neither the qualification
+  workflow nor a local static server stands in for it; 0.1.0 passed both and
+  failed from JSR.
 - Apply the digest-verification step only if container publication has been
   authorized under the data-distribution policy.
 - Preserve the CI run, version/ABI decision, source-data revisions, artifact

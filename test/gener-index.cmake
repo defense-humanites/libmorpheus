@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# MORPHEUS_TEST_LAUNCHER is empty for native builds; cross builds (Emscripten)
+# pass the emulator that runs the compiled programs.
 
 foreach(required IN ITEMS MORPHEUS_GENER_INDEX_BUILDER
                           MORPHEUS_GENER_INDEX_INSPECTOR
@@ -17,7 +19,7 @@ file(REMOVE "${first}" "${second}")
 
 foreach(output IN ITEMS "${first}" "${second}")
   execute_process(
-    COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}"
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
             "${output}" "${MORPHEUS_GENER_INDEX_SOURCE}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
@@ -38,7 +40,7 @@ if(NOT compare_result EQUAL 0)
 endif()
 
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_INSPECTOR}" "${first}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_INSPECTOR}" "${first}"
   RESULT_VARIABLE inspect_result
   OUTPUT_VARIABLE inspect_output
   ERROR_VARIABLE inspect_error
@@ -51,7 +53,7 @@ endif()
 set(rejected "${MORPHEUS_GENER_INDEX_WORK_DIR}/rejected.mgi")
 file(REMOVE "${rejected}")
 execute_process(
-  COMMAND "${MORPHEUS_GENER_INDEX_BUILDER}"
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
           "${rejected}" "${MORPHEUS_GENER_INDEX_UNEXPANDED_SOURCE}"
   RESULT_VARIABLE rejected_result
   OUTPUT_QUIET
