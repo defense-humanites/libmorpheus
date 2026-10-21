@@ -9,6 +9,16 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-21
+
+Target project version: **0.4.3**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release carries no change to analysis or generation results.
+It regularizes the provenance of the WebAssembly binding: `@libmorpheus/wasm`
+0.1.0 was compiled from a `main` commit whose runtime sources differ from
+`v0.4.2` by the two ILP32 corrections below. 0.4.3 is the native release
+those sources belong to, and WebAssembly binding 0.1.1 is compiled from it.
+
 ### Fixed
 
 - The WebAssembly facade instantiates a module whose import module names a
@@ -41,6 +51,8 @@ the corpus.
   Emscripten's Node.js path on runtimes without `import.meta.url`. The binding
   README documents the recommended configuration for servers, browsers and
   Cloudflare Workers, the latter exercised with `wrangler dev`.
+- WebAssembly binding 0.1.1, compiled from this release, with the JSR
+  import-name mapping above. 0.1.0 remains usable from npm.
 - WebAssembly binding release track. `bindings/js/wasm/` is packaged as
   `@libmorpheus/wasm` for npm (`package.json`) and JSR (`jsr.json`) from one
   directory; `internal/version.mjs` declares the binding version, the

@@ -1,6 +1,6 @@
 {
   "name": "@libmorpheus/wasm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "WebAssembly build of the libmorpheus morphological analyzer for browsers and JavaScript runtimes",
   "keywords": [
     "morpheus",
