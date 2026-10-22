@@ -2,8 +2,11 @@
 
 # Sigmatic suffix repair
 
-Not yet qualified on LISTALL: the dedicated workflow runs on the commit that
-adds this recipe and this page will carry its receipt.
+Qualified code: `6fc097adb4560f85ae54e78d2d3922bb70063aac`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39813136660)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-sigmatic-suffix-6fc097a.json)
+records counts, categories and SHA-256 values only.
 
 The [written-part anchor repair](latin-anchor-duplication.md) handled the
 parts that repeat the stem's letters. A second defect of the same historical
@@ -65,17 +68,37 @@ nothing.
 
 ## Full LISTALL diagnostic
 
-Pending the dedicated run. The first runs failed their global check
-because LISTALL forms stopped being recognized, and each of them turned out
-to have been recognized by a wrong reading alone: *subsit* as a perfect of
-*subsentio* from the `sub-s` stem (the irregular *subsum* of the candidate,
-as of the controlled baseline, generates neither *subsit* nor *subsunt*), and
-*deintus* as a perfect participle of *indulgeo* composed with the native
-preverb `de_-` from the `int` stem, a form the controlled baseline does not
-recognize at all. The qualification tool now counts and publishes the forms
-whose **every** former reading was a perfect-system reading of a repaired
-block, directly or through native preverb composition, and still fails on
-any other lost form.
+| Metric | Original candidate | Sigmatic repair trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 847,843 |
+| Native analysis rows | 2,100,530 | 2,100,845 |
+| Lost recognized forms | — | 3 (see below) |
+| Removed eleven-field readings | — | 29 |
+| Added eleven-field readings | — | 344 |
+| Changed grammatical multisets | — | 217 |
+| Equal-count multiset changes | — | 0 |
+
+96 forms become recognized. Of the 344 additions, 332 are direct and 12
+carry native preverbs; by API tense they are 6 without tense, 99 future, 167
+perfect, 48 pluperfect and 24 future perfect. The 29 removed readings lie on
+25 forms that stay recognized under other readings. The identical-root
+control changes nothing.
+
+Three LISTALL forms stop being recognized, and the receipt attributes each of
+them to a single former reading, a perfect of a repaired block (two direct,
+one through native preverb composition). The first runs of the qualification
+failed on exactly these forms, and each turned out to have been recognized by
+a wrong reading alone: *subsit* as a perfect of *subsentio* from the `sub-s`
+stem (the irregular *subsum* of the candidate, as of the controlled baseline,
+generates neither *subsit* nor *subsunt*), and *deintus* as a perfect
+participle of *indulgeo* composed with the native preverb `de_-` from the
+`int` stem, a form the controlled baseline does not recognize at all. The
+qualification tool therefore counts and publishes the forms whose **every**
+former reading was a perfect-system reading of a repaired block, directly or
+through native preverb composition, and still fails on any other lost form.
+The lesson carries beyond this recipe: native preverb composition multiplies
+every defective stem across the preverb table, so a repair also withdraws
+composed readings, and a real word may owe its recognition to one of them.
 
 ## Remaining arbitration
 
