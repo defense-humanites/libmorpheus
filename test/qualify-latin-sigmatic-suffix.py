@@ -44,6 +44,24 @@ class Inventory(unittest.TestCase):
         self.assertIn(b'indulsit',{c[0] for c in cells})
         self.assertIn(b'refultum',{c[0] for c in cells})
 
+    def test_defective_only_losses(self):
+        import json,tempfile
+        rows=[{'form':'subsit','curated_count':1,'rebuilt_count':0,'retained_rows':0,'added':[],
+               'removed':[{'signature':['subsit','subsentio',2,3,1,0,0,5,4,1,0],'multiplicity':1}]},
+              {'form':'other','curated_count':2,'rebuilt_count':1,'retained_rows':1,'added':[],
+               'removed':[{'signature':['other','indulgeo',2,3,1,0,0,5,4,1,0],'multiplicity':1}]}]
+        bad=rows+[{'form':'gone','curated_count':1,'rebuilt_count':0,'retained_rows':0,'added':[],
+                   'removed':[{'signature':['gone','amo',2,3,1,0,0,1,4,1,0],'multiplicity':1}]}]
+        with tempfile.TemporaryDirectory() as d:
+            delta=Path(d)/'delta.jsonl'
+            delta.write_text(''.join(json.dumps(r)+'\n' for r in rows))
+            report=trial.defective_only_losses(delta,{b'subsentio',b'indulgeo'})
+            self.assertEqual(report['counts'],{'forms':1,'readings':1})
+            self.assertEqual(report['readings_by_tense'],{'5':1})
+            delta.write_text(''.join(json.dumps(r)+'\n' for r in bad))
+            with self.assertRaises(ValueError):
+                trial.defective_only_losses(delta,{b'subsentio',b'indulgeo'})
+
     def test_pinned_counts(self):
         self.assertEqual(trial.EXPECTED_COUNTS,{'repaired_records':10,'repaired_lemma_blocks':6})
 

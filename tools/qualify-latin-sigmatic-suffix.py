@@ -45,6 +45,21 @@ def replaced_records(before,after):
     return gone,came
 
 
+def defective_only_losses(delta_path,repaired_lemmas):
+    """Count LISTALL forms no longer recognized whose every former reading was a perfect-system reading of a repaired lemma."""
+    counts=Counter();tenses=Counter()
+    for line in delta_path.read_bytes().splitlines():
+        row=json.loads(line)
+        if row['rebuilt_count'] or not row['curated_count']:continue
+        readings=[tuple(r['signature']) for r in row['removed'] for _ in range(r['multiplicity'])]
+        if any(r[1].encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7) for r in readings):
+            raise ValueError('sigmatic repair loses a recognized form outside the defective readings')
+        counts['forms']+=1;counts['readings']+=len(readings)
+        for r in readings:tenses[str(r[7])]+=1
+    return {'counts':dict(counts),'readings_by_tense':dict(sorted(tenses.items())),
+            'scope':'forms whose only readings came from the defective perfect or supine stems of repaired blocks; no lexical value published'}
+
+
 def prepare(args):
     paths={n:getattr(args,n) for n in ('report','candidate','headers','tei')}
     receipts={'report':primary.REPORT_SHA,'candidate':changed.reproduction.candidate.CANDIDATE_SHA,
@@ -112,10 +127,15 @@ def prepare(args):
             global_control=supines.direct.audit.audit(args.forms,readers['after'],readers['after'],target/'global-control.jsonl',require_identical=True)
             global_delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-delta.jsonl')
             if (global_delta['counts']['distinct_forms']!=1033579
-                    or global_delta['analysis_rows']['curated']!=2100530
-                    or global_delta['counts'].get('recognized_curated__absent_rebuilt',0)):
-                raise ValueError('sigmatic repair global scope differs or loses recognized forms')
+                    or global_delta['analysis_rows']['curated']!=2100530):
+                raise ValueError('sigmatic repair global scope differs')
+            # A LISTALL form may stop being recognized only when every reading it
+            # had came from a repaired block's defective perfect or supine: the
+            # form was recognized by a wrong reading alone (subsit as a perfect of
+            # subsentio). Any other lost form fails the qualification.
+            lost=defective_only_losses(target/'global-delta.jsonl',{lemma for lemma,_,_,_ in gone})
             global_report={'control':global_control,'comparison':global_delta,
+                           'lost_forms_recognized_only_by_defective_readings':lost,
                            'removed_reading_displacement':prefix.displacement_review(target/'global-delta.jsonl',readers['after'])}
     finally:
         for reader in readers.values():reader.close()
