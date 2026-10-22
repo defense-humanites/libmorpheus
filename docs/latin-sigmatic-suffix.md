@@ -65,14 +65,17 @@ nothing.
 
 ## Full LISTALL diagnostic
 
-Pending the dedicated run. The first run on `8c26632` failed its global
-check: a LISTALL form stopped being recognized. The qualification tool now
-distinguishes a form whose **every** former reading was a perfect-system
-reading of a repaired block — recognized by a wrong reading alone, as
-*subsit* was as a perfect of *subsentio*, the irregular *subsum* of the
-candidate (and of the controlled baseline) generating neither *subsit* nor
-*subsunt* — which it counts and publishes, from any other lost form, which
-still fails the run.
+Pending the dedicated run. The first runs failed their global check
+because LISTALL forms stopped being recognized, and each of them turned out
+to have been recognized by a wrong reading alone: *subsit* as a perfect of
+*subsentio* from the `sub-s` stem (the irregular *subsum* of the candidate,
+as of the controlled baseline, generates neither *subsit* nor *subsunt*), and
+*deintus* as a perfect participle of *indulgeo* composed with the native
+preverb `de_-` from the `int` stem, a form the controlled baseline does not
+recognize at all. The qualification tool now counts and publishes the forms
+whose **every** former reading was a perfect-system reading of a repaired
+block, directly or through native preverb composition, and still fails on
+any other lost form.
 
 ## Remaining arbitration
 

@@ -46,24 +46,28 @@ def replaced_records(before,after):
     return gone,came
 
 
+def base_lemma(lemma):
+    """A native preverb composition reports the preverb with its notation before a hyphen; the block lemma follows it."""
+    return lemma.rsplit('-',1)[-1] if '-' in lemma else lemma
+
+
 def defective_only_losses(delta_path,repaired_lemmas):
-    """Count LISTALL forms no longer recognized whose every former reading was a perfect-system reading of a repaired lemma."""
-    counts=Counter();tenses=Counter()
+    """Count LISTALL forms no longer recognized whose every former reading was a perfect-system reading of a repaired block, direct or composed with a native preverb."""
+    counts=Counter();tenses=Counter();origins=Counter()
     for line in delta_path.read_bytes().splitlines():
         row=json.loads(line)
         if row['rebuilt_count'] or not row['curated_count']:continue
         readings=[tuple(r['signature']) for r in row['removed'] for _ in range(r['multiplicity'])]
-        foreign=Counter((r[2],r[7],r[1].encode() in repaired_lemmas,
-                         hashlib.sha256(r[1].encode()).hexdigest()[:16],hashlib.sha256(row['form'].encode()).hexdigest()[:16],
-                         len(r[1]),len(row['form'])) for r in readings
-                        if r[1].encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7))
+        foreign=Counter((r[2],r[7],hashlib.sha256(r[1].encode()).hexdigest()[:16],len(r[1]),len(row['form'])) for r in readings
+                        if base_lemma(r[1]).encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7))
         if foreign:
             raise ValueError('sigmatic repair loses a recognized form outside the defective readings: '
-                             'pos,tense,repaired-lemma,lemma-sha,form-sha,lengths counts %s' % sorted(foreign.items()))
+                             'pos,tense,lemma-sha,lengths counts %s' % sorted(foreign.items()))
         counts['forms']+=1;counts['readings']+=len(readings)
-        for r in readings:tenses[str(r[7])]+=1
-    return {'counts':dict(counts),'readings_by_tense':dict(sorted(tenses.items())),
-            'scope':'forms whose only readings came from the defective perfect or supine stems of repaired blocks; no lexical value published'}
+        for r in readings:
+            tenses[str(r[7])]+=1;origins['native_preverb_composition' if '-' in r[1] else 'direct']+=1
+    return {'counts':dict(counts),'readings_by_tense':dict(sorted(tenses.items())),'readings_by_origin':dict(sorted(origins.items())),
+            'scope':'forms whose only readings came from the defective perfect or supine stems of repaired blocks, directly or through native preverb composition; no lexical value published'}
 
 
 def prepare(args):
