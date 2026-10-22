@@ -52,8 +52,11 @@ def defective_only_losses(delta_path,repaired_lemmas):
         row=json.loads(line)
         if row['rebuilt_count'] or not row['curated_count']:continue
         readings=[tuple(r['signature']) for r in row['removed'] for _ in range(r['multiplicity'])]
-        if any(r[1].encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7) for r in readings):
-            raise ValueError('sigmatic repair loses a recognized form outside the defective readings')
+        foreign=Counter((r[2],r[7],r[1].encode() in repaired_lemmas) for r in readings
+                        if r[1].encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7))
+        if foreign:
+            raise ValueError('sigmatic repair loses a recognized form outside the defective readings: '
+                             'pos,tense,repaired-lemma counts %s' % sorted(foreign.items()))
         counts['forms']+=1;counts['readings']+=len(readings)
         for r in readings:tenses[str(r[7])]+=1
     return {'counts':dict(counts),'readings_by_tense':dict(sorted(tenses.items())),
