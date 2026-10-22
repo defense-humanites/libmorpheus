@@ -173,7 +173,20 @@ jobs:
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --forms "$RUNNER_TEMP/sigmatic-listall/LISTALL.distinct-literal.txt" \
             --output "$RUNNER_TEMP/sigmatic-suffix-trial" \
+            2> "$RUNNER_TEMP/sigmatic-suffix-qualify.err" \
             | tee "$RUNNER_TEMP/sigmatic-suffix-receipt.json"
+      - name: Report a qualification failure on the open pull request
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$number" ] || exit 0
+          { printf '<!-- qualification-failure %s %s -->\n**%s** on `%s` failed in run %s; exception lines only, no lexical values:\n\n```\n' "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_WORKFLOW" "${GITHUB_SHA:0:7}" "$GITHUB_RUN_ID"
+            grep -E 'Error|Traceback|File "' "$RUNNER_TEMP/sigmatic-suffix-qualify.err" 2>/dev/null | tail -n 30 | sed -E 's#/home/runner/work/[^/]+/[^/]+/##g' || true
+            printf '```\n'; } > "$RUNNER_TEMP/failure.md"
+          gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/failure.md"
       - name: Publish the aggregate receipt on the open pull request
         if: success()
         env:
