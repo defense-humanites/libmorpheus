@@ -2,8 +2,11 @@
 
 # Written-part anchor repair
 
-Not yet qualified on LISTALL: the dedicated workflow runs on the commit that
-adds this recipe and this page will carry its receipt.
+Qualified code: `e4fc8b126b061a0a2145143e3857a3005848b73a`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39752098078)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-anchor-duplication-e4fc8b1.json)
+records counts, categories and SHA-256 values only.
 
 The [residual loss attribution](latin-residual-loss-attribution.md) left the
 changed-definition dossiers as the largest residue. Read one by one (in
@@ -53,7 +56,7 @@ lemmas have several blocks or headers; all of these are left alone. The
 private trial source has SHA-256
 `93368df83cbbf977ee1b394042501dd270acf4dabe8396e5d92e9a49a22711a6`.
 
-## Native qualification (family cells, local)
+## Native qualification on family cells
 
 `tools/qualify-latin-anchor-duplication.py` rebuilds the original native
 candidate, checks its index receipts, builds the trial, requires unchanged
@@ -73,9 +76,28 @@ repaired block. The identical-root control changes nothing.
 
 ## Full LISTALL diagnostic
 
-Pending the dedicated run. The global comparison must show no recognized
-LISTALL form lost: the withdrawn doubled forms are not Latin words and are
-not expected in LISTALL, and the run fails if one is.
+| Metric | Original candidate | Anchor repair trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 848,252 |
+| Native analysis rows | 2,100,530 | 2,104,349 |
+| Lost recognized forms | — | 0 |
+| Removed eleven-field readings | — | 120 |
+| Added eleven-field readings | — | 3,939 |
+| Changed grammatical multisets | — | 1,930 |
+| Equal-count multiset changes | — | 0 |
+
+No recognized LISTALL form is lost: none of the 245 doubled forms the
+defective stems generated is a LISTALL word. **502 forms become
+recognized**, among them the perfects of *voveo* and *mansuesco*, which no
+reading reached before. Of the 3,939 additions, 1,550 are direct, 1,985 carry
+native preverbs and 404 occur on forms with both; by API tense they are 69
+without tense, 1,089 future, 1,922 perfect, 563 pluperfect and 296 future
+perfect. The 120 removed readings lie on 50 forms that stay recognized: they
+are readings of the doubled stems, 16 direct and 104 through native preverb
+composition, on forms another block still analyzes — *vivixit*, for example,
+loses its reading under *vivo* and keeps the one under *vivesco*, whose own
+block the recipe withheld. None is an enclitic displacement. The
+identical-root control changes nothing.
 
 ## Remaining arbitration
 
