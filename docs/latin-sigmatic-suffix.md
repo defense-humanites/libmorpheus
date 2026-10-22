@@ -69,8 +69,9 @@ Pending the dedicated run. The first run on `8c26632` failed its global
 check: a LISTALL form stopped being recognized. The qualification tool now
 distinguishes a form whose **every** former reading was a perfect-system
 reading of a repaired block — recognized by a wrong reading alone, as
-*subsit* was as a perfect of *subsentio* while the candidate holds no
-*subsum* — which it counts and publishes, from any other lost form, which
+*subsit* was as a perfect of *subsentio*, the irregular *subsum* of the
+candidate (and of the controlled baseline) generating neither *subsit* nor
+*subsunt* — which it counts and publishes, from any other lost form, which
 still fails the run.
 
 ## Remaining arbitration
