@@ -3,6 +3,7 @@
 """Qualify the sigmatic suffix repair natively; lexical evidence stays private."""
 import argparse
 from collections import Counter
+import hashlib
 import importlib.util
 import json
 import os
@@ -52,11 +53,13 @@ def defective_only_losses(delta_path,repaired_lemmas):
         row=json.loads(line)
         if row['rebuilt_count'] or not row['curated_count']:continue
         readings=[tuple(r['signature']) for r in row['removed'] for _ in range(r['multiplicity'])]
-        foreign=Counter((r[2],r[7],r[1].encode() in repaired_lemmas) for r in readings
+        foreign=Counter((r[2],r[7],r[1].encode() in repaired_lemmas,
+                         hashlib.sha256(r[1].encode()).hexdigest()[:16],hashlib.sha256(row['form'].encode()).hexdigest()[:16],
+                         len(r[1]),len(row['form'])) for r in readings
                         if r[1].encode() not in repaired_lemmas or r[7] not in (0,3,5,6,7))
         if foreign:
             raise ValueError('sigmatic repair loses a recognized form outside the defective readings: '
-                             'pos,tense,repaired-lemma counts %s' % sorted(foreign.items()))
+                             'pos,tense,repaired-lemma,lemma-sha,form-sha,lengths counts %s' % sorted(foreign.items()))
         counts['forms']+=1;counts['readings']+=len(readings)
         for r in readings:tenses[str(r[7])]+=1
     return {'counts':dict(counts),'readings_by_tense':dict(sorted(tenses.items())),
