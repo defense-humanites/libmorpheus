@@ -2,10 +2,12 @@
 
 # Combined Latin candidate
 
-Qualified code: pending for the **eleven-stage combination** (private
-source `ec3fc3d4…`); the dedicated workflow run will qualify it with four
-full LISTALL passes. The **nine-stage combination** it extends was qualified
-on `1d91bb1` (receipt
+Qualified code: `da8cd34` for the **eleven-stage combination** (the
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39960707178)
+succeeds with four full LISTALL passes; the
+[aggregate receipt](qualification/latin-combined-candidate-da8cd34.json)
+records counts, categories and SHA-256 values only). The **nine-stage
+combination** it extends was qualified on `1d91bb1` (receipt
 [`latin-combined-candidate-1d91bb1.json`](qualification/latin-combined-candidate-1d91bb1.json),
 private source `d02f4bdb…`, figures kept below); the six-stage one on
 `6d0f766` and `b925a88` (`f719a4e1…`).
@@ -47,60 +49,70 @@ eleven-stage source has SHA-256
 `ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e`
 (nine-stage: `d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0`).
 
-Against the original candidate the nine-stage combination adds **698**
-records (181 `are_vb`, 12 deponent `are_vb`, 3 `conj1`, 39 `conj2`, 134
-`conj3`, 16 `conj3_io`, 12 `conj4`, 7 `ire_vb`, 160 `perfstem`, 134 `pp4`)
-and removes **104** (13 attribution stems, 13 leaked-tag stems, 8 reclassed
-`conj1` presents, 39 replaced perfects and 31 replaced supines). The 698
-added records receive **4,188 cells on 3,974 forms**: 114 are covered before
-the combination and all 4,188 after. On those forms the sixteen-field
-comparison retains 6,287 readings, adds 6,799 and removes none; 883 forms
-become recognized and none is lost. Against the controlled rebuilt baseline,
-739 of the additions are exact historical readings. Twenty-one of the 59
-changed-definition loss cases have a changed block. The identical-root
-control changes nothing.
+Against the original candidate the eleven-stage combination adds **734**
+records (181 `are_vb`, 12 deponent `are_vb`, 3 `conj1`, 42 `conj2`, 134
+`conj3`, 16 `conj3_io`, 12 `conj4`, 7 `ire_vb`, 182 `perfstem`, 145 `pp4`)
+and removes **140** (13 attribution stems, 13 leaked-tag stems, 8 reclassed
+`conj1` presents, 3 reclassed `conj3` presents, 61 replaced perfects and 42
+replaced supines; the nine-stage one added 698 and removed 104). The 734
+added records receive **4,404 cells on 4,177 forms**: 132 are covered before
+the combination and all 4,404 after. On those forms the sixteen-field
+comparison retains 6,751 readings, adds 7,085 and removes 95 (the
+third-conjugation futures of the reclassed presents, now second-conjugation
+presents); 887 forms become recognized and none is lost. Against the
+controlled rebuilt baseline, 823 of the additions are exact historical
+readings (739 before). The identical-root control changes nothing.
 
-## Full LISTALL diagnostics of the nine-stage combination
+## Full LISTALL diagnostics of the combinations
 
 Against the original candidate:
 
-| Metric | Original candidate | Nine-stage combination |
-| --- | ---: | ---: |
-| Recognized literal forms | 847,750 | 853,521 |
-| Native analysis rows | 2,100,530 | 2,149,411 |
-| Lost recognized forms | — | 3 (defective readings only) |
-| Removed eleven-field readings | — | 165 |
-| Added eleven-field readings | — | 49,046 |
-| Changed grammatical multisets | — | 29,662 |
-| Equal-count multiset changes | — | 0 |
+| Metric | Original candidate | Nine-stage combination | Eleven-stage combination |
+| --- | ---: | ---: | ---: |
+| Recognized literal forms | 847,750 | 853,521 | 853,570 |
+| Native analysis rows | 2,100,530 | 2,149,411 | 2,149,567 |
+| Lost recognized forms | — | 3 (defective readings only) | 75 (defective readings only) |
+| Removed eleven-field readings | — | 165 | 1,638 |
+| Added eleven-field readings | — | 49,046 | 50,675 |
+| Changed grammatical multisets | — | 29,662 | 31,231 |
+| Equal-count multiset changes | — | 0 | 282 |
 
-The three forms no longer recognized are those of the
-[sigmatic qualification](latin-sigmatic-suffix.md): each had a single
-reading, a perfect of a repaired block, two direct and one through native
-preverb composition. The 165 removed readings lie on 83 forms that stay
-recognized: 16 are enclitic retries displaced by a new direct analysis
-(reproduced on the input without its `-dum`), 129 are readings of withdrawn
-defective stems on forms whose remaining readings carry native preverbs, and
-20 are readings of withdrawn defective stems beside other direct readings.
+The forms no longer recognized pass the qualification's check: every former
+reading of each came from a repaired block's defective record. On the
+nine-stage combination they are the three of the
+[sigmatic qualification](latin-sigmatic-suffix.md). On the eleven-stage one
+they are 75 forms with 107 former readings (78 direct, 29 through native
+preverb composition; 14 present readings of the reclassed stems, the rest
+perfect-system readings of withdrawn stems) under 8 lemmas: the
+[residual attachment trial](latin-residual-attachments.md) alone lost 123,
+and the chain recovers 48 of them, among which the perfect system of
+*dirimo* that the joined-itype stage repairs. The 1,638 removed readings lie
+on 950 forms that stay recognized: 16 are enclitic retries displaced by a
+new direct analysis (reproduced on the input without its `-dum`), 1,275 are
+readings of withdrawn defective stems on forms whose remaining readings
+carry native preverbs (the short vowel-anchored stems composed with the
+whole preverb table), and 347 are readings of withdrawn or reclassed stems
+beside other direct readings.
 
 Against the controlled rebuilt baseline:
 
-| Controlled baseline → | Original candidate | Six-stage combination | Nine-stage combination |
-| --- | ---: | ---: | ---: |
-| Readings retained | 2,006,554 | 2,010,262 | 2,010,719 |
-| Readings removed | 41,774 | 38,066 | 37,609 |
-| Readings added | 93,976 | 134,983 | 138,692 |
-| Forms recognized by both | 831,201 | 832,224 | 832,493 |
-| Forms completely lost | 6,789 | 5,766 | 5,497 |
-| Lemmas with completely lost forms | 133 | 114 | 109 |
+| Controlled baseline → | Original candidate | Six-stage | Nine-stage | Eleven-stage |
+| --- | ---: | ---: | ---: | ---: |
+| Readings retained | 2,006,554 | 2,010,262 | 2,010,719 | 2,010,809 |
+| Readings removed | 41,774 | 38,066 | 37,609 | 37,519 |
+| Readings added | 93,976 | 134,983 | 138,692 | 138,758 |
+| Forms recognized by both | 831,201 | 832,224 | 832,493 | 832,577 |
+| Forms completely lost | 6,789 | 5,766 | 5,497 | 5,413 |
+| Lemmas with completely lost forms | 133 | 114 | 109 | 109 |
 
-The nine-stage combination stops removing **4,165** historical readings and
-**1,292** completely lost forms are recognized again, under 24 fewer lemmas.
-The lemma-identity review of the 37,609 readings still removed matches
-24,238 of the 29,038 on recognized forms at ten fields under another lemma
-(16,836 against a reading the baseline already carried, 7,402 against an
-added one; 127 of 406 lemmas fully matched, 74 in part); 4,800 readings on
-recognized forms and 8,571 on completely lost forms remain unmatched.
+The eleven-stage combination stops removing **4,255** historical readings
+(4,165 at nine stages) and **1,376** completely lost forms are recognized
+again (1,292), under 24 fewer lemmas. The lemma-identity review of the
+37,519 readings still removed matches 24,168 of the 29,072 on recognized
+forms at ten fields under another lemma (16,666 against a reading the
+baseline already carried, 7,502 against an added one; 126 of 418 lemmas
+fully matched, 79 in part); 4,904 readings on recognized forms and 8,447 on
+completely lost forms remain unmatched.
 
 ## Six-stage combination (qualified on `6d0f766` and `b925a88`)
 

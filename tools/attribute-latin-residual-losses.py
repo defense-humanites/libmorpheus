@@ -51,6 +51,7 @@ NOTATION = str.maketrans('', '', '_^-')
 QUALIFIED_BASELINE_COMPARISON = {
     'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463': {'removed_rows': 38066, 'forms': 5766},
     'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0': {'removed_rows': 37609, 'forms': 5497},
+    'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e': {'removed_rows': 37519, 'forms': 5413},
 }
 
 
