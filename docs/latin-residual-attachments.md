@@ -75,11 +75,11 @@ control changes nothing.
 | Equal-count multiset changes | — | 228 |
 
 Of the 1,397 additions, 1,121 are direct, 109 carry native preverbs and
-167 both; by API tense they are 24 without tense, 85 present, 42 future,
-335 future perfect, 605 perfect, 204 pluperfect and 102 future perfect
-indicative. The 228 equal-count changes are the reclassed presents: a
-third-conjugation future such as *silet* becomes the second-conjugation
-present. Of the 1,473 removed readings, **1,170 carry native preverbs**:
+167 both; by API tense they are 24 without tense, 85 present, 42
+imperfect, 335 future (the future participle and the reclassed presents'
+future), 605 perfect, 204 pluperfect and 102 future perfect. The 228
+equal-count changes come from the reclassed presents: a third-conjugation
+future such as *silet* becomes the second-conjugation present. Of the 1,473 removed readings, **1,170 carry native preverbs**:
 the eight short defective stems of the vowel-anchored family (`e_m`,
 `empt`, `e_v`, `e_t`, `de_v`, `de_t`, `dex`, `dect`, `re_m`, `rempt`) were
 composed with the whole preverb table, and withdrawing them withdraws every
