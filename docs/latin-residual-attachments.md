@@ -101,6 +101,30 @@ because its source header carries the conjugation digit in a second
 `<itype>` field that `combitype` joins to the first. Extending the
 attachment proofs to joined itype fields is the next recipe.
 
+## Joined itype fields
+
+The historical pipeline runs `combitype` before `latvb`: two `<itype>`
+fields separated by white space become one string joined by `, `, and the
+partition writes consecutive itype fields tab-separated, so a header whose
+conjugation digit sits in a second field (*dirimo*: `e_mi, emptum` then `3`)
+reaches the lexer as `e_mi, emptum, 3` and goes through the same attachment
+rule as a single field. The three attachment repairs prove their shapes from
+a single source field and left such blocks alone.
+`tools/repair-latin-joined-itypes.py` emulates the join: for each header
+whose itype fields are consecutive and equal to the source projection
+(339 on the source candidate), it hands the written-part anchor, sigmatic
+suffix and residual attachment repairs a one-field view of the header and
+of its source article, each applying its own proof and historical-output
+check unchanged. It reads the lexer tables with C comments removed and
+character-literal trims accepted (the residual repair's own reader takes
+the commented-out `u^i, u_tum, 3` case for a live one; the difference
+withholds and never repairs). On the source candidate the extension repairs
+**3 blocks, 4 records**: the anchor duplication of *bibo* (`bi^bi^b`,
+withheld by the anchor trial for its two fields), the vowel-anchored parts
+of *dirimo* (`di^re_m`, `di^rempt`) and a doubled `u` (*insuo*). It is not
+qualified separately: it enters the combined candidate as a stage right
+after the residual repairs, and the combined qualification measures it.
+
 ## Remaining arbitration
 
 The recipe covers the attachment families the survey found; parts whose

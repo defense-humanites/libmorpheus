@@ -6,8 +6,10 @@ Each trial so far was staged and measured on the unchanged full source
 candidate. This tool applies the same bounded recipes in a fixed order, each
 on the output of the previous one, and records every stage's counts and
 SHA-256. The order lets later recipes see earlier repairs: the attribution
-replay and the deletions come first, the labiovelar, anchor and sigmatic
-replacements next, the prefix alternates copy the repaired records, the
+replay and the deletions come first, the labiovelar, anchor, sigmatic and
+residual attachment replacements next, then the same attachment repairs on
+the headers whose itype fields combitype joins, the prefix alternates copy
+the repaired records, the
 backlinked and quoted presents follow, and the earlier -jicio repair closes
 the chain for the block the attribution replay unblocks. No recipe is changed; lexical values
 stay private.
@@ -35,6 +37,8 @@ STAGES = (
     ('velar-short-suffix', 'repair-latin-velar-short-suffix'),
     ('anchor-duplication', 'repair-latin-anchor-duplication'),
     ('sigmatic-suffix', 'repair-latin-sigmatic-suffix'),
+    ('residual-attachments', 'repair-latin-residual-attachments'),
+    ('joined-itypes', 'repair-latin-joined-itypes'),
     ('prefix-alternates', 'recover-latin-prefix-alternates'),
     ('backlinked-presents', 'recover-latin-backlinked-present-classes'),
     ('quoted-presents', 'recover-latin-backlinked-present-classes'),
@@ -71,7 +75,7 @@ def prepare(candidate, headers, lexica, filters, output):
     final = target / 'combined.stems'
     first.write_private(final, current.read_bytes())
     return {'schema': 1,
-            'scope': 'the eight separately qualified trials and the earlier -jicio repair applied in sequence on one private candidate; per-stage counts and hashes; no production promotion',
+            'scope': 'the nine separately qualified trials, the joined-itype extension of the attachment repairs and the earlier -jicio repair applied in sequence on one private candidate; per-stage counts and hashes; no production promotion',
             'source_revision': stages and sibling('recover-latin-initial-sense').review.REVISION,
             'input_sha256': hashlib.sha256(candidate.read_bytes()).hexdigest(),
             'stages': stages, 'output_sha256': hashlib.sha256(final.read_bytes()).hexdigest()}

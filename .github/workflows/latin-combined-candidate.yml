@@ -14,6 +14,9 @@ on:
       - 'test/review-latin-removed-lemma-identity.py'
       - 'tools/repair-latin-anchor-duplication.py'
       - 'tools/repair-latin-sigmatic-suffix.py'
+      - 'tools/repair-latin-residual-attachments.py'
+      - 'tools/repair-latin-joined-itypes.py'
+      - 'test/repair-latin-joined-itypes.py'
       - '.github/workflows/latin-combined-candidate.yml'
   workflow_dispatch:
 
@@ -165,6 +168,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
+          "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-joined-itypes.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/reconstruct-latin-combined-candidate.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-combined-candidate.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-removed-lemma-identity.py

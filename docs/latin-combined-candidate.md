@@ -2,18 +2,13 @@
 
 # Combined Latin candidate
 
-Qualified code: `1d91bb1` for the **nine-stage combination** (the
-[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39922696615)
-succeeds with four full LISTALL passes; the
-[aggregate receipt](qualification/latin-combined-candidate-1d91bb1.json)
-records counts, categories and SHA-256 values only). The **six-stage
-combination** it extends was qualified on `6d0f766` and `b925a88` (receipts
-[`latin-combined-candidate-6d0f766.json`](qualification/latin-combined-candidate-6d0f766.json),
-[`latin-combined-candidate-b925a88.json`](qualification/latin-combined-candidate-b925a88.json));
-its private source has SHA-256
-`f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463` and the
-[residual loss attribution](latin-residual-loss-attribution.md) still refers
-to it.
+Qualified code: pending for the **eleven-stage combination** (private
+source `ec3fc3d4…`); the dedicated workflow run will qualify it with four
+full LISTALL passes. The **nine-stage combination** it extends was qualified
+on `1d91bb1` (receipt
+[`latin-combined-candidate-1d91bb1.json`](qualification/latin-combined-candidate-1d91bb1.json),
+private source `d02f4bdb…`, figures kept below); the six-stage one on
+`6d0f766` and `b925a88` (`f719a4e1…`).
 
 Each of the recent trials was staged and measured on the unchanged full
 source candidate `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`,
@@ -24,7 +19,7 @@ backlinked presents of one proof pre-empt the other. This document qualifies
 the recipes applied together, in a fixed order, on one private candidate. It
 changes no recipe.
 
-## Stage chain (nine stages)
+## Stage chain (eleven stages)
 
 `tools/reconstruct-latin-combined-candidate.py` applies, each on the output
 of the previous stage:
@@ -36,16 +31,21 @@ of the previous stage:
 | 3 | [labiovelar short suffix](latin-velar-short-suffix.md) | 8 | 16 replaced |
 | 4 | [written-part anchor](latin-anchor-duplication.md) | 25 | 44 replaced |
 | 5 | [sigmatic suffix](latin-sigmatic-suffix.md) | 6 | 10 replaced |
-| 6 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
-| 7 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
-| 8 | backlinked presents, quotation proof | 10 | 11 added |
-| 9 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none |
+| 6 | [residual attachments](latin-residual-attachments.md) | 24 | 32 replaced (3 presents reclassed) |
+| 7 | [joined itype fields](latin-residual-attachments.md#joined-itype-fields) | 3 | 4 replaced |
+| 8 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
+| 9 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
+| 10 | backlinked presents, quotation proof | 10 | 11 added |
+| 11 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none |
 
-The two attachment repairs come before the prefix alternates so that the
-copied perfects and supines are the repaired ones. Every stage's input and
-output SHA-256 is recorded; the chain is pinned in the qualification tool and
-the private nine-stage source has SHA-256
-`d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0`.
+The four attachment repairs come before the prefix alternates so that the
+copied perfects and supines are the repaired ones; the joined-itype stage
+runs the three attachment recipes once more on the headers whose itype
+fields `combitype` joins. Every stage's input and output SHA-256 is
+recorded; the chain is pinned in the qualification tool and the private
+eleven-stage source has SHA-256
+`ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e`
+(nine-stage: `d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0`).
 
 Against the original candidate the nine-stage combination adds **698**
 records (181 `are_vb`, 12 deponent `are_vb`, 3 `conj1`, 39 `conj2`, 134

@@ -15,22 +15,24 @@ spec=importlib.util.spec_from_file_location('combine',Path(__file__).with_name('
 combine=importlib.util.module_from_spec(spec);spec.loader.exec_module(combine)
 spec=importlib.util.spec_from_file_location('identity',Path(__file__).with_name('review-latin-removed-lemma-identity.py'))
 identity=importlib.util.module_from_spec(spec);spec.loader.exec_module(identity)
-spec=importlib.util.spec_from_file_location('sigmatic',Path(__file__).with_name('qualify-latin-sigmatic-suffix.py'))
-sigmatic=importlib.util.module_from_spec(spec);spec.loader.exec_module(sigmatic)
+spec=importlib.util.spec_from_file_location('residual',Path(__file__).with_name('qualify-latin-residual-attachments.py'))
+residual=importlib.util.module_from_spec(spec);spec.loader.exec_module(residual)
 primary=prefix.primary;changed=prefix.changed;review=prefix.review;native=prefix.native;supines=prefix.supines
-COMBINED_SHA='d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0'
-# The earlier combination of six trials, qualified on 6d0f766 and b925a88.
-PREVIOUS_COMBINED_SHA='f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
+COMBINED_SHA='ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
+# The earlier combination of nine stages, qualified on 1d91bb1.
+PREVIOUS_COMBINED_SHA='d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0'
 STAGE_SHA={
            'editor-attributions': '46e06edb3f4401c1ce0f921f53c11d602ff0fa44a8222e982e13d33dec992dde',
            'itype-tag-leak': 'd7bfa6ee9ee56252d62c82b31875cb9ec844ac8f0e0e8333751211fd6c142487',
            'velar-short-suffix': 'c99b856d4d02c99fe71be3ce3bb63f9f46d03dedd8b482eac9f448ea7209c3fd',
            'anchor-duplication': '78ed905dbdf5c2b91c35a2d7b5309d45b851000be1ea969368d533be29b92ba0',
            'sigmatic-suffix': '218470eb2bd0cef56fcd6f5e7ee0dcc08fac1a1e18320cfc03acd07aa81ef9c5',
-           'prefix-alternates': '113b1d3f9bb87d966d4eb045d27ae76bc08c47817474e99c1ec813b7a2ba25d3',
-           'backlinked-presents': '84c05c33e639ab55e5c14f3e5da1a006ff19defb377310b2ce2f460c948aeb98',
-           'quoted-presents': 'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0',
-           'jicio-parts': 'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0'
+           'residual-attachments': '991364c4267f36ef8d8643eb7f80d2bed73f9b7ff62b9db4076e7afdce5ddf43',
+           'joined-itypes': 'd23878fd04cc557c941bb6d7d916a68371a2464ee1d42c38d8c73b7ec4c95cec',
+           'prefix-alternates': '4db98c54d522524e7b239185be5294c8f5f752fefd50dd54fb54a0dc323fe8da',
+           'backlinked-presents': '4d2dea2627091bdfe6b8d22d96695ce4e48454025aee71e2266be52093174216',
+           'quoted-presents': 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e',
+           'jicio-parts': 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
 }
 
 
@@ -128,12 +130,14 @@ def prepare(args):
             if (global_delta['counts']['distinct_forms']!=1033579
                     or global_delta['analysis_rows']['curated']!=2100530):
                 raise ValueError('combined candidate global scope differs')
-            # The anchor and sigmatic repairs withdraw defective perfect and
-            # supine stems; a LISTALL form may stop being recognized only when
-            # every reading it had came from one of them (see the sigmatic
-            # qualification). Any other lost form fails the qualification.
+            # The attachment repairs withdraw defective perfect and supine stems
+            # and reclass a few presents; a LISTALL form may stop being recognized
+            # only when every reading it had came from one of those records (see
+            # the sigmatic and residual qualifications). Any other lost form fails
+            # the qualification.
             defective_lemmas={lemma for lemma,_,kind,_ in gone if kind in (b'perfstem',b'pp4')}
-            lost=sigmatic.defective_only_losses(target/'global-delta.jsonl',defective_lemmas)
+            reclassed_lemmas={lemma for lemma,_,kind,_ in gone if kind.startswith(b'conj')}
+            lost=residual.defective_only_losses(target/'global-delta.jsonl',defective_lemmas|reclassed_lemmas,reclassed_lemmas)
             displacement=prefix.displacement_review(target/'global-delta.jsonl',readers['after'])
             # The controlled rebuilt baseline against the original and the combined
             # candidate: readings the combination restores are those removed by the
