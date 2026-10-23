@@ -2,10 +2,11 @@
 
 # Residual attachment repairs
 
-Qualified code: pending; the first run of the
-[dedicated workflow](../.github/workflows/latin-residual-attachments.yml)
-qualifies the trial with the full LISTALL diagnostic and its aggregate
-receipt will be archived under `qualification/`.
+Qualified code: `56da80e`. The
+[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39949297666)
+succeeds with the full LISTALL diagnostic; the
+[aggregate receipt](qualification/latin-residual-attachments-56da80e.json)
+records counts, categories and SHA-256 values only.
 
 After the [written-part anchor](latin-anchor-duplication.md) and
 [sigmatic suffix](latin-sigmatic-suffix.md) repairs, a survey of every
@@ -62,11 +63,43 @@ control changes nothing.
 
 ## Full LISTALL diagnostic
 
-Pending the dedicated run. The qualification tool publishes the LISTALL
-forms whose every former reading came from a repaired block's defective
-record (a perfect-system reading of a withdrawn stem, or any reading of a
-reclassed present), directly or through native preverb composition, and
-fails on any other lost form.
+| Metric | Original candidate | Residual attachment trial |
+| --- | ---: | ---: |
+| Recognized literal forms | 847,750 | 847,748 |
+| Native analysis rows | 2,100,530 | 2,100,454 |
+| Forms newly recognized | — | 121 |
+| Lost recognized forms | — | 123 (see below) |
+| Removed eleven-field readings | — | 1,473 |
+| Added eleven-field readings | — | 1,397 |
+| Changed grammatical multisets | — | 1,506 |
+| Equal-count multiset changes | — | 228 |
+
+Of the 1,397 additions, 1,121 are direct, 109 carry native preverbs and
+167 both; by API tense they are 24 without tense, 85 present, 42 future,
+335 future perfect, 605 perfect, 204 pluperfect and 102 future perfect
+indicative. The 228 equal-count changes are the reclassed presents: a
+third-conjugation future such as *silet* becomes the second-conjugation
+present. Of the 1,473 removed readings, **1,170 carry native preverbs**:
+the eight short defective stems of the vowel-anchored family (`e_m`,
+`empt`, `e_v`, `e_t`, `de_v`, `de_t`, `dex`, `dect`, `re_m`, `rempt`) were
+composed with the whole preverb table, and withdrawing them withdraws every
+composition. The identical-root control changes nothing.
+
+The 123 forms no longer recognized pass the qualification's check: every
+former reading of each came from a repaired block's defective record
+(perfect-system readings of the withdrawn stems, present readings of the
+reclassed stems), 76 directly and 125 through native preverb composition,
+under 7 lemmas. A local enumeration of the defective stems composed with
+the preverb table shows what such forms can be. Most are not words
+(*congruuit*, *addevit*, *indexit*), but two real families stand out,
+recognized before only by a wrong composition on a wrong stem: the noun
+*coetus* (as a supine of `co-` with *expleo*'s defective `e_t`) and the
+perfect system of *dirimo* (*diremi*, *diremit*, *diremptum*, as `di-` with
+*redimo*'s defective `re_m`). *Dirimo*'s own block is the same historical
+defect (`di^ri^me_m`, inherited by the witness), outside this recipe only
+because its source header carries the conjugation digit in a second
+`<itype>` field that `combitype` joins to the first. Extending the
+attachment proofs to joined itype fields is the next recipe.
 
 ## Remaining arbitration
 
