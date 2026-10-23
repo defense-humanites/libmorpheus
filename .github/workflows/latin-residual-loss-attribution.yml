@@ -2,7 +2,8 @@
 name: Latin residual loss attribution
 
 # One LISTALL pass, about 25 minutes: the diagnostic reads the qualified
-# combined candidate and changes nothing. It runs on manual dispatch, and on
+# combined candidate (the tool pins each qualified combination by hash) and
+# changes nothing. It runs on manual dispatch, and on
 # push only when this file itself changes (GitHub registers a workflow for
 # dispatch only after it has run once).
 on:
@@ -152,7 +153,20 @@ jobs:
             --forms "$RUNNER_TEMP/combined-listall/LISTALL.distinct-literal.txt" \
             --witness stemlib/Latin/stemsrc/vbs.latin \
             --output "$RUNNER_TEMP/residual-loss-attribution" \
+            2> "$RUNNER_TEMP/residual-loss-attribution.err" \
             | tee "$RUNNER_TEMP/residual-loss-receipt.json"
+      - name: Report the exception lines of a failure on the open pull request
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$number" ] || exit 0
+          { printf '<!-- qualification-failure %s %s -->\n**%s** on `%s` failed in run %s; exception lines only, no lexical values:\n\n```\n' "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_WORKFLOW" "${GITHUB_SHA:0:7}" "$GITHUB_RUN_ID"
+            grep -E 'Error|Traceback|File "' "$RUNNER_TEMP/residual-loss-attribution.err" 2>/dev/null | tail -n 30 | sed -E 's#/home/runner/work/[^/]+/[^/]+/##g' || true
+            printf '```\n'; } > "$RUNNER_TEMP/failure.md"
+          gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/failure.md"
       - name: Publish the aggregate receipt on the open pull request
         if: success()
         env:
