@@ -46,6 +46,11 @@ identity = sibling('review-latin-removed-lemma-identity')
 FIELDS = ('workword', 'lemma', 'part_of_speech', 'person', 'number', 'gender',
           'grammatical_case', 'tense', 'mood', 'voice', 'degree')
 NOTATION = str.maketrans('', '', '_^-')
+# Readings removed and forms completely lost against the controlled baseline,
+# as the combined-candidate receipt of each qualified combination records them.
+QUALIFIED_BASELINE_COMPARISON = {
+    'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463': {'removed_rows': 38066, 'forms': 5766},
+}
 
 
 def composed_lemmas(compounds=COMPOUNDS):
@@ -173,7 +178,9 @@ def prepare(args):
         readers['baseline'] = supines.direct.StrictRows(args.library, args.baseline)
         readers['after'] = supines.direct.StrictRows(args.library, target / 'trial')
         comparison = supines.direct.audit.audit(args.forms, readers['baseline'], readers['after'], target / 'baseline-combined.jsonl')
-        expected = {'removed_rows': 38066, 'forms': 5766}
+        expected = QUALIFIED_BASELINE_COMPARISON.get(combined.COMBINED_SHA)
+        if expected is None:
+            raise ValueError('residual loss attribution has no qualified baseline comparison for this combined candidate')
         if (comparison['global_eleven_field_multisets']['removed_rows'] != expected['removed_rows']
                 or comparison['lost_forms_diagnostic']['forms'] != expected['forms']):
             raise ValueError('residual loss attribution baseline comparison differs from the qualified receipt')

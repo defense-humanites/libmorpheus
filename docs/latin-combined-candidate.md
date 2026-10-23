@@ -2,14 +2,18 @@
 
 # Combined Latin candidate
 
-Qualified code: `b925a88ef2919530235302827cff3a5fcfd2edcb` (lemma-identity review added to the receipt;
-the candidate, the stage chain and every LISTALL figure below are unchanged
-from `6d0f7668d25dbc096da066799d88509c78ffa84d`). The
-[dedicated workflow run](https://github.com/defense-humanites/libmorpheus/actions/runs/39271717038)
-succeeds with four full LISTALL passes; the
-[aggregate receipt](qualification/latin-combined-candidate-b925a88.json)
-records counts, categories and SHA-256 values only (the earlier receipt
-[`6d0f766`](qualification/latin-combined-candidate-6d0f766.json) is kept).
+Two combinations are recorded here. The **nine-stage combination** adds the
+[written-part anchor repair](latin-anchor-duplication.md) and the
+[sigmatic suffix repair](latin-sigmatic-suffix.md) to the earlier chain; it
+is not yet qualified on LISTALL — the dedicated workflow runs on the commit
+that pins it and this page will carry its receipt. The **six-stage
+combination** below it was qualified on `6d0f766` and `b925a88` (receipts
+[`latin-combined-candidate-6d0f766.json`](qualification/latin-combined-candidate-6d0f766.json),
+[`latin-combined-candidate-b925a88.json`](qualification/latin-combined-candidate-b925a88.json));
+its private source has SHA-256
+`f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463` and the
+[residual loss attribution](latin-residual-loss-attribution.md) still refers
+to it.
 
 Each of the recent trials was staged and measured on the unchanged full
 source candidate `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`,
@@ -20,7 +24,7 @@ backlinked presents of one proof pre-empt the other. This document qualifies
 the recipes applied together, in a fixed order, on one private candidate. It
 changes no recipe.
 
-## Stage chain
+## Stage chain (nine stages)
 
 `tools/reconstruct-latin-combined-candidate.py` applies, each on the output
 of the previous stage:
@@ -30,22 +34,45 @@ of the previous stage:
 | 1 | [editor attributions](latin-editor-attributions.md) | 12 | 26 removed, 20 written (8 presents reclassed) |
 | 2 | [`</itype>` tag leak](latin-itype-tag-leak.md) | 13 | 13 deleted |
 | 3 | [labiovelar short suffix](latin-velar-short-suffix.md) | 8 | 16 replaced |
-| 4 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
-| 5 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
-| 6 | backlinked presents, quotation proof | 10 | 11 added |
-| 7 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none |
+| 4 | [written-part anchor](latin-anchor-duplication.md) | 25 | 44 replaced |
+| 5 | [sigmatic suffix](latin-sigmatic-suffix.md) | 6 | 10 replaced |
+| 6 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
+| 7 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
+| 8 | backlinked presents, quotation proof | 10 | 11 added |
+| 9 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none |
 
-Stage 4 adds two records more than its separate trial because two
-attribution blocks now hold a regular `are_vb` derivative and a written
-perfect that the prefix spelling copies. Stage 6 adds four records fewer
-because the reference proof already staged them. Stage 7 finds nothing: the
-`-io` block kept outside the attribution replay still carries its
-attribution stem, so the `-jicio` proof withholds it. Every stage's input and
+The two attachment repairs come before the prefix alternates so that the
+copied perfects and supines are the repaired ones. Every stage's input and
 output SHA-256 is recorded; the chain is pinned in the qualification tool and
-the private combined source has SHA-256
-`f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463`.
+the private nine-stage source has SHA-256
+`d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0`.
 
-## Native qualification
+Against the original candidate the nine-stage combination adds **698**
+records (181 `are_vb`, 12 deponent `are_vb`, 3 `conj1`, 39 `conj2`, 134
+`conj3`, 16 `conj3_io`, 12 `conj4`, 7 `ire_vb`, 160 `perfstem`, 134 `pp4`)
+and removes **104** (13 attribution stems, 13 leaked-tag stems, 8 reclassed
+`conj1` presents, 39 replaced perfects and 31 replaced supines). On the local
+family qualification the 698 added records receive **4,188 cells on 3,974
+forms**: 114 are covered before the combination and all 4,188 after. On
+those forms the sixteen-field comparison retains 6,287 readings, adds 6,799
+and removes none; 883 forms become recognized and none is lost. Against the
+controlled rebuilt baseline, 739 of the additions are exact historical
+readings. Twenty-one of the 59 changed-definition loss cases have a changed
+block. The identical-root control changes nothing. The LISTALL qualification
+must also show that any form no longer recognized was recognized only by a
+defective perfect or supine, as the sigmatic qualification established.
+
+## Six-stage combination (qualified on `6d0f766` and `b925a88`)
+
+The six-stage chain is the one above without stages 4 and 5, applied in the
+same order. Stage 4 of that chain (now stage 6) adds two records more than
+its separate trial because two attribution blocks hold a regular `are_vb`
+derivative and a written perfect that the prefix spelling copies; the
+quotation proof adds four records fewer because the reference proof already
+staged them; the `-jicio` proof finds nothing because the `-io` block kept
+outside the attribution replay still carries its attribution stem.
+
+## Native qualification of the six-stage combination
 
 `tools/qualify-latin-combined-candidate.py` rebuilds the original native
 candidate, checks its index receipts, builds the combination and requires
@@ -64,7 +91,7 @@ become recognized and none is lost. Against the controlled rebuilt baseline,
 of the 59 changed-definition loss cases have a changed block. The
 identical-root control changes nothing.
 
-## Full LISTALL diagnostics
+## Full LISTALL diagnostics of the six-stage combination
 
 Against the original candidate:
 
@@ -111,7 +138,7 @@ LISTALL, not family-form estimates. The 38,066 readings still removed and the
 include the native-preverb readings whose composed identities are
 unqualified.
 
-## Lemma identity among the readings still removed
+## Lemma identity among the readings still removed (six-stage combination)
 
 The eleven-field comparison counts a reading as removed when any field
 differs, the lemma included. The [witness backlog screen](latin-witness-backlog-screen.md)

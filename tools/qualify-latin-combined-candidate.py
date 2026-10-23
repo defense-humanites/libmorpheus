@@ -15,16 +15,22 @@ spec=importlib.util.spec_from_file_location('combine',Path(__file__).with_name('
 combine=importlib.util.module_from_spec(spec);spec.loader.exec_module(combine)
 spec=importlib.util.spec_from_file_location('identity',Path(__file__).with_name('review-latin-removed-lemma-identity.py'))
 identity=importlib.util.module_from_spec(spec);spec.loader.exec_module(identity)
+spec=importlib.util.spec_from_file_location('sigmatic',Path(__file__).with_name('qualify-latin-sigmatic-suffix.py'))
+sigmatic=importlib.util.module_from_spec(spec);spec.loader.exec_module(sigmatic)
 primary=prefix.primary;changed=prefix.changed;review=prefix.review;native=prefix.native;supines=prefix.supines
-COMBINED_SHA='f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
+COMBINED_SHA='d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0'
+# The earlier combination of six trials, qualified on 6d0f766 and b925a88.
+PREVIOUS_COMBINED_SHA='f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
 STAGE_SHA={
            'editor-attributions': '46e06edb3f4401c1ce0f921f53c11d602ff0fa44a8222e982e13d33dec992dde',
            'itype-tag-leak': 'd7bfa6ee9ee56252d62c82b31875cb9ec844ac8f0e0e8333751211fd6c142487',
            'velar-short-suffix': 'c99b856d4d02c99fe71be3ce3bb63f9f46d03dedd8b482eac9f448ea7209c3fd',
-           'prefix-alternates': '62ce8fac2f576459f92fd6f5649f0031d98a21b7ddb4ea827ccd80155d56478b',
-           'backlinked-presents': 'ff777b66170685f5d240f805a083976fe16841d8fccfbfbcb9ef366653b91626',
-           'quoted-presents': 'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463',
-           'jicio-parts': 'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
+           'anchor-duplication': '78ed905dbdf5c2b91c35a2d7b5309d45b851000be1ea969368d533be29b92ba0',
+           'sigmatic-suffix': '218470eb2bd0cef56fcd6f5e7ee0dcc08fac1a1e18320cfc03acd07aa81ef9c5',
+           'prefix-alternates': '113b1d3f9bb87d966d4eb045d27ae76bc08c47817474e99c1ec813b7a2ba25d3',
+           'backlinked-presents': '84c05c33e639ab55e5c14f3e5da1a006ff19defb377310b2ce2f460c948aeb98',
+           'quoted-presents': 'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0',
+           'jicio-parts': 'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0'
 }
 
 
@@ -120,9 +126,14 @@ def prepare(args):
             global_control=supines.direct.audit.audit(args.forms,readers['after'],readers['after'],target/'global-control.jsonl',require_identical=True)
             global_delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-delta.jsonl')
             if (global_delta['counts']['distinct_forms']!=1033579
-                    or global_delta['analysis_rows']['curated']!=2100530
-                    or global_delta['counts'].get('recognized_curated__absent_rebuilt',0)):
-                raise ValueError('combined candidate global scope differs or loses recognized forms')
+                    or global_delta['analysis_rows']['curated']!=2100530):
+                raise ValueError('combined candidate global scope differs')
+            # The anchor and sigmatic repairs withdraw defective perfect and
+            # supine stems; a LISTALL form may stop being recognized only when
+            # every reading it had came from one of them (see the sigmatic
+            # qualification). Any other lost form fails the qualification.
+            defective_lemmas={lemma for lemma,_,kind,_ in gone if kind in (b'perfstem',b'pp4')}
+            lost=sigmatic.defective_only_losses(target/'global-delta.jsonl',defective_lemmas)
             displacement=prefix.displacement_review(target/'global-delta.jsonl',readers['after'])
             # The controlled rebuilt baseline against the original and the combined
             # candidate: readings the combination restores are those removed by the
@@ -135,6 +146,7 @@ def prepare(args):
             lemma_identity={'original':identity.review(target/'baseline-original.jsonl',text_readings(readers['before']),target/'identity-original.jsonl'),
                             'combined':identity.review(target/'baseline-combined.jsonl',text_readings(readers['after']),target/'identity-combined.jsonl')}
             global_report={'control':global_control,'comparison':global_delta,'removed_reading_displacement':displacement,
+                           'lost_forms_recognized_only_by_defective_readings':lost,
                            'removed_reading_lemma_identity':lemma_identity,
                            'controlled_baseline_to_original':{k:baseline_original[k] for k in ('counts','analysis_rows','global_eleven_field_multisets','changed_analysis_counts','lost_forms_diagnostic')},
                            'controlled_baseline_to_combined':{k:baseline_combined[k] for k in ('counts','analysis_rows','global_eleven_field_multisets','changed_analysis_counts','lost_forms_diagnostic')},
@@ -148,7 +160,7 @@ def prepare(args):
             native.digest(args.baseline/'Latin/steminds'/n)!=baseline_indexes[n] for n in indexes):
         raise ValueError('combined candidate qualification changed an input')
     return {'schema':1,
-            'scope':'the six separately qualified trials and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline, with the lemma-identity review of the readings still removed; no production promotion',
+            'scope':'the eight separately qualified trials and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline, with the lemma-identity review of the readings still removed; no production promotion',
             'native_scope':'engine-generated cells of each added record under its exact lemma and class; historical restoration on those forms and, with LISTALL, globally against the controlled rebuilt baseline; no independent form attestation',
             'combination':combination,'added_record_classes':classes,'removed_record_classes':classify_removed(gone),
             'added_records':len(came),'removed_records':len(gone),'input_sha256':receipts,

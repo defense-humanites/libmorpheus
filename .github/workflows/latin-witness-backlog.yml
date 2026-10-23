@@ -109,7 +109,7 @@ jobs:
             --headers "$RUNNER_TEMP/compounds/Latin.headers.jsonl" \
             --lexica "$RUNNER_TEMP/lexica" --filters "$RUNNER_TEMP/filters" \
             --private-output "$RUNNER_TEMP/combined" > "$RUNNER_TEMP/combination.json"
-          python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert d['output_sha256']=='f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463', d['output_sha256']" "$RUNNER_TEMP/combination.json"
+          python3 -c "import json,sys; d=json.load(open(sys.argv[1])); assert d['output_sha256']=='d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0', d['output_sha256']" "$RUNNER_TEMP/combination.json"
           for candidate in qualified-candidate/candidate.stems combined/combined.stems; do
             "$RUNNER_TEMP/lexical-python/bin/python" tools/screen-latin-witness-backlog.py \
               --candidate "$RUNNER_TEMP/$candidate" --witness stemlib/Latin/stemsrc/vbs.latin \

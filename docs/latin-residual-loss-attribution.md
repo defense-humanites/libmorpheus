@@ -9,7 +9,10 @@ on LISTALL once; the
 [aggregate receipt](qualification/latin-residual-loss-attribution-347a058.json)
 records categories, counts and SHA-256 values only. Two labels of that
 receipt were refined in the tool afterwards without changing a count; the
-mapping is given below.
+mapping is given below. The receipt measures the six-stage combination
+(`f719a4e1…`); the tool pins the qualified baseline comparison of each
+combination by its hash and refuses a combination it does not know, so the
+nine-stage combination needs its own run once qualified.
 
 After the [combined candidate](latin-combined-candidate.md) and its
 lemma-identity review, two residues remain against the controlled rebuilt
