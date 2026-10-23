@@ -27,9 +27,10 @@ BLOCKS = {b'perdo': [b':vs:perd\tconj3'], b'calvor': [b':vs:calv\tconj3'], b'amo
 
 class Categories(unittest.TestCase):
     def test_lemma_categories_follow_the_open_decisions(self):
-        category = lambda lemma, pos=2: attribution.lemma_category(lemma, pos, CATEGORIES, BLOCKS, {b'defatiscor'})
+        category = lambda lemma, pos=2: attribution.lemma_category(lemma, pos, CATEGORIES, BLOCKS, {b'defatiscor', b'eo#2', b'amo'})
         self.assertEqual(category('con-manduco#1'), 'native_preverb_identifier:hyphenated')
         self.assertEqual(category('defatiscor'), 'native_preverb_identifier:mapped_composition')
+        # a curated or candidate lemma keeps its category even when the engine reports its name for a composition
         self.assertEqual(category('perdo'), 'curated_lemma_with_candidate_definition')
         self.assertEqual(category('calvo'), 'curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma')
         self.assertEqual(category('eo#2'), 'curated_lemma_without_definition:joined:vowel_initial_digit_grammar')

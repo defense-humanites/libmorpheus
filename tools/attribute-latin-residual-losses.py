@@ -69,8 +69,6 @@ def lemma_category(lemma, pos, categories, candidate_blocks, composed=frozenset(
     key = lemma.encode('ascii', 'replace')
     if '-' in re.sub(r'#\d+$', '', lemma):
         return 'native_preverb_identifier:hyphenated'
-    if key in composed:
-        return 'native_preverb_identifier:mapped_composition'
     category = categories.get(key)
     if category == 'with_candidate_definitions':
         return 'curated_lemma_with_candidate_definition'
@@ -78,6 +76,11 @@ def lemma_category(lemma, pos, categories, candidate_blocks, composed=frozenset(
         return 'curated_lemma_without_definition:' + category
     if candidate_blocks.get(key):
         return 'candidate_lemma_outside_curated_witness'
+    # A name vbs.cmp.ml maps to a composition names the composition only when
+    # no curated or candidate block carries it: a curated lemma whose name
+    # the engine also reports for a composition keeps its own category.
+    if key in composed:
+        return 'native_preverb_identifier:mapped_composition'
     return 'lemma_outside_curated_witness_and_candidate'
 
 
