@@ -21,6 +21,8 @@ except ImportError as exc:
 
 
 LEXICA_REVISION = "56061ca127f4a2844980baffc5f2b6d1332897b3"
+LATIN_SOURCE = Path("CTS_XML_TEI/perseus/pdllex/lat/ls/lat.ls.perseus-eng1.xml")
+LATIN_SOURCE_SHA256 = "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
 SOURCE_DIRS = {
     "Greek": ("grc/lsj", "grc.lsj.perseus-eng*.xml"),
     # eng2 edits the Latin dictionary's Greek quotations into Unicode. The
@@ -211,7 +213,19 @@ def sha256(path):
     return digest.hexdigest()
 
 
-def run(lexica, repo, output, languages=("Greek", "Latin")):
+def standalone_latin_source(source):
+    """Accept only the exact pinned edition, independently of Git metadata."""
+    if source.name != LATIN_SOURCE.name or sha256(source) != LATIN_SOURCE_SHA256:
+        raise ValueError("standalone Latin source differs from the pinned edition")
+    return source, LEXICA_REVISION
+
+
+def selected_sources(lexica, languages):
+    if lexica.is_file():
+        if tuple(languages) != ("Latin",):
+            raise ValueError("a standalone TEI file supports only the Latin edition")
+        source, revision = standalone_latin_source(lexica)
+        return revision, {"Latin": [source]}
     revision = subprocess.check_output(["git", "-C", str(lexica), "rev-parse", "HEAD"], text=True).strip()
     if revision != LEXICA_REVISION:
         raise ValueError(f"lexica revision {revision} differs from pinned {LEXICA_REVISION}")
@@ -220,8 +234,6 @@ def run(lexica, repo, output, languages=("Greek", "Latin")):
                                      "CTS_XML_TEI/perseus/pdllex/lat/ls"], text=True)
     if dirty:
         raise ValueError("selected TEI source files differ from the pinned revision")
-    if output.exists():
-        raise ValueError(f"stage already exists: {output}")
     sources = {}
     for language in languages:
         subdir, pattern = SOURCE_DIRS[language]
@@ -229,7 +241,14 @@ def run(lexica, repo, output, languages=("Greek", "Latin")):
         if not files or (language == "Latin" and len(files) != 1) or (language == "Greek" and len(files) != 27):
             raise ValueError(f"incomplete {language} TEI edition: {len(files)} files")
         sources[language] = files
-    output.mkdir(parents=True)
+    return revision, sources
+
+
+def run(lexica, repo, output, languages=("Greek", "Latin")):
+    revision, sources = selected_sources(lexica, languages)
+    if output.exists():
+        raise ValueError(f"stage already exists: {output}")
+    output.mkdir(parents=True, mode=0o700)
     for language, files in sources.items():
         projected = set()
         header_orths = {}
@@ -270,7 +289,9 @@ def run(lexica, repo, output, languages=("Greek", "Latin")):
             "schema": 2,
             "status": "investigation-only; not a production or redistribution input",
             "source_repository": "PerseusDL/lexica", "source_revision": revision,
-            "source_files": [{"path": f.relative_to(lexica).as_posix(), "sha256": sha256(f)} for f in files],
+            "source_files": [{"path": (LATIN_SOURCE.as_posix() if lexica.is_file()
+                                       else f.relative_to(lexica).as_posix()),
+                              "sha256": sha256(f)} for f in files],
             "entries": count, "projected_rows": count - sum(reasons.values()),
             "skipped_by_reason": dict(sorted(reasons.items())),
             "projected_unique_lemmas": len(projected),
@@ -289,7 +310,7 @@ def run(lexica, repo, output, languages=("Greek", "Latin")):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--lexica", type=Path, required=True, help="local PerseusDL/lexica checkout at the pinned revision")
+    parser.add_argument("--lexica", type=Path, required=True, help="pinned PerseusDL/lexica checkout or exact standalone Latin TEI")
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--output", type=Path, required=True, help="fresh, private staging directory outside the source checkout")
     parser.add_argument("--language", choices=("Greek", "Latin", "both"), default="both",

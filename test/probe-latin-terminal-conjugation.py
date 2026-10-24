@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
+from collections import Counter
+import importlib.util
+import io
+import json
+from pathlib import Path
+import tempfile
+from types import SimpleNamespace
+import unittest
+
+spec = importlib.util.spec_from_file_location('terminal', Path(__file__).resolve().parents[1] /
+                                           'tools/probe-latin-terminal-conjugation.py')
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+
+
+def reading(lemma=b'zzlemma', tense=1, preverb=b'', person=1, voice=1):
+    return SimpleNamespace(workword=b'zzform', lemma=lemma, part_of_speech=2, person=person,
+        number=1, gender=0, grammatical_case=0, tense=tense, mood=4, voice=voice, degree=0,
+        preverb=preverb, raw_preverb=preverb, stem=b'zzstem', suffix=b'', ending=b'zzend')
+
+
+class Analyzer:
+    def __init__(self, rows): self.values = rows
+    def analyses(self, form, require_untruncated=False):
+        if not require_untruncated: raise AssertionError('native probes need untruncated fields')
+        return self.values
+
+
+class TerminalConjugation(unittest.TestCase):
+    def test_retained_input_comparison_excludes_only_substituted_source_and_binds_other_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); latin = root / 'Latin'
+            (latin / 'lexical').mkdir(parents=True); (latin / 'stemsrc').mkdir()
+            for name in ('vbs.latin', 'zzone', 'zztwo', 'zzthree'):
+                (latin / 'stemsrc' / name).write_text('synthetic ' + name)
+            manifest = ''.join('Latin\tverb\tstemsrc/'+name+'\tsynthetic\n' for name in ('vbs.latin', 'zzone', 'zztwo', 'zzthree'))
+            (latin / 'lexical/inputs.tsv').write_text(manifest)
+            before = m.retained_inputs(root)
+            self.assertEqual(len(before), 3)
+            (latin / 'stemsrc/vbs.latin').write_text('substituted')
+            self.assertEqual(m.retained_inputs(root), before)
+            (latin / 'stemsrc/zzone').write_text('changed retained bytes')
+            self.assertNotEqual(m.retained_inputs(root), before)
+            (latin / 'lexical/inputs.tsv').write_text(manifest + 'Latin\tverb\t../escape\tsynthetic\n')
+            with self.assertRaises(ValueError): m.retained_inputs(root)
+
+    def test_only_one_terminal_digit_is_replaced_without_mutating_source_fields(self):
+        row = {'headword': 'zzsource', 'fields': [{'name': 'orth', 'projection': 'zzsource'},
+            {'name': 'itype', 'projection': 'zzperf, zzsup, 3'}, {'name': 'pos', 'projection': 'v. a.'}]}
+        result, digit = m.simplified(row)
+        self.assertEqual(digit, 3)
+        self.assertEqual(result['fields'][1]['projection'], '3')
+        self.assertEqual(row['fields'][1]['projection'], 'zzperf, zzsup, 3')
+        self.assertEqual(result['fields'][0], row['fields'][0])
+        for fields in ([], [{'name': 'itype', 'projection': '3'}],
+                       [{'name': 'itype', 'projection': 'zzperf, 3 or 4'}], row['fields'] + [row['fields'][1]]):
+            with self.assertRaises(ValueError): m.simplified(dict(row, fields=fields))
+
+    def test_trace_profile_has_no_lexical_strings_and_preserves_field_and_head_checks(self):
+        traces = [{'filter': 'combitype', 'stdout': 'zzsource \t<itype>zzperf, 3</itype>', 'stderr': 'zzprivate'},
+                  {'filter': 'conj1', 'stdout': 'zzsource \t<itype>e^re</itype>', 'stderr': ''}]
+        profile = m.trace_profile(traces, 'zzperf, 3', 'zzsource')
+        self.assertTrue(profile[0]['original_itype_survives'])
+        self.assertFalse(profile[1]['original_itype_survives'])
+        self.assertEqual([p['itype_fields'] for p in profile], [1, 1])
+        self.assertNotIn('zz', json.dumps(profile))
+
+    def test_new_blocks_are_append_only_and_cannot_duplicate_empty_blocks_or_emit_aliases(self):
+        old = b':le:zzold\n:vs:zzoldstem conj3\n'
+        case = {'lemma': 'zznew', 'counterfactual_definitions': {b'zznew': Counter({b':vs:zznewstem conj3': 2})}}
+        result = m.candidate_payload(old, [case])
+        self.assertTrue(result.startswith(old))
+        self.assertEqual(result[len(old):], b':le:zznew\n:vs:zznewstem conj3\n:vs:zznewstem conj3\n')
+        for candidate, records in ((old.rstrip(), [case]), (old+b':le:zznew\n', [case]),
+                                   (old, [dict(case, counterfactual_definitions={b'zzalias': Counter({b':vs:zzstem conj3': 1})})])):
+            with self.assertRaises(ValueError): m.candidate_payload(candidate, records)
+        self.assertEqual(m.candidate_payload(old, [dict(case, counterfactual_definitions={})]), old)
+
+    def test_source_headword_requires_direct_first_person_present_and_keeps_lemma_suffix(self):
+        case = {'lemma': 'zzlemma#2', 'header': {'headword': 'zz-le_m^or#2'}}
+        direct = reading(b'zzlemma#2', voice=2)
+        other = reading(b'zzlemma#2', voice=2, preverb=b'ex')
+        report = m.source_headword_probe(case, Analyzer([]), Analyzer([direct, other]))
+        self.assertEqual(report['form'], 'zzlemor')
+        self.assertEqual(report['after_expected'], 1)
+        self.assertEqual(report['added_rows'], 2)
+        self.assertEqual(m.source_headword_probe(case, Analyzer([]), Analyzer([reading(b'zzlemma#2', voice=1)]))['after_expected'], 0)
+
+    def test_native_loss_probe_reproduces_witness_multiplicity_and_compares_exact_signatures(self):
+        old = reading(); changed = reading(tense=2)
+        forms = {b'zzform': Counter({m.loss.signature(old): 2})}
+        output = io.StringIO()
+        report = m.probe_losses(forms, Analyzer([old, old]), Analyzer([]), Analyzer([old, changed]), output)
+        self.assertEqual(report['counts'], {'forms': 1, 'recognized_counterfactual_forms': 1,
+            'expected_lost_readings': 2, 'recovered_exact_readings': 1, 'still_missing_exact_readings': 1,
+            'other_counterfactual_readings': 1})
+        self.assertNotIn('zz', json.dumps(report))
+        self.assertIn('zzform', output.getvalue())
+        for baseline, before in (([old], []), ([old, old], [old])):
+            with self.assertRaises(ValueError):
+                m.probe_losses(forms, Analyzer(baseline), Analyzer(before), Analyzer([]), io.StringIO())
+
+    def test_target_inventory_counts_only_selected_literal_lemmas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'losses'
+            values = [m.loss.decoded(v) for v in m.loss.signature(reading())]
+            other = list(values); other[1] = 'zzother'
+            form = {'kind': 'lost_form', 'form': 'zzform', 'readings': [{'signature': values}] * 2 + [{'signature': other}]}
+            path.write_text(json.dumps(form)+'\n'+json.dumps({'kind': 'lemma_review'})+'\n')
+            forms, rows = m.target_forms(path, {'zzlemma'})
+            self.assertEqual(rows, 2)
+            self.assertEqual(forms, {b'zzform': Counter({m.loss.signature(reading()): 2})})
+            path.write_text(json.dumps(form)+'\n'+json.dumps(form)+'\n')
+            with self.assertRaises(ValueError): m.target_forms(path, {'zzlemma'})
+
+    def test_expansion_report_exposes_regular_past_extrapolation_as_aggregates(self):
+        records = {b'zzlemma': Counter({b':vs:zzroot conj3': 1, b':vs:zzperf perfstem': 2,
+                   b':vs:zzsup pp4': 1, b':wd:zzword other': 1})}
+        report = m.expanded_profiles(records, ['zzlemma'])
+        self.assertEqual(report, {'present': 1, 'perfect': 2, 'supine': 1, 'literal_word': 1})
+        self.assertNotIn('zz', json.dumps(report))
+
+    def test_review_selection_keeps_only_qualified_principal_part_dossiers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'review'
+            article = {'partition': 'verbal', 'headword_identity': 'same_literal_lemma', 'replay_state': 'emits_no_definitions',
+                'grammar_profile': {'itype_shape': 'principal_parts_with_conjugation_digit', 'first_orth_extent': 'full'}}
+            case = {'lemma': 'zzlemma', 'review_decision': 'historical_extraction_review', 'articles': [article]}
+            path.write_text(json.dumps(case)+'\n')
+            self.assertEqual(m.select_cases(path), [case])
+            for rows in ([case, case], [dict(case, articles=[dict(article, headword_identity='different_literal_lemma')])]):
+                path.write_text(''.join(json.dumps(r)+'\n' for r in rows))
+                with self.assertRaises(ValueError): m.select_cases(path)
+
+    def test_regular_perfect_aliases_are_not_unknown_or_present(self):
+        for tag in (b'avperf', b'evperf', b'ivperf', b'perfstem'):
+            self.assertEqual(m.definition_type(b':vs:zzstem ' + tag), 'perfect')
+            with self.assertRaises(ValueError): m.definition_type(b':vs:zzstem conj1 ' + tag)
+
+    def test_derivatives_and_literal_words_are_distinct_from_explicit_stem_classes(self):
+        self.assertEqual(m.definition_type(b':de:zzroot are_vb'), 'derivation')
+        self.assertEqual(m.definition_type(b':vb:zzword perf act 1st sg'), 'literal_verbal_word')
+        self.assertEqual(m.definition_type(b':wd:zzword unknown'), 'literal_word')
+        self.assertEqual(m.definition_type(b':vs:conj1 unknown'), 'other')
+        profiles = m.expanded_directive_profiles({b'zzlemma': Counter({
+            b':de:zzprivate are_vb zzsecret': 2, b':vs:zzstem conj3': 1,
+            b':vb:zzword perf act 1st sg': 1})}, ['zzlemma'])
+        self.assertEqual(profiles[0], {'directive': ':de:', 'definition_type': 'derivation',
+            'declared_classes': ('are_vb',), 'rows': 2})
+        self.assertNotIn('zz', json.dumps(profiles))
+
+    def test_direct_comparison_preserves_multiplicity_and_detects_equal_count_target_substitution(self):
+        old = reading(); other = reading(tense=5)
+        forms = {b'zzform': Counter({m.loss.signature(old): 2})}
+        report = m.compare_counterfactuals(forms, Analyzer([old, old, other]), Analyzer([old, old]), io.StringIO())
+        self.assertTrue(report['same_exact_target_recoveries'])
+        self.assertTrue(report['present_multisets_included_in_full'])
+        self.assertEqual(report['counts']['removed_rows'], 1)
+        self.assertEqual(report['counts']['retained_rows'], 2)
+        self.assertEqual(report['removed_readings_by_tense'], [{'tense': 5, 'rows': 1}])
+        self.assertNotIn('zz', json.dumps(report))
+        report = m.compare_counterfactuals(forms, Analyzer([old, old]), Analyzer([old, other]), io.StringIO())
+        self.assertFalse(report['same_exact_target_recoveries'])
+        self.assertFalse(report['present_multisets_included_in_full'])
+        self.assertEqual(report['counts']['target_recoveries_removed'], 1)
+        self.assertEqual(report['counts']['added_rows'], 1)
+
+    def test_source_families_use_headword_and_digit_with_distinct_infinitives_and_voices(self):
+        for head, digit, second, infinitive, voice in (
+            ('zzrootzo', 1, 'zzrootzas', 'zzrootzare', 1),
+            ('zzrootzo', 3, 'zzrootzis', 'zzrootzere', 1),
+            ('zzrootzio', 3, 'zzrootzis', 'zzrootzere', 1),
+            ('zzrootzio', 4, 'zzrootzis', 'zzrootzire', 1),
+            ('zzrootzor', 1, 'zzrootzaris', 'zzrootzari', 2),
+            ('zzrootzor', 3, 'zzrootzeris', 'zzrootzi', 2),
+            ('zzrootzior', 3, 'zzrootzeris', 'zzrootzi', 2),
+            ('zzrootzior', 4, 'zzrootziris', 'zzrootziri', 2)):
+            cells = m.source_present_family({'header': {'headword': head+'#2'}, 'digit': digit})
+            self.assertEqual(len(cells), 13)
+            self.assertEqual(cells[0]['form'], head)
+            self.assertEqual(cells[1]['form'], second)
+            self.assertEqual(cells[-1], {'form': infinitive, 'person': 0, 'number': 0, 'mood': 5, 'voice': voice})
+            self.assertEqual({(c['person'], c['number'], c['mood']) for c in cells},
+                {(person, number, mood) for mood in (4,8) for number in (1,3) for person in (1,2,3)} | {(0,0,5)})
+        for head, digit in (('zzrootzo', 4), ('zzrootzo', 2), ('zz rootzo', 3), ('o', 1)):
+            with self.assertRaises(ValueError): m.source_present_family({'header': {'headword': head}, 'digit': digit})
+
+    def test_principal_part_syntax_keeps_coordinated_and_empty_parts_unresolved(self):
+        case = {'lemma': 'zzsource#2', 'digit': 3, 'header': {'headword': 'zzsourceor#2',
+            'fields': [{'name': 'itype', 'projection': 'zzpe_rfi, zzsupum and zzotherum, , 3'}]}}
+        output = io.StringIO()
+        report = m.review_principal_parts([case], output)
+        profile = report['groups'][0]
+        self.assertEqual(profile['declared_parts'], 3)
+        self.assertEqual(profile['headword_morphology'], 'passive_headword')
+        self.assertEqual(profile['part_shapes'][0]['terminal_spelling'], 'ending_i')
+        self.assertTrue(profile['part_shapes'][0]['quantity_notation'])
+        self.assertEqual(profile['part_shapes'][1]['syntax'], 'coordinated_or_alternative')
+        self.assertEqual(profile['part_shapes'][2]['syntax'], 'empty')
+        self.assertNotIn('zz', json.dumps(report))
+        private = json.loads(output.getvalue())
+        self.assertEqual(private['literal_comma_separated_parts'], ['zzpe_rfi', 'zzsupum and zzotherum', ''])
+        self.assertEqual(private['decision'], 'syntax_review_only_no_past_stem_reconstruction')
+        for fields in ([], [{'name': 'itype', 'projection': 'zzperf, 4'}],
+                       [{'name': 'itype', 'projection': '3'}], case['header']['fields'] * 2):
+            with self.assertRaises(ValueError): m.principal_parts_profile(dict(case, header=dict(case['header'], fields=fields)))
+
+    def test_reading_profiles_keep_source_identity_and_mixed_native_provenance_private(self):
+        direct = reading(); derived = reading(preverb=b'ex'); outside = reading(lemma=b'zzoutside', tense=5)
+        counter = Counter({m.loss.signature(direct): 2, m.loss.signature(outside): 1})
+        groups = m.reading_profiles(counter, [direct, derived, outside], {b'zzlemma'}, b'zzlemma')
+        report = m.public_reading_profiles(groups)
+        self.assertEqual(sum(row['rows'] for row in report), 3)
+        self.assertTrue(any(row['lemma_relation']=='same_source_lemma' and row['provenance']=='mixed' and row['rows']==2 for row in report))
+        self.assertTrue(any(row['lemma_relation']=='outside_source_lemmas' and row['tense']==5 for row in report))
+        self.assertNotIn('zz', json.dumps(report))
+        with self.assertRaises(ValueError): m.reading_profiles(counter, [outside], {b'zzlemma'})
+
+    def test_family_added_readings_are_partitioned_without_approving_other_grammar(self):
+        case = {'lemma': 'zzlemma', 'digit': 3, 'header': {'headword': 'zzrootzo'}}
+        cells = {cell['form'].encode(): cell for cell in m.source_present_family(case)}
+        class FamilyAnalyzer:
+            def analyses(self, form, require_untruncated=False):
+                if not require_untruncated: raise AssertionError('missing native truncation guard')
+                cell = cells[form]
+                expected = reading()
+                expected.workword = form
+                for key in ('person', 'number', 'mood', 'voice'): setattr(expected, key, cell[key])
+                other = SimpleNamespace(**vars(expected)); other.tense = 5
+                return [expected, other]
+        output = io.StringIO()
+        report = m.probe_present_families([case], Analyzer([]), FamilyAnalyzer(), output)
+        self.assertEqual(report['counts']['added_expected_rows'], 13)
+        self.assertEqual(report['counts']['added_other_rows'], 13)
+        self.assertEqual(sum(row['rows'] for row in report['other_added_reading_profiles']), 13)
+        self.assertTrue(all(row['lemma_relation']=='same_source_lemma' and row['tense']==5 for row in report['other_added_reading_profiles']))
+        self.assertNotIn('zz', json.dumps(report))
+        self.assertTrue(all(row['other_added'] for row in map(json.loads, output.getvalue().splitlines())))
+
+    def test_route_comparison_separates_new_direct_from_retained_preverb_with_same_eleven_fields(self):
+        direct, derived = reading(tense=3), reading(tense=3, preverb=b'ex')
+        cell = {'person': 1, 'number': 1, 'mood': 8, 'voice': 1}
+        self.assertEqual(m.loss.signature(direct), m.loss.signature(derived))
+        counts, groups, private = m.compare_family_routes([derived], [derived, direct], b'zzlemma', cell)
+        self.assertEqual(counts['retained_rows'], 1)
+        self.assertEqual(counts['added_direct_rows'], 1)
+        self.assertEqual(counts['added_native_preverb_rows'], 0)
+        self.assertEqual(counts['added_other_rows'], 1)
+        self.assertEqual(m.public_reading_profiles(groups)[0]['provenance'], 'direct')
+        self.assertNotIn('zz', json.dumps({'counts':counts,'profiles':m.public_reading_profiles(groups)}))
+        self.assertEqual(private['added'][0]['route_fields']['preverb'], '')
+        counts, _, _ = m.compare_family_routes([direct], [derived], b'zzlemma', cell)
+        self.assertEqual(counts['removed_direct_rows'], 1)
+        self.assertEqual(counts['added_native_preverb_rows'], 1)
+        self.assertEqual(counts['retained_rows'], 0)
+
+    def test_route_comparison_keeps_raw_preverb_and_decomposition_multiplicity(self):
+        old = reading(preverb=b'ex'); new = SimpleNamespace(**vars(old)); new.raw_preverb=b'rawalternate'
+        other = SimpleNamespace(**vars(old)); other.stem=b'zzchangedstem'
+        counts, _, _ = m.compare_family_routes([old, old], [old, new, other], b'zzlemma',
+            {'person':1,'number':1,'mood':4,'voice':1})
+        self.assertEqual((counts['retained_rows'], counts['removed_rows'], counts['added_rows']), (1,1,2))
+        self.assertEqual(counts['added_native_preverb_rows'], 2)
+
+    def test_part_evidence_requires_full_orth_or_explicit_latin_quote_and_never_expands_fragments(self):
+        import xml.etree.ElementTree as ET
+        entry=ET.fromstring('<entry><orth extent="full">zzfulli</orth><orth>zzfragmentum</orth>'
+            '<quote lang="en">zzfragmentum</quote><quote>zzfragmentum</quote>'
+            '<quote lang="la">zzquotum zzrootzi</quote><foreign xml:lang="la">zzforeignus</foreign></entry>')
+        class Projection:
+            @staticmethod
+            def normalize(value, language):
+                return value if value.replace('_','').replace('^','').isalpha() else None
+        case={'lemma':'zzrootzo','digit':3,'header':{'headword':'zzrootzo','fields':[{'name':'itype',
+            'projection':'zzfulli, zzfragmentum, zzquotum, zzforeignus, zzrootzi, zzmissingri, 3'}]}}
+        evidence=m.principal_part_evidence(case,entry,Projection)
+        self.assertTrue(evidence[0]['independent_full_orth_exact'])
+        self.assertFalse(evidence[1]['independent_full_orth_exact'])
+        self.assertFalse(evidence[1]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[2]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[3]['explicit_latin_quote_token_exact'])
+        self.assertTrue(evidence[4]['literal_present_component_prefix'])
+        self.assertFalse(evidence[5]['literal_present_component_prefix'])
+        self.assertNotIn('zz',json.dumps(evidence))
+        profile,_=m.principal_parts_profile(case)
+        self.assertEqual(profile['part_shapes'][-1]['terminal_spelling'],'ending_ri')
+
+    def test_present_isolation_preserves_literal_directive_without_derivative_or_past(self):
+        case = {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}}
+        present = b':vs:zzroot conj3_io dep'
+        expanded = {b'zzlemma': Counter({present: 1, b':vs:zzperf ivperf': 1,
+                                       b':vs:zzsup pp4': 1, b':wd:zzword unknown': 1})}
+        selected = m.present_cases(expanded, [case])
+        self.assertEqual(selected[0]['counterfactual_definitions'], {b'zzlemma': Counter({present: 1})})
+        self.assertEqual(case, {'lemma': 'zzlemma', 'header': {'headword': 'zzlemma'}})
+        for records in ({}, {present: 2}, {present: 1, b':vs:zzother conj3': 1},
+                        {b':de:zzroot conj3': 1}, {b':vs:zzperf ivperf': 1}):
+            with self.assertRaises(ValueError): m.present_cases({b'zzlemma': Counter(records)}, [case])
+
+
+if __name__ == '__main__': unittest.main()
