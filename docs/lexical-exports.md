@@ -9,6 +9,19 @@ therefore reconstructs a **new, inspectable projection**, not the historical
 bytes or the provenance of those snapshots. See
 [the production audit](stemlib-production-audit.md#repository-archaeology).
 
+> **Reading note (October 2026).** This document is the chronological record
+> of the reconstruction up to the per-recipe trials: importer archaeology,
+> the Whitaker probe, the allomorph and alternate stages, the Greek quantity
+> review. Every figure it calls "current", "latest" or "combined" is current
+> as of the section that states it, not as of the branch head. The chain of
+> bounded recipes qualified on LISTALL, its receipts and the decisions it
+> leaves open are recorded afterwards in
+> [the PR journal](pr-18-journal.md), [the combined candidate](latin-combined-candidate.md),
+> [the open decisions](latin-open-decisions.md) and
+> [the research index](latin-research-index.md); the 824,563-form "combined
+> runtime" and the 12,984 baseline-only forms below predate that chain
+> (853,570 forms recognized, 5,413 lost at eleven stages).
+
 ## First investigation stage
 
 `tools/reconstruct-lexical-exports.py` reads the [PerseusDL/lexica](https://github.com/PerseusDL/lexica)

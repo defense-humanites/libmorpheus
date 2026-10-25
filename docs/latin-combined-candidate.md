@@ -10,7 +10,11 @@ records counts, categories and SHA-256 values only). The **nine-stage
 combination** it extends was qualified on `1d91bb1` (receipt
 [`latin-combined-candidate-1d91bb1.json`](qualification/latin-combined-candidate-1d91bb1.json),
 private source `d02f4bdb…`, figures kept below); the six-stage one on
-`6d0f766` and `b925a88` (`f719a4e1…`).
+`6d0f766` and `b925a88` (`f719a4e1…`). The stage counts name the
+separately qualified trials; each receipt also lists the earlier `-jicio`
+repair as a closing stage entry, so the receipts carry seven, nine and
+eleven entries respectively, the last one changing nothing (see
+[the stage table](#stage-chain-eleven-stages) below).
 
 Each of the recent trials was staged and measured on the unchanged full
 source candidate `6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9`,
@@ -116,8 +120,10 @@ completely lost forms remain unmatched.
 
 ## Six-stage combination (qualified on `6d0f766` and `b925a88`)
 
-The six-stage chain is the one above without stages 4 and 5, applied in the
-same order. Stage 4 of that chain (now stage 6) adds two records more than
+The six-stage chain is the one above without stages 4 to 7 (the two
+attachment repairs, the residual families and the joined fields), applied in
+the same order. Its fourth stage, the prefix alternates (stage 8 above), adds
+two records more than
 its separate trial because two attribution blocks hold a regular `are_vb`
 derivative and a written perfect that the prefix spelling copies; the
 quotation proof adds four records fewer because the reference proof already

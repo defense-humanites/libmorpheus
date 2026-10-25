@@ -11,7 +11,15 @@ rule proven from the source header and the historical lexer, applied to
 blocks whose records are the lexer's own output. Each needs a choice about
 what the candidate is allowed to contain. This page states the choices,
 what each would cost or recover, and what a bounded tool could still do
-within each once the choice is made. Lemma names appear only as examples.
+within each once the choice is made. Lemma names, and individual stems or
+written parts quoted to show a defect or a repair, appear only as examples;
+every example is derivable from the public source header and the public
+lexer. The candidate files, the per-lemma dossiers and any list of forms or
+stems stay private, in the sessions that produced them. Each decision below
+names the receipt that measures it; the receipts carry counts, categories
+and fingerprints only. The repository maintainer decides; until then the
+default holds: nothing is admitted beyond the bounded recipes, nothing is
+promoted and the PR stays a draft.
 
 ## 1. Changed-definition dossiers — 2,249 lost forms, 39 lemmas
 
@@ -32,6 +40,18 @@ option only lemma by lemma, with the quoted article passage as the proof,
 along the lines of the quotation proof of the
 [backlinked presents](latin-backlinked-present-classes.md).
 
+Costs: the current state leaves the 2,249 forms lost; admitting all witness
+records recovers them but reintroduces 2,327 readings no source header
+supports as written and gives up the source-backed discipline of the
+chain; the per-dossier option costs one proof per lemma and recovers only
+what the article quotes. Evidence:
+`qualification/latin-residual-loss-attribution-0f0d489.json`
+(`completely_lost_forms_by_lemma_category` and
+`unmatched_readings_by_lemma_category`, class
+`curated_lemma_with_candidate_definition`) and
+`qualification/latin-loss-source-review-8462af2.json` for the source
+reading of each dossier; the dossiers themselves are private.
+
 ## 2. Native preverb compositions — 1,553 lost forms, 40 lemmas
 
 The engine composes any preverb of its table with any indexed stem and
@@ -50,7 +70,17 @@ recognized (which would mean inventing headers), whether `vbs.cmp.ml`
 should keep mapping names whose base article the candidate lacks, and
 whether a form recognized only through a composition on a withdrawn stem
 counts as a loss at all. The attribution tool already separates the three
-cases by count.
+cases by count: `native_preverb_identifier:hyphenated` (1,137 forms, 33
+names) and `native_preverb_identifier:mapped_composition` (416 forms, 7
+names) in `qualification/latin-residual-loss-attribution-0f0d489.json`,
+and `lost_forms_recognized_only_by_defective_readings.readings_by_origin`
+(`native_preverb_composition`: 29 readings) in
+`qualification/latin-combined-candidate-da8cd34.json` for the compositions
+on withdrawn stems. Costs: inventing headers for compositions would add
+records with no article behind them; keeping `vbs.cmp.ml` mappings whose
+base article the candidate lacks keeps 416 forms recognized under names the
+candidate cannot explain; counting withdrawn-stem compositions as losses
+would make every repair of a wrong stem look like a regression.
 
 ## 3. Vowel-initial principal parts — 591 lost forms, 8 lemmas (7 with losses)
 
@@ -70,6 +100,11 @@ than repairing blocks it produced. That is the decision: whether the
 candidate may contain blocks the historical filter never emitted, provided
 each comes from a header shape named in advance and from the lexer's own
 stem derivation. If yes, one tool covers the four shapes (eight lemmas).
+Evidence: class
+`curated_lemma_without_definition:joined:vowel_initial_digit_grammar` in
+`qualification/latin-residual-loss-attribution-0f0d489.json` (591 forms,
+7 lemmas with losses; 413 unmatched readings) and the header shapes in
+`qualification/latin-witness-backlog-screen-545281b.json`.
 
 ## 4. Curated lemmas without definition — 1,168 lost forms, 23 lemmas
 
@@ -87,7 +122,10 @@ without parts) are the lemma-identity and admission policies the
 [witness backlog screen](latin-witness-backlog-screen.md) isolated; the
 other three can be reached by bounded rules once the policy of question 3
 is settled. The alternate spellings and homograph numberings of the same
-screen cost no form.
+screen cost no form. Evidence: the
+`curated_lemma_without_definition:*` classes of
+`qualification/latin-residual-loss-attribution-0f0d489.json` and the
+screen's receipt `qualification/latin-witness-backlog-screen-545281b.json`.
 
 ## 5. Beyond the verbal candidate
 
@@ -97,6 +135,14 @@ four verbal inputs nor `vbs.cmp.ml` carries (5). The nominal side of the
 reconstruction, `vtags`, the irregular paradigms (*subsum* without a
 subjunctive) and the Hopper oracles have not been started, and no
 production promotion is proposed until the questions above are settled.
+
+The options are: leave these outside the PR (the current state), open a
+separate research branch for the nominal reconstruction and `vtags`, or
+fold the 68 non-verbal readings of verbal blocks into decision 1, since
+they belong to the same dossiers. Evidence: class
+`lemma_outside_curated_witness_and_candidate` and the
+`readings_by_part_of_speech` breakdown in
+`qualification/latin-residual-loss-attribution-0f0d489.json`.
 
 ## What a decision would start
 

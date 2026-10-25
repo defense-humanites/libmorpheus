@@ -14,7 +14,12 @@ records categories, counts and SHA-256 values only. The earlier receipts
 (nine-stage combination, `d02f4bdb…`) and
 [`347a058`](qualification/latin-residual-loss-attribution-347a058.json)
 (six-stage, `f719a4e1…`) used the same method; their figures are kept below
-for comparison. (A run on `b5e2e60` between the first two also succeeded
+for comparison. The `347a058` receipt labelled the categories differently
+(one unsplit `native_preverb_identifier` class, mapped compositions under
+`lemma_outside_curated_witness_and_candidate`, separate `non_verbal_reading:*`
+classes); the tables below map those labels onto the current ones, so the
+per-category deltas against `347a058` are approximate at the class
+boundaries while the totals are exact. (A run on `b5e2e60` between the first two also succeeded
 but its receipt is not archived: the tool then consulted `vbs.cmp.ml`
 before the witness, and the losses of the 113 curated or candidate lemmas
 whose names the engine also reports for a native composition — *abdo* for
@@ -150,8 +155,8 @@ the four verbal inputs nor `vbs.cmp.ml` carries.
   ways, recovering compositions on repaired stems and withdrawing those on
   defective ones.
 - Among the curated lemmas without definition, the vowel-initial grammar
-  strings weigh most (591 lost forms, 413 unmatched readings under 7
-  lemmas); the voice variants kept as active lemmas weigh 403 lost forms,
+  strings weigh most (591 lost forms under 7 lemmas, 413 unmatched readings
+  under 6 of them); the voice variants kept as active lemmas weigh 403 lost forms,
   all of them active forms of a deponent article. No recipe so far touches
   them: these figures are identical on the three combinations.
 - Nothing here changes a candidate; the PR remains a draft.
