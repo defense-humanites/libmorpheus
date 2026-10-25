@@ -101,6 +101,7 @@ Each receipt is named after its workflow and the short hash of the commit it qua
 | [`latin-combined-candidate-6d0f766.json`](qualification/latin-combined-candidate-6d0f766.json) | `6d0f766` | [pr-18-journal](pr-18-journal.md) |
 | [`latin-combined-candidate-b925a88.json`](qualification/latin-combined-candidate-b925a88.json) | `b925a88` | [pr-18-journal](pr-18-journal.md) |
 | [`latin-combined-candidate-da8cd34.json`](qualification/latin-combined-candidate-da8cd34.json) | `da8cd34` | [latin-combined-candidate](latin-combined-candidate.md), [latin-open-decisions](latin-open-decisions.md), [pr-18-journal](pr-18-journal.md) |
+| [`latin-combined-candidate-8bfd450.json`](qualification/latin-combined-candidate-8bfd450.json) | `8bfd450` | [latin-combined-candidate](latin-combined-candidate.md), [pr-18-journal](pr-18-journal.md) |
 | [`latin-direct-present-b022abb.json`](qualification/latin-direct-present-b022abb.json) | `b022abb` | [latin-direct-present-control](latin-direct-present-control.md), [pr-18-journal](pr-18-journal.md) |
 | [`latin-editor-attributions-ad81403.json`](qualification/latin-editor-attributions-ad81403.json) | `ad81403` | [latin-editor-attributions](latin-editor-attributions.md), [pr-18-journal](pr-18-journal.md) |
 | [`latin-historical-portability-b4cd55d.json`](qualification/latin-historical-portability-b4cd55d.json) | `b4cd55d` | [latin-historical-filter-portability](latin-historical-filter-portability.md), [pr-18-journal](pr-18-journal.md) |

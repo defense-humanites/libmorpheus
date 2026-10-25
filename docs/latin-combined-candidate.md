@@ -51,9 +51,11 @@ stage changes nothing here and its output hash equals stage 7's. Until
 25 October 2026 it closed the chain, after the presents; it now stands
 before the prefix alternates so that, on an input where it does act, its
 replacements precede the records the alternates copy. The receipt
-`da8cd34` lists the earlier order with the same per-stage counts and the
-same final hash `ec3fc3d4…`; the next qualification run records the new
-order.
+`da8cd34` lists the earlier order; the re-qualification on `8bfd450`
+([receipt](qualification/latin-combined-candidate-8bfd450.json)) records
+the new order with the same per-stage counts and hashes (stage 8 now maps
+`d23878fd…` to itself) and the same final hash `ec3fc3d4…`: keyed by stage
+name, the two receipts differ in nothing but the scope strings.
 
 The four attachment repairs and the `-jicio` re-run come before the prefix alternates so that the
 copied perfects and supines are the repaired ones; the joined-itype stage
