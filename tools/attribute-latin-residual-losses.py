@@ -168,6 +168,9 @@ def prepare(args):
         raise ValueError('residual loss attribution input receipt differs')
     target = changed.loss.private_target(args.output, [*paths.values(), args.library, args.baseline, args.tools, args.filters, args.witness])
     target.mkdir(mode=0o700)
+    expected = QUALIFIED_BASELINE_COMPARISON.get(combined.COMBINED_SHA)
+    if expected is None:
+        raise ValueError('residual loss attribution has no qualified baseline comparison for this combined candidate')
     baseline_indexes = {n: native.digest(args.baseline / 'Latin/steminds' / n) for n in changed.reproduction.candidate.INDEXES}
     combination = combined.combine.prepare(args.candidate, args.headers, args.tei, args.filters, target / 'combination')
     if combination['output_sha256'] != combined.COMBINED_SHA:
@@ -183,9 +186,6 @@ def prepare(args):
         readers['baseline'] = supines.direct.StrictRows(args.library, args.baseline)
         readers['after'] = supines.direct.StrictRows(args.library, target / 'trial')
         comparison = supines.direct.audit.audit(args.forms, readers['baseline'], readers['after'], target / 'baseline-combined.jsonl')
-        expected = QUALIFIED_BASELINE_COMPARISON.get(combined.COMBINED_SHA)
-        if expected is None:
-            raise ValueError('residual loss attribution has no qualified baseline comparison for this combined candidate')
         if (comparison['global_eleven_field_multisets']['removed_rows'] != expected['removed_rows']
                 or comparison['lost_forms_diagnostic']['forms'] != expected['forms']):
             raise ValueError('residual loss attribution baseline comparison differs from the qualified receipt')

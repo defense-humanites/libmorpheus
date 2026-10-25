@@ -39,12 +39,23 @@ of the previous stage:
 | 5 | [sigmatic suffix](latin-sigmatic-suffix.md) | 6 | 10 replaced |
 | 6 | [residual attachments](latin-residual-attachments.md) | 24 | 32 replaced (3 presents reclassed) |
 | 7 | [joined itype fields](latin-residual-attachments.md#joined-itype-fields) | 3 | 4 replaced |
-| 8 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
-| 9 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
-| 10 | backlinked presents, quotation proof | 10 | 11 added |
-| 11 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none |
+| 8 | [`-jicio` duplicate components](lexical-exports.md#duplicate-components-proved-by-complete-third-conjugation-alternates) | 0 | none (see below) |
+| 9 | [abbreviated prefix alternates](latin-prefix-alternates.md) | 366 | 583 added |
+| 10 | [backlinked presents, reference proof](latin-backlinked-present-classes.md) | 19 | 19 added |
+| 11 | backlinked presents, quotation proof | 10 | 11 added |
 
-The four attachment repairs come before the prefix alternates so that the
+Stage 8 is a re-run of a repair the input candidate `6caf089d…` already
+carries: `reconstruct-latin-qualified-candidate.py` applies
+`repair-latin-jicio-parts.py` (18 records) before the chain starts, so the
+stage changes nothing here and its output hash equals stage 7's. Until
+25 October 2026 it closed the chain, after the presents; it now stands
+before the prefix alternates so that, on an input where it does act, its
+replacements precede the records the alternates copy. The receipt
+`da8cd34` lists the earlier order with the same per-stage counts and the
+same final hash `ec3fc3d4…`; the next qualification run records the new
+order.
+
+The four attachment repairs and the `-jicio` re-run come before the prefix alternates so that the
 copied perfects and supines are the repaired ones; the joined-itype stage
 runs the three attachment recipes once more on the headers whose itype
 fields `combitype` joins. Every stage's input and output SHA-256 is

@@ -115,10 +115,16 @@ whose itype fields are consecutive and equal to the source projection
 (339 on the source candidate), it hands the written-part anchor, sigmatic
 suffix and residual attachment repairs a one-field view of the header and
 of its source article, each applying its own proof and historical-output
-check unchanged. It reads the lexer tables with C comments removed and
-character-literal trims accepted (the residual repair's own reader takes
-the commented-out `u^i, u_tum, 3` case for a live one; the difference
-withholds and never repairs). On the source candidate the extension repairs
+check unchanged. The lexer tables are read once, by the residual repair's
+reader shared with this extension, with C comments removed and
+character-literal trims accepted; until 25 October 2026 the residual repair
+had a reader of its own that took the commented-out `u^i, u_tum, 3` case
+for a live one and dropped the three cases with a character-literal trim,
+a difference that withheld and never repaired (verified on the whole
+lexer: the two readers gave the same proof outcome for every itype). The
+literal set the two attachment recipes receive here is the one they compute
+themselves (the 52 explicit `strcmp` cases), where the extension passed the
+46 cases with a `do_vstems` call before. On the source candidate the extension repairs
 **3 blocks, 4 records**: the anchor duplication of *bibo* (`bi^bi^b`,
 withheld by the anchor trial for its two fields), the vowel-anchored parts
 of *dirimo* (`di^re_m`, `di^rempt`) and a doubled `u` (*insuo*). It is not

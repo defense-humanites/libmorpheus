@@ -108,5 +108,17 @@ class Transform(unittest.TestCase):
         self.assertEqual(counts, {'withheld_block_shape_differs': 2, 'withheld_records_not_historical_output': 2})
 
 
+class LexerTables(unittest.TestCase):
+    def test_live_cases_only_with_character_trims_and_inside_the_literal_table(self):
+        literal, spectypes = m.lexer_tables()
+        # the commented-out ``u^i, u_tum, 3`` case trims nothing; the live one trims at u
+        self.assertEqual(literal['u^i, u_tum, 3'], ('conj3', "'u'"))
+        for itype, case in (('sum, 2', ('conj2', "'d'")), ('ve_ni, ventum', ('conj4', "'v'")), ('cu_tus, 3', ('conj3', "'q'"))):
+            self.assertEqual(literal[itype], case, itype)
+        self.assertEqual(literal['ui, u_tum, 3'], ('conj3', 'yytext[7]'))
+        self.assertTrue(set(literal) <= m.anchor.literal_table())
+        self.assertIn('e_mi, emptum, 3', spectypes)
+
+
 if __name__ == '__main__':
     unittest.main()

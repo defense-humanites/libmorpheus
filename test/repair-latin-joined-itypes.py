@@ -60,6 +60,7 @@ class View(unittest.TestCase):
         self.assertEqual(literal['u^i, 3'], ('conj3', '0'))
         self.assertEqual(literal['e^re'], ('conj3', None))
         self.assertIn('e_mi, emptum, 3', spectypes)
+        self.assertIs(m.lexer_tables, m.residual.lexer_tables)
         self.assertEqual(m.join_rule(), ', ')
 
 

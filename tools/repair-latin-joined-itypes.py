@@ -50,14 +50,7 @@ COMBITYPE = anchor.LEXER.with_name('combitype.l')
 JOIN = ', '
 
 
-def lexer_tables(lexer=LEXER):
-    """Literal cases with their trim argument, and spectypes[], from the lexer with its C comments removed."""
-    text = re.sub(r'/\*.*?\*/', '', lexer.read_text(errors='replace'), flags=re.S)
-    literal = {}
-    for match in re.finditer(r'strcmp\(yytext,"<itype>([^"]*)</itype>"\)\s*\)\s*return\(\s*do(?:verb|_vstems)\("([^"]+)"(?:,\s*(0|1|yytext\[7\]|\'[a-z]\'))?\s*\)', text):
-        literal.setdefault(match.group(1), (match.group(2), match.group(3)))
-    table = re.search(r'char \*spectypes\[\] = \{(.*?)\};', text, re.S).group(1)
-    return literal, set(re.findall(r'"<itype>(.*?)</itype>"', table))
+lexer_tables = residual.lexer_tables
 
 
 def join_rule(combitype=COMBITYPE):
@@ -101,7 +94,7 @@ def joined_view(row, entry):
 def transform(candidate, rows, entries, tables=None):
     join_rule()
     tables = lexer_tables() if tables is None else tables
-    literal = set(tables[0])
+    literal = anchor.literal_table()
     views, sources = [], {}
     counts = Counter()
     for row in rows:

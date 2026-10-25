@@ -29,10 +29,10 @@ STAGE_SHA={
            'sigmatic-suffix': '218470eb2bd0cef56fcd6f5e7ee0dcc08fac1a1e18320cfc03acd07aa81ef9c5',
            'residual-attachments': '991364c4267f36ef8d8643eb7f80d2bed73f9b7ff62b9db4076e7afdce5ddf43',
            'joined-itypes': 'd23878fd04cc557c941bb6d7d916a68371a2464ee1d42c38d8c73b7ec4c95cec',
+           'jicio-parts': 'd23878fd04cc557c941bb6d7d916a68371a2464ee1d42c38d8c73b7ec4c95cec',
            'prefix-alternates': '4db98c54d522524e7b239185be5294c8f5f752fefd50dd54fb54a0dc323fe8da',
            'backlinked-presents': '4d2dea2627091bdfe6b8d22d96695ce4e48454025aee71e2266be52093174216',
-           'quoted-presents': 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e',
-           'jicio-parts': 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
+           'quoted-presents': 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
 }
 
 
@@ -164,7 +164,7 @@ def prepare(args):
             native.digest(args.baseline/'Latin/steminds'/n)!=baseline_indexes[n] for n in indexes):
         raise ValueError('combined candidate qualification changed an input')
     return {'schema':1,
-            'scope':'the eight separately qualified trials and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline, with the lemma-identity review of the readings still removed; no production promotion',
+            'scope':'the nine separately qualified trials, the joined-itype extension of the attachment repairs and the earlier -jicio repair combined in sequence on one private candidate; family cells of every added record, LISTALL comparison against the original candidate and against the controlled rebuilt baseline, with the lemma-identity review of the readings still removed; no production promotion',
             'native_scope':'engine-generated cells of each added record under its exact lemma and class; historical restoration on those forms and, with LISTALL, globally against the controlled rebuilt baseline; no independent form attestation',
             'combination':combination,'added_record_classes':classes,'removed_record_classes':classify_removed(gone),
             'added_records':len(came),'removed_records':len(gone),'input_sha256':receipts,

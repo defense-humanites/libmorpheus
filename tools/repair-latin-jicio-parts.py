@@ -58,7 +58,7 @@ def transform(candidate, rows):
             lemma = line[4:].strip()
             blocks[lemma] += 1
         m = pattern.fullmatch(line)
-        if m:
+        if m and lemma is not None:
             records[lemma].append((index, m[1], m[2], m[3].strip()))
     replacements = {}
     additions = {}

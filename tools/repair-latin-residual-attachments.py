@@ -52,10 +52,16 @@ CLASSLESS = ('u^i', 'e^re')
 
 
 def lexer_tables(lexer=LEXER):
-    """The literal cases with their trim argument, and the spectypes[] strings, from the historical lexer."""
-    text = lexer.read_text(errors='replace')
+    """Literal cases with their trim argument, and spectypes[], from the lexer with its C comments removed.
+
+    The reader shared with the joined-itype repair: a case inside a C comment
+    (``u^i, u_tum, 3`` trimming nothing, commented out in the lexer) is not
+    live, and a trim given as a character literal (``'d'``, ``'u'``, ``'v'``,
+    ``'q'``) is a case like any other.
+    """
+    text = re.sub(r'/\*.*?\*/', '', lexer.read_text(errors='replace'), flags=re.S)
     literal = {}
-    for match in re.finditer(r'strcmp\(yytext,"<itype>([^"]*)</itype>"\)\s*\)\s*return\(\s*do(?:verb|_vstems)\("([^"]+)"(?:,\s*(0|1|yytext\[7\]))?\s*\)', text):
+    for match in re.finditer(r'strcmp\(yytext,"<itype>([^"]*)</itype>"\)\s*\)\s*return\(\s*do(?:verb|_vstems)\("([^"]+)"(?:,\s*(0|1|yytext\[7\]|\'[a-z]\'))?\s*\)', text):
         literal.setdefault(match.group(1), (match.group(2), match.group(3)))
     table = re.search(r'char \*spectypes\[\] = \{(.*?)\};', text, re.S).group(1)
     return literal, set(re.findall(r'"<itype>(.*?)</itype>"', table))
