@@ -14,15 +14,32 @@ on:
     # Lexical research files (the Latin and Greek Python tools and their
     # tests, the research workflows, their reference receipts and the
     # documentation) do not touch the runtime contract this workflow
-    # qualifies. tools/assemble-stemlib-qualification.py is used below and
-    # stays covered.
+    # qualifies. The research importers that carry no language in their
+    # name are listed one by one, so that the production Python files stay
+    # covered: tools/build-stemlib-lexical.py (the stemlib builder CMake
+    # runs), tools/audit-stemlib-lexical.py, tools/package-stemlib-runtime.py,
+    # tools/assemble-stemlib-qualification.py (used below) and the CMake
+    # tests test/stemlib-*.py.
     paths-ignore:
       - 'docs/**'
       - 'tools/*-latin-*.py'
       - 'tools/*-greek-*.py'
-      - 'tools/*lexical*.py'
+      - 'tools/audit-lexical-stems.py'
+      - 'tools/partition-lexical-latin.py'
+      - 'tools/prepare-greek-lexical-review.py'
+      - 'tools/reconstruct-lexical-exports.py'
+      - 'tools/split-greek-lexical-headers.py'
+      - 'tools/transfer-lexical-record-corrections.py'
       - 'tools/latin-*.json'
-      - 'test/*.py'
+      - 'tools/latin-*.json.license'
+      - 'test/*-latin-*.py'
+      - 'test/*-greek-*.py'
+      - 'test/audit-lexical-stems.py'
+      - 'test/partition-lexical-latin.py'
+      - 'test/prepare-greek-lexical-review.py'
+      - 'test/reconstruct-lexical-exports.py'
+      - 'test/split-greek-lexical-headers.py'
+      - 'test/transfer-lexical-record-corrections.py'
       - '.github/workflows/latin-*.yml'
       - '.github/workflows/lexical-import-research.yml'
       - '.github/workflows/documentation-license.yml'
