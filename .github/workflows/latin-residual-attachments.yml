@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 name: Latin residual attachment repairs trial
 
+# The workflow file itself is not a push path: editing it does not launch a
+# qualification run (use workflow_dispatch), and the concurrency group cancels
+# a run superseded by a newer push.
 on:
   push:
     branches:
@@ -10,12 +13,15 @@ on:
       - 'test/repair-latin-residual-attachments.py'
       - 'tools/qualify-latin-residual-attachments.py'
       - 'test/qualify-latin-residual-attachments.py'
-      - '.github/workflows/latin-residual-attachments.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   source-review:
@@ -25,12 +31,21 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install isolated lexer and source dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq flex libfl-dev
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
+          for attempt in 1 2 3; do
+            sudo timeout 600 apt-get -o DPkg::Lock::Timeout=300 update -qq && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          for attempt in 1 2 3; do
+            sudo timeout 600 apt-get -o DPkg::Lock::Timeout=300 install -y -qq flex libfl-dev && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          flex --version > /dev/null
           python3 -m venv "$RUNNER_TEMP/lexical-python"
           "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
       - name: Fetch the pinned TEI
         run: |
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           git clone --filter=blob:none --no-checkout \
             https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
           git -C "$RUNNER_TEMP/lexica" sparse-checkout set --no-cone \
@@ -39,6 +54,7 @@ jobs:
       - name: Reconstruct the qualified recovered headers privately
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
             --language Latin --lexica "$RUNNER_TEMP/lexica" --output "$RUNNER_TEMP/projected"
@@ -56,6 +72,7 @@ jobs:
       - name: Reproduce the original and diagnostic filter outputs
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           ulimit -c 0
           python3 test/probe-latin-historical-filter-portability.py
@@ -82,6 +99,7 @@ jobs:
       - name: Review the exact changed lemma against the pinned TEI
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-historical-filter-delta.py \
             --reference "$RUNNER_TEMP/historical.stems" \
@@ -94,6 +112,7 @@ jobs:
       - name: Qualify isolated source supine families natively
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/qualify-latin-historical-source-supines.py
           cmake -S . -B "$RUNNER_TEMP/supine-native" -G Ninja \
@@ -113,6 +132,7 @@ jobs:
       - name: Reconstruct the unchanged qualified full candidate privately
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/qualify-latin-historical-source-candidate.py
           "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-latin-qualified-candidate.py \
@@ -123,6 +143,7 @@ jobs:
       - name: Build the pinned original native candidate for read-only source checks
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 - <<'PY'
           import importlib.util
@@ -146,6 +167,7 @@ jobs:
       - name: Prepare the pinned full literal LISTALL input
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 - <<'PY'
           import os
@@ -160,6 +182,7 @@ jobs:
       - name: Qualify the residual attachment repair privately
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" test/repair-latin-residual-attachments.py
           "$RUNNER_TEMP/lexical-python/bin/python" test/qualify-latin-residual-attachments.py
@@ -183,9 +206,22 @@ jobs:
           set -euo pipefail
           number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
           [ -n "$number" ] || exit 0
-          { printf '<!-- qualification-failure %s %s -->\n**%s** on `%s` failed in run %s; exception lines only, no lexical values:\n\n```\n' "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_WORKFLOW" "${GITHUB_SHA:0:7}" "$GITHUB_RUN_ID"
-            grep -E 'Error|Traceback|File "' "$RUNNER_TEMP/residual-attachments-qualify.err" 2>/dev/null | tail -n 30 | sed -E 's#/home/runner/work/[^/]+/[^/]+/##g' || true
-            printf '```\n'; } > "$RUNNER_TEMP/failure.md"
+          python3 - "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$RUNNER_TEMP" > "$RUNNER_TEMP/failure.md" <<'PY'
+          import glob, os, re, sys
+          workflow, sha, run, temporary = sys.argv[1:5]
+          lines = []
+          for path in sorted(glob.glob(os.path.join(temporary, '*.err'))):
+              with open(path, errors='replace') as handle:
+                  lines += [line.rstrip('\n') for line in handle if re.search(r'Error|Traceback|File "|error:|fatal:|^E: ', line)]
+          def scrub(line):
+              line = re.sub(r'/home/runner/work/[^/]+/[^/]+/', '', line)
+              line = re.sub(r'''(?<!File )(?<![A-Za-z0-9_])b?(['"]).*?\1''', "'...'", line)
+              line = re.sub(r'\S*\^\S*', '...', line)
+              line = re.sub(r'(?<!\S)[a-z_^]*_[a-z_^]*-[a-z_^]+(?!\S)|(?<!\S)[a-z_^]+-[a-z_^]*_[a-z_^]*(?!\S)', '...', line)
+              return line[:300]
+          body = '\n'.join(scrub(line) for line in lines[-30:]) or '(no exception line was captured; see the run log)'
+          print(f"<!-- qualification-failure {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}` failed in run {run}; exception lines only, quoted values redacted, no lexical values:\n\n```\n{body}\n```")
+          PY
           gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/failure.md"
       - name: Publish the aggregate receipt on the open pull request
         if: success()
@@ -196,16 +232,43 @@ jobs:
           set -euo pipefail
           number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
           [ -n "$number" ] || { echo "no open pull request for $GITHUB_REF_NAME; receipt stays in this log"; exit 0; }
-          python3 - "$RECEIPT" "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY'
-          import base64, gzip, json, sys
+          status=0
+          python3 - "$RECEIPT" "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/comment.md" <<'PY' || status=$?
+          import base64, gzip, json, re, sys
           receipt, workflow, sha, run = sys.argv[1:5]
           data = json.loads(open(receipt, 'rb').read().splitlines()[-1])
-          compact = json.dumps(data, sort_keys=True, separators=(',', ':'))
+          def suspicious(text):
+              if ' ' in text:
+                  return re.search(r"""(?<![A-Za-z0-9_])b['"]""", text) is not None
+              if '^' in text or text.startswith(("b'", 'b"')):
+                  return True
+              return '_' in text and re.fullmatch(r"[a-z_^]+-[a-z_^]+", text) is not None
+          def walk(node, path):
+              if isinstance(node, dict):
+                  for key, value in node.items():
+                      shown = path + '/' + ('...' if suspicious(str(key)) else str(key))
+                      if suspicious(str(key)):
+                          yield shown
+                      yield from walk(value, shown)
+              elif isinstance(node, list):
+                  for index, value in enumerate(node):
+                      yield from walk(value, f'{path}[{index}]')
+              elif isinstance(node, str) and suspicious(node):
+                  yield path
+          flagged = sorted(set(walk(data, '')))
+          if flagged:
+              print(f"<!-- aggregate-receipt-withheld {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}`, run {run}: the receipt is **withheld** because {len(flagged)} string(s) look like lexical values (a quantity mark, a byte literal or a hyphenated stem shape) at " + ', '.join(f'`{p}`' for p in flagged[:20]) + ". It stays in the run log.")
+              sys.exit(3)
           head = f"<!-- aggregate-receipt {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}` - aggregate receipt from run {run}: counts, categories and SHA-256 only, no lexical values.\n\n"
+          compact = json.dumps(data, sort_keys=True, separators=(',', ':'))
           if len(compact) < 60000:
               print(head + "<details><summary>receipt.json</summary>\n\n```json\n" + compact + "\n```\n\n</details>")
           else:
               blob = base64.b64encode(gzip.compress(compact.encode())).decode()
-              print(head + "The compact receipt exceeds the comment size; it is gzip+base64 below.\n\n<details><summary>receipt.json.gz.b64</summary>\n\n```\n" + blob + "\n```\n\n</details>")
+              if len(blob) < 60000:
+                  print(head + "The compact receipt exceeds the comment size; it is gzip+base64 below.\n\n<details><summary>receipt.json.gz.b64</summary>\n\n```\n" + blob + "\n```\n\n</details>")
+              else:
+                  print(head + f"The receipt is too large for a comment ({len(compact)} bytes compact, {len(blob)} gzip+base64); it stays in the log of run {run}.")
           PY
           gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
+          exit "$status"

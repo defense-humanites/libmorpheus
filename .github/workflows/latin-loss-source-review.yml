@@ -1,12 +1,21 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 name: Latin changed-definition loss source review
 
 # Manual dispatch only: archived at pinned commits under docs/qualification/;
 # the broad path filter re-ran it on nearly every research push.
+# The workflow file itself is not a push path: editing it does not launch a
+# qualification run (use workflow_dispatch), and the concurrency group cancels
+# a run superseded by a newer push.
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   source-review:
@@ -16,12 +25,21 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install isolated lexer and source dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq flex libfl-dev
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
+          for attempt in 1 2 3; do
+            sudo timeout 600 apt-get -o DPkg::Lock::Timeout=300 update -qq && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          for attempt in 1 2 3; do
+            sudo timeout 600 apt-get -o DPkg::Lock::Timeout=300 install -y -qq flex libfl-dev && break
+            [ "$attempt" -lt 3 ] && sleep 30
+          done
+          flex --version > /dev/null
           python3 -m venv "$RUNNER_TEMP/lexical-python"
           "$RUNNER_TEMP/lexical-python/bin/pip" install lxml==6.1.1
       - name: Fetch the pinned TEI
         run: |
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           git clone --filter=blob:none --no-checkout \
             https://github.com/PerseusDL/lexica.git "$RUNNER_TEMP/lexica"
           git -C "$RUNNER_TEMP/lexica" sparse-checkout set --no-cone \
@@ -30,6 +48,7 @@ jobs:
       - name: Reconstruct the qualified recovered headers privately
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-lexical-exports.py \
             --language Latin --lexica "$RUNNER_TEMP/lexica" --output "$RUNNER_TEMP/projected"
@@ -47,6 +66,7 @@ jobs:
       - name: Reproduce the original and diagnostic filter outputs
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           ulimit -c 0
           python3 test/probe-latin-historical-filter-portability.py
@@ -73,6 +93,7 @@ jobs:
       - name: Review the exact changed lemma against the pinned TEI
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-historical-filter-delta.py \
             --reference "$RUNNER_TEMP/historical.stems" \
@@ -85,6 +106,7 @@ jobs:
       - name: Qualify isolated source supine families natively
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/qualify-latin-historical-source-supines.py
           cmake -S . -B "$RUNNER_TEMP/supine-native" -G Ninja \
@@ -104,6 +126,7 @@ jobs:
       - name: Reconstruct the unchanged qualified full candidate privately
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/qualify-latin-historical-source-candidate.py
           "$RUNNER_TEMP/lexical-python/bin/python" tools/reconstruct-latin-qualified-candidate.py \
@@ -114,6 +137,7 @@ jobs:
       - name: Reproduce the pinned complete-loss dossier
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" test/review-latin-changed-definition-losses.py
           python3 test/reproduce-latin-complete-losses.py
@@ -139,6 +163,7 @@ jobs:
       - name: Review changed-definition losses against source and isolated filters
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-changed-definition-losses.py \
             --dossier "$RUNNER_TEMP/complete-losses/loss-dossier.jsonl" \
@@ -151,6 +176,7 @@ jobs:
       - name: Review lost native identifiers against their literal bases
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/review-latin-lost-preverb-bases.py
           "$RUNNER_TEMP/lexical-python/bin/python" tools/review-latin-lost-preverb-bases.py \
@@ -166,6 +192,7 @@ jobs:
       - name: Qualify bounded primary source directives including the nine verbal replay differences
         run: |
           set -euo pipefail
+          exec 2> >(tee -a "$RUNNER_TEMP/steps.err" >&2)
           umask 077
           python3 test/qualify-latin-loss-primary-source.py
           python3 test/qualify-latin-loss-primary-source-native.py "$RUNNER_TEMP/supine-native"
@@ -180,3 +207,28 @@ jobs:
             --tools "$RUNNER_TEMP/supine-native" --library "$RUNNER_TEMP/supine-native/libmorpheus.so" \
             --output "$RUNNER_TEMP/loss-primary-source"
 
+      - name: Report a qualification failure on the open pull request
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          number="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')"
+          [ -n "$number" ] || exit 0
+          python3 - "$GITHUB_WORKFLOW" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$RUNNER_TEMP" > "$RUNNER_TEMP/failure.md" <<'PY'
+          import glob, os, re, sys
+          workflow, sha, run, temporary = sys.argv[1:5]
+          lines = []
+          for path in sorted(glob.glob(os.path.join(temporary, '*.err'))):
+              with open(path, errors='replace') as handle:
+                  lines += [line.rstrip('\n') for line in handle if re.search(r'Error|Traceback|File "|error:|fatal:|^E: ', line)]
+          def scrub(line):
+              line = re.sub(r'/home/runner/work/[^/]+/[^/]+/', '', line)
+              line = re.sub(r'''(?<!File )(?<![A-Za-z0-9_])b?(['"]).*?\1''', "'...'", line)
+              line = re.sub(r'\S*\^\S*', '...', line)
+              line = re.sub(r'(?<!\S)[a-z_^]*_[a-z_^]*-[a-z_^]+(?!\S)|(?<!\S)[a-z_^]+-[a-z_^]*_[a-z_^]*(?!\S)', '...', line)
+              return line[:300]
+          body = '\n'.join(scrub(line) for line in lines[-30:]) or '(no exception line was captured; see the run log)'
+          print(f"<!-- qualification-failure {workflow} {sha} -->\n**{workflow}** on `{sha[:7]}` failed in run {run}; exception lines only, quoted values redacted, no lexical values:\n\n```\n{body}\n```")
+          PY
+          gh pr comment "$number" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/failure.md"
