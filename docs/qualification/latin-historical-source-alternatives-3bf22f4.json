@@ -1,0 +1,49 @@
+{
+  "qualified_commit": "3bf22f4984d112236e082c749ba7230dcbe4b655",
+  "workflow_run": 37919452849,
+  "workflow_job": 113783585748,
+  "conclusion": "success",
+  "latin_historical_filter_source_review": {
+    "changed_lemmas": 1,
+    "delta_classes": {
+      "added": {
+        "perfect": 1,
+        "supine": 1
+      },
+      "removed": {
+        "perfect": 1
+      }
+    },
+    "diagnostic_matches_bounded_source_recipe": false,
+    "expected_source_directives": 5,
+    "extra_diagnostic_directives": 0,
+    "input_sha256": {
+      "delta": "258e211210c33e223fe3055c7c21e3a9c834f51d5e27e1ff4332d900dd2d4622",
+      "diagnostic": "8f234062ffeaf58e15ceabe3c8a8f5ff2ea37ef0c62d90659ea5db581a5c85de",
+      "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+      "reference": "22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479",
+      "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+    },
+    "isolated_source_backend_alternative_type_rows": 0,
+    "isolated_source_reproduces_full_diagnostic_multiset": true,
+    "isolated_source_selected_directives": 4,
+    "literal_source_header_matches": 1,
+    "missing_source_directives": 1,
+    "original_inputs_unchanged": true,
+    "private_source_review_sha256": "10d79072c4df8923acbb85fbd0cd28ec4a3e49b8a05cc2962ddb37cb03983023",
+    "schema": 1,
+    "scope": "one-lemma source consistency review; no lexical promotion or candidate substitution",
+    "source_branch": "explicit_compound_two_perfects_two_supines",
+    "source_header_shape": {
+      "bare_fourth_conjugation_fields": 0,
+      "comma_separated_segments": 3,
+      "fields_with_alternative_connector": 1,
+      "grammar_sha256": "5c37ef75f09c7baae9cd0c4d5916c5abcdc4bf067fca3c131dc22f40454ab654",
+      "itype_fields": 1,
+      "principal_part_like_tokens": 4,
+      "terminal_conjugation_digit": 3,
+      "tokens_with_quantity_marks": 0
+    },
+    "source_quantity_only_difference_pairs": 0
+  }
+}

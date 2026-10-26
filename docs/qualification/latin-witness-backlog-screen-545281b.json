@@ -1,0 +1,64 @@
+{
+ "latin_witness_backlog_screen": [
+  {
+   "counts": {
+    "unjoined:active_article_for_deponent_lemma": 6,
+    "unjoined:alternate_spelling_kept_as_lemma": 3,
+    "unjoined:deponent_article_for_active_lemma": 14,
+    "unjoined:homograph_numbering_differs": 4,
+    "unjoined:no_projected_header": 15,
+    "with_candidate_definitions": 6702,
+    "without_candidate_definitions": 71,
+    "witness_verbal_lemmas": 6773
+   },
+   "input_sha256": {
+    "Latin.headers.jsonl": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+    "candidate.stems": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+    "lat.ls.perseus-eng1.xml": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee",
+    "latvb.l": "27765fb0e13ba200f432c98218e1bb53126acedb391bf1d8c5cabe1fe30dd231",
+    "vbs.latin": "38e802ebeba3208f0c78b532a8f5a6a51d11ba349b2c9e5a90367fa56eefdc82"
+   },
+   "joined_grammar_shapes": {
+    "bare_infinitive": 2,
+    "no_inflection_field": 7,
+    "other_grammar": 8,
+    "several_inflection_fields": 4,
+    "vowel_initial_digit_grammar": 8
+   },
+   "literal_table_size": 88,
+   "schema": 1,
+   "scope": "curated verbal lemmas without candidate definitions, joined to projected headers; grammar-string shape of the historical table; witness used for membership only, no stem labelled",
+   "source_revision": "56061ca127f4a2844980baffc5f2b6d1332897b3"
+  },
+  {
+   "counts": {
+    "unjoined:active_article_for_deponent_lemma": 6,
+    "unjoined:alternate_spelling_kept_as_lemma": 3,
+    "unjoined:deponent_article_for_active_lemma": 14,
+    "unjoined:homograph_numbering_differs": 4,
+    "unjoined:no_projected_header": 15,
+    "with_candidate_definitions": 6702,
+    "without_candidate_definitions": 71,
+    "witness_verbal_lemmas": 6773
+   },
+   "input_sha256": {
+    "Latin.headers.jsonl": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+    "combined.stems": "f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463",
+    "lat.ls.perseus-eng1.xml": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee",
+    "latvb.l": "27765fb0e13ba200f432c98218e1bb53126acedb391bf1d8c5cabe1fe30dd231",
+    "vbs.latin": "38e802ebeba3208f0c78b532a8f5a6a51d11ba349b2c9e5a90367fa56eefdc82"
+   },
+   "joined_grammar_shapes": {
+    "bare_infinitive": 2,
+    "no_inflection_field": 7,
+    "other_grammar": 8,
+    "several_inflection_fields": 4,
+    "vowel_initial_digit_grammar": 8
+   },
+   "literal_table_size": 88,
+   "schema": 1,
+   "scope": "curated verbal lemmas without candidate definitions, joined to projected headers; grammar-string shape of the historical table; witness used for membership only, no stem labelled",
+   "source_revision": "56061ca127f4a2844980baffc5f2b6d1332897b3"
+  }
+ ]
+}

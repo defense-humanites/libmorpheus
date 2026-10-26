@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+name: Documentation license boundary
+
+on:
+  push:
+    paths:
+      - 'docs/*.md'
+      - 'test/license-boundary.cmake'
+      - '.github/workflows/documentation-license.yml'
+  pull_request:
+    paths:
+      - 'docs/*.md'
+      - 'test/license-boundary.cmake'
+      - '.github/workflows/documentation-license.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  license-boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check source and documentation SPDX boundaries
+        run: cmake -DMORPHEUS_SOURCE_DIR="$GITHUB_WORKSPACE" -P test/license-boundary.cmake

@@ -1,0 +1,1414 @@
+{
+ "latin_residual_loss_attribution": {
+  "baseline_comparison": {
+   "counts": {
+    "absent_curated__absent_rebuilt": 174561,
+    "absent_curated__recognized_rebuilt": 21028,
+    "distinct_forms": 1033579,
+    "input_lines": 1033579,
+    "recognized_curated__absent_rebuilt": 5497,
+    "recognized_curated__recognized_rebuilt": 832493
+   },
+   "global_eleven_field_multisets": {
+    "added_rows": 138692,
+    "removed_rows": 37609,
+    "retained_rows": 2010719
+   }
+  },
+  "combined_source_sha256": "d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0",
+  "completely_lost_forms_by_lemma_category": {
+   "curated_lemma_with_candidate_definition": {
+    "forms": 2347,
+    "lemmas": 42,
+    "readings": 3727
+   },
+   "curated_lemma_without_definition:joined:bare_infinitive": {
+    "forms": 29,
+    "lemmas": 2,
+    "readings": 29
+   },
+   "curated_lemma_without_definition:joined:no_inflection_field": {
+    "forms": 288,
+    "lemmas": 4,
+    "readings": 439
+   },
+   "curated_lemma_without_definition:joined:other_grammar": {
+    "forms": 247,
+    "lemmas": 3,
+    "readings": 349
+   },
+   "curated_lemma_without_definition:joined:several_inflection_fields": {
+    "forms": 170,
+    "lemmas": 2,
+    "readings": 253
+   },
+   "curated_lemma_without_definition:joined:vowel_initial_digit_grammar": {
+    "forms": 591,
+    "lemmas": 7,
+    "readings": 928
+   },
+   "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma": {
+    "forms": 403,
+    "lemmas": 9,
+    "readings": 483
+   },
+   "curated_lemma_without_definition:unjoined:no_projected_header": {
+    "forms": 31,
+    "lemmas": 3,
+    "readings": 66
+   },
+   "native_preverb_identifier:hyphenated": {
+    "forms": 1123,
+    "lemmas": 30,
+    "readings": 1754
+   },
+   "native_preverb_identifier:mapped_composition": {
+    "forms": 416,
+    "lemmas": 7,
+    "readings": 543
+   }
+  },
+  "compounds_sha256": "d02a893ebd1f567fa7e33c8940322a407947fe38f2a0fb438c988187a0815689",
+  "counts": {
+   "completely_lost_forms": 5497,
+   "readings_on_completely_lost_forms": 8571,
+   "removed_readings_matched_by_lemma_identity": 24238,
+   "unmatched_readings_on_recognized_forms": 4800
+  },
+  "input_sha256": {
+   "candidate": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+   "forms": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+   "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+   "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+  },
+  "lemma_categories": {
+   "joined:bare_infinitive": 2,
+   "joined:no_inflection_field": 7,
+   "joined:other_grammar": 8,
+   "joined:several_inflection_fields": 4,
+   "joined:vowel_initial_digit_grammar": 8,
+   "unjoined:active_article_for_deponent_lemma": 6,
+   "unjoined:alternate_spelling_kept_as_lemma": 3,
+   "unjoined:deponent_article_for_active_lemma": 14,
+   "unjoined:homograph_numbering_differs": 4,
+   "unjoined:no_projected_header": 15,
+   "with_candidate_definitions": 6702
+  },
+  "original_inputs_unchanged": true,
+  "readings_by_part_of_speech": {
+   "completely_lost_forms": {
+    "2": 8571
+   },
+   "unmatched_on_recognized_forms": {
+    "1": 27,
+    "2": 4732,
+    "3": 40,
+    "4": 1
+   }
+  },
+  "schema": 1,
+  "scope": "readings of the controlled rebuilt baseline that the combined candidate removes on LISTALL and that lemma identity does not explain, attributed by lemma category of the open decisions and by differing fields; witness used for membership only; no candidate changed, no production promotion",
+  "trial_indexes_sha256": {
+   "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+   "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+   "vbind": "cee247bbcaebf62f096dad7ef88058d2392a535d6b1a2d54dc71794eef7cc2e2",
+   "vbind.lindex": "a884009e848af8877cbdd8ee9b987cb03dee0e1db9902ba14697e3243fa7e590"
+  },
+  "unmatched_readings_by_category_and_fields": [
+   {
+    "differing_fields": "identical_reading_at_lower_multiplicity",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1414
+   },
+   {
+    "differing_fields": "lemma+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 326
+   },
+   {
+    "differing_fields": "identical_reading_at_lower_multiplicity",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 317
+   },
+   {
+    "differing_fields": "identical_reading_at_lower_multiplicity",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 291
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice+degree",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 157
+   },
+   {
+    "differing_fields": "lemma+tense+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 142
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 128
+   },
+   {
+    "differing_fields": "workword",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 103
+   },
+   {
+    "differing_fields": "identical_reading_at_lower_multiplicity",
+    "lemma_category": "curated_lemma_without_definition:joined:several_inflection_fields",
+    "readings": 100
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 96
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 80
+   },
+   {
+    "differing_fields": "workword",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 78
+   },
+   {
+    "differing_fields": "mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 62
+   },
+   {
+    "differing_fields": "lemma+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 58
+   },
+   {
+    "differing_fields": "mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 58
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 52
+   },
+   {
+    "differing_fields": "mood",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 45
+   },
+   {
+    "differing_fields": "tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 44
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 43
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 42
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 42
+   },
+   {
+    "differing_fields": "lemma+tense",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 40
+   },
+   {
+    "differing_fields": "lemma+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 38
+   },
+   {
+    "differing_fields": "tense+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 37
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 35
+   },
+   {
+    "differing_fields": "tense",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 33
+   },
+   {
+    "differing_fields": "tense+mood",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 27
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 26
+   },
+   {
+    "differing_fields": "lemma+tense",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 26
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 23
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+mood+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 22
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 20
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 20
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+mood",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 18
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+grammatical_case+mood+degree",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 18
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 17
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 16
+   },
+   {
+    "differing_fields": "lemma+gender",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 16
+   },
+   {
+    "differing_fields": "tense+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 16
+   },
+   {
+    "differing_fields": "lemma+tense",
+    "lemma_category": "curated_lemma_without_definition:unjoined:no_projected_header",
+    "readings": 15
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 14
+   },
+   {
+    "differing_fields": "mood",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 14
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 14
+   },
+   {
+    "differing_fields": "person+number+tense+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 14
+   },
+   {
+    "differing_fields": "tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 14
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 12
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+mood+degree",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 12
+   },
+   {
+    "differing_fields": "workword+lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 12
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 12
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 11
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 11
+   },
+   {
+    "differing_fields": "lemma+tense",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 11
+   },
+   {
+    "differing_fields": "tense+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 11
+   },
+   {
+    "differing_fields": "lemma+tense",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 11
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 10
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 10
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 10
+   },
+   {
+    "differing_fields": "workword+lemma",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 9
+   },
+   {
+    "differing_fields": "tense",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 9
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 8
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 8
+   },
+   {
+    "differing_fields": "person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 8
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+grammatical_case+mood+degree",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 8
+   },
+   {
+    "differing_fields": "workword+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 8
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 7
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 7
+   },
+   {
+    "differing_fields": "lemma+tense+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 7
+   },
+   {
+    "differing_fields": "person+number+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 7
+   },
+   {
+    "differing_fields": "lemma+number+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "workword+lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+grammatical_case+mood",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 6
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 6
+   },
+   {
+    "differing_fields": "person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 6
+   },
+   {
+    "differing_fields": "workword+lemma+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 6
+   },
+   {
+    "differing_fields": "identical_reading_at_lower_multiplicity",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "workword+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 6
+   },
+   {
+    "differing_fields": "person+number+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 5
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 5
+   },
+   {
+    "differing_fields": "workword+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+mood",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+tense+mood",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+mood+degree",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 5
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "tense+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+part_of_speech",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "person+number+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "workword+lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "workword+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 4
+   },
+   {
+    "differing_fields": "part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "workword+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 4
+   },
+   {
+    "differing_fields": "lemma+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+tense+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "person+number+tense+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:bare_infinitive",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+mood",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+lemma+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 3
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+mood",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 3
+   },
+   {
+    "differing_fields": "lemma+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+person+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+number+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+number+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+tense",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:bare_infinitive",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:bare_infinitive",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+person+tense+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:no_projected_header",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:no_projected_header",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:no_projected_header",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+tense+voice",
+    "lemma_category": "curated_lemma_without_definition:unjoined:no_projected_header",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+mood+degree",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+number+mood",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "workword+lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 2
+   },
+   {
+    "differing_fields": "lemma+number",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+number+tense",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+number+gender+grammatical_case+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+grammatical_case+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+person+tense+mood",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+tense+mood+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+tense+voice",
+    "lemma_category": "curated_lemma_with_candidate_definition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:bare_infinitive",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:bare_infinitive",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+number+gender+grammatical_case+tense+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:no_inflection_field",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+grammatical_case+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+grammatical_case+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:other_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:several_inflection_fields",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:several_inflection_fields",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:several_inflection_fields",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+grammatical_case",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+mood",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+number",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+number+gender+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+number+grammatical_case+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+gender+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+mood+degree",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+part_of_speech+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+tense+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+number+mood+voice",
+    "lemma_category": "curated_lemma_without_definition:joined:vowel_initial_digit_grammar",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+grammatical_case+mood",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+mood",
+    "lemma_category": "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+grammatical_case+tense+mood+voice",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+part_of_speech+number+gender+grammatical_case+mood",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+person+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "lemma_outside_curated_witness_and_candidate",
+    "readings": 1
+   },
+   {
+    "differing_fields": "person+number+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 1
+   },
+   {
+    "differing_fields": "workword+lemma+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:hyphenated",
+    "readings": 1
+   },
+   {
+    "differing_fields": "lemma+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "part_of_speech+person+number+gender+grammatical_case+tense+mood+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 1
+   },
+   {
+    "differing_fields": "tense+voice",
+    "lemma_category": "native_preverb_identifier:mapped_composition",
+    "readings": 1
+   }
+  ],
+  "unmatched_readings_by_difference_size": {
+   "four_or_more_grammatical_fields": 208,
+   "four_or_more_grammatical_fields_and_lemma": 1097,
+   "identical_reading_at_lower_multiplicity": 2128,
+   "one_grammatical_field": 221,
+   "one_grammatical_field_and_lemma": 518,
+   "two_or_three_grammatical_fields": 338,
+   "two_or_three_grammatical_fields_and_lemma": 290
+  },
+  "unmatched_readings_by_differing_fields": {
+   "identical_reading_at_lower_multiplicity": 2128,
+   "lemma+gender": 16,
+   "lemma+grammatical_case": 1,
+   "lemma+mood": 390,
+   "lemma+mood+voice": 2,
+   "lemma+number": 2,
+   "lemma+number+gender+grammatical_case+tense+mood+voice": 3,
+   "lemma+number+gender+voice": 1,
+   "lemma+number+grammatical_case+voice": 1,
+   "lemma+number+mood": 8,
+   "lemma+number+tense": 1,
+   "lemma+part_of_speech": 4,
+   "lemma+part_of_speech+gender+grammatical_case+mood": 2,
+   "lemma+part_of_speech+gender+grammatical_case+tense+mood+voice": 18,
+   "lemma+part_of_speech+gender+mood": 4,
+   "lemma+part_of_speech+gender+tense+mood+voice": 38,
+   "lemma+part_of_speech+gender+tense+mood+voice+degree": 2,
+   "lemma+part_of_speech+grammatical_case+mood": 1,
+   "lemma+part_of_speech+grammatical_case+tense+mood+voice": 9,
+   "lemma+part_of_speech+mood": 10,
+   "lemma+part_of_speech+mood+degree": 28,
+   "lemma+part_of_speech+number+gender+grammatical_case+tense+mood": 2,
+   "lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice": 23,
+   "lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice+degree": 3,
+   "lemma+part_of_speech+number+grammatical_case+mood": 3,
+   "lemma+part_of_speech+number+grammatical_case+tense+mood+voice": 8,
+   "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice": 29,
+   "lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree": 17,
+   "lemma+part_of_speech+person+gender+tense+mood+voice": 1,
+   "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice": 26,
+   "lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree": 8,
+   "lemma+part_of_speech+person+number+gender+tense+mood+voice+degree": 3,
+   "lemma+part_of_speech+person+number+tense+mood+voice": 2,
+   "lemma+part_of_speech+tense+mood+voice": 59,
+   "lemma+part_of_speech+tense+mood+voice+degree": 288,
+   "lemma+person+gender+grammatical_case+mood+voice": 3,
+   "lemma+person+gender+grammatical_case+tense+mood": 14,
+   "lemma+person+gender+grammatical_case+tense+mood+voice": 204,
+   "lemma+person+gender+grammatical_case+tense+mood+voice+degree": 9,
+   "lemma+person+number+gender+grammatical_case+mood+voice": 1,
+   "lemma+person+number+gender+grammatical_case+tense+mood": 18,
+   "lemma+person+number+gender+grammatical_case+tense+mood+voice": 108,
+   "lemma+person+number+mood+voice": 43,
+   "lemma+person+number+tense+mood+voice": 9,
+   "lemma+person+number+tense+voice": 4,
+   "lemma+person+tense+mood": 4,
+   "lemma+tense": 103,
+   "lemma+tense+mood": 185,
+   "lemma+tense+mood+voice": 3,
+   "lemma+tense+voice": 13,
+   "mood": 179,
+   "part_of_speech+person+gender+grammatical_case+tense+mood+voice": 2,
+   "part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree": 4,
+   "part_of_speech+person+number+gender+grammatical_case+tense+mood+voice": 1,
+   "person+gender+grammatical_case+mood+voice": 4,
+   "person+gender+grammatical_case+tense+mood+voice": 107,
+   "person+number+gender+grammatical_case+mood+voice": 1,
+   "person+number+gender+grammatical_case+tense+mood+voice": 18,
+   "person+number+mood+voice": 17,
+   "person+number+tense+mood+voice": 3,
+   "person+number+tense+voice": 17,
+   "tense": 42,
+   "tense+mood": 119,
+   "tense+mood+voice": 17,
+   "tense+voice": 21,
+   "workword": 181,
+   "workword+lemma": 9,
+   "workword+lemma+gender+grammatical_case+tense+mood+voice": 11,
+   "workword+lemma+grammatical_case+tense+mood+voice": 5,
+   "workword+lemma+number+gender+grammatical_case+tense+mood+voice": 2,
+   "workword+lemma+number+gender+tense+mood+voice": 2,
+   "workword+lemma+number+grammatical_case+tense+mood+voice": 2,
+   "workword+lemma+number+tense+mood+voice": 2,
+   "workword+lemma+part_of_speech+gender+grammatical_case+mood": 29,
+   "workword+lemma+part_of_speech+gender+grammatical_case+mood+degree": 12,
+   "workword+lemma+part_of_speech+gender+grammatical_case+tense+mood": 1,
+   "workword+lemma+part_of_speech+gender+tense+mood": 6,
+   "workword+lemma+part_of_speech+grammatical_case+mood": 9,
+   "workword+lemma+part_of_speech+grammatical_case+mood+degree": 18,
+   "workword+lemma+part_of_speech+mood": 3,
+   "workword+lemma+part_of_speech+mood+degree": 2,
+   "workword+lemma+part_of_speech+number+gender+grammatical_case+mood": 2,
+   "workword+lemma+part_of_speech+number+gender+grammatical_case+mood+degree": 8,
+   "workword+lemma+part_of_speech+number+gender+grammatical_case+tense+mood": 2,
+   "workword+lemma+part_of_speech+number+gender+grammatical_case+tense+mood+voice": 1,
+   "workword+lemma+part_of_speech+number+gender+mood": 1,
+   "workword+lemma+part_of_speech+number+grammatical_case+mood": 1,
+   "workword+lemma+part_of_speech+number+mood": 3,
+   "workword+lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice": 3,
+   "workword+lemma+part_of_speech+person+gender+grammatical_case+tense+mood+voice+degree": 1,
+   "workword+lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice": 2,
+   "workword+lemma+part_of_speech+person+number+gender+grammatical_case+tense+mood+voice+degree": 1,
+   "workword+lemma+person+gender+grammatical_case+tense+mood+voice": 21,
+   "workword+lemma+person+number+gender+grammatical_case+tense+mood+voice": 6,
+   "workword+lemma+person+number+tense+mood+voice": 1,
+   "workword+lemma+person+tense+mood": 1,
+   "workword+lemma+tense": 2,
+   "workword+lemma+tense+mood+voice": 1,
+   "workword+lemma+tense+voice": 1,
+   "workword+person+gender+grammatical_case+tense+mood+voice": 22,
+   "workword+person+number+gender+grammatical_case+tense+mood+voice": 12
+  },
+  "unmatched_readings_by_lemma_category": {
+   "curated_lemma_with_candidate_definition": {
+    "lemmas": 68,
+    "readings": 2338
+   },
+   "curated_lemma_without_definition:joined:bare_infinitive": {
+    "lemmas": 1,
+    "readings": 9
+   },
+   "curated_lemma_without_definition:joined:no_inflection_field": {
+    "lemmas": 4,
+    "readings": 11
+   },
+   "curated_lemma_without_definition:joined:other_grammar": {
+    "lemmas": 2,
+    "readings": 37
+   },
+   "curated_lemma_without_definition:joined:several_inflection_fields": {
+    "lemmas": 2,
+    "readings": 103
+   },
+   "curated_lemma_without_definition:joined:vowel_initial_digit_grammar": {
+    "lemmas": 6,
+    "readings": 413
+   },
+   "curated_lemma_without_definition:unjoined:deponent_article_for_active_lemma": {
+    "lemmas": 9,
+    "readings": 69
+   },
+   "curated_lemma_without_definition:unjoined:no_projected_header": {
+    "lemmas": 3,
+    "readings": 23
+   },
+   "lemma_outside_curated_witness_and_candidate": {
+    "lemmas": 26,
+    "readings": 73
+   },
+   "native_preverb_identifier:hyphenated": {
+    "lemmas": 120,
+    "readings": 1595
+   },
+   "native_preverb_identifier:mapped_composition": {
+    "lemmas": 13,
+    "readings": 129
+   }
+  },
+  "witness_sha256": "38e802ebeba3208f0c78b532a8f5a6a51d11ba349b2c9e5a90367fa56eefdc82"
+ }
+}
