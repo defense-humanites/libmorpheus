@@ -29,8 +29,8 @@ this separation and used one `v<version>` tag for the native and Deno tracks.
 
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
-`release-node-0.1.0.md` or `release-wasm-0.1.2.md`. The current native
-candidate is recorded in `release-0.4.4.md`; the earlier decisions remain
+`release-node-0.1.0.md` or `release-wasm-0.1.2.md`. The most recent native
+release is recorded in `release-0.4.4.md`; the earlier decisions remain
 historical evidence.
 
 ## 1. Version and compatibility decisions
@@ -151,10 +151,15 @@ Do not qualify from a partial rerun that omits a failing job. Both Perseids and
 Alpheios fixture suites must run where their data prerequisites are available.
 A job that built and tested successfully and failed only while uploading its
 artifact (the hosted runner could not reach GitHub's artifact storage during
-the `v0.4.3` run) is a different case: re-run the failed jobs of the same run
-(`gh run rerun <id> --failed`) rather than retagging. The successful jobs keep
-their results and artifacts, the re-run job repeats its whole build and test,
-and the publication job then runs on the same attempt. The tag never moves.
+the `v0.4.3` run), or that was cancelled before any step ran because no
+hosted runner picked it up (macOS arm64 capacity during the `v0.4.4`
+dispatch, three times in a row), is a different case: re-run the failed jobs
+of the same run (`gh run rerun <id> --failed`) rather than retagging. The
+successful jobs keep their results and artifacts, the re-run job repeats its
+whole build and test, and the publication job then runs on the same
+attempt. The tag never moves. A tagged run queues independently of a
+dispatch and may obtain a runner first; the publication job still waits for
+every qualification job of its own run.
 
 ## 4. ABI and consumer checks
 
