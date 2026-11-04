@@ -201,9 +201,16 @@ init_endind(char *fname, endind *etags)
 		fprintf(stderr,"could not build buffer for endtags\n");
 		goto no_memory;
 	}
+/*
+ * Request the whole file at once rather than BUFSIZ at a time: the C
+ * library then reads it through at most a few system calls instead of
+ * thousands, which matters where every call crosses into JavaScript
+ * (the WebAssembly build). The loop only remains for a file longer than
+ * INT_MAX, the most vax_fread() accepts per call.
+ */
 	while (sofar < file_length) {
 		size_t remaining = file_length-sofar;
-		int requested = remaining > (size_t)BUFSIZ ? BUFSIZ : (int)remaining;
+		int requested = remaining > (size_t)INT_MAX ? INT_MAX : (int)remaining;
 
 		nread = vax_fread(buffer+sofar,sizeof *buffer,requested,f);
 		if (nread != requested) {
