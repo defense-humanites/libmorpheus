@@ -9,6 +9,19 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-11-04
+
+Target project version: **0.4.4**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release carries no change to analysis or generation results. It
+reads each index file in one request instead of thousands, which halves the
+first analysis of a WebAssembly context, and it is the release WebAssembly
+binding 0.1.2 is compiled from and declares; that binding also adopts the
+stemlib bytes it is given instead of copying them. Both changes answer the
+cold-start cost of a serverless deployment.
+
+### Changed
+
 - The WebAssembly facade's `writeStemlib()` (and so `fetchStemlib()`) adopts
   the arrays it is given instead of copying them, and creates each directory
   once per call instead of probing every path segment of every file. Placing
@@ -32,6 +45,8 @@ the corpus.
   (3,000 Greek headwords and the Latin fixtures compared against the
   previous module). Native builds issue fewer system calls; no result or
   ABI change.
+- WebAssembly binding 0.1.2, compiled from this release, with the adoption
+  of stemlib bytes above. 0.1.1 remains usable from both registries.
 
 ## [0.4.3] - 2026-10-21
 
