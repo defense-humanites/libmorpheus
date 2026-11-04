@@ -458,7 +458,8 @@ jobs:
           node data.js --dataset perseids --subset runtime --manifest \
             --output ../../../build/data-runtime-acquired
           test -f ../../../build/data-runtime-acquired/stemlib-manifest.json
-          test -f ../../../build/data-runtime-acquired/Latin/stemsrc/lemlist
+          test -f ../../../build/data-runtime-acquired/Greek/stemsrc/lemlist
+          test -f ../../../build/data-runtime-acquired/Latin/stemsrc/vbs.cmp.ml
           test ! -e ../../../build/data-runtime-acquired/Latin/stemsrc/ls.nom
           node data.js --dataset alpheios --subset runtime --with-gener \
             --output ../../../build/data-runtime-gener-acquired

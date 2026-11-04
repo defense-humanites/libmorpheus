@@ -64,7 +64,8 @@ Morpheus datasets carry their historical sources and index production
 scripts next to the compiled tables. The runtime reads, per language,
 `rule_files/`, `steminds/{nomind,vbind}{,.lindex}`,
 `endtables/{indices,out}/`, `derivs/indices/derivind` and
-`stemsrc/{vbs.cmp.ml,lemlist}`, plus `gener.index` at the stemlib root for
+`stemsrc/{vbs.cmp.ml,lemlist}` (where the dataset has them; Perseids Latin
+has no `lemlist`), plus `gener.index` at the stemlib root for
 Greek generation. `--subset runtime` writes exactly that: 275 files and
 10 MiB for Perseids (both languages), 156 files and 19 MiB for Alpheios
 with `gener.index`. `isRuntimeFile(path, languages)` exposes the predicate.
