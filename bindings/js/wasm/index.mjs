@@ -608,19 +608,30 @@ export class Morpheus {
   }
 
   /**
-   * Write stemlib files into the in-memory file system. `entries` maps paths
+   * Place stemlib files in the in-memory file system. `entries` maps paths
    * relative to `root` (for example `Latin/steminds/nomind`) to bytes.
    * Returns `root` to pass to `open()`.
+   *
+   * The bytes are adopted, not copied: the file system keeps each
+   * `Uint8Array` (or a view of each `ArrayBuffer`) as the file's contents,
+   * so the caller must not modify them afterwards. The module only reads
+   * them; a later write to the same path replaces the array rather than
+   * writing into it. Copy first (`new Uint8Array(bytes)`) to keep a buffer
+   * for reuse.
    */
   writeStemlib(entries, root = "/stemlib") {
     const FS = this.#module.FS;
     const iterable = entries instanceof Map || Array.isArray(entries)
       ? entries
       : Object.entries(entries);
+    const directories = new Set();
     for (const [relativePath, data] of iterable) {
       const fullPath = `${root}/${relativePath}`.replace(/\/+/g, "/");
       const directory = fullPath.slice(0, fullPath.lastIndexOf("/"));
-      this.#ensureDirectory(directory);
+      if (!directories.has(directory)) {
+        this.#ensureDirectory(directory);
+        directories.add(directory);
+      }
       const bytes = data instanceof Uint8Array
         ? data
         : data instanceof ArrayBuffer
@@ -629,7 +640,9 @@ export class Morpheus {
         ? encoder.encode(data)
         : null;
       if (!bytes) throw new TypeError(`unsupported data for ${relativePath}`);
-      FS.writeFile(fullPath, bytes);
+      // MEMFS keeps `bytes` itself; the copy into the module's heap happens
+      // at each read, as it would after a copy here.
+      FS.writeFile(fullPath, bytes, { canOwn: true });
     }
     return root;
   }
@@ -637,7 +650,8 @@ export class Morpheus {
   /**
    * Fetch stemlib files over HTTP into the in-memory file system. `paths`
    * are relative to both `baseUrl` and `root`; pass the directory listing or
-   * manifest of the served stemlib. Returns `root` to pass to `open()`.
+   * manifest of the served stemlib. The fetched bytes are adopted as in
+   * `writeStemlib()`. Returns `root` to pass to `open()`.
    */
   async fetchStemlib(baseUrl, paths, { root = "/stemlib", fetch: fetcher = globalThis.fetch, concurrency = 8 } = {}) {
     if (typeof fetcher !== "function") throw new Error("fetch is unavailable; pass options.fetch");

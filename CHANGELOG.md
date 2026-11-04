@@ -9,6 +9,17 @@ the corpus.
 
 ## [Unreleased]
 
+- The WebAssembly facade's `writeStemlib()` (and so `fetchStemlib()`) adopts
+  the arrays it is given instead of copying them, and creates each directory
+  once per call instead of probing every path segment of every file. Placing
+  the Greek runtime subset in memory on a fresh Node.js process falls from
+  about 20 ms to 7 ms, the part of a serverless cold start the facade
+  controls. Node.js callers already handed over views, since Emscripten's
+  "copy" of a `Buffer` is a `Buffer.slice`, which is a view; the contract is
+  now explicit for every input type: the bytes belong to the module and must
+  not be modified afterwards. Analyses are unchanged. (WebAssembly binding
+  change only; no native release is needed.)
+
 ## [0.4.3] - 2026-10-21
 
 Target project version: **0.4.3**. C ABI: **2**. Shared-library SONAME: **1**.
