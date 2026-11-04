@@ -89,8 +89,9 @@ things are the application's responsibility, whichever runtime it targets.
    JavaScript, which the [benchmark](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md#performance-against-the-native-ffi-path)
    shows is the slow placement. Mounting is for development and tests.
 4. **Instance lifetime and concurrency.** One instance costs tens of
-   milliseconds to create and holds its own copy of the data, so create it
-   once and keep it. A context is cheap, synchronous and single-threaded:
+   milliseconds to create and holds its own data (`writeStemlib()` adopts the
+   arrays it is given rather than copying them, so do not modify them
+   afterwards), so create it once and keep it. A context is cheap, synchronous and single-threaded:
    open one per language at start-up and reuse it for every request; since
    `analyze()` and `generate()` never yield, concurrent requests in one event
    loop cannot interleave inside a call. For more than one core, run one
@@ -240,9 +241,11 @@ Workers forbid compiling WebAssembly from bytes at run time and expose no
 `import.meta.url`, so the two platform mechanisms replace the loader's own
 discovery: the `.wasm` is imported as a module and passed as `wasmModule`, and
 the factory is imported statically. The stemlib files are bundled as Data
-modules so the Worker needs no network access to start. This configuration
-was exercised with `wrangler dev` (the local `workerd` runtime); it has not yet
-been run on the hosted platform.
+modules so the Worker needs no network access to start. `writeStemlib()`
+keeps views of those modules' buffers instead of copying them, so a fresh
+isolate pays the module instantiation and one directory walk, not a copy of
+the data. This configuration was exercised with `wrangler dev` (the local
+`workerd` runtime); it has not yet been run on the hosted platform.
 
 ```toml
 # wrangler.toml

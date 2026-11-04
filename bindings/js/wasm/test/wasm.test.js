@@ -179,6 +179,57 @@ test("in-memory stemlib written from host bytes", async () => {
   }
 });
 
+test("in-memory and mounted stemlibs give identical analyses", async () => {
+  const morpheus = await createMorpheus({ moduleUrl });
+  const latinDirectory = join(stemlibRoot, "Latin");
+  const entries = listFiles(latinDirectory)
+    .filter((path) =>
+      /\/(rule_files|steminds|endtables\/(indices|out)|derivs\/indices)\//.test(path) ||
+      /\/stemsrc\/(vbs\.cmp\.ml|lemlist)$/.test(path)
+    )
+    .map((path) => [`Latin/${relative(latinDirectory, path)}`, readFileSync(path)]);
+  const memory = morpheus.open({
+    stemlib: morpheus.writeStemlib(entries, "/identical-memory"),
+    language: MorpheusLanguage.Latin,
+  });
+  const mounted = morpheus.open({
+    stemlib: morpheus.mountDirectory(stemlibRoot, "/identical-host"),
+    language: MorpheusLanguage.Latin,
+  });
+  try {
+    for (const word of ["rosarum", "amaverint", "ferre", "quibus", "dum"]) {
+      assert.deepEqual(memory.analyze(word), mounted.analyze(word), word);
+    }
+  } finally {
+    memory.close();
+    mounted.close();
+  }
+});
+
+test("writeStemlib adopts the caller's bytes and never writes into them", async () => {
+  const morpheus = await createMorpheus({ moduleUrl });
+  const plain = new Uint8Array([104, 101, 108, 108, 111]);
+  const buffer = Buffer.from("hello");
+  const shared = new Uint8Array(new ArrayBuffer(5));
+  shared.set(plain);
+  morpheus.writeStemlib(
+    [["a/plain", plain], ["a/buffer", buffer], ["a/shared", shared.buffer]],
+    "/adopted",
+  );
+  // The file system holds the arrays themselves, whatever their type.
+  plain[0] = 72;
+  buffer[0] = 72;
+  shared[0] = 72;
+  for (const name of ["plain", "buffer", "shared"]) {
+    assert.equal(Buffer.from(morpheus.fs.readFile(`/adopted/a/${name}`)).toString(), "Hello", name);
+  }
+  // A later write to the same path replaces the contents; the adopted array
+  // is released untouched, even when the new contents are shorter.
+  morpheus.writeStemlib({ "a/plain": "yo" }, "/adopted");
+  assert.equal(Buffer.from(morpheus.fs.readFile("/adopted/a/plain")).toString(), "yo");
+  assert.equal(Buffer.from(plain).toString(), "Hello");
+});
+
 test("opening an incomplete stemlib reports MORPHEUS_STEMLIB_ERROR", async () => {
   const morpheus = await createMorpheus({ moduleUrl });
   morpheus.writeStemlib({ "Latin/rule_files/stemtypes.table": "x" }, "/partial");

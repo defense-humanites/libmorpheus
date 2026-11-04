@@ -129,8 +129,14 @@ Greek) and then reads lazily, by stem class and analysis path,
 as an internal error on the forms that need it, so applications ship the whole
 set. Measured on the Perseids stemlib, that is about 3 MiB for Latin and 8 MiB
 for Greek. Under Node.js the facade mounts a host directory
-(NODEFS); in a browser it writes fetched bytes into MEMFS from a manifest of
-paths. The distribution boundary is unchanged: neither the module nor the
+(NODEFS) or places host bytes in MEMFS; in a browser it fetches the files
+into MEMFS from a manifest of paths. In both MEMFS cases the facade hands
+Emscripten the caller's arrays with `canOwn` rather than copying them (the
+copy into the module's heap happens at each `read()` either way), and
+creates each directory once per call: placing the 8 MiB Greek subset went
+from about 20 ms to 7 ms on a fresh Node.js process, which is the cost a
+serverless isolate pays at every cold start. The arrays become the module's
+and must not be modified afterwards; the runtime only reads them. The distribution boundary is unchanged: neither the module nor the
 facade package embeds a stemlib, and the [redistribution
 policy](stemlib-redistribution.md) applies to any application that serves one.
 

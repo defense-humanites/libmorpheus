@@ -222,6 +222,10 @@ export class Morpheus {
   readonly generationSize: number;
   statusMessage(status: number): string;
   mountDirectory(hostPath: string, mountPoint?: string): string;
+  /**
+   * Place stemlib files in the in-memory file system and return `root`. The
+   * bytes are adopted, not copied: do not modify them afterwards.
+   */
   writeStemlib(entries: StemlibEntries, root?: string): string;
   fetchStemlib(baseUrl: string | URL, paths: Iterable<string>, options?: FetchStemlibOptions): Promise<string>;
   static requiredFiles(language: MorpheusLanguage): string[];
