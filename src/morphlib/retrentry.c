@@ -15,8 +15,10 @@ init_preind(char *fname, int *maxkeys)
 	long file_size;
 	size_t divisor;
 	size_t record_count;
+	size_t sofar;
 	size_t i;
 	int written;
+	unsigned char *records;
 	char tmp[LONGSTRING];
 
 	if (!maxkeys) {
@@ -64,22 +66,49 @@ init_preind(char *fname, int *maxkeys)
 		return(NULL);
 	}
 
-	for(i=0; i < record_count; i++) {
-		morpheus_stemlib_offset tagoffset;
+/*
+ * Read the records through one buffer rather than one ReadKey() per
+ * record, so the C library issues a few system calls instead of one per
+ * stdio buffer; the WebAssembly build pays for every call. The layout is
+ * the one WriteKey() produces: KEYLEN key bytes, then the offset as four
+ * little-endian bytes (get_int32()).
+ */
+	records = record_count ? (unsigned char *)malloc(record_count*divisor) : NULL;
+	if (record_count && !records) {
+		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
+		free(etags);
+		fclose(f);
+		return(NULL);
+	}
+	sofar = 0;
+	while (sofar < record_count*divisor) {
+		size_t remaining = record_count*divisor-sofar;
+		int requested = remaining > (size_t)INT_MAX ? INT_MAX : (int)remaining;
+		int nread = vax_fread(records+sofar,1,requested,f);
 
-		if( ReadKey(tagstring_of(etags+i),&tagoffset,f) != 1) {
+		if (nread != requested) {
 			fprintf(stderr,"short read while loading %s\n",tmp);
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+			free(records);
 			free(etags);
 			fclose(f);
 			return(NULL);
 		}
-		tagoffset_of(etags+i) = tagoffset;
-/*
-if( ! (i % 25) )
-printf(" i %d last tags [%s]\n",  i , tagstring_of(etags+i) );
-*/
+		sofar += (size_t)nread;
 	}
+	for(i=0; i < record_count; i++) {
+		const unsigned char *record = records+i*divisor;
+		unsigned int byte;
+		morpheus_stemlib_offset tagoffset = 0;
+
+		memcpy(tagstring_of(etags+i),record,(size_t)KEYLEN);
+		for (byte = 0; byte < sizeof tagoffset; byte++) {
+			tagoffset |= (morpheus_stemlib_offset)record[KEYLEN+byte]
+				<< (8U*byte);
+		}
+		tagoffset_of(etags+i) = tagoffset;
+	}
+	free(records);
 /*
 printf("flen %d i %d last tags [%s]\n", flen, i , tagstring_of(etags+i) );
 */

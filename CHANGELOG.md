@@ -19,6 +19,19 @@ the corpus.
   now explicit for every input type: the bytes belong to the module and must
   not be modified afterwards. Analyses are unchanged. (WebAssembly binding
   change only; no native release is needed.)
+- The index loaders read each file in one request. `init_endind` (verb
+  stem, ending and derivation indices) asked `vax_fread` for `BUFSIZ` bytes
+  at a time and `init_preind` read the pre-index sidecars one record at a
+  time through the stdio buffer, so a context's first Greek analysis issued
+  about 3,500 `read` calls for 1.8 MiB; under WebAssembly every call crosses
+  into the JavaScript file system. Both now request the whole file, which
+  the C library serves in a few calls (about 80 for the same analysis), and
+  `init_preind` decodes the records from memory with the layout `WriteKey`
+  produces. The first analysis of a WebAssembly context falls from 10–15 ms
+  to about 6 ms with optimized code on a 2 vCPU host; analyses are identical
+  (3,000 Greek headwords and the Latin fixtures compared against the
+  previous module). Native builds issue fewer system calls; no result or
+  ABI change.
 
 ## [0.4.3] - 2026-10-21
 

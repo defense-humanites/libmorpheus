@@ -189,6 +189,17 @@ What the numbers say, within that noise:
   and opening a context takes 30–40 ms cold against 5–6 ms for a `cruncher`
   process, and a worker pool adds 100–150 ms before its first answer. A
   server should keep instances alive; a browser pays it once per page.
+- **The first analysis loads the indices.** A context reads the verb stem
+  index (1.5 MiB for Greek), the two pre-index sidecars and the ending and
+  derivation indices on its first analysis, and each ending table on the
+  first word of its stem class; the ending-table cache holds 45 tables for
+  139 Greek ones, so varied vocabulary keeps reloading a table every dozen
+  words, at a few per cent of the per-word cost. Each index is read in one
+  request (the loaders once asked for `BUFSIZ` at a time, about 3,500 reads
+  through the JavaScript file system for the first Greek analysis; it is
+  now about 80), so the first analysis costs about 6 ms with optimized code
+  on a 2 vCPU host, against 10–15 ms before, and more while V8 still runs
+  the module's baseline tier.
 - **Memory is per instance.** Each worker is a V8 isolate plus its own MEMFS
   copy of the runtime subset; the process-wide peak RSS during the pool
   measurements was 350–500 MiB against about 60 MiB for the FFI model. The
