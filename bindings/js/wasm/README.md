@@ -77,8 +77,12 @@ things are the application's responsibility, whichever runtime it targets.
    URLs, or a platform that forbids compiling WebAssembly from bytes), import
    the `.wasm` through the platform's own mechanism and pass it as
    `wasmModule`; the loader then neither fetches nor compiles anything.
-2. **The stemlib.** Nothing is bundled. Acquire a dataset as described in
-   [Acquiring runtime data](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md), check the
+2. **The stemlib.** Nothing is bundled. Acquire a dataset with the
+   [`@libmorpheus/data`](https://github.com/defense-humanites/libmorpheus/tree/main/bindings/js/data)
+   command (`npx @libmorpheus/data --dataset perseids --subset runtime
+   --manifest --output ./stemlib` writes the runtime files and a manifest;
+   see [Acquiring runtime data](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md)
+   for the other routes), check the
    [redistribution policy](https://github.com/defense-humanites/libmorpheus/blob/main/docs/stemlib-redistribution.md) for what
    you ship, and give the module the **whole runtime subset** of each language
    you serve (see [Which files](#which-files)).
@@ -119,8 +123,10 @@ stemsrc/vbs.cmp.ml  stemsrc/lemlist        (when the dataset has them)
 
 plus `<root>/gener.index` for Greek generation. In the Perseids stemlib that is
 about 3 MiB for Latin and 8 MiB for Greek; the qualified Greek generation index
-adds 11 MiB. Publish a manifest of those paths next to the data; the facade
-takes any iterable of `[path, bytes]`.
+adds 11 MiB. `@libmorpheus/data --subset runtime --manifest` writes exactly
+this set with a `stemlib-manifest.json` listing every file's path, size and
+SHA-256; the facade takes any iterable of `[path, bytes]`, and
+`fetchStemlib()` takes the manifest's paths.
 
 ## Node.js, Deno and Bun
 

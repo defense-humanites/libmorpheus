@@ -71,6 +71,13 @@ if(BUILD_TESTING)
       -P "${PROJECT_SOURCE_DIR}/test/node-package-metadata.cmake"
   )
   add_test(
+    NAME data_package_metadata
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+      -P "${PROJECT_SOURCE_DIR}/test/data-package-metadata.cmake"
+  )
+  add_test(
     NAME python_package_metadata
     COMMAND
       "${CMAKE_COMMAND}"

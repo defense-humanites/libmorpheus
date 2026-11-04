@@ -35,6 +35,21 @@ and macOS arm64. Import `nativeLibraryPath` from the package's `/native` export
 to obtain the `.so` or `.dylib` path. Loading it remains an FFI operation and
 therefore requires `deno run --allow-ffi`.
 
+Deployments that need the data without any native binding — the WebAssembly
+binding under Node.js, Deno or Bun, browsers, Cloudflare Workers — use the
+standalone acquisition package, which contains no data itself:
+
+```sh
+npx @libmorpheus/data --dataset perseids --subset runtime --manifest --output ./stemlib
+```
+
+`--subset runtime` writes only the files the runtime reads (see the
+WebAssembly binding's README for the list) and `--manifest` adds a
+`stemlib-manifest.json` with every file's path, size and SHA-256, for
+`fetchStemlib()`, bundlers and `writeStemlib()` callers. The command is the
+Node.js binding's `libmorpheus-data`, published on its own with those two
+additions; `bindings/js/data/README.md` documents it.
+
 ## Choose a dataset
 
 | Use                     | Dataset path in a recursive `libmorpheus` checkout | Languages               | `gener.index`                    |

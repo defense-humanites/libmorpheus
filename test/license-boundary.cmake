@@ -43,6 +43,24 @@ set(agpl_files
     bindings/js/node/package-platform.mjs
     bindings/js/node/test/binding.test.js
     bindings/js/node/test/bootstrap-npm.test.js
+    bindings/js/data/NOTICE
+    bindings/js/data/README.md
+    bindings/js/data/data.d.ts
+    bindings/js/data/data.js
+    bindings/js/data/internal/archive.js
+    bindings/js/data/internal/data-internal.js
+    bindings/js/data/internal/data-manifest.js
+    bindings/js/data/internal/gener-index.js
+    bindings/js/data/internal/gener-runtime.js
+    bindings/js/data/internal/main-module.js
+    bindings/js/data/internal/runtime-subset.js
+    bindings/js/data/internal/version.js
+    bindings/js/data/tools/bootstrap-npm.mjs
+    bindings/js/data/test/bootstrap-npm.test.js
+    bindings/js/data/test/data.test.js
+    bindings/js/data/test/gener.test.js
+    bindings/js/data/test/main-module.test.js
+    docs/release-data-0.1.0.md
     bindings/js/node/test/data.test.js
     bindings/js/node/test/gener.test.js
     bindings/js/node/test/main-module.test.js
@@ -130,6 +148,8 @@ endforeach()
 foreach(mpl_file IN ITEMS
         bindings/js/node/internal/gener-manifest.js
         bindings/js/node/internal/gener-preparer.mjs
+        bindings/js/data/internal/gener-manifest.js
+        bindings/js/data/internal/gener-preparer.mjs
         bindings/js/deno/internal/gener_manifest.ts
         bindings/js/deno/internal/gener_preparer.mjs
         include/morpheus/compat.h

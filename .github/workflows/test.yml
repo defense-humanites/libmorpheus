@@ -370,6 +370,8 @@ jobs:
             bindings/js/deno/internal/gener_preparer.mjs
           cmp build/deno-gener-wasm/gener_preparer.mjs \
             bindings/js/node/internal/gener-preparer.mjs
+          cmp build/deno-gener-wasm/gener_preparer.mjs \
+            bindings/js/data/internal/gener-preparer.mjs
 
   node:
     name: Node.js binding
@@ -438,6 +440,43 @@ jobs:
           cmake -E sha256sum \
             ../../../build/node-data-gener-acquired/gener.index | \
             grep -F '5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6'
+
+      - name: Test the data acquisition package
+        working-directory: bindings/js/data
+        run: npm test
+
+      - name: Acquire the runtime subset with the data package and analyze it
+        # The subset the tool writes must be the subset the WebAssembly
+        # facade documents: open a context over the manifest's files with
+        # the Node.js binding's native runtime and analyze one form per
+        # language. The Alpheios acquisition also rebuilds gener.index.
+        env:
+          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
+          MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/dev/node/libmorpheus_node.node
+        working-directory: bindings/js/data
+        run: |
+          node data.js --dataset perseids --subset runtime --manifest \
+            --output ../../../build/data-runtime-acquired
+          test -f ../../../build/data-runtime-acquired/stemlib-manifest.json
+          test -f ../../../build/data-runtime-acquired/Latin/stemsrc/lemlist
+          test ! -e ../../../build/data-runtime-acquired/Latin/stemsrc/ls.nom
+          node data.js --dataset alpheios --subset runtime --with-gener \
+            --output ../../../build/data-runtime-gener-acquired
+          cmake -E sha256sum \
+            ../../../build/data-runtime-gener-acquired/gener.index | \
+            grep -F '5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6'
+          node --input-type=module -e '
+            import { MorpheusLanguage, MorpheusLibrary } from "../node/index.js";
+            const library = new MorpheusLibrary(process.env.MORPHEUS_LIBRARY);
+            const root = "../../../build/data-runtime-acquired";
+            for (const [language, word, lemma] of [[MorpheusLanguage.Greek, "e)/kstasis", "e)/kstasis"], [MorpheusLanguage.Latin, "rosarum", "rosa"]]) {
+              const context = library.createContext(root, language);
+              const analyses = await context.analyze(word);
+              if (!analyses.some((analysis) => analysis.lemma === lemma)) throw new Error(`${word}: ${JSON.stringify(analyses)}`);
+              await context.close();
+            }
+            library.close();
+          '
 
       - name: Verify npm package contents
         working-directory: bindings/js/node

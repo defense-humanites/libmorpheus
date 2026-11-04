@@ -1,0 +1,17 @@
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+libmorpheus data acquisition tool
+Copyright (C) 2026 Antoine Boquet
+
+This package is licensed under the GNU Affero General Public License version 3
+or later. It contains a command-line tool and JavaScript library that download
+pinned Morpheus stem datasets from their upstream repositories, verify them and
+prepare them for the libmorpheus runtime. It does not contain any linguistic
+stem-library data, nor the libmorpheus runtime. Its internal experimental
+generation preparer includes MPL-2.0 Morpheus code compiled with the
+MIT-licensed Emscripten runtime. The corresponding texts are under LICENSES/.
+
+The datasets the tool acquires are mixed-license works distributed by their
+upstream projects under their own terms; the tool preserves each upstream
+license text next to the data it writes. Consult the libmorpheus provenance
+and redistribution documentation before republishing acquired data.

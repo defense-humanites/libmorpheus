@@ -24,8 +24,13 @@ use `wasm-v<version>` tags and declare, in
 `bindings/js/wasm/internal/version.mjs`, the libmorpheus release and ABI
 compiled into the module and the Emscripten release that reproduces it;
 unlike the other bindings, this package ships the runtime, so its declared
-native version must equal the tagged tree's own. Releases through `0.3.2` predate
-this separation and used one `v<version>` tag for the native and Deno tracks.
+native version must equal the tagged tree's own. The data acquisition
+package uses `data-v<version>` tags and declares its version in
+`bindings/js/data/internal/version.js`; it ships neither runtime nor data,
+only the pinned upstream revisions it verifies, so it is coupled to the
+redistribution policy's reviewed revisions rather than to a native release.
+Releases through `0.3.2` predate this separation and used one `v<version>`
+tag for the native and Deno tracks.
 
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
@@ -181,7 +186,11 @@ every qualification job of its own run.
   `node_package_metadata` keeps the Node facade, its native compatibility, and
   all platform package templates aligned. `python_package_metadata` keeps the
   Python distribution, native compatibility, release workflow, and public
-  smoke contract aligned.
+  smoke contract aligned. `data_package_metadata` keeps the data acquisition
+  package's identity, closed file lists, pinned upstream revisions and
+  release decision aligned, requires the files it shares with the Node.js
+  binding to stay byte-identical, and forbids any stemlib artifact in its
+  tree.
 
 ## 5. Runtime artifacts
 
