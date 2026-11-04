@@ -165,6 +165,14 @@ with its companion SHA-256 file. It measures the provenance release against
 unchanged and the 0.4.3 release decision records the within-noise comparison
 and identical result counts.
 
+The accepted 0.4.4 report is retained at
+[`bench/release-evidence/benchmark-0.4.4.json`](../bench/release-evidence/benchmark-0.4.4.json)
+with its companion SHA-256 file. It measures the single-request index
+loaders against 0.4.3 on the same host; result counts are identical, warm
+latencies are within noise, the cold `cruncher` falls 15 %, and the 0.4.4
+release decision explains the Deno-version-dependent RSS growth of the
+four-context maximal generation.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be
