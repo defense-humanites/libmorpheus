@@ -5,8 +5,8 @@
 Version 0.1.2 is the third release of the WebAssembly binding. It compiles
 libmorpheus 0.4.4, C ABI 2, with Emscripten 4.0.15, and supersedes 0.1.1 for
 one reason: the cost a serverless isolate pays before its first answer. This
-document records the intended contract; it does not authorize or record
-creation of the `wasm-v0.1.2` tag.
+document records the intended contract and, in its last section, the
+publication.
 
 ## Why a new version
 
@@ -70,12 +70,25 @@ After publication, the package must be exercised from JSR itself
 example against a local stemlib), since JSR transforms the files it serves;
 0.1.1 passed that check.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. publish native 0.4.4 first (`v0.4.4`), since the binding declares it;
-2. confirm the tagged Linux CI and WebAssembly runs on the candidate commit;
-3. explicitly authorize creation of `wasm-v0.1.2`;
-4. after publication, run the JSR end-to-end check above and record its
-   outcome here.
+- Tag: `wasm-v0.1.2`, created by the maintainer on 2026-11-04 on
+  `dd06be9592d8b0c713fd0025b0755cbb8eab7247`, the commit of
+  [`v0.4.4`](release-0.4.4.md), after that native release was published.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/41886343999)
+  and [WebAssembly](https://github.com/defense-humanites/libmorpheus/actions/runs/41886344489),
+  both passed.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/41886344088);
+  the rebuilt module reproduced the qualified artifact byte for byte, npm
+  (`latest` now `0.1.2`, tarball integrity
+  `sha512-kusagCLww5Yo1jkC5F1tUAKD6bFiBW0VrQzRY14sT/3K133iIkYPDwoLudvXgvZGgFPlT0b6E9FIoBJKgNB2Jg==`)
+  and JSR both accepted the version, and the
+  [`wasm-v0.1.2` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/wasm-v0.1.2)
+  carries the module files.
+- Module digests (`SHA256SUMS`):
+  `094b93bc177dfc8de179d4aac720b6af75d4bf54e14a906840bf6c2176726f71`
+  (`morpheus.mjs`),
+  `bb6ee592799885179204459a82632bf76ae233d23f670832b788eaa93292e8cc`
+  (`morpheus.wasm`).
+- JSR end-to-end check: pending; the maintainer runs it as described above
+  and records the outcome here.

@@ -31,9 +31,12 @@ needs a release for this version.
 - SONAME major: **1**
 - Previous release tag: `v0.4.3`
 - Benchmark evidence: **accepted**
-- Pre-release Linux CI: pending (the tagged commit's run)
-- Pre-release platform qualification: pending (manual dispatch with
-  `package_artifacts` on the exact candidate commit)
+- Pre-release Linux CI: [passed on `dd06be9`](https://github.com/defense-humanites/libmorpheus/actions/runs/41881947934)
+- Pre-release platform qualification: [passed on `dd06be9`](https://github.com/defense-humanites/libmorpheus/actions/runs/41873559175)
+  (manual dispatch with `package_artifacts`)
+- Tagged platform run and release publication: [passed on `dd06be9`](https://github.com/defense-humanites/libmorpheus/actions/runs/41881948288)
+- Release: [`v0.4.4`](https://github.com/defense-humanites/libmorpheus/releases/tag/v0.4.4),
+  created on 2026-11-04 on `dd06be9592d8b0c713fd0025b0755cbb8eab7247`
 
 ## Benchmark evidence
 
@@ -83,13 +86,30 @@ candidate and one built from `v0.4.3` agreed byte for byte over 3,000 Greek
 headwords from `stemsrc/lemlist` and the Latin fixtures; the native suite
 passed, also under AddressSanitizer, UBSan and ThreadSanitizer on `main`.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
+The tag was created by the maintainer on 2026-11-04 on `dd06be9`, the merge
+of the accepted benchmark evidence, a descendant of the measured revision
+`3df935c` that differs from it only by that evidence and this document.
 
-1. dispatch the platform workflow with `package_artifacts` for the candidate
-   commit and inspect the three native archives;
-2. confirm the final tagged Linux CI and platform runs and record their links
-   above;
-3. explicitly authorize creation of `v0.4.4`, then of `wasm-v0.1.2` on the
-   same commit or a descendant with an unchanged runtime.
+GitHub's hosted macOS arm64 runners were short of capacity that evening:
+on the manual `package_artifacts` dispatch, the `apple-silicon` job was
+cancelled three times without a runner ("not acquired by Runner of type
+hosted even after multiple attempts") and no step ran; it obtained a runner
+at the fourth re-run and passed. The tagged run, started meanwhile,
+obtained one at once and passed every job at its first attempt, so the
+macOS qualification was supplied twice. Linux CI and the WebAssembly
+workflow passed on the tag as well. The tag never moved.
+
+The release carries the three native archives and their digests, plus the
+accepted benchmark report and its sidecar:
+
+| Asset | SHA-256 |
+|---|---|
+| `libmorpheus-0.4.4-Linux-x86_64-glibc.tar.gz` | `0fac8971e5926f1f7578ba1f858c6804b620f7d5557a65e44de35d96c1a35af6` |
+| `libmorpheus-0.4.4-Linux-aarch64-glibc.tar.gz` | `64d8796faa07e4760688ce54b3a99a5378c0488f83ebd00fe16cb626b284e0e6` |
+| `libmorpheus-0.4.4-macOS-arm64.tar.gz` | `4b40eccff7fde81f5efc60b5835fc51294875f1c8b48dd39643af48a615bf511` |
+| `benchmark-0.4.4.json` | `4dd2b7bd68961766f0f85059b990e99586e1d9ab2b5722114fd5b4460834be18` |
+
+WebAssembly binding 0.1.2 was tagged on the same commit afterwards; see
+[`release-wasm-0.1.2.md`](release-wasm-0.1.2.md).
