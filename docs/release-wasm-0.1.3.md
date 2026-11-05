@@ -45,12 +45,25 @@ After publication, the package must be exercised from JSR itself
 example against a local stemlib, this time with a Latin check such as
 `analyze("latin", "amatus")` returning one analysis with lemma `amo`).
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. publish native 0.4.5 first (`v0.4.5`), since the binding declares it;
-2. confirm the tagged Linux CI and WebAssembly runs on the candidate commit;
-3. explicitly authorize creation of `wasm-v0.1.3`;
-4. after publication, run the JSR end-to-end check above and record its
-   outcome here.
+- Tag: `wasm-v0.1.3`, created by the maintainer on 2026-11-05 on
+  `4a81111dc3634087760682f05b732ec8581ea0f4`, the commit of
+  [`v0.4.5`](release-0.4.5.md), after that native release was published.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/42073327859)
+  and [WebAssembly](https://github.com/defense-humanites/libmorpheus/actions/runs/42073327691),
+  both passed.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42073327650);
+  the rebuilt module reproduced the qualified artifact byte for byte, npm
+  (`latest` now `0.1.3`, tarball integrity
+  `sha512-YDCKjO8g4JVTpYyA5kK3EkODZilt7ElIu0Wrkf9DPJs7zn0Emd3/hdJFp1lqlAB9JbmkvcESpkUNWHVLRhaC1Q==`)
+  and JSR both accepted the version, and the
+  [`wasm-v0.1.3` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/wasm-v0.1.3)
+  carries the module files.
+- Module digests (`SHA256SUMS`):
+  `92edf6f1c7102fc207571a76bd6255443524b5da10d6bbbe562205bfbb90735d`
+  (`morpheus.mjs`),
+  `09a8841ad754ebb67f1ae218153d7a4492a4d2dd20e4a5abcff54ad85f8f8f50`
+  (`morpheus.wasm`).
+- JSR end-to-end check: pending (maintainer, from `jsr:@libmorpheus/wasm@0.1.3`
+  with the Latin check `analyze("latin", "amatus")`).
