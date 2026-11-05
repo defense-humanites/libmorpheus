@@ -7,7 +7,7 @@ package, `bindings/js/data/`. It extracts the `libmorpheus-data` command and
 `acquireMorpheusData()` library from the Node.js binding, where they had been
 reachable only by installing a native binding, and adds what a WebAssembly
 or browser deployment needs from them. This document records the intended
-contract; it does not authorize or record creation of the `data-v0.1.0` tag.
+contract and, in its last section, the publication.
 
 ## Release record
 
@@ -102,14 +102,27 @@ command must be exercised from JSR itself (`deno run -A
 jsr:@libmorpheus/data --dataset perseids --subset runtime --output …`),
 since JSR transforms the files it serves.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. publish the npm placeholder and configure the trusted publisher for
-   `data-release.yml`; link `@libmorpheus/data` on JSR to the repository
-   and that workflow;
-2. confirm the tagged Linux CI run on the candidate commit;
-3. explicitly authorize creation of `data-v0.1.0`;
-4. after publication, run the JSR end-to-end check above and record its
-   outcome here.
+- Tag: `data-v0.1.0`, created by the maintainer on 2026-11-05 on
+  `8a2bec2d8b508dc81137674bbd4720b6ff9c1f97` (the merge of the release
+  workflow), after the npm placeholder, the trusted publisher and the JSR
+  link had been set up.
+- Tagged Linux CI: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42012922639).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42012922632):
+  tests under Node.js and Deno, both manifests dry-run, the Perseids Latin
+  runtime subset acquired with the command installed from the tarball,
+  npm (`latest` now `0.1.0`, tarball integrity
+  `sha512-kdCvnG/7oERfKRPuwTFiyDCAMI3sU3k8186WQokzk4JroB14gYB38yoI+2p0F5IrdQZy5puogHsf738f8nb/tw==`)
+  and JSR both accepted the version, and the
+  [`data-v0.1.0` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/data-v0.1.0)
+  carries `libmorpheus-data-0.1.0.tgz` (SHA-256
+  `9e9f4fe871d1218621575748f6e26b76c49723a239daaca52f78510ff327a93d`, the
+  same digest an `npm pack` of the merge commit produced on the reviewer's
+  host) and `SHA256SUMS`.
+- JSR end-to-end check: done by the maintainer on 2026-11-05 with Deno,
+  from `jsr:@libmorpheus/data`; the command served by JSR acquired a
+  dataset as the README describes.
+- The Node.js binding depends on this version since 0.1.2, published the
+  same day; its published npm smoke test acquires both datasets through
+  this package.
