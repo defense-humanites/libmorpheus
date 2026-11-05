@@ -99,6 +99,30 @@ if(NOT coupled_jsr_at EQUAL -1)
   message(FATAL_ERROR "native platform workflow still publishes JSR")
 endif()
 
+# Every retained benchmark report, whatever its schema, must match the
+# SHA-256 sidecar published next to it with its release; the sidecar names
+# the report as the release assets do.
+file(GLOB retained_benchmark_sidecars
+     "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-*.json.sha256")
+if(NOT retained_benchmark_sidecars)
+  message(FATAL_ERROR "no retained benchmark evidence under bench/release-evidence")
+endif()
+foreach(retained_sidecar IN LISTS retained_benchmark_sidecars)
+  string(REGEX REPLACE "\\.sha256$" "" retained_report "${retained_sidecar}")
+  get_filename_component(retained_report_name "${retained_report}" NAME)
+  if(NOT EXISTS "${retained_report}")
+    message(FATAL_ERROR
+      "retained benchmark sidecar without its report: ${retained_report_name}")
+  endif()
+  file(SHA256 "${retained_report}" retained_report_checksum)
+  file(READ "${retained_sidecar}" retained_sidecar_content)
+  if(NOT retained_sidecar_content MATCHES
+       "^${retained_report_checksum}  ${retained_report_name}\n$")
+    message(FATAL_ERROR
+      "retained benchmark digest differs: ${retained_report_name}")
+  endif()
+endforeach()
+
 file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/deno-release.yml"
      deno_release_workflow)
 foreach(expected_workflow_value IN ITEMS
@@ -393,5 +417,36 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.4")
      NOT recorded_benchmark_checksum MATCHES
        "^${benchmark_checksum}  benchmark-0.4.4.json")
     message(FATAL_ERROR "Accepted 0.4.4 benchmark digest differs")
+  endif()
+endif()
+
+if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.5")
+  foreach(expected_patch_release_value IN ITEMS
+          "Previous release tag: `v0.4.4`"
+          "Benchmark evidence: **accepted**"
+          "5ba9dc037510f51dc8c13440a8d61a76f6d04739"
+          "f10dbc854337e440cd3b07e274e81ae7fbafe7386a95b5a8e99739ff566ca590"
+          "This native release changes Latin results in one respect and fixes the\nWebAssembly build's Latin results outright (issue #37).")
+    string(FIND "${release_decision}" "${expected_patch_release_value}"
+                patch_release_value_at)
+    if(patch_release_value_at EQUAL -1)
+      message(FATAL_ERROR
+        "release-0.4.5.md is missing: ${expected_patch_release_value}")
+    endif()
+  endforeach()
+  set(benchmark_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.5.json")
+  set(benchmark_checksum
+      "f10dbc854337e440cd3b07e274e81ae7fbafe7386a95b5a8e99739ff566ca590")
+  if(NOT EXISTS "${benchmark_path}" OR
+     NOT EXISTS "${benchmark_path}.sha256")
+    message(FATAL_ERROR "Accepted 0.4.5 benchmark evidence is missing")
+  endif()
+  file(SHA256 "${benchmark_path}" actual_benchmark_checksum)
+  file(READ "${benchmark_path}.sha256" recorded_benchmark_checksum)
+  if(NOT actual_benchmark_checksum STREQUAL benchmark_checksum OR
+     NOT recorded_benchmark_checksum MATCHES
+       "^${benchmark_checksum}  benchmark-0.4.5.json")
+    message(FATAL_ERROR "Accepted 0.4.5 benchmark digest differs")
   endif()
 endif()

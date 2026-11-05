@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T18:25:23.259Z",
+  "label": "release-candidate",
+  "platform": {
+    "target": "aarch64-apple-darwin",
+    "arch": "aarch64",
+    "os": "darwin",
+    "vendor": "apple",
+    "standalone": false
+  },
+  "runtime": {
+    "deno": "2.9.5",
+    "v8": "15.0.245.2-rusty",
+    "typescript": "6.0.3"
+  },
+  "hardwareConcurrency": 12,
+  "sourceRevision": "5b88cbec171f4ccade0b08edccbaf1763e1eb90b",
+  "stemlibRevision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "corpus": "test/fixture.json",
+  "corpusSha256": "cc6f0eb3a2e52b0c6d6c3784d95d01ab3e7c1c824df7e38b6b9b96adcd1539c2",
+  "uniqueWords": 24,
+  "iterations": 20,
+  "warmupIterations": 2,
+  "measurements": [
+    {
+      "engine": "ffi",
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 317.445666,
+      "operationsPerSecond": 1512.0697851959333,
+      "meanMicroseconds": 661.3451375000001,
+      "startupMs": 1.742292,
+      "analyses": 740,
+      "peakRssBytes": 67239936,
+      "rssGrowthBytes": 23134208
+    },
+    {
+      "engine": "ffi",
+      "contexts": 2,
+      "operations": 480,
+      "durationMs": 203.98816699999998,
+      "operationsPerSecond": 2353.0776665099406,
+      "meanMicroseconds": 424.97534791666664,
+      "startupMs": 1.3822079999999914,
+      "analyses": 740,
+      "peakRssBytes": 67977216,
+      "rssGrowthBytes": 704512
+    },
+    {
+      "engine": "ffi",
+      "contexts": 4,
+      "operations": 480,
+      "durationMs": 134.87920800000006,
+      "operationsPerSecond": 3558.7397577245542,
+      "meanMicroseconds": 280.99835000000013,
+      "startupMs": 1.445208999999977,
+      "analyses": 740,
+      "peakRssBytes": 71598080,
+      "rssGrowthBytes": 3620864
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 319.4515409999999,
+      "operationsPerSecond": 1502.5753154842353,
+      "meanMicroseconds": 665.5240437499998,
+      "startupMs": null,
+      "analyses": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 36.596917000000076,
+      "operationsPerSecond": 273.24706067453656,
+      "meanMicroseconds": 3659.6917000000076,
+      "startupMs": 3.6596917000000078,
+      "analyses": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    }
+  ],
+  "comparison": [
+    {
+      "engine": "ffi",
+      "contexts": 1,
+      "throughputChangePercent": -1.1070921346269191,
+      "meanLatencyChangePercent": 1.119485874693904,
+      "peakRssChangePercent": 0.6128953174797669,
+      "rssGrowthChangePercent": 0.7851534618129818
+    },
+    {
+      "engine": "ffi",
+      "contexts": 2,
+      "throughputChangePercent": -1.1177731696564552,
+      "meanLatencyChangePercent": 1.13040857339739,
+      "peakRssChangePercent": 0.6550218340611424,
+      "rssGrowthChangePercent": 7.499999999999996
+    },
+    {
+      "engine": "ffi",
+      "contexts": 4,
+      "throughputChangePercent": -0.21991825456156855,
+      "meanLatencyChangePercent": 0.22040296090619638,
+      "peakRssChangePercent": 0.5291005291005346,
+      "rssGrowthChangePercent": -1.7777777777777781
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "throughputChangePercent": -2.5976550227378437,
+      "meanLatencyChangePercent": 2.6669327348784577,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "throughputChangePercent": 0.11658359090753745,
+      "meanLatencyChangePercent": -0.11644783184364682,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    }
+  ]
+}

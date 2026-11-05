@@ -112,14 +112,22 @@ sh bench/release.sh benchmark-0.4.0.json \
   bench/release-evidence/benchmark-0.3.2.json
 ```
 
-The accepted 0.2.0 baseline is
-[`benchmark-0.2.0.json`](https://github.com/defense-humanites/libmorpheus/releases/download/v0.2.0/benchmark-0.2.0.json)
+The schema 1 reports published with the first five native releases,
+`v0.1.0` to `v0.2.0`, are retained under
+[`bench/release-evidence/`](../bench/release-evidence/) with the SHA-256
+sidecars published next to them; the retained files are byte for byte the
+release assets. Each was produced on the controlled Apple Silicon host from
+the exact commit its tag selects, with the Alpheios stemlib at
+`4632415fe93c85e9fdca47a0c5a13f31385f0023`, and measures the five
+historical analysis configurations only. The accepted 0.2.0 baseline is
+[`benchmark-0.2.0.json`](../bench/release-evidence/benchmark-0.2.0.json)
 with SHA-256
 `d877dadd080a31ae75c8f970fb179a6638b54a2db0afd11c336eb9b2e33cf977`.
-It uses schema 1 and therefore compares only the five historical analysis
-configurations. Generation was introduced in schema 2; the first accepted
-0.3.0 report establishes its performance baseline instead of fabricating a
-comparison with 0.2.0.
+Generation was introduced in schema 2; the first accepted 0.3.0 report
+establishes its performance baseline instead of fabricating a comparison
+with 0.2.0. The release validator accepts schema 2 only, so the schema 1
+reports are checked for integrity, not revalidated, by the `release_metadata`
+test, which verifies every retained sidecar.
 
 The accepted 0.3.0 preparation report is retained at
 [`bench/release-evidence/benchmark-0.3.0.json`](../bench/release-evidence/benchmark-0.3.0.json)
@@ -172,6 +180,14 @@ loaders against 0.4.3 on the same host; result counts are identical, warm
 latencies are within noise, the cold `cruncher` falls 15 %, and the 0.4.4
 release decision explains the Deno-version-dependent RSS growth of the
 four-context maximal generation.
+
+The accepted 0.4.5 report is retained at
+[`bench/release-evidence/benchmark-0.4.5.json`](../bench/release-evidence/benchmark-0.4.5.json)
+with its companion SHA-256 file. It measures the stem-class release against
+0.4.4 on the same host and toolchain; result counts are identical,
+latencies are within noise, and the 0.4.5 release decision revises the
+reading of the four-context maximal generation's RSS growth, which the
+report shows to vary between runs under one Deno version.
 
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
