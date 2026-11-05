@@ -47,7 +47,9 @@ next to the loader itself; nothing changes for the caller. JSR also rewrites
 the module's import names into relative specifiers on publish, which the
 facade maps back onto the loader's imports. **Version 0.1.0 predates that
 mapping and fails to instantiate from JSR**; use 0.1.1 or later from either
-registry, or 0.1.0 from npm.
+registry, or 0.1.0 from npm. **Versions 0.1.0 to 0.1.2 return no analysis
+for Latin forms built on the fourth principal part** (`amatus`, supines,
+perfect participles; issue #37); use 0.1.3 or later for Latin.
 
 ## Building the module
 
