@@ -11,7 +11,6 @@ if(NOT DEFINED MORPHEUS_SOURCE_DIR)
 endif()
 
 set(data_dir "${MORPHEUS_SOURCE_DIR}/bindings/js/data")
-set(node_dir "${MORPHEUS_SOURCE_DIR}/bindings/js/node")
 set(expected_version "0.1.0")
 
 # --- Identity -----------------------------------------------------------------
@@ -208,23 +207,36 @@ if(NOT internal_files STREQUAL expected_internal_files)
     "Data package internal/ differs from the packaged list: ${internal_files}")
 endif()
 
-# --- Files shared with the Node.js binding ------------------------------------
+# --- Files shared with the WebAssembly binding --------------------------------
 
-# Until @libmorpheus/node depends on this package, both carry these files;
-# they must not drift. data-internal.js, data.js and version.js differ by
-# design (the subset, the manifest and the package identity).
-foreach(shared IN ITEMS
-        internal/archive.js internal/data-manifest.js internal/gener-index.js
-        internal/gener-manifest.js internal/gener-preparer.mjs
-        internal/gener-runtime.js internal/main-module.js
-        LICENSE LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt)
+# Both packages embed Emscripten output, so they carry the same license texts.
+foreach(shared IN ITEMS LICENSE LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt)
   file(SHA256 "${data_dir}/${shared}" data_sha)
-  file(SHA256 "${node_dir}/${shared}" node_sha)
-  if(NOT data_sha STREQUAL node_sha)
+  file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/wasm/${shared}" wasm_sha)
+  if(NOT data_sha STREQUAL wasm_sha)
     message(FATAL_ERROR
-      "${shared} differs between the data package and the Node.js binding")
+      "${shared} differs between the data package and the WebAssembly binding")
   endif()
 endforeach()
+# The Node.js binding keeps its own copy of the tar reader for native
+# archives; it must not drift from the data package's.
+file(SHA256 "${data_dir}/internal/archive.js" data_archive_sha)
+file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/node/internal/archive.js"
+     node_archive_sha)
+if(NOT data_archive_sha STREQUAL node_archive_sha)
+  message(FATAL_ERROR
+    "internal/archive.js differs between the data package and the Node.js binding")
+endif()
+# The Deno binding still carries its own copy of the generation preparer;
+# it must not drift from the data package's (the preparer CI job compares
+# both with a fresh build).
+file(SHA256 "${data_dir}/internal/gener-preparer.mjs" data_preparer_sha)
+file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/deno/internal/gener_preparer.mjs"
+     deno_preparer_sha)
+if(NOT data_preparer_sha STREQUAL deno_preparer_sha)
+  message(FATAL_ERROR
+    "internal/gener-preparer.mjs differs between the data package and the Deno binding")
+endif()
 
 # --- No linguistic data -------------------------------------------------------
 

@@ -283,12 +283,12 @@ if(NOT licenses_files STREQUAL "EMSCRIPTEN.txt;MPL-2.0.txt")
 endif()
 foreach(license_file IN ITEMS EMSCRIPTEN.txt MPL-2.0.txt)
   file(SHA256 "${binding_dir}/LICENSES/${license_file}" wasm_license_sha)
-  file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/node/LICENSES/${license_file}"
-       node_license_sha)
-  if(NOT wasm_license_sha STREQUAL node_license_sha)
+  file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/data/LICENSES/${license_file}"
+       data_license_sha)
+  if(NOT wasm_license_sha STREQUAL data_license_sha)
     message(FATAL_ERROR
-      "LICENSES/${license_file} differs between the WebAssembly and Node.js "
-      "bindings")
+      "LICENSES/${license_file} differs between the WebAssembly binding and "
+      "the data package")
   endif()
 endforeach()
 

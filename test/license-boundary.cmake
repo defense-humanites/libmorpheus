@@ -28,10 +28,6 @@ set(agpl_files
     bindings/js/node/index.d.ts
     bindings/js/node/index.js
     bindings/js/node/internal/archive.js
-    bindings/js/node/internal/data-internal.js
-    bindings/js/node/internal/data-manifest.js
-    bindings/js/node/internal/gener-index.js
-    bindings/js/node/internal/gener-runtime.js
     bindings/js/node/internal/main-module.js
     bindings/js/node/internal/native-internal.js
     bindings/js/node/internal/native-manifest.js
@@ -62,8 +58,6 @@ set(agpl_files
     bindings/js/data/test/gener.test.js
     bindings/js/data/test/main-module.test.js
     docs/release-data-0.1.0.md
-    bindings/js/node/test/data.test.js
-    bindings/js/node/test/gener.test.js
     bindings/js/node/test/main-module.test.js
     bindings/js/node/test/native.test.js
     bindings/js/node/test/setup.test.js
@@ -147,8 +141,6 @@ foreach(agpl_file IN LISTS agpl_files)
 endforeach()
 
 foreach(mpl_file IN ITEMS
-        bindings/js/node/internal/gener-manifest.js
-        bindings/js/node/internal/gener-preparer.mjs
         bindings/js/data/internal/gener-manifest.js
         bindings/js/data/internal/gener-preparer.mjs
         bindings/js/deno/internal/gener_manifest.ts
