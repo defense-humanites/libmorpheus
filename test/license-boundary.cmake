@@ -13,6 +13,7 @@ set(agpl_files
     .github/workflows/python-release.yml
     .github/workflows/wasm.yml
     .github/workflows/wasm-release.yml
+    .github/workflows/data-release.yml
     CHANGELOG.md
     CMakeLists.txt
     docs/release-node-0.1.0.md

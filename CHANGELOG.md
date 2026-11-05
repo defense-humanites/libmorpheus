@@ -30,8 +30,12 @@ the corpus.
   The package is published on npm and JSR from the same directory and runs
   under Node.js, Deno and Bun (its tests pass under all three;
   `import.meta.main` lets `deno run jsr:@libmorpheus/data` run the
-  command). First release: `docs/release-data-0.1.0.md`; the Node.js
-  binding's own command is unchanged.
+  command). `data-release.yml` publishes a `data-v*` tag to npm (OIDC with
+  provenance) and JSR after testing the package under both runtimes and
+  acquiring a dataset with the command installed from the `npm pack`
+  tarball; Linux CI runs on those tags. First release:
+  `docs/release-data-0.1.0.md`; the Node.js binding's own command is
+  unchanged.
 
 ## [0.4.4] - 2026-11-04
 
