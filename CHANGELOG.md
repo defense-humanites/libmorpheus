@@ -23,11 +23,15 @@ the corpus.
   Latin headwords differed from the native library. The runtime now knows
   both names, and the loader refuses a stem-type table naming an unknown
   class with a diagnostic and an internal error, on every platform alike.
-  Native results change for deponent verbs only: their perfect participles
-  are reported as deponent instead of passive (12 of 1,517 Latin headwords,
-  `ingressus` gains the deponent reading next to the passive one); Greek
-  results are unchanged over 3,000 headwords, and WebAssembly results now
-  equal native ones in lemma, stem and ending over both samples.
+  Native results change in one respect: readings whose lemma is a deponent
+  or semi-deponent verb of the stemlib (`cavillor`, `vador`, `audeo`, and
+  the deponent doublets Perseids records next to active verbs, such as
+  `juror`, `toleror`, `lupor`) report their perfect participle as deponent
+  instead of passive; readings of active lemmas are unchanged. 12 of 1,517
+  Latin headwords are affected (`ingressus` gains the deponent `ingredior`
+  reading next to the passive one). Greek results are unchanged over 3,000
+  headwords, and WebAssembly results now equal native ones in lemma, stem
+  and ending over both samples.
   `public_fixtures` asserts `amatus`, `rosarum` and `ingressus` on both
   platforms. The stemlib production tools share the class table: tables
   regenerated from the Perseids sources now carry `PP_SU|01` where the
