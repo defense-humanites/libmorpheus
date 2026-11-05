@@ -1,0 +1,31 @@
+{
+  "name": "@libmorpheus/data",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "exports": {
+    ".": "./data.js"
+  },
+  "nodeModulesDir": "none",
+  "publish": {
+    "include": [
+      "LICENSE",
+      "LICENSES/EMSCRIPTEN.txt",
+      "LICENSES/MPL-2.0.txt",
+      "NOTICE",
+      "README.md",
+      "data.d.ts",
+      "data.js",
+      "internal/archive.js",
+      "internal/data-internal.js",
+      "internal/data-manifest.js",
+      "internal/gener-index.js",
+      "internal/gener-manifest.js",
+      "internal/gener-preparer.mjs",
+      "internal/gener-runtime.js",
+      "internal/main-module.js",
+      "internal/runtime-subset.js",
+      "internal/version.js",
+      "jsr.json"
+    ]
+  }
+}

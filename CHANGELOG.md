@@ -9,6 +9,30 @@ the corpus.
 
 ## [Unreleased]
 
+### Added
+
+- Data acquisition package `@libmorpheus/data` (`bindings/js/data/`),
+  extracted from the Node.js binding's `libmorpheus-data` command so that
+  WebAssembly, browser and Workers deployments can acquire a pinned dataset
+  without installing a native binding. It contains no linguistic data: it
+  downloads the pinned upstream archive, verifies the tree and the upstream
+  license, and writes the result with a provenance receipt. New in this
+  package: `--subset runtime` writes only the files the runtime reads (275
+  files and 10 MiB for Perseids, 156 files and 19 MiB for Alpheios with
+  `gener.index`), `--languages` keeps a subset of a dataset's languages, and
+  `--manifest` writes `stemlib-manifest.json` (path, size, SHA-256 of every
+  written file) for `fetchStemlib()`, bundlers and `writeStemlib()`.
+  `data_package_metadata` guards the package contract, requires the files
+  shared with the Node.js binding to stay byte-identical until that binding
+  depends on this package, and forbids any stemlib artifact in the package
+  tree. Linux CI acquires both datasets from upstream, rebuilds
+  `gener.index` and analyzes one form per language over the runtime subset.
+  The package is published on npm and JSR from the same directory and runs
+  under Node.js, Deno and Bun (its tests pass under all three;
+  `import.meta.main` lets `deno run jsr:@libmorpheus/data` run the
+  command). First release: `docs/release-data-0.1.0.md`; the Node.js
+  binding's own command is unchanged.
+
 ## [0.4.4] - 2026-11-04
 
 Target project version: **0.4.4**. C ABI: **2**. Shared-library SONAME: **1**.

@@ -1,0 +1,57 @@
+{
+  "name": "@libmorpheus/data",
+  "version": "0.1.0",
+  "description": "Acquires pinned Morpheus stem datasets from their upstream repositories for libmorpheus: verifies them, writes the runtime subset and a manifest, builds the generation index. Contains no linguistic data.",
+  "type": "module",
+  "types": "./data.d.ts",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defense-humanites/libmorpheus.git",
+    "directory": "bindings/js/data"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "morpheus",
+    "libmorpheus",
+    "stemlib",
+    "ancient-greek",
+    "latin",
+    "morphology"
+  ],
+  "exports": {
+    ".": {
+      "types": "./data.d.ts",
+      "import": "./data.js"
+    }
+  },
+  "bin": {
+    "libmorpheus-data": "./data.js"
+  },
+  "files": [
+    "LICENSE",
+    "LICENSES",
+    "NOTICE",
+    "README.md",
+    "data.d.ts",
+    "data.js",
+    "internal/archive.js",
+    "internal/data-internal.js",
+    "internal/data-manifest.js",
+    "internal/gener-index.js",
+    "internal/gener-manifest.js",
+    "internal/gener-preparer.mjs",
+    "internal/gener-runtime.js",
+    "internal/main-module.js",
+    "internal/runtime-subset.js",
+    "internal/version.js"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

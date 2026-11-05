@@ -315,6 +315,12 @@ acquires native runtime `0.3.2` and requires C ABI `2`. The main module exports
 
 ### Acquire stem data
 
+The same acquisition is also published on its own as
+[`@libmorpheus/data`](https://github.com/defense-humanites/libmorpheus/tree/main/bindings/js/data),
+for deployments that need the data without a native binding (the WebAssembly
+binding, browsers, Workers); it adds a runtime-only subset and a file
+manifest. A later release of this binding will depend on that package.
+
 For Greek and Latin analysis, acquire the Perseids dataset:
 
 ```sh
