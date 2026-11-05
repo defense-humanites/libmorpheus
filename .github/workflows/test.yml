@@ -228,6 +228,17 @@ jobs:
           deno lint --rules-include=no-slow-types mod.ts
           deno publish --dry-run
 
+      - name: Test the data acquisition package under Deno and dry-run its JSR manifest
+        # The package is published to JSR as well as npm; its fixture-based
+        # tests (tar reader, zlib, crypto, the Emscripten preparer, main
+        # module detection) must pass through Deno's node: compatibility.
+        working-directory: bindings/js/data
+        run: |
+          deno test -A --no-check test/data.test.js test/gener.test.js test/main-module.test.js
+          deno check data.js
+          deno publish --dry-run
+          deno run -A data.js --help | grep -F 'Usage: libmorpheus-data'
+
       - name: Configure library
         run: cmake --preset dev
 

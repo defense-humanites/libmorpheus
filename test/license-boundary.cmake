@@ -245,6 +245,17 @@ if(wasm_jsr_spdx_at EQUAL -1)
           "AGPL SPDX sidecar missing for bindings/js/wasm/jsr.json")
 endif()
 
+foreach(data_sidecar IN ITEMS package.json jsr.json)
+  file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/data/${data_sidecar}.license"
+       data_sidecar_license)
+  string(FIND "${data_sidecar_license}"
+         "SPDX-License-Identifier: AGPL-3.0-or-later" data_sidecar_spdx_at)
+  if(data_sidecar_spdx_at EQUAL -1)
+    message(FATAL_ERROR
+            "AGPL SPDX sidecar missing for bindings/js/data/${data_sidecar}")
+  endif()
+endforeach()
+
 file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/deno/jsr.json.license"
      jsr_license)
 string(FIND "${jsr_license}"

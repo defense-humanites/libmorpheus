@@ -79,6 +79,37 @@ if(NOT default_import STREQUAL "./data.js" OR
   message(FATAL_ERROR "Unexpected data package entry points")
 endif()
 
+# --- jsr.json (JSR) ---------------------------------------------------------
+
+set(jsr_path "${data_dir}/jsr.json")
+file(READ "${jsr_path}" jsr_config)
+foreach(field IN ITEMS name version license)
+  string(JSON "jsr_${field}" ERROR_VARIABLE json_error
+         GET "${jsr_config}" "${field}")
+  if(json_error)
+    message(FATAL_ERROR "Invalid ${field} in ${jsr_path}: ${json_error}")
+  endif()
+endforeach()
+if(NOT jsr_name STREQUAL "@libmorpheus/data")
+  message(FATAL_ERROR "Unexpected JSR package name: ${jsr_name}")
+endif()
+if(NOT jsr_version STREQUAL data_version)
+  message(FATAL_ERROR
+    "JSR version ${jsr_version} differs from package ${data_version}")
+endif()
+if(NOT jsr_license STREQUAL "AGPL-3.0-or-later")
+  message(FATAL_ERROR "Unexpected JSR package license: ${jsr_license}")
+endif()
+string(JSON jsr_default_export GET "${jsr_config}" exports .)
+if(NOT jsr_default_export STREQUAL "./data.js")
+  message(FATAL_ERROR "Unexpected JSR package exports: ${jsr_default_export}")
+endif()
+file(READ "${data_dir}/data.js" data_entry)
+string(FIND "${data_entry}" "// @ts-self-types=\"./data.d.ts\"" self_types_at)
+if(self_types_at EQUAL -1)
+  message(FATAL_ERROR "data.js must declare its types for JSR (@ts-self-types)")
+endif()
+
 # --- Packaged files -----------------------------------------------------------
 
 set(expected_files
@@ -109,10 +140,38 @@ foreach(packaged IN LISTS expected_files)
   endif()
 endforeach()
 
+# The JSR list names the same sources, with the license directory spelled
+# file by file and the manifest itself.
+set(expected_jsr_files ${expected_files} jsr.json)
+list(REMOVE_ITEM expected_jsr_files LICENSES)
+list(APPEND expected_jsr_files LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt)
+string(JSON include_count ERROR_VARIABLE json_error
+       LENGTH "${jsr_config}" publish include)
+if(json_error)
+  message(FATAL_ERROR "Invalid publish.include in ${jsr_path}: ${json_error}")
+endif()
+list(LENGTH expected_jsr_files expected_count)
+if(NOT include_count EQUAL expected_count)
+  message(FATAL_ERROR
+    "JSR publish.include has ${include_count} entries; expected ${expected_count}")
+endif()
+math(EXPR last_include "${include_count} - 1")
+foreach(index RANGE 0 ${last_include})
+  string(JSON included GET "${jsr_config}" publish include ${index})
+  list(FIND expected_jsr_files "${included}" expected_at)
+  if(expected_at EQUAL -1)
+    message(FATAL_ERROR "Unexpected JSR package file: ${included}")
+  endif()
+  list(REMOVE_ITEM expected_jsr_files "${included}")
+endforeach()
+if(expected_jsr_files)
+  message(FATAL_ERROR "Missing JSR package files: ${expected_jsr_files}")
+endif()
+
 # --- Tracked sources ----------------------------------------------------------
 
 foreach(required IN ITEMS
-        package.json.license tools/bootstrap-npm.mjs
+        package.json.license jsr.json jsr.json.license tools/bootstrap-npm.mjs
         test/bootstrap-npm.test.js test/data.test.js test/gener.test.js
         test/main-module.test.js LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt)
   if(NOT EXISTS "${data_dir}/${required}")
@@ -124,7 +183,8 @@ file(GLOB data_root_files
      RELATIVE "${data_dir}"
      "${data_dir}/*")
 set(expected_root_files
-    LICENSE NOTICE README.md data.d.ts data.js package.json package.json.license)
+    LICENSE NOTICE README.md data.d.ts data.js jsr.json jsr.json.license
+    package.json package.json.license)
 foreach(root_file IN LISTS data_root_files)
   list(FIND expected_root_files "${root_file}" expected_at)
   if(expected_at EQUAL -1)
@@ -182,9 +242,11 @@ foreach(data_file IN LISTS data_files)
   endif()
 endforeach()
 string(JSON files_json GET "${package}" files)
-if(files_json MATCHES "stemlib|steminds|endtables|rule_files|gener\\.index")
-  message(FATAL_ERROR "Data package manifest must not reference linguistic data")
-endif()
+foreach(manifest IN ITEMS "${files_json}" "${jsr_config}")
+  if(manifest MATCHES "stemlib|steminds|endtables|rule_files|gener\\.index")
+    message(FATAL_ERROR "Data package manifests must not reference linguistic data")
+  endif()
+endforeach()
 
 # --- Pinned datasets ----------------------------------------------------------
 

@@ -27,8 +27,11 @@ the corpus.
   depends on this package, and forbids any stemlib artifact in the package
   tree. Linux CI acquires both datasets from upstream, rebuilds
   `gener.index` and analyzes one form per language over the runtime subset.
-  First release: `docs/release-data-0.1.0.md`; the Node.js binding's own
-  command is unchanged.
+  The package is published on npm and JSR from the same directory and runs
+  under Node.js, Deno and Bun (its tests pass under all three;
+  `import.meta.main` lets `deno run jsr:@libmorpheus/data` run the
+  command). First release: `docs/release-data-0.1.0.md`; the Node.js
+  binding's own command is unchanged.
 
 ## [0.4.4] - 2026-11-04
 

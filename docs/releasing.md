@@ -29,6 +29,8 @@ package uses `data-v<version>` tags and declares its version in
 `bindings/js/data/internal/version.js`; it ships neither runtime nor data,
 only the pinned upstream revisions it verifies, so it is coupled to the
 redistribution policy's reviewed revisions rather than to a native release.
+Like the WebAssembly binding it is published to npm and JSR from one
+directory (`package.json` and `jsr.json` must agree).
 Releases through `0.3.2` predate this separation and used one `v<version>`
 tag for the native and Deno tracks.
 

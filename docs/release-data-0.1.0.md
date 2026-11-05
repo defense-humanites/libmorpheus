@@ -19,8 +19,13 @@ contract; it does not authorize or record creation of the `data-v0.1.0` tag.
 - Generation preparer: the checked-in WebAssembly build shared byte for
   byte with the Deno and Node.js bindings; generated `gener.index` digest
   `5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6`
-- Registry: npm only (the tool runs under Node.js; Deno runs it through
-  `npm:`); no JSR entry
+- Registries: npm (`package.json`) and JSR (`jsr.json`) from the same
+  directory, as for the WebAssembly binding. The package uses only `node:`
+  modules that Deno and Bun provide: its fixture-based tests pass unchanged
+  under Deno 2.9 and Bun 1.4, and `deno publish --dry-run` reports nothing.
+  `import.meta.main` (Deno, Bun, Node.js 24.2+) makes
+  `deno run -A jsr:@libmorpheus/data …` run the command; older Node.js
+  falls back to the executable-path check.
 
 ## What the package is, and is not
 
@@ -77,19 +82,26 @@ distinct package name would be used for a dataset the gate ever qualifies.
 ## Publication
 
 On an authorized `data-v0.1.0` tag, a publication workflow (to be added
-before the first release, on the pattern of `wasm-release.yml`) tests the
-package, publishes it to npm through OIDC with provenance, and records the
-published tarball's integrity in this document. npm grants a trusted
-publisher only to an existing package, so a 0.0.0 placeholder
-(`tools/bootstrap-npm.mjs`) must first be published manually under the
-`bootstrap` dist-tag; as for the WebAssembly binding, npm will also give it
-`latest` until 0.1.0 replaces it.
+before the first release, on the pattern of `wasm-release.yml` without its
+module rebuild) tests the package, publishes it to npm through OIDC with
+provenance and to JSR, and records the published tarball's integrity in
+this document. npm grants a trusted publisher only to an existing package,
+so a 0.0.0 placeholder (`tools/bootstrap-npm.mjs`) must first be published
+manually under the `bootstrap` dist-tag; as for the WebAssembly binding,
+npm will also give it `latest` until 0.1.0 replaces it. JSR reserves the
+name when the package is linked to the repository. After publication the
+command must be exercised from JSR itself (`deno run -A
+jsr:@libmorpheus/data --dataset perseids --subset runtime --output …`),
+since JSR transforms the files it serves.
 
 ## Remaining authorization
 
 Before publication, a maintainer must:
 
 1. publish the npm placeholder and configure the trusted publisher for
-   `data-release.yml`;
+   `data-release.yml`; link `@libmorpheus/data` on JSR to the repository
+   and that workflow;
 2. confirm the tagged Linux CI run on the candidate commit;
-3. explicitly authorize creation of `data-v0.1.0`.
+3. explicitly authorize creation of `data-v0.1.0`;
+4. after publication, run the JSR end-to-end check above and record its
+   outcome here.

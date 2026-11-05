@@ -19,15 +19,23 @@ before republishing what you acquire.
 
 ## Usage
 
+The package is published on npm and on JSR; the command runs under
+Node.js 20+, Deno 2 and Bun:
+
 ```sh
 # Greek and Latin analysis: the Perseids dataset, runtime files only,
 # with a manifest for the WebAssembly facade or a bundler.
 npx @libmorpheus/data --dataset perseids --subset runtime --manifest --output ./stemlib
+deno run -A jsr:@libmorpheus/data --dataset perseids --subset runtime --manifest --output ./stemlib
+bunx @libmorpheus/data --dataset perseids --subset runtime --manifest --output ./stemlib
 
 # Greek analysis and experimental generation: the Alpheios reference
 # dataset with its validated generation index.
 npx @libmorpheus/data --dataset alpheios --subset runtime --with-gener --output ./stemlib-greek
 ```
+
+Under Deno, `-A` can be narrowed to
+`--allow-net=codeload.github.com --allow-read=./stemlib --allow-write=./stemlib`.
 
 | Option | Effect |
 |---|---|

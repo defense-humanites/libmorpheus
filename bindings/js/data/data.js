@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// @ts-self-types="./data.d.ts"
 
 import { acquireMorpheusData, MANIFEST_FILE, RECEIPT_FILE } from "./internal/data-internal.js";
 import { MORPHEUS_DATASETS } from "./internal/data-manifest.js";
@@ -101,7 +102,10 @@ function usage() {
   ].join("\n");
 }
 
-if (isMainModule(import.meta.url)) {
+// Node.js below 24.2 has no import.meta.main; the fallback compares the
+// executable path (an npm bin symlink included). Deno and Bun set
+// import.meta.main, which also covers `deno run jsr:@libmorpheus/data`.
+if (import.meta.main ?? isMainModule(import.meta.url)) {
   try {
     const options = parseMorpheusDataArgs(process.argv.slice(2));
     if (options.help) console.log(usage());
