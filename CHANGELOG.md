@@ -9,6 +9,28 @@ the corpus.
 
 ## [Unreleased]
 
+### Fixed
+
+- Latin fourth-principal-part analyses on 32-bit targets, and the voice of
+  deponent perfect participles everywhere (issue #37). The Perseids Latin
+  `stemtypes.table` names the fourth-principal-part class `pp_su`, and both
+  Greek tables name `nounstem` for `pers_pron`; neither was in the runtime's
+  class table. `GetStemClass()` reports an unknown class as all ones, and
+  that value, widened into a 64-bit `long`, is positive, so `AddMorphKey()`
+  accepted the key with a stem type that has every bit set; on `wasm32` it
+  is `-1`, the key was refused and every stem of the class was dropped: the
+  WebAssembly module returned no analysis for `amatus`, and 108 of 1,517
+  Latin headwords differed from the native library. The runtime now knows
+  both names, and the loader refuses a stem-type table naming an unknown
+  class with a diagnostic and an internal error, on every platform alike.
+  Native results change for deponent verbs only: their perfect participles
+  are reported as deponent instead of passive (12 of 1,517 Latin headwords,
+  `ingressus` gains the deponent reading next to the passive one); Greek
+  results are unchanged over 3,000 headwords, and WebAssembly results now
+  equal native ones in lemma, stem and ending over both samples.
+  `public_fixtures` asserts `amatus`, `rosarum` and `ingressus` on both
+  platforms.
+
 ### Added
 
 - Data acquisition package `@libmorpheus/data` (`bindings/js/data/`),

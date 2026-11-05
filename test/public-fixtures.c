@@ -25,6 +25,32 @@ analysis_count(morpheus_context *context, const char *word,
   return(count);
 }
 
+/* Analyses of `word` whose lemma is `lemma` and whose voice is `voice`
+ * (any voice when `voice` is MORPHEUS_VOICE_NONE). */
+static size_t
+lemma_voice_count(morpheus_context *context, const char *word,
+                  morpheus_options options, const char *lemma,
+                  morpheus_voice voice)
+{
+  morpheus_result *result = NULL;
+  morpheus_analysis analysis;
+  size_t count;
+  size_t matches=0;
+  size_t i;
+
+  assert(morpheus_analyze(context,(const uint8_t *)word,strlen(word),
+                          options,&result) == MORPHEUS_OK);
+  count=morpheus_result_count(result);
+  for(i=0;i<count;i++) {
+    assert(morpheus_result_copy(result,i,&analysis,sizeof analysis) ==
+           MORPHEUS_OK);
+    if(strcmp(analysis.lemma,lemma) == 0 &&
+       (voice == MORPHEUS_VOICE_NONE || analysis.voice == voice)) matches++;
+  }
+  morpheus_result_free(result);
+  return(matches);
+}
+
 static size_t
 part_of_speech_count(morpheus_context *context, const char *word,
                      morpheus_options options,
@@ -95,6 +121,26 @@ main(void)
   config.language=MORPHEUS_LANGUAGE_LATIN;
   assert(morpheus_open(&config,&context) == MORPHEUS_OK);
   assert(analysis_count(context,"est",strict) == 2);
+  /*
+   * Fourth-principal-part stems (class pp4, named "pp_su" in the Latin
+   * stemtypes.table) must resolve on every platform: the WebAssembly build
+   * once dropped every one of them (issue #37). amatus is only the perfect
+   * passive participle; rosarum is both the participle of rodo and the
+   * noun; the deponent ingredior keeps its deponent participle distinct
+   * from a passive one, which an all-ones stem type used to hide.
+   */
+  assert(analysis_count(context,"amatus",strict) == 1);
+  assert(lemma_voice_count(context,"amatus",strict,"amo",
+                           MORPHEUS_VOICE_PASSIVE) == 1);
+  assert(analysis_count(context,"rosarum",strict) == 2);
+  assert(lemma_voice_count(context,"rosarum",strict,"rodo",
+                           MORPHEUS_VOICE_NONE) == 1);
+  assert(lemma_voice_count(context,"rosarum",strict,"rosa",
+                           MORPHEUS_VOICE_NONE) == 1);
+  assert(lemma_voice_count(context,"ingressus",strict,"ingredior",
+                           MORPHEUS_VOICE_DEPONENT) == 1);
+  assert(lemma_voice_count(context,"ingressus",strict,"ingredior",
+                           MORPHEUS_VOICE_PASSIVE) == 1);
   morpheus_close(context);
   return(0);
 }

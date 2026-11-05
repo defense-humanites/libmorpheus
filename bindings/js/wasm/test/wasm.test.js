@@ -173,7 +173,10 @@ test("in-memory stemlib written from host bytes", async () => {
   }
   const context = morpheus.open({ stemlib: root, language: MorpheusLanguage.Latin });
   try {
-    assert.equal(context.analyze("rosarum")[0].lemma, "rosa");
+    // The participle of rodo and the noun; the former is a fourth-
+    // principal-part stem, which the module once dropped (issue #37).
+    assert.deepEqual(context.analyze("rosarum").map((analysis) => analysis.lemma).sort(), ["rodo", "rosa"]);
+    assert.deepEqual(context.analyze("amatus").map((analysis) => analysis.lemma), ["amo"]);
   } finally {
     context.close();
   }

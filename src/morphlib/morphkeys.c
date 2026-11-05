@@ -607,6 +607,22 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 		stemnum = (Stemtype)parsed;
 		Xstrncpy(targs[i].morph_key , stemname,(size_t)MAXWORDSIZE);
 		declnum = (*classfunc)(decl);
+		/*
+		 * GetStemClass() reports an unknown class as all ones. That
+		 * value used to be stored as is: widened into a 64-bit long
+		 * it is positive, so AddMorphKey() accepted the key with a
+		 * stem type that has every bit set, while on a 32-bit long
+		 * it is -1 and the key was silently refused, dropping every
+		 * stem of that class (issue #37). A class the table names
+		 * but the runtime does not know is a stemlib defect; report
+		 * it when the table is loaded, on every platform alike.
+		 */
+		if (declnum == (Stemtype)-1) {
+			fprintf(stderr,"%s: unknown stem class [%s] for [%s]\n",
+				fname, decl, stemname);
+			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
+			goto failed;
+		}
 		
 
 /*		if( declnum == 0 ) { 

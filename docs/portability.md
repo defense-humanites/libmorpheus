@@ -60,7 +60,9 @@ The supported native deployment targets are little-endian LP64 systems. The
 experimental WebAssembly build targets `wasm32`, a little-endian ILP32
 environment: the disk format does not depend on the width of `long`, and the
 two in-memory sites that assign a 32-bit disk word to a `long` are explicit
-about it (`src/morphlib/morphkeys.c`, `src/morphlib/retrentry.c`). Big-endian
+about it (`src/morphlib/morphkeys.c`, `src/morphlib/retrentry.c`), and the
+stem-type table loader refuses an unknown stem class instead of leaving its
+all-ones failure value to the sign of `long` (issue #37). Big-endian
 targets and non-8-bit-byte C implementations are not currently supported.
 See [wasm.md](wasm.md) for the WebAssembly qualification.
 The Deno binding additionally requires a 64-bit `x86_64` or `aarch64`
