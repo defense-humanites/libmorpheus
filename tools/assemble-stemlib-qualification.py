@@ -177,7 +177,7 @@ def build(source, build_root, ctest_junit, output):
     alpheios_path = lexical_root / "alpheios-reference-comparison.tsv"
     expected_summary = {
         "Greek": ["357", "156", "0"],
-        "Latin": ["211", "73", "0"],
+        "Latin": ["211", "76", "0"],
     }
     summary_rows = rows(summary_path)
     require(len(summary_rows) == 3 and
@@ -190,7 +190,7 @@ def build(source, build_root, ctest_junit, output):
     difference_rows = rows(difference_path)
     require(difference_rows[0] == ["path", "reason"],
             "invalid table baseline difference header")
-    require(len(difference_rows) == 230 and all(
+    require(len(difference_rows) == 233 and all(
         row[1:] == ["explicit-binary-serialization"]
         for row in difference_rows[1:]), "unexpected table baseline differences")
     binary_exception_path = source / "test/stemlib-binary-baseline-exceptions.tsv"
@@ -198,7 +198,7 @@ def build(source, build_root, ctest_junit, output):
     require(difference_rows[1:] == binary_exceptions,
             "table difference report does not match its exception manifest")
     semantic_rows = rows(semantic_path)
-    require(len(semantic_rows) == 229 and all(
+    require(len(semantic_rows) == 232 and all(
         len(row) == 5 and row[0] == binary_exceptions[index][0] and
         row[1].isdigit() and int(row[1]) > 0 and
         row[2].isdigit() and int(row[2]) > 0 and
@@ -208,16 +208,24 @@ def build(source, build_root, ctest_junit, output):
         "binary baseline differences are not semantically equivalent")
     semantic_counts = Counter(row[4] for row in semantic_rows)
     require(semantic_counts == Counter({
-        "semantic-identical": 228,
-        "reviewed-semantic-exception": 1,
+        "semantic-identical": 227,
+        "reviewed-semantic-exception": 5,
     }), "unexpected binary semantic comparison summary")
     semantic_exception_path = (
         source / "test/stemlib-binary-semantic-exceptions.tsv")
     semantic_exceptions = rows(semantic_exception_path)
-    require(semantic_exceptions == [[
-                "Latin/endtables/out/er_eris.out", "0-11", "stem-type",
-                "4377", "4388", "duplicate-registry-value",
-            ]] and
+    # The pp4 (pp_su) records carried GetStemClass()'s all-ones failure value
+    # in the historical tables; regenerated ones carry PP_SU|01 (issue #37).
+    pp4_exception = ["stem-type", "4294967295", "12582913",
+                     "unknown-stem-class-all-ones"]
+    require(semantic_exceptions == [
+                ["Latin/derivs/out/are_vb.out", "2-2"] + pp4_exception,
+                ["Latin/derivs/out/ire_vb.out", "3-3"] + pp4_exception,
+                ["Latin/derivs/out/reg_conj.out", "6-7"] + pp4_exception,
+                ["Latin/endtables/out/er_eris.out", "0-11", "stem-type",
+                 "4377", "4388", "duplicate-registry-value"],
+                ["Latin/endtables/out/pp4.out", "0-143"] + pp4_exception,
+            ] and
             [row[0] for row in semantic_exceptions] == [
                 row[0] for row in semantic_rows
                 if row[4] == "reviewed-semantic-exception"

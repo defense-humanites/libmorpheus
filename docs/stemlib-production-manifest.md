@@ -94,24 +94,30 @@ bytes. CI prints a compact TSV summary of the comparison. This comparison
 covers table production, including its nominal, verb and derivation table
 indexes; the separate lexical proof below covers the stem indexes.
 
-The current comparison records 156 Greek and 73 Latin binary differences, with
-zero textual or index differences. Their complete sorted path set is pinned in
+The current comparison records 156 Greek and 76 Latin binary differences, with
+zero textual or index differences (the checked-in Latin nominal ending index
+is read without the stray `pp4` tokens of the historical tools; issue #37).
+Their complete sorted path set is pinned in
 `test/stemlib-binary-baseline-exceptions.tsv`; CI rejects a missing, unexpected,
 duplicated, reordered, malformed, or reclassified exception.
 
-Every one of those 229 binary differences is also decoded through the runtime
+Every one of those 232 binary differences is also decoded through the runtime
 reader and compared record by record. Equal morphology registry names are
 ordered by definition order and resolve to the last definition deterministically
 across C libraries. This makes `illw.out` match the historical table and leaves
-228 files with identical decoded content. The remaining twelve `er_eris.out`
-records differ only in the numeric ID attached to the same duplicated symbolic
-name and class; their exact range and values are pinned in
+227 files with identical decoded content. Twelve `er_eris.out` records differ
+only in the numeric ID attached to the same duplicated symbolic name and
+class. The 144 records of `pp4.out` and four derivation records differ only in
+the stem type of the fourth-principal-part class, all ones in the historical
+tables (whose tools did not know the class name `pp_su`) against `PP_SU|01`
+in the regenerated ones, over which the runtime analyzes identically (issue
+#37). Their exact ranges and values are pinned in
 `test/stemlib-binary-semantic-exceptions.tsv`. Every other field, including
 ending text, grammatical form, dialect, region, morphology flags and domains,
 must match. CI retains `binary-semantic-comparison.tsv` and rejects any unlisted
 semantic difference. The comparator and qualification assembler both require
-the exact `er_eris.out` path, record range, field and numeric values; changing
-the exception manifest alone cannot authorize a different discrepancy.
+the exact paths, record ranges, fields and numeric values; changing the
+exception manifest alone cannot authorize a different discrepancy.
 
 ## Lexical production and qualification
 
@@ -184,8 +190,8 @@ lexical construction and both fail-closed tool checks. It rejects any failed,
 skipped or disabled test and records the complete executed test count without
 copying nondeterministic JUnit timings into the report. It also records table
 and lexical output counts,
-the 228 semantically identical binary files, the single reviewed semantic
-exception, the Perseids difference-manifest hashes and the complete pinned
+the 227 semantically identical binary files, the five reviewed semantic
+exception entries, the Perseids difference-manifest hashes and the complete pinned
 Alpheios comparison summary. It is written only when the independent CTest receipts
 match each other, both match the production target, and all comparison counts and
 exception sets retain their reviewed values. CI preserves
@@ -359,7 +365,7 @@ the changed `vbind` and `vbind.lindex` paths are pinned in
 `test/stemlib-lexical-baseline-exceptions.tsv`. All differences correspond to
 the seven repairs, including reclassification of the six `prosum` future forms
 from untyped words to `irreg_pp1` verbs. The odd-key output remains byte-identical.
-The 229 table-binary exceptions remain intact.
+The 232 table-binary exceptions remain intact.
 
 ### Locating additional lexical refusals
 

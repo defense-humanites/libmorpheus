@@ -36,6 +36,20 @@ Two source sites needed attention for ILP32, where `long` is 32 bits:
 a `Morph_flags` (`long`), and `retrentry.c` refuses a pre-index offset above
 `LONG_MAX` instead of narrowing it. Both are no-ops on LP64.
 
+A third site hid a result difference rather than a build error. The stem
+type tables name classes the runtime did not know (`pp_su`, the Latin fourth
+principal part, and `nounstem`); `GetStemClass()` reports an unknown class as
+all ones, and that value, widened into a 64-bit `long`, is positive and was
+accepted with a stem type that has every bit set, while on `wasm32` it is
+`-1` and the key was refused, dropping every Latin participle and supine
+built on the fourth principal part (`amatus` had no analysis; 108 of 1,517
+Latin headwords differed; issue #37). The runtime now knows both names and
+refuses a stem-type table that names an unknown class, on every platform
+alike. Since that fix, a differential of the Node.js binding against the
+module over 3,000 Greek headwords and 1,517 Latin headwords plus participles
+shows no difference in lemma, stem or ending; `public_fixtures` asserts the
+Latin forms on both platforms.
+
 ## Build
 
 Emscripten **4.0.15**, the version the project already pins for its internal

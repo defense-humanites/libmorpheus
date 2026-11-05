@@ -53,12 +53,17 @@ word-form bytes, normal and group-record round trips, truncated reads, and
 record-size calculations. These tests run on native Linux, Alpine/musl and
 Apple Silicon CI targets.
 
-The complete production qualification additionally decodes all 229 regenerated
+The complete production qualification additionally decodes all 232 regenerated
 `.out` files whose bytes differ from the checked-in Perseids snapshots. It
 compares every semantic field of every record and emits a deterministic report.
-There are 228 semantically identical files. Morphology keys with duplicate rule
+There are 227 semantically identical files. Morphology keys with duplicate rule
 registry names resolve deterministically to the last registered definition,
-which matches the checked-in `illw.out` value. The remaining twelve
-`er_eris.out` records use the same duplicated symbolic name and class but a
-different numeric ID; this single historical exception is pinned separately.
-Any other semantic change fails qualification.
+which matches the checked-in `illw.out` value. Twelve `er_eris.out` records
+use the same duplicated symbolic name and class but a different numeric ID.
+The 144 records of `pp4.out` and four derivation records (`are_vb.out`,
+`ire_vb.out`, `reg_conj.out`) carry, in the checked-in tables, the all-ones
+value with which the historical tools stood in for the fourth-principal-part
+class `pp_su`, unknown to them; regenerated records carry `PP_SU` with stem
+number `01`, and the runtime analyzes identically over both (issue #37). These
+two historical exceptions are pinned separately, record range and values
+included. Any other semantic change fails qualification.

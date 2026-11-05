@@ -1,3 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # path	records	field	baseline_value	generated_value	reason
+Latin/derivs/out/are_vb.out	2-2	stem-type	4294967295	12582913	unknown-stem-class-all-ones
+Latin/derivs/out/ire_vb.out	3-3	stem-type	4294967295	12582913	unknown-stem-class-all-ones
+Latin/derivs/out/reg_conj.out	6-7	stem-type	4294967295	12582913	unknown-stem-class-all-ones
 Latin/endtables/out/er_eris.out	0-11	stem-type	4377	4388	duplicate-registry-value
+Latin/endtables/out/pp4.out	0-143	stem-type	4294967295	12582913	unknown-stem-class-all-ones

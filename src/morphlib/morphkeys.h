@@ -15,6 +15,9 @@ static const struct {
 		"noun3",			NOUNSTEM|DECL3,
 		"noun4",			NOUNSTEM|DECL4,
 		"noun5",			NOUNSTEM|DECL5,
+		/* "nounstem" is a nominal stem without a declension bit; the
+		 * Greek and Latin tables use it for pers_pron. */
+		"nounstem",		NOUNSTEM,
 		"indecl1",		INDECL|NOUNSTEM|DECL1,
 		"indecl2",		INDECL|NOUNSTEM|DECL2,
 		"indecl3",		INDECL|NOUNSTEM|DECL3,
@@ -28,6 +31,10 @@ static const struct {
 		"pp_ap",		PP_AP,
 		"pp_fp",		PP_FP,
 		"pp_p4",		PP_SU,
+		/* The Perseids Latin stemtypes.table names the fourth
+		 * principal part class "pp_su" (the supine stem); it is the
+		 * same class as "pp_p4". */
+		"pp_su",		PP_SU,
 		"pp_va",		PP_VA,
 		"pp_vn",		PP_VN,
 		"verbstem",		VERBSTEM,
