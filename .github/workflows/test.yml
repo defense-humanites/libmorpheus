@@ -499,6 +499,9 @@ jobs:
       - name: Verify npm package contents
         working-directory: bindings/js/node
         run: |
+          # The data package was linked for the tests; packaging must see
+          # the tree as a consumer's npm would, without it.
+          rm -rf node_modules
           npm pack --dry-run --ignore-scripts
           node package-platform.mjs \
             linux-x64-gnu \
