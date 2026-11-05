@@ -9,6 +9,18 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-05
+
+Target project version: **0.4.5**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release resolves the stem classes the stem-type tables name
+(`pp_su`, `nounstem`) and refuses unknown ones, which restores every Latin
+fourth-principal-part analysis to the WebAssembly build and reports the
+perfect participles of deponent lemmas as deponent natively. It is the
+release WebAssembly binding 0.1.3 is compiled from and declares. The data
+acquisition package and the Node.js binding's dependency on it, released
+in between, are listed below.
+
 ### Fixed
 
 - Latin fourth-principal-part analyses on 32-bit targets, and the voice of
@@ -33,7 +45,9 @@ the corpus.
   headwords, and WebAssembly results now equal native ones in lemma, stem
   and ending over both samples.
   `public_fixtures` asserts `amatus`, `rosarum` and `ingressus` on both
-  platforms. The stemlib production tools share the class table: tables
+  platforms. WebAssembly binding 0.1.3, compiled from this release, carries
+  the repair; 0.1.2 and earlier drop those Latin analyses. The stemlib
+  production tools share the class table: tables
   regenerated from the Perseids sources now carry `PP_SU|01` where the
   historical ones carry the all-ones value (the 144 `pp4.out` records and
   four derivation records, pinned as a second reviewed semantic exception;
