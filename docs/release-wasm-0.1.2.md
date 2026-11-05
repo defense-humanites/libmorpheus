@@ -90,5 +90,8 @@ example against a local stemlib), since JSR transforms the files it serves;
   (`morpheus.mjs`),
   `bb6ee592799885179204459a82632bf76ae233d23f670832b788eaa93292e8cc`
   (`morpheus.wasm`).
-- JSR end-to-end check: pending; the maintainer runs it as described above
-  and records the outcome here.
+- JSR end-to-end check: done by the maintainer on 2026-11-05 on macOS
+  (Apple Silicon) with Deno, from `jsr:@libmorpheus/wasm@0.1.2` and the
+  README's Node.js/Deno example against a local stemlib. The module served
+  by JSR instantiated and `analyze("greek", "e)/kstasis")` returned the
+  expected single analysis, as for 0.1.1.
