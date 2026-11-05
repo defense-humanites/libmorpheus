@@ -156,6 +156,9 @@ Greek/endtables/out/ww_pr.out	explicit-binary-serialization
 Greek/endtables/out/y_bos.out	explicit-binary-serialization
 Greek/endtables/out/y_fos.out	explicit-binary-serialization
 Greek/endtables/out/y_pos.out	explicit-binary-serialization
+Latin/derivs/out/are_vb.out	explicit-binary-serialization
+Latin/derivs/out/ire_vb.out	explicit-binary-serialization
+Latin/derivs/out/reg_conj.out	explicit-binary-serialization
 Latin/endtables/out/0_adj3.out	explicit-binary-serialization
 Latin/endtables/out/0_i.out	explicit-binary-serialization
 Latin/endtables/out/0_is.out	explicit-binary-serialization

@@ -29,7 +29,14 @@ the corpus.
   results are unchanged over 3,000 headwords, and WebAssembly results now
   equal native ones in lemma, stem and ending over both samples.
   `public_fixtures` asserts `amatus`, `rosarum` and `ingressus` on both
-  platforms.
+  platforms. The stemlib production tools share the class table: tables
+  regenerated from the Perseids sources now carry `PP_SU|01` where the
+  historical ones carry the all-ones value (the 144 `pp4.out` records and
+  four derivation records, pinned as a second reviewed semantic exception;
+  the runtime analyzes identically over both), and the Latin nominal ending
+  index no longer lists `pp4`, which the table-build comparison reads out of
+  the checked-in baseline. The checked-in generation preparer is rebuilt
+  from the repaired tree.
 
 ### Added
 

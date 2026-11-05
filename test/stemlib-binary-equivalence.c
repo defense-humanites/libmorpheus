@@ -141,20 +141,43 @@ static int load_semantic_exceptions(const char *path)
 			exception->field = FIELD_DERIVATION_TYPE;
 		else goto invalid;
 		if(!parse_unsigned(fields[3],&exception->baseline_value) ||
-		   !parse_unsigned(fields[4],&exception->generated_value) ||
-		   strcmp(fields[5],"duplicate-registry-value") != 0) goto invalid;
-		/* Only this reviewed historical registry choice may diverge. */
-		if(strcmp(exception->path,"Latin/endtables/out/er_eris.out") != 0 ||
-		   exception->first_record != 0U ||
-		   exception->last_record != 11U ||
-		   exception->field != FIELD_STEM_TYPE ||
-		   exception->baseline_value != 4377U ||
-		   exception->generated_value != 4388U) goto invalid;
+		   !parse_unsigned(fields[4],&exception->generated_value)) goto invalid;
+		if(strcmp(fields[5],"duplicate-registry-value") == 0) {
+			/* Only this reviewed historical registry choice may diverge. */
+			if(strcmp(exception->path,"Latin/endtables/out/er_eris.out") != 0 ||
+			   exception->first_record != 0U ||
+			   exception->last_record != 11U ||
+			   exception->field != FIELD_STEM_TYPE ||
+			   exception->baseline_value != 4377U ||
+			   exception->generated_value != 4388U) goto invalid;
+		} else if(strcmp(fields[5],"unknown-stem-class-all-ones") == 0) {
+			/*
+			 * The Perseids Latin tables were produced by tools in
+			 * which the fourth-principal-part class pp4 (named pp_su
+			 * in stemtypes.table, unknown to the runtime until issue
+			 * #37) carried GetStemClass()'s all-ones failure value.
+			 * The regenerated records carry PP_SU with stem number 01
+			 * (060000001); the runtime analyzes identically over both.
+			 * Only these records, in these tables, may diverge so.
+			 */
+			if(exception->field != FIELD_STEM_TYPE ||
+			   exception->baseline_value != 4294967295U ||
+			   exception->generated_value != 12582913U) goto invalid;
+			if(!((strcmp(exception->path,"Latin/derivs/out/are_vb.out") == 0 &&
+			      exception->first_record == 2U && exception->last_record == 2U) ||
+			     (strcmp(exception->path,"Latin/derivs/out/ire_vb.out") == 0 &&
+			      exception->first_record == 3U && exception->last_record == 3U) ||
+			     (strcmp(exception->path,"Latin/derivs/out/reg_conj.out") == 0 &&
+			      exception->first_record == 6U && exception->last_record == 7U) ||
+			     (strcmp(exception->path,"Latin/endtables/out/pp4.out") == 0 &&
+			      exception->first_record == 0U && exception->last_record == 143U)))
+				goto invalid;
+		} else goto invalid;
 		semantic_exception_count++;
 	}
 	input_failed = ferror(input);
 	if(fclose(input) != 0) input_failed = 1;
-	if(input_failed || semantic_exception_count != 1)
+	if(input_failed || semantic_exception_count != 5)
 		return(0);
 	return(1);
 
@@ -369,7 +392,7 @@ int main(int argc, char **argv)
 		count++;
 	}
 	if(ferror(manifest)) failed = 1;
-	if(count != 229U) {
+	if(count != 232U) {
 		fprintf(stderr,"unexpected binary semantic comparison count: %u\n",count);
 		failed = 1;
 	}

@@ -368,21 +368,29 @@ restored writer uses explicit serialization instead of historical in-memory
 structure bytes. This establishes convergence for the table-production
 subgraph independently of the lexical production proof described below.
 
-The checked-in baseline comparison currently contains 156 Greek and 73 Latin
-binary differences, against zero differences in ASCII expansions or indexes.
+The checked-in baseline comparison currently contains 156 Greek and 76 Latin
+binary differences, against zero differences in ASCII expansions or indexes
+once the checked-in Latin nominal ending index is read without the `pp4`
+tokens that the all-ones stem type of the historical tools had put there (the
+class is a participle class and belongs to the verbal index; issue #37).
 The complete sorted path set is pinned in
 `test/stemlib-binary-baseline-exceptions.tsv` with the
 `explicit-binary-serialization` classification. CI rejects any change to that
 reviewed exception set.
 
-Qualification now decodes every record in those 229 pairs through the runtime
+Qualification now decodes every record in those 232 pairs through the runtime
 reader. Morphology key lookup now orders equal names by registry definition
 order and selects the last definition, rather than inheriting an unspecified
-`qsort` choice. This matches the historical `illw.out` value and leaves 228
+`qsort` choice. This matches the historical `illw.out` value and leaves 227
 files semantically identical. The twelve `er_eris.out` records retain one
 explicit historical numeric-ID exception: both IDs map to the same duplicated
-symbolic name and class. Its exact range and values remain pinned; any other
-decoded difference is fatal and the complete report is retained as CI evidence.
+symbolic name and class. The 144 `pp4.out` records and four derivation
+records (`are_vb.out` 2, `ire_vb.out` 3, `reg_conj.out` 6–7) retain a second:
+the historical tools did not know the class name `pp_su` and stored
+`GetStemClass()`'s all-ones failure value, where the repaired tools store
+`PP_SU|01`; the runtime analyzes identically over both tables (issue #37).
+Their exact ranges and values remain pinned; any other decoded difference is
+fatal and the complete report is retained as CI evidence.
 
 The subsequent lexical tranche restores `do_conj` as an internal MPL C17 target
 and connects all three lexical producers to a separate ordered source manifest
@@ -463,8 +471,8 @@ hashed in table provenance; CI invokes the target directly.
 
 CI finally assembles a deterministic machine-readable qualification report
 that cross-checks the two independent CTest builds against the public CMake
-target, the 229 reviewed Perseids binary exceptions, the twelve reviewed
-lexical differences, the decoded 228-to-one semantic split, and all 146 selected
+target, the 232 reviewed Perseids binary exceptions, the twelve reviewed
+lexical differences, the decoded 227-to-five semantic split, and all 146 selected
 Alpheios comparison paths. The report
 and its supporting receipts, provenance and comparison tables are retained
 together as a revision-named CI artifact. Its final gate also parses the full

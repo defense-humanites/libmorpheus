@@ -195,6 +195,33 @@ function(compare_builds language)
               "${MORPHEUS_STEMLIB_ROOT}/${relative_path}"
       RESULT_VARIABLE baseline_compare_result
     )
+    if(NOT baseline_compare_result EQUAL 0 AND
+       relative_path STREQUAL "Latin/endtables/indices/nendind")
+      # The shipped Latin nominal ending index was produced by tools in
+      # which the fourth-principal-part class pp4 (named pp_su in the
+      # stemtypes table, unknown to the runtime until issue #37) carried
+      # an all-ones stem type and therefore matched the nominal mask. The
+      # class is a participle class and now belongs to vbendind only; the
+      # regenerated index must equal the baseline once the baseline's
+      # stray pp4 tokens are removed, and must list pp4 nowhere itself.
+      file(READ "${MORPHEUS_STEMLIB_ROOT}/${relative_path}" baseline_index)
+      file(READ "${first}/${relative_path}" rebuilt_index)
+      # Endings whose only nominal stem type was pp4 (the future active
+      # participle endings in -urus) leave the index with it.
+      string(REGEX REPLACE "(^|\n)[^ \n]+ pp4\n" "\\1" normalized_index
+             "${baseline_index}")
+      string(REGEX REPLACE " pp4(\n)" "\\1" normalized_index "${normalized_index}")
+      string(REGEX REPLACE " pp4 " " " normalized_index "${normalized_index}")
+      if(rebuilt_index MATCHES "(^|[ \n])pp4([ \n]|$)")
+        message(FATAL_ERROR
+                "${language} rebuilt nominal ending index still lists pp4")
+      endif()
+      if(normalized_index STREQUAL rebuilt_index)
+        set(baseline_compare_result 0)
+        message(STATUS
+                "${language} nominal ending index equals the baseline without its pp4 tokens")
+      endif()
+    endif()
     if(NOT baseline_compare_result EQUAL 0)
       if(relative_path MATCHES
          "^${language}/(endtables|derivs)/out/[A-Za-z0-9_]+[.]out$")
