@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T14:33:08.024Z",
+  "label": "release-candidate",
+  "platform": {
+    "target": "aarch64-apple-darwin",
+    "arch": "aarch64",
+    "os": "darwin",
+    "vendor": "apple",
+    "standalone": false
+  },
+  "runtime": {
+    "deno": "2.9.5",
+    "v8": "15.0.245.2-rusty",
+    "typescript": "6.0.3"
+  },
+  "hardwareConcurrency": 12,
+  "sourceRevision": "54f936a2b674c61d0949e51455ca0f4f2aa8b99c",
+  "stemlibRevision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+  "corpus": "test/fixture.json",
+  "corpusSha256": "cc6f0eb3a2e52b0c6d6c3784d95d01ab3e7c1c824df7e38b6b9b96adcd1539c2",
+  "uniqueWords": 24,
+  "iterations": 20,
+  "warmupIterations": 2,
+  "measurements": [
+    {
+      "engine": "ffi",
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 317.81825,
+      "operationsPerSecond": 1510.2971588321313,
+      "meanMicroseconds": 662.1213541666667,
+      "startupMs": 6.282667,
+      "analyses": 740,
+      "peakRssBytes": 63782912,
+      "rssGrowthBytes": 23691264
+    },
+    {
+      "engine": "ffi",
+      "contexts": 2,
+      "operations": 480,
+      "durationMs": 205.82495899999998,
+      "operationsPerSecond": 2332.078686336578,
+      "meanMicroseconds": 428.8019979166666,
+      "startupMs": 1.3238750000000437,
+      "analyses": 740,
+      "peakRssBytes": 64634880,
+      "rssGrowthBytes": 802816
+    },
+    {
+      "engine": "ffi",
+      "contexts": 4,
+      "operations": 480,
+      "durationMs": 136.29287499999998,
+      "operationsPerSecond": 3521.8275350050403,
+      "meanMicroseconds": 283.94348958333325,
+      "startupMs": 1.5180829999999332,
+      "analyses": 740,
+      "peakRssBytes": 68042752,
+      "rssGrowthBytes": 3407872
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 320.46808399999986,
+      "operationsPerSecond": 1497.8090610733025,
+      "meanMicroseconds": 667.6418416666663,
+      "startupMs": null,
+      "analyses": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 36.081125000000156,
+      "operationsPerSecond": 277.153220693644,
+      "meanMicroseconds": 3608.112500000016,
+      "startupMs": 3.608112500000016,
+      "analyses": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    }
+  ]
+}
