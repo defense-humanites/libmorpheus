@@ -1,6 +1,6 @@
 {
   "name": "@libmorpheus/node",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node.js binding for the libmorpheus morphological analyzer",
   "type": "module",
   "types": "./index.d.ts",
@@ -41,7 +41,6 @@
   },
   "files": [
     "LICENSE",
-    "LICENSES",
     "NOTICE",
     "README.md",
     "data.d.ts",
@@ -54,10 +53,13 @@
     "setup.d.ts",
     "setup.js"
   ],
+  "dependencies": {
+    "@libmorpheus/data": "0.1.0"
+  },
   "optionalDependencies": {
-    "@libmorpheus/node-darwin-arm64": "0.1.1",
-    "@libmorpheus/node-linux-arm64-gnu": "0.1.1",
-    "@libmorpheus/node-linux-x64-gnu": "0.1.1"
+    "@libmorpheus/node-darwin-arm64": "0.1.2",
+    "@libmorpheus/node-linux-arm64-gnu": "0.1.2",
+    "@libmorpheus/node-linux-x64-gnu": "0.1.2"
   },
   "scripts": {
     "test": "node --test test/*.test.js"

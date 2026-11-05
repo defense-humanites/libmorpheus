@@ -34,3 +34,4 @@ src/gkends/buildend
 src/gkends/buildword
 src/gkends/indderivtables
 src/gkends/indendtables
+node_modules/

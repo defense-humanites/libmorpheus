@@ -13,7 +13,7 @@ foreach(field IN ITEMS name version license type)
   endif()
 endforeach()
 if(NOT node_name STREQUAL "@libmorpheus/node" OR
-   NOT node_version STREQUAL "0.1.1" OR
+   NOT node_version STREQUAL "0.1.2" OR
    NOT node_license STREQUAL "AGPL-3.0-or-later" OR
    NOT node_type STREQUAL "module")
   message(FATAL_ERROR
@@ -35,11 +35,30 @@ foreach(forbidden_script IN ITEMS preinstall install postinstall)
       "Node package must not run ${forbidden_script} during npm installation")
   endif()
 endforeach()
-foreach(forbidden_field IN ITEMS dependencies)
+# The only runtime dependency is the data acquisition package, pinned to
+# the exact version the tree carries: the binding declares which
+# acquisition logic it ships, as it declares its native release.
+string(JSON dependency_count LENGTH "${package}" dependencies)
+if(NOT dependency_count EQUAL 1)
+  message(FATAL_ERROR
+    "Node package must depend on @libmorpheus/data only: ${dependency_count} dependencies")
+endif()
+string(JSON data_dependency ERROR_VARIABLE field_error
+  GET "${package}" dependencies "@libmorpheus/data")
+if(field_error)
+  message(FATAL_ERROR "Node package does not depend on @libmorpheus/data")
+endif()
+file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/data/package.json" data_package)
+string(JSON data_tree_version GET "${data_package}" version)
+if(NOT data_dependency STREQUAL data_tree_version)
+  message(FATAL_ERROR
+    "Node package pins @libmorpheus/data@${data_dependency}; the tree carries ${data_tree_version}")
+endif()
+foreach(forbidden_field IN ITEMS peerDependencies)
   string(JSON ignored ERROR_VARIABLE field_error GET "${package}" "${forbidden_field}")
   if(NOT field_error)
     message(FATAL_ERROR
-      "Initial Node package unexpectedly declares ${forbidden_field}")
+      "Node package unexpectedly declares ${forbidden_field}")
   endif()
 endforeach()
 
@@ -103,19 +122,26 @@ if(NOT setup_import STREQUAL "./setup.js" OR
   message(FATAL_ERROR "Unexpected Node combined setup entrypoint")
 endif()
 
+# The data internals moved to bindings/js/data; the binding must not grow
+# a copy back.
+foreach(removed IN ITEMS internal/data-internal.js
+    internal/data-manifest.js internal/gener-index.js
+    internal/gener-manifest.js internal/gener-preparer.mjs
+    internal/gener-runtime.js LICENSES)
+  if(EXISTS "${node_dir}/${removed}")
+    message(FATAL_ERROR
+      "Node binding carries ${removed} again; it belongs to @libmorpheus/data")
+  endif()
+endforeach()
 foreach(required IN ITEMS
     CMakeLists.txt LICENSE NOTICE README.md addon.c index.d.ts index.js
-    data.d.ts data.js internal/archive.js internal/data-internal.js
-    internal/data-manifest.js internal/gener-index.js internal/gener-manifest.js
-    internal/gener-preparer.mjs internal/gener-runtime.js
-    internal/main-module.js
+    data.d.ts data.js internal/archive.js internal/main-module.js
     internal/native-internal.js internal/native-manifest.js
     internal/setup-internal.js internal/version.js native.d.ts native.js
     setup.d.ts setup.js
-    LICENSES/EMSCRIPTEN.txt LICENSES/MPL-2.0.txt
     package-platform.mjs package.json package.json.license
-    test/binding.test.js test/data.test.js test/gener.test.js
-    test/main-module.test.js test/native.test.js test/setup.test.js)
+    test/binding.test.js test/main-module.test.js test/native.test.js
+    test/setup.test.js)
   if(NOT EXISTS "${node_dir}/${required}")
     message(FATAL_ERROR "Missing Node binding source: ${required}")
   endif()

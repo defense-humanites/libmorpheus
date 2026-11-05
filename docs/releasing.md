@@ -59,7 +59,10 @@ historical evidence.
 - For a Node.js release, update `bindings/js/node/package.json`,
   `MORPHEUS_NODE_VERSION`, and all three `npm/*/package.json` templates
   together. Keep every optional dependency pinned to that exact package
-  version, then review the separately declared native release and ABI.
+  version, keep the `@libmorpheus/data` dependency pinned to the exact data
+  package version the tree carries (a data release that the binding should
+  pick up therefore implies a binding release), then review the separately
+  declared native release and ABI.
 - For a Python release, update `bindings/python/pyproject.toml` and
   `MORPHEUS_PYTHON_VERSION` together, then independently review
   `MORPHEUS_NATIVE_VERSION` and `MORPHEUS_NATIVE_ABI_VERSION`.

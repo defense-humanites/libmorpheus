@@ -203,6 +203,10 @@ jobs:
           stemlib/gener.index
           test/generation-service-source.txt
 
+      - name: Link the in-tree data package into the Node.js binding
+        working-directory: bindings/js/node
+        run: npm install --ignore-scripts --no-save --no-package-lock ../data
+
       - name: Test Node.js binding
         env:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.so
@@ -319,6 +323,10 @@ jobs:
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
           MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
         run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
+
+      - name: Link the in-tree data package into the Node.js binding
+        working-directory: bindings/js/node
+        run: npm install --ignore-scripts --no-save --no-package-lock ../data
 
       - name: Test Node.js binding
         env:
@@ -549,6 +557,10 @@ jobs:
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
           MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
         run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
+
+      - name: Link the in-tree data package into the Node.js binding
+        working-directory: bindings/js/node
+        run: npm install --ignore-scripts --no-save --no-package-lock ../data
 
       - name: Test Node.js binding
         env:

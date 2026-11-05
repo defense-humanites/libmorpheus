@@ -6,9 +6,9 @@ Copyright (C) 2026 Antoine Boquet
 This package is licensed under the GNU Affero General Public License version 3
 or later. It contains a Node-API adapter and JavaScript facade, but does not
 contain the separately distributed native libmorpheus runtime or linguistic
-stem-library data. Its internal experimental data preparer includes MPL-2.0
-Morpheus code compiled with the MIT-licensed Emscripten runtime. The
-corresponding texts are under LICENSES/.
+stem-library data. Dataset acquisition, including the experimental generation
+preparer, is provided by its dependency @libmorpheus/data, which carries its
+own notices.
 
 The native runtime is a mixed-license work. Consult the runtime distribution's
 licensing documentation and provenance records before redistribution.

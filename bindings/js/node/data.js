@@ -1,60 +1,21 @@
 #!/usr/bin/env node
 // SPDX-License-Identifier: AGPL-3.0-or-later
+//
+// The data acquisition command and library now live in @libmorpheus/data,
+// which this package depends on. This module keeps the `libmorpheus-data`
+// command and the `@libmorpheus/node/data` export working unchanged.
 
-import { acquireMorpheusData } from "./internal/data-internal.js";
+import { acquireMorpheusData, parseMorpheusDataArgs } from "@libmorpheus/data";
 import { isMainModule } from "./internal/main-module.js";
 
-export { acquireMorpheusData };
+export { acquireMorpheusData, parseMorpheusDataArgs };
 
-function takeValue(args, index, name) {
-  const value = args[index + 1];
-  if (value === undefined || value.startsWith("--")) throw new TypeError(`${name} requires a value`);
-  return value;
-}
-
-export function parseMorpheusDataArgs(args) {
-  let dataset;
-  let output;
-  let withGener = false;
-  let help = false;
-  for (let index = 0; index < args.length; index++) {
-    const argument = args[index];
-    if (argument === "--help" || argument === "-h") help = true;
-    else if (argument === "--dataset") {
-      dataset = takeValue(args, index, "--dataset");
-      index++;
-    } else if (argument.startsWith("--dataset=")) dataset = argument.slice("--dataset=".length);
-    else if (argument === "--output") {
-      output = takeValue(args, index, "--output");
-      index++;
-    } else if (argument.startsWith("--output=")) output = argument.slice("--output=".length);
-    else if (argument === "--with-gener") withGener = true;
-    else throw new TypeError(`unknown argument: ${argument}`);
-  }
-  if (help) return { dataset: dataset ?? "alpheios", output: output ?? ".", withGener, help };
-  if (dataset !== "alpheios" && dataset !== "perseids") throw new TypeError(dataset === undefined ? "--dataset is required" : `unsupported dataset: ${dataset}`);
-  if (output === undefined || output === "") throw new TypeError("--output is required");
-  if (withGener && dataset !== "alpheios") {
-    throw new TypeError("--with-gener is supported only for alpheios");
-  }
-  return { dataset, output, withGener, help };
-}
-
-function usage() {
-  return `Usage: libmorpheus-data --dataset <alpheios|perseids> --output <directory> [--with-gener]\n\nAlpheios provides Greek analysis and experimental generation; Perseids provides Greek and Latin analysis.`;
-}
-
-if (isMainModule(import.meta.url)) {
-  try {
-    const options = parseMorpheusDataArgs(process.argv.slice(2));
-    if (options.help) console.log(usage());
-    else {
-      const receipt = await acquireMorpheusData(options);
-      console.log(`Prepared ${receipt.dataset} data in ${options.output} (${receipt.files.count} verified files).`);
-    }
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
-    console.error(usage());
-    process.exitCode = 1;
-  }
+if (import.meta.main ?? isMainModule(import.meta.url)) {
+  // Re-dispatch to the package's own command so that --help and errors
+  // read the same whichever entry point ran.
+  const { fileURLToPath } = await import("node:url");
+  const { spawnSync } = await import("node:child_process");
+  const command = fileURLToPath(import.meta.resolve("@libmorpheus/data"));
+  const result = spawnSync(process.execPath, [command, ...process.argv.slice(2)], { stdio: "inherit" });
+  process.exitCode = result.status ?? 1;
 }

@@ -3,7 +3,7 @@
 
 import { lstat, rm } from "node:fs/promises";
 
-import { acquireMorpheusData } from "./internal/data-internal.js";
+import { acquireMorpheusData } from "@libmorpheus/data";
 import {
   acquireMorpheusNativeWithDependencies,
   defaultNativeAcquisitionDependencies,

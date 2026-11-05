@@ -381,8 +381,6 @@ jobs:
           cmp build/deno-gener-wasm/gener_preparer.mjs \
             bindings/js/deno/internal/gener_preparer.mjs
           cmp build/deno-gener-wasm/gener_preparer.mjs \
-            bindings/js/node/internal/gener-preparer.mjs
-          cmp build/deno-gener-wasm/gener_preparer.mjs \
             bindings/js/data/internal/gener-preparer.mjs
 
   node:
@@ -424,6 +422,13 @@ jobs:
           build/dev/morpheus_gener_index_builder
           stemlib/gener.index
           test/generation-service-source.txt
+
+      - name: Link the in-tree data package into the Node.js binding
+        # The binding depends on @libmorpheus/data; the tree's own copy is
+        # linked (not the registry's) so that both packages are tested
+        # together. --no-save leaves package.json untouched.
+        working-directory: bindings/js/node
+        run: npm install --ignore-scripts --no-save --no-package-lock ../data
 
       - name: Test Node.js binding
         env:

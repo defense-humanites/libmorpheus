@@ -34,8 +34,17 @@ the corpus.
   provenance) and JSR after testing the package under both runtimes and
   acquiring a dataset with the command installed from the `npm pack`
   tarball; Linux CI runs on those tags. First release:
-  `docs/release-data-0.1.0.md`; the Node.js binding's own command is
-  unchanged.
+  `docs/release-data-0.1.0.md`.
+- Node.js binding 0.1.2 depends on `@libmorpheus/data` 0.1.0 (exact pin)
+  instead of carrying its own copy of the acquisition code: `libmorpheus-data`
+  and the `/data` export re-dispatch to and re-export from that package, so
+  `--subset runtime`, `--languages` and `--manifest` are available from the
+  binding too; `libmorpheus-setup` is unchanged. The binding no longer
+  embeds the generation preparer, so its `LICENSES/` directory and the
+  MPL/Emscripten notice move to the data package (`NOTICE` says so). The
+  declared native release stays 0.3.2 with C ABI 2. `node_package_metadata`
+  requires the pin to equal the tree's data package version; CI links the
+  in-tree data package into the binding before testing it.
 
 ## [0.4.4] - 2026-11-04
 
