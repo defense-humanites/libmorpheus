@@ -81,15 +81,23 @@ distinct package name would be used for a dataset the gate ever qualifies.
 
 ## Publication
 
-On an authorized `data-v0.1.0` tag, a publication workflow (to be added
-before the first release, on the pattern of `wasm-release.yml` without its
-module rebuild) tests the package, publishes it to npm through OIDC with
-provenance and to JSR, and records the published tarball's integrity in
-this document. npm grants a trusted publisher only to an existing package,
-so a 0.0.0 placeholder (`tools/bootstrap-npm.mjs`) must first be published
-manually under the `bootstrap` dist-tag; as for the WebAssembly binding,
-npm will also give it `latest` until 0.1.0 replaces it. JSR reserves the
-name when the package is linked to the repository. After publication the
+On an authorized `data-v0.1.0` tag, `data-release.yml` (the WebAssembly
+track's workflow without its module rebuild) verifies the tag against the
+version module and both manifests, runs `data_package_metadata`, waits for
+the tagged Linux CI, tests the package under Node.js and Deno, dry-runs both
+manifests, installs the `npm pack` tarball in a scratch project and acquires
+the Perseids Latin runtime subset with the installed command (the data
+stays on the runner), then publishes to npm through OIDC with provenance
+and to JSR — both steps skip a version already present — and attaches the
+tarball and its SHA-256 to a `data-v0.1.0` GitHub pre-release. The
+published tarball's integrity is recorded in this document afterwards.
+
+npm grants a trusted publisher only to an existing package, so a 0.0.0
+placeholder (`node bindings/js/data/tools/bootstrap-npm.mjs --output <dir>`,
+then `npm publish --tag bootstrap` from that directory) must first be
+published manually; as for the WebAssembly binding, npm will also give it
+`latest` until 0.1.0 replaces it. JSR reserves the name when the package is
+linked to the repository and to `data-release.yml`. After publication the
 command must be exercised from JSR itself (`deno run -A
 jsr:@libmorpheus/data --dataset perseids --subset runtime --output …`),
 since JSR transforms the files it serves.

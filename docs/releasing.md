@@ -334,6 +334,17 @@ every qualification job of its own run.
   manually dispatch `Publish WebAssembly binding` with the existing tag; both
   the npm and the JSR steps skip an exact version already present, so the
   dispatch resumes at the GitHub release.
+- For a data acquisition package release, run `npm test`, `deno test -A
+  --no-check test/*.test.js`, `deno publish --dry-run` and `npm pack
+  --dry-run --ignore-scripts` from `bindings/js/data`, and tag the exact
+  qualified commit as `data-v<version>`. `data-release.yml` waits for the
+  tagged Linux CI, repeats those checks, acquires a dataset with the command
+  installed from the `npm pack` tarball (the data never leaves the runner),
+  publishes to npm through OIDC with provenance and to JSR, and attaches the
+  tarball and its digest to a pre-release. Both registry steps are
+  idempotent, so a recovery dispatch with `release_tag` resumes at the
+  release; the npm placeholder and the JSR link are prepared as for the
+  WebAssembly binding.
 - After publication, exercise the package from JSR itself (`deno add
   jsr:@libmorpheus/wasm@<version>`, then the README's Node.js/Deno example
   against a local stemlib) and record the outcome in the release decision.

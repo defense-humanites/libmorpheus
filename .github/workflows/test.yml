@@ -10,6 +10,7 @@ on:
       - "node-v*"
       - "python-v*"
       - "wasm-v*"
+      - "data-v*"
   pull_request:
     # Lexical research files (the Latin and Greek Python tools and their
     # tests, the research workflows, their reference receipts and the

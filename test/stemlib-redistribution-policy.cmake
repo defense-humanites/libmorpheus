@@ -136,7 +136,8 @@ foreach(index RANGE 0 1)
 endforeach()
 
 foreach(workflow IN ITEMS platform.yml deno-release.yml node-release.yml
-                          python-release.yml wasm.yml wasm-release.yml)
+                          python-release.yml wasm.yml wasm-release.yml
+                          data-release.yml)
   file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/${workflow}"
        workflow_contents)
   if(workflow_contents MATCHES

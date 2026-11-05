@@ -1,0 +1,283 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+name: Publish data acquisition package
+
+on:
+  push:
+    tags:
+      - 'data-v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing data acquisition package tag to publish or recover
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+
+concurrency:
+  group: data-release-${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish-data:
+    name: Test, then publish to npm and JSR
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the package tag
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          ref: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.5
+
+      - name: Show the tools later steps will use
+        run: |
+          command -v cmake node npm deno
+          cmake --version | head -n 1
+          node --version
+          npm --version
+          deno --version | head -n 1
+
+      - name: Verify package version and contract
+        id: metadata
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+        run: |
+          # Every check below is silent on success; on failure, name the
+          # command and line in a check-run annotation.
+          trap 'echo "::error title=verify (line $LINENO)::$BASH_COMMAND"' ERR
+          if ! [[ "$RELEASE_TAG" =~ ^data-v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "Invalid release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+          git fetch --no-tags origin "+refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          git show-ref --verify "refs/tags/$RELEASE_TAG"
+          release_sha="$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")"
+          echo "tag $RELEASE_TAG -> $release_sha; HEAD $(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$release_sha"
+
+          package_version="$(node --input-type=module -e '
+            import { MORPHEUS_DATA_VERSION } from "./bindings/js/data/internal/version.js";
+            console.log(MORPHEUS_DATA_VERSION);
+          ')"
+          echo "package $package_version"
+          test "$RELEASE_TAG" = "data-v$package_version"
+          test "$(node -p 'require("./bindings/js/data/package.json").version')" = "$package_version"
+          test "$(node -p 'require("./bindings/js/data/jsr.json").version')" = "$package_version"
+
+          cmake -DMORPHEUS_SOURCE_DIR="$GITHUB_WORKSPACE" \
+            -P test/data-package-metadata.cmake
+
+          npm_version="$(npm --version)"
+          node -e '
+            const [major, minor, patch] = process.argv[1].split(".").map(Number);
+            if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) process.exit(1);
+          ' "$npm_version"
+
+          echo "release-sha=$release_sha" >> "$GITHUB_OUTPUT"
+          echo "package-version=$package_version" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for tagged Linux CI
+        uses: actions/github-script@v8
+        env:
+          RELEASE_SHA: ${{ steps.metadata.outputs.release-sha }}
+        with:
+          script: |
+            const deadline = Date.now() + 20 * 60 * 1000
+            while (Date.now() < deadline) {
+              const result = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'test.yml',
+                event: 'push',
+                head_sha: process.env.RELEASE_SHA,
+                per_page: 10,
+              })
+              const run = result.data.workflow_runs.find((candidate) =>
+                candidate.head_sha === process.env.RELEASE_SHA
+              )
+              if (run?.status === 'completed') {
+                if (run.conclusion !== 'success') {
+                  throw new Error(`Linux CI ${run.html_url} concluded ${run.conclusion}`)
+                }
+                core.info(`Linux CI passed: ${run.html_url}`)
+                return
+              }
+              core.info(run === undefined
+                ? 'Waiting for Linux CI to appear.'
+                : `Waiting for Linux CI ${run.html_url}: ${run.status}.`)
+              await new Promise((resolve) => setTimeout(resolve, 15000))
+            }
+            throw new Error('Timed out waiting for tagged Linux CI')
+
+      - name: Test the package under Node.js and Deno and verify both manifests
+        working-directory: bindings/js/data
+        run: |
+          npm test
+          deno test -A --no-check test/data.test.js test/gener.test.js test/main-module.test.js
+          deno check data.js
+          deno publish --dry-run
+          npm pack --dry-run --ignore-scripts .
+
+      - name: Acquire a dataset with the packaged command from an npm tarball
+        # The command installed from the tarball must acquire a pinned
+        # dataset from upstream and write the runtime subset with its
+        # manifest; the acquired data stays in the runner and is never
+        # uploaded anywhere.
+        env:
+          PACKAGE_VERSION: ${{ steps.metadata.outputs.package-version }}
+        run: |
+          pack_root="$RUNNER_TEMP/data-pack"
+          consumer_root="$RUNNER_TEMP/data-consumer"
+          mkdir -p "$pack_root" "$consumer_root"
+          tarball="$(npm pack --silent --ignore-scripts \
+            --pack-destination "$pack_root" ./bindings/js/data)"
+          echo "TARBALL=$pack_root/$tarball" >> "$GITHUB_ENV"
+          cd "$consumer_root"
+          npm init --yes
+          npm install --ignore-scripts "$pack_root/$tarball"
+          npx libmorpheus-data --dataset perseids --subset runtime --languages lat \
+            --manifest --output ./stemlib
+          node --input-type=module -e '
+            import { readFile } from "node:fs/promises";
+            import { MORPHEUS_DATA_VERSION } from "@libmorpheus/data";
+            if (MORPHEUS_DATA_VERSION !== process.env.PACKAGE_VERSION) process.exit(1);
+            const receipt = JSON.parse(await readFile("./stemlib/MORPHEUS-DATA.json", "utf8"));
+            const manifest = JSON.parse(await readFile("./stemlib/stemlib-manifest.json", "utf8"));
+            if (receipt.packageVersion !== process.env.PACKAGE_VERSION) process.exit(1);
+            if (receipt.subset.name !== "runtime" || receipt.languages.join() !== "lat") process.exit(1);
+            if (manifest.files.length !== receipt.subset.count) process.exit(1);
+            if (!manifest.files.some(({ path }) => path === "Latin/steminds/nomind")) process.exit(1);
+          '
+
+      - name: Record the tarball digest
+        run: |
+          mkdir -p "$RUNNER_TEMP/data-release"
+          cp "$TARBALL" "$RUNNER_TEMP/data-release/"
+          cd "$RUNNER_TEMP/data-release"
+          sha256sum "$(basename "$TARBALL")" | tee SHA256SUMS
+          echo "RELEASE_DIR=$RUNNER_TEMP/data-release" >> "$GITHUB_ENV"
+          echo "TARBALL_NAME=$(basename "$TARBALL")" >> "$GITHUB_ENV"
+
+      - name: Publish npm package
+        # Trusted publishing: npm exchanges the job's OIDC token for the
+        # publish grant configured on the package, as the other tracks do.
+        env:
+          PACKAGE_VERSION: ${{ steps.metadata.outputs.package-version }}
+        run: |
+          published="$(npm view "@libmorpheus/data@$PACKAGE_VERSION" version \
+            2>/dev/null || true)"
+          if test -n "$published"; then
+            test "$published" = "$PACKAGE_VERSION"
+            echo "@libmorpheus/data@$PACKAGE_VERSION is already published."
+          else
+            npm publish ./bindings/js/data --access public --provenance
+          fi
+
+      - name: Publish JSR package
+        # Like the npm step, skip an exact version JSR already holds, so a
+        # recovery dispatch after a timed-out run reaches the release step.
+        working-directory: bindings/js/data
+        env:
+          PACKAGE_VERSION: ${{ steps.metadata.outputs.package-version }}
+        run: |
+          status="$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://jsr.io/@libmorpheus/data/${PACKAGE_VERSION}_meta.json" || echo 000)"
+          case "$status" in
+            200)
+              echo "@libmorpheus/data@$PACKAGE_VERSION is already published on JSR."
+              ;;
+            404)
+              deno publish
+              ;;
+            *)
+              echo "::error title=jsr::unexpected HTTP $status from JSR for version $PACKAGE_VERSION"
+              exit 1
+              ;;
+          esac
+
+      - name: Publish package release with the tarball and its digest
+        uses: actions/github-script@v8
+        env:
+          PACKAGE_VERSION: ${{ steps.metadata.outputs.package-version }}
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const tag = `data-v${process.env.PACKAGE_VERSION}`
+            const expected = [process.env.TARBALL_NAME, 'SHA256SUMS']
+            let existing
+            try {
+              existing = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              })
+            } catch (error) {
+              if (error.status !== 404) throw error
+            }
+            if (existing === undefined) {
+              const notesPath = `docs/release-data-${process.env.PACKAGE_VERSION}.md`
+              const body = fs.existsSync(notesPath)
+                ? fs.readFileSync(notesPath, 'utf8')
+                : `Data acquisition package ${process.env.PACKAGE_VERSION}. Contains no linguistic data.`
+              existing = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                target_commitish: context.sha,
+                name: `libmorpheus data acquisition package ${process.env.PACKAGE_VERSION}`,
+                body,
+                draft: true,
+                prerelease: true,
+              })
+            }
+            if (existing.data.draft) {
+              const uploaded = new Set(existing.data.assets.map((asset) => asset.name))
+              for (const name of expected.filter((name) => !uploaded.has(name))) {
+                const data = fs.readFileSync(path.join(process.env.RELEASE_DIR, name))
+                await github.rest.repos.uploadReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: existing.data.id,
+                  name,
+                  data,
+                  headers: {
+                    'content-type': 'application/octet-stream',
+                    'content-length': data.length,
+                  },
+                })
+              }
+              existing = await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: existing.data.id,
+                draft: false,
+                make_latest: 'false',
+              })
+            }
+            if (existing.data.draft) {
+              throw new Error(`Package release remains a draft: ${existing.data.html_url}`)
+            }
+            const published = new Set(existing.data.assets.map((asset) => asset.name))
+            const missing = expected.filter((name) => !published.has(name))
+            if (missing.length !== 0) {
+              throw new Error(`Package release is missing: ${missing.join(', ')}`)
+            }
+            core.info(`Published package release: ${existing.data.html_url}`)

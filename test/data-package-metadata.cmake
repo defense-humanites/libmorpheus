@@ -263,6 +263,27 @@ foreach(pin IN ITEMS
   endif()
 endforeach()
 
+# --- Publication workflow -----------------------------------------------------
+
+file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/data-release.yml"
+     release_workflow)
+foreach(expected_workflow_text IN ITEMS
+        "- 'data-v*'"
+        "npm publish ./bindings/js/data --access public --provenance"
+        "https://jsr.io/@libmorpheus/data/"
+        "-P test/data-package-metadata.cmake")
+  string(FIND "${release_workflow}" "${expected_workflow_text}" workflow_text_at)
+  if(workflow_text_at EQUAL -1)
+    message(FATAL_ERROR
+      "data-release.yml does not contain: ${expected_workflow_text}")
+  endif()
+endforeach()
+file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/test.yml" test_workflow)
+string(FIND "${test_workflow}" "- \"data-v*\"" data_tag_at)
+if(data_tag_at EQUAL -1)
+  message(FATAL_ERROR "test.yml does not run on data-v* tags")
+endif()
+
 # --- Release decision ---------------------------------------------------------
 
 set(decision "${MORPHEUS_SOURCE_DIR}/docs/release-data-${data_version}.md")
