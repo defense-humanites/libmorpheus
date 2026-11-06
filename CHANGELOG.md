@@ -21,6 +21,11 @@ the corpus.
   scales with contexts again. The facade requires the addon's
   `recordEncoding`, so a rebuilt addon is needed with this facade (the npm
   platform packages are rebuilt by the binding's release).
+- Node.js binding 0.1.3 (prepared; `docs/release-node-0.1.3.md`) ships that
+  encoding and declares native release 0.4.5 instead of 0.3.2:
+  `libmorpheus-native` and `libmorpheus-setup` acquire the `v0.4.5` archives,
+  so applications receive the native changes since 0.3.2, the Latin
+  stem-class resolution of 0.4.5 included. C ABI 2 unchanged.
 
 - The runtime benchmark harness runs under Node.js and measures the
   Node.js binding (`bindings/js/node`, Node-API) instead of the Deno FFI

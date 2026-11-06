@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-export const MORPHEUS_NATIVE_VERSION = "0.3.2";
+export const MORPHEUS_NATIVE_VERSION = "0.4.5";
 export const MORPHEUS_NATIVE_ABI_VERSION = 2;
 export const MORPHEUS_NATIVE_SCHEMA_VERSION = 2;
 export const MORPHEUS_NATIVE_REPOSITORY =
