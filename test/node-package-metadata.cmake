@@ -13,7 +13,7 @@ foreach(field IN ITEMS name version license type)
   endif()
 endforeach()
 if(NOT node_name STREQUAL "@libmorpheus/node" OR
-   NOT node_version STREQUAL "0.1.2" OR
+   NOT node_version STREQUAL "0.1.3" OR
    NOT node_license STREQUAL "AGPL-3.0-or-later" OR
    NOT node_type STREQUAL "module")
   message(FATAL_ERROR
@@ -25,6 +25,31 @@ string(FIND "${version_module}"
   "MORPHEUS_NODE_VERSION = \"${node_version}\"" version_at)
 if(version_at EQUAL -1)
   message(FATAL_ERROR "Node version module differs from package.json")
+endif()
+file(READ "${node_dir}/index.d.ts" index_types)
+string(FIND "${index_types}"
+  "MORPHEUS_NODE_VERSION = \"${node_version}\"" typed_version_at)
+if(typed_version_at EQUAL -1)
+  message(FATAL_ERROR "Node index.d.ts declares another MORPHEUS_NODE_VERSION")
+endif()
+# The declared native release is one string in the manifest, its types and
+# the README; the binding version has a release decision from 0.1.3 on.
+file(READ "${node_dir}/internal/native-manifest.js" native_manifest)
+string(REGEX MATCH "MORPHEUS_NATIVE_VERSION = \"([0-9.]+)\"" _ "${native_manifest}")
+set(declared_native_version "${CMAKE_MATCH_1}")
+if(NOT declared_native_version MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+  message(FATAL_ERROR "Node native manifest declares no native release")
+endif()
+file(READ "${node_dir}/native.d.ts" native_types)
+file(READ "${node_dir}/README.md" node_readme)
+if(NOT native_types MATCHES "MORPHEUS_NATIVE_VERSION: \"${declared_native_version}\"" OR
+   NOT node_readme MATCHES "Binding `${node_version}` currently\nacquires native runtime `${declared_native_version}`")
+  message(FATAL_ERROR
+    "Node native.d.ts or README disagree with native release ${declared_native_version}")
+endif()
+if(NOT EXISTS "${MORPHEUS_SOURCE_DIR}/docs/release-node-${node_version}.md")
+  message(FATAL_ERROR
+    "Missing Node.js release decision: docs/release-node-${node_version}.md")
 endif()
 
 foreach(forbidden_script IN ITEMS preinstall install postinstall)

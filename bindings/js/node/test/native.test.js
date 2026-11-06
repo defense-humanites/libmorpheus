@@ -9,6 +9,7 @@ import test from "node:test";
 import { gzipSync } from "node:zlib";
 
 import { acquireMorpheusNativeWithDependencies } from "../internal/native-internal.js";
+import { MORPHEUS_NATIVE_VERSION } from "../internal/native-manifest.js";
 import { parseMorpheusNativeArgs } from "../native.js";
 
 function writeString(buffer, offset, length, value) {
@@ -35,12 +36,12 @@ function tarEntry(path, content = Buffer.alloc(0), type = "0", linkPath = "") {
 }
 
 function nativeArchive() {
-  const root = "libmorpheus-0.3.2-Linux-x86_64-glibc/";
+  const root = `libmorpheus-${MORPHEUS_NATIVE_VERSION}-Linux-x86_64-glibc/`;
   return Buffer.concat([
     tarEntry(root, Buffer.alloc(0), "5"),
     tarEntry(`${root}lib/`, Buffer.alloc(0), "5"),
-    tarEntry(`${root}lib/libmorpheus.so.0.3.2`, Buffer.from("native fixture")),
-    tarEntry(`${root}lib/libmorpheus.so`, Buffer.alloc(0), "2", "libmorpheus.so.0.3.2"),
+    tarEntry(`${root}lib/libmorpheus.so.${MORPHEUS_NATIVE_VERSION}`, Buffer.from("native fixture")),
+    tarEntry(`${root}lib/libmorpheus.so`, Buffer.alloc(0), "2", `libmorpheus.so.${MORPHEUS_NATIVE_VERSION}`),
     Buffer.alloc(1024),
   ]);
 }
@@ -61,7 +62,7 @@ test("native acquisition verifies, extracts, materializes links, and records pro
   try {
     const compressed = gzipSync(nativeArchive());
     const digest = createHash("sha256").update(compressed).digest("hex");
-    const asset = "libmorpheus-0.3.2-Linux-x86_64-glibc.tar.gz";
+    const asset = `libmorpheus-${MORPHEUS_NATIVE_VERSION}-Linux-x86_64-glibc.tar.gz`;
     const receipt = await acquireMorpheusNativeWithDependencies(
       { output },
       dependencies(compressed, Buffer.from(`${digest}  ${asset}\n`)),
@@ -84,7 +85,7 @@ test("native acquisition rolls back a checksum mismatch", async () => {
   const output = join(parent, "runtime");
   try {
     const compressed = gzipSync(nativeArchive());
-    const asset = "libmorpheus-0.3.2-Linux-x86_64-glibc.tar.gz";
+    const asset = `libmorpheus-${MORPHEUS_NATIVE_VERSION}-Linux-x86_64-glibc.tar.gz`;
     await assert.rejects(
       acquireMorpheusNativeWithDependencies(
         { output },
