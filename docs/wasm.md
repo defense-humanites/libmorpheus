@@ -156,9 +156,12 @@ policy](stemlib-redistribution.md) applies to any application that serves one.
 
 ## Performance against the native FFI path
 
-`bench/compare.ts` measures the module next to the Deno FFI binding on the same
-corpus when `MORPHEUS_WASM_MODULE` is set; [benchmarks.md](benchmarks.md)
-describes the execution models. The run below is **indicative only**: a shared
+`bench/compare.mjs` measures the module next to the native binding on the
+same corpus when `MORPHEUS_WASM_MODULE` is set; [benchmarks.md](benchmarks.md)
+describes the execution models. The run below was taken with the Deno
+harness retired after 0.4.5 (`ffi` is the Deno FFI binding; the Node.js
+harness measures the Node-API binding as `node`, in the same process as the
+worker pool). It is **indicative only**: a shared
 2-vCPU Linux sandbox, the 24 Greek fixture words, native Release build with
 GCC, Emscripten 4.0.15 at `-O2`, Deno 2.9.6, Alpheios stemlib with the
 complete qualified `gener.index` (17.8 MiB runtime subset per MEMFS instance,
@@ -240,7 +243,8 @@ cost it targets.
   `wasm-release.yml` publishes only a module that reproduces the qualified
   CI artifact byte for byte. The first publication still needs the registry
   side set up (JSR link, npm trusted publisher).
-- The facade has been exercised under Node.js, Deno (benchmark) and the local
+- The facade has been exercised under Node.js (binding tests, benchmark
+  worker pool), Deno and the local
   Cloudflare Workers runtime (`wrangler dev`, see the
   [binding README](../bindings/js/wasm/README.md#cloudflare-workers)); a
   browser smoke test (fetching a stemlib manifest into MEMFS) and a hosted

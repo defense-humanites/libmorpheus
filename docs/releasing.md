@@ -218,8 +218,10 @@ every qualification job of its own run.
   including source revision, stemlib revision, and compiler metadata. Compare
   it with the previous accepted report on the same controlled hardware and
   investigate material regressions before tagging.
-- Pass the final JSON report through `bench/validate.ts` with the exact source,
-  stemlib, compiler, and label values before preserving it as release evidence.
+- Pass the final JSON report through `bench/validate.mjs` with the exact
+  source, stemlib, compiler, and label values before preserving it as release
+  evidence. The benchmark host needs Node.js 20 or later with its Node-API
+  headers; `bench/release.sh` builds the addon with the release runtime.
 - Generate the native archive with `cpack` and require
   `test-release-package.cmake` to verify its checksum and installed surface.
   The verification must compile and run independent CMake and `pkg-config`

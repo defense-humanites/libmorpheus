@@ -9,6 +9,24 @@ the corpus.
 
 ## [Unreleased]
 
+### Changed
+
+- The runtime benchmark harness runs under Node.js and measures the
+  Node.js binding (`bindings/js/node`, Node-API) instead of the Deno FFI
+  binding: `bench/compare.mjs`, `bench/validate.mjs` and `bench/report.mjs`
+  replace `bench/compare.ts` and `bench/validate.ts`, the WebAssembly pool
+  runs on `worker_threads`, and `bench/release.sh` builds the addon with the
+  release runtime (`MORPHEUS_NODE_ADDON`). Reports are schema 3 (`node`
+  engine; Node.js, V8, libuv, kernel and binding versions recorded). The
+  validator still accepts the retained schema 2 evidence; a schema 1 or 2
+  baseline is compared on `cruncher-persistent` only (`comparisonScope`
+  `cross-runtime`), the one row whose timing does not run through the
+  harness's runtime, so the first schema 3 release report establishes the
+  new baseline of the binding, generation and cold rows. Deno's maintainers
+  announced the end of its development on 2026-10-09; the release gate no
+  longer depends on it. The native library, its results and the Deno binding
+  are unchanged.
+
 ## [0.4.5] - 2026-11-05
 
 Target project version: **0.4.5**. C ABI: **2**. Shared-library SONAME: **1**.

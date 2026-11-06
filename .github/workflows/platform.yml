@@ -190,10 +190,10 @@ jobs:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.so
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
           MORPHEUS_CRUNCHER: ${{ github.workspace }}/build/release/cruncher
+          MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/release/node/libmorpheus_node.node
         run: |
           cp build/release/test-gener-corpus/first.mgi stemlib/gener.index
-          deno run --allow-env --allow-ffi --allow-read --allow-run \
-            bench/compare.ts --iterations 1 --warmup 0 --contexts 1,2 \
+          node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1,2 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json > /dev/null
 
@@ -355,10 +355,10 @@ jobs:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.so
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
           MORPHEUS_CRUNCHER: ${{ github.workspace }}/build/release/cruncher
+          MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/release/node/libmorpheus_node.node
         run: |
           cp build/release/test-gener-corpus/first.mgi stemlib/gener.index
-          deno run --allow-env --allow-ffi --allow-read --allow-run \
-            bench/compare.ts --iterations 1 --warmup 0 --contexts 1,2 \
+          node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1,2 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json > /dev/null
 
@@ -588,10 +588,10 @@ jobs:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.dylib
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
           MORPHEUS_CRUNCHER: ${{ github.workspace }}/build/release/cruncher
+          MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/release/node/libmorpheus_node.node
         run: |
           cp build/release/test-gener-corpus/first.mgi stemlib/gener.index
-          deno run --allow-env --allow-ffi --allow-read --allow-run \
-            bench/compare.ts --iterations 1 --warmup 0 --contexts 1,2 \
+          node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1,2 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json > /dev/null
 
