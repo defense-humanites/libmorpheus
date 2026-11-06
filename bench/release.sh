@@ -72,7 +72,7 @@ for command in cmake ctest git node; do
   }
 done
 
-build_dir=build/release
+build_dir="${project_dir}/build/release"
 stemlib=${MORPHEUS_BENCHMARK_STEMLIB:-vendor/alpheios-morpheus/dist/stemlib}
 label=${MORPHEUS_BENCHMARK_LABEL:-release-candidate}
 iterations=${MORPHEUS_BENCHMARK_ITERATIONS:-20}
