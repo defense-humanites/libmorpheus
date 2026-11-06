@@ -268,16 +268,13 @@ jobs:
           -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/dev/packages
           -P test/test-deno-binding-package.cmake
 
-      - name: Check binding and benchmark runner
+      - name: Check binding
         run: |
-          sh -n bench/release.sh
           deno check bindings/js/deno/mod.ts bindings/js/deno/test/mod_test.ts \
             bindings/js/deno/data.ts bindings/js/deno/test/data_test.ts \
             bindings/js/deno/native.ts bindings/js/deno/test/native_test.ts \
             bindings/js/deno/setup.ts bindings/js/deno/test/setup_test.ts \
-            bindings/js/deno/test/gener_preparer_test.ts \
-            bench/compare.ts bench/compare_test.ts bench/wasm_worker.ts \
-            bench/validate.ts bench/validate_test.ts
+            bindings/js/deno/test/gener_preparer_test.ts
 
       - name: Test binding
         env:
@@ -290,8 +287,6 @@ jobs:
           bindings/js/deno/test/native_test.ts
           bindings/js/deno/test/setup_test.ts
           bindings/js/deno/test/gener_preparer_test.ts
-          bench/compare_test.ts
-          bench/validate_test.ts
 
       - name: Test native acquisition with path-scoped permissions
         run: |
@@ -301,18 +296,6 @@ jobs:
             --allow-read="$PWD/build/deno-scoped-native" \
             --allow-write="$PWD/build/deno-scoped-native" \
             bindings/js/deno/test/native_test.ts
-
-      - name: Validate accepted release benchmark evidence
-        run: |
-          (cd bench/release-evidence && sha256sum -c \
-            benchmark-0.3.0.json.sha256 benchmark-0.3.1.json.sha256 \
-            benchmark-0.3.2.json.sha256 benchmark-0.4.0.json.sha256)
-          deno run --allow-read bench/validate.ts \
-            bench/release-evidence/benchmark-0.4.0.json \
-            --label release-candidate \
-            --revision 3048fdad64b30f5ba35423bacb5197f5a347e228 \
-            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
-            --compiler 'Apple clang version 21.0.0 (clang-2100.3.34.2)'
 
       - name: Acquire and verify pinned Deno datasets
         run: |
@@ -329,19 +312,6 @@ jobs:
           cmake -E sha256sum build/data-test-alpheios/gener.index | \
             grep -F '5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6'
           test -f build/data-test-perseids/Latin/steminds/nomind
-
-      - name: Smoke-test benchmark runner
-        env:
-          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
-          MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
-          MORPHEUS_CRUNCHER: ${{ github.workspace }}/build/dev/cruncher
-        run: |
-          ctest --test-dir build/dev --output-on-failure -R '^gener_corpus$'
-          cp build/dev/test-gener-corpus/first.mgi stemlib/gener.index
-          deno run --allow-env --allow-ffi --allow-read --allow-run \
-            bench/compare.ts --iterations 1 --warmup 0 --contexts 1 \
-            --cold-samples 1 --generation-small 'lo/gos' \
-            --generation-maximal 'i(/hmi' --json > /dev/null
 
   deno-gener-preparer:
     runs-on: ubuntu-latest
@@ -412,10 +382,11 @@ jobs:
           -DMORPHEUS_BUILD_NODE_BINDING=ON
           -DMORPHEUS_NODE_INCLUDE_DIR=${{ steps.node.outputs.include }}
 
-      - name: Build native runtime and Node-API addon
+      - name: Build native runtime, Node-API addon and benchmark inputs
         run: >-
           cmake --build --preset dev --target
-          morpheus libmorpheus_node morpheus_gener_index_builder
+          morpheus libmorpheus_node cruncher morpheus_gener_index_builder
+          morpheus_gener_source_preparer morpheus_gener_index_reader_test
 
       - name: Prepare experimental generation fixture
         run: >-
@@ -437,6 +408,46 @@ jobs:
           MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
         working-directory: bindings/js/node
         run: npm test
+
+      - name: Test the benchmark harness
+        run: |
+          sh -n bench/release.sh
+          node --test bench/test/*.test.mjs
+
+      - name: Validate accepted release benchmark evidence
+        # The schema 2 reports of the retired Deno harness stay readable by
+        # the validator; release_metadata checks every retained sidecar.
+        run: |
+          node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.4.5.json \
+            --label release-candidate \
+            --revision 5ba9dc037510f51dc8c13440a8d61a76f6d04739 \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+
+      - name: Smoke-test benchmark runner
+        # One iteration of every native model against a schema 2 baseline:
+        # the cross-runtime comparison must find its row.
+        env:
+          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
+          MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/dev/node/libmorpheus_node.node
+          MORPHEUS_CRUNCHER: ${{ github.workspace }}/build/dev/cruncher
+        run: |
+          ctest --test-dir build/dev --output-on-failure -R '^gener_corpus$'
+          mkdir -p build/benchmark-stemlib
+          ln -s "$PWD/stemlib/Greek" build/benchmark-stemlib/Greek
+          cp build/dev/test-gener-corpus/first.mgi build/benchmark-stemlib/gener.index
+          MORPHEUS_STEMLIB="$PWD/build/benchmark-stemlib" \
+            node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1 \
+            --cold-samples 1 --generation-small 'lo/gos' \
+            --generation-maximal 'i(/hmi' --json \
+            --baseline bench/release-evidence/benchmark-0.4.5.json \
+            > build/benchmark-smoke.json
+          node -e '
+            const report = JSON.parse(require("node:fs").readFileSync("build/benchmark-smoke.json", "utf8"));
+            if (report.schemaVersion !== 3 || report.comparisonScope !== "cross-runtime") throw new Error(JSON.stringify(report));
+            if (report.comparison.length !== 1 || report.comparison[0].engine !== "cruncher-persistent") throw new Error(JSON.stringify(report.comparison));
+          '
 
       - name: Acquire pinned native runtime with Node.js
         working-directory: bindings/js/node

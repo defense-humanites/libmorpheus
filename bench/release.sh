@@ -65,7 +65,7 @@ if ! git -C vendor/alpheios-morpheus diff --quiet -- ||
   exit 1
 fi
 
-for command in cmake ctest deno git; do
+for command in cmake ctest git node; do
   command -v "${command}" >/dev/null 2>&1 || {
     echo "required command is missing: ${command}" >&2
     exit 1
@@ -94,13 +94,19 @@ case "$(uname -s)" in
     ;;
 esac
 cruncher="${build_dir}/cruncher"
+addon="${build_dir}/node/libmorpheus_node.node"
 
 revision=$(git rev-parse HEAD)
 stemlib_revision=$(git -C vendor/alpheios-morpheus rev-parse HEAD)
 
-cmake --preset release -DBUILD_TESTING=ON
+cmake --preset release -DBUILD_TESTING=ON -DMORPHEUS_BUILD_NODE_BINDING=ON
 cmake --build --preset release
 ctest --preset release
+
+[ -f "${addon}" ] || {
+  echo "Node-API addon was not built: ${addon}" >&2
+  exit 1
+}
 
 generation_index="${build_dir}/test-gener-corpus/first.mgi"
 [ -f "${generation_index}" ] || {
@@ -129,32 +135,23 @@ cleanup()
 trap cleanup 0 HUP INT TERM
 
 if [ -n "${baseline}" ]; then
-  MORPHEUS_LIBRARY="${library}" \
-  MORPHEUS_STEMLIB="${stemlib}" \
-  MORPHEUS_CRUNCHER="${cruncher}" \
-    deno run --allow-env --allow-ffi="${library}" --allow-read --allow-run \
-      bench/compare.ts --json --baseline "${baseline}" \
-      --label "${label}" --revision "${revision}" \
-      --stemlib-revision "${stemlib_revision}" --compiler "${compiler}" \
-      --iterations "${iterations}" --warmup "${warmup}" \
-      --contexts "${contexts}" --cold-samples "${cold_samples}" \
-      --generation-small "lo/gos" --generation-maximal "i(/hmi" \
-      > "${temporary}"
+  set -- --baseline "${baseline}"
 else
-  MORPHEUS_LIBRARY="${library}" \
-  MORPHEUS_STEMLIB="${stemlib}" \
-  MORPHEUS_CRUNCHER="${cruncher}" \
-    deno run --allow-env --allow-ffi="${library}" --allow-read --allow-run \
-      bench/compare.ts --json \
-      --label "${label}" --revision "${revision}" \
-      --stemlib-revision "${stemlib_revision}" --compiler "${compiler}" \
-      --iterations "${iterations}" --warmup "${warmup}" \
-      --contexts "${contexts}" --cold-samples "${cold_samples}" \
-      --generation-small "lo/gos" --generation-maximal "i(/hmi" \
-      > "${temporary}"
+  set --
 fi
+MORPHEUS_LIBRARY="${library}" \
+MORPHEUS_NODE_ADDON="${addon}" \
+MORPHEUS_STEMLIB="${stemlib}" \
+MORPHEUS_CRUNCHER="${cruncher}" \
+  node bench/compare.mjs --json "$@" \
+    --label "${label}" --revision "${revision}" \
+    --stemlib-revision "${stemlib_revision}" --compiler "${compiler}" \
+    --iterations "${iterations}" --warmup "${warmup}" \
+    --contexts "${contexts}" --cold-samples "${cold_samples}" \
+    --generation-small "lo/gos" --generation-maximal "i(/hmi" \
+    > "${temporary}"
 
-deno run --allow-read bench/validate.ts "${temporary}" \
+node bench/validate.mjs "${temporary}" \
   --label "${label}" --revision "${revision}" \
   --stemlib-revision "${stemlib_revision}" --compiler "${compiler}"
 

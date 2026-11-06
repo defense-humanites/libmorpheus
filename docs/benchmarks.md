@@ -2,23 +2,33 @@
 
 # Runtime benchmarks
 
-`bench/compare.ts` measures the production-facing Deno FFI path for analysis
-and generation and compares analysis with the compatibility `cruncher` client
-on the same Beta Code corpus. It is a manual benchmark rather than a CI
-performance gate: shared runners execute only one-iteration protocol smoke
-tests.
+`bench/compare.mjs` measures the native library through the Node.js binding
+(`bindings/js/node`, a Node-API addon) for analysis and generation and
+compares analysis with the compatibility `cruncher` client on the same Beta
+Code corpus. It is a manual benchmark rather than a CI performance gate:
+shared runners execute only one-iteration protocol smoke tests.
 
-Build the normal runtime first, then run:
+The harness is plain Node.js (20 or later, ECMAScript modules, no
+dependencies): `bench/compare.mjs` runs the measurements, `bench/report.mjs`
+holds the report schema, the comparison and the release validation,
+`bench/validate.mjs` is the validator's command line, and
+`bench/wasm-runtime.mjs`, `bench/wasm-pool.mjs` and `bench/wasm-worker.mjs`
+drive the optional WebAssembly models. Reports up to 0.4.5 (schema 2) were
+produced by a Deno harness measuring the Deno FFI binding; the Node.js
+harness produces schema 3 and establishes a new baseline, since the
+measured binding changed (see [Comparing reports](#comparing-reports)).
+
+Build the runtime and the addon first, then run:
 
 ```sh
-cmake --preset dev
+cmake --preset dev -DMORPHEUS_BUILD_NODE_BINDING=ON
 cmake --build --preset dev
 
 MORPHEUS_LIBRARY="$PWD/build/dev/libmorpheus.so" \
+MORPHEUS_NODE_ADDON="$PWD/build/dev/node/libmorpheus_node.node" \
 MORPHEUS_STEMLIB="$PWD/stemlib" \
 MORPHEUS_CRUNCHER="$PWD/build/dev/cruncher" \
-deno run --allow-env --allow-ffi --allow-read --allow-run \
-  bench/compare.ts \
+node bench/compare.mjs \
   --iterations 20 \
   --warmup 2 \
   --contexts 1,2,4 \
@@ -27,17 +37,20 @@ deno run --allow-env --allow-ffi --allow-read --allow-run \
   --generation-maximal 'i(/hmi'
 ```
 
-Use `libmorpheus.dylib` on macOS. Pass `--json` to produce a machine-readable
-report suitable for archiving with a release or deployment evaluation.
+Use `libmorpheus.dylib` on macOS. The addon opens the library named by
+`MORPHEUS_LIBRARY`; it is built against the Node-API headers of the `node`
+on `PATH` (`-DMORPHEUS_NODE_INCLUDE_DIR` names another installation). Pass
+`--json` to produce a machine-readable report suitable for archiving with a
+release or deployment evaluation.
 
 Release reports should identify the exact code, data, and compiler inputs:
 
 ```sh
 MORPHEUS_LIBRARY="$PWD/build/release/libmorpheus.so" \
+MORPHEUS_NODE_ADDON="$PWD/build/release/node/libmorpheus_node.node" \
 MORPHEUS_STEMLIB="$PWD/vendor/alpheios-morpheus/dist/stemlib" \
 MORPHEUS_CRUNCHER="$PWD/build/release/cruncher" \
-deno run --allow-env --allow-ffi --allow-read --allow-run \
-  bench/compare.ts --json \
+node bench/compare.mjs --json \
   --label release-candidate \
   --revision "$(git rev-parse HEAD)" \
   --stemlib-revision "$(git -C vendor/alpheios-morpheus rev-parse HEAD)" \
@@ -67,11 +80,11 @@ numbers in one report are directly comparable:
 
 ```sh
 MORPHEUS_LIBRARY="$PWD/build/release/libmorpheus.so" \
+MORPHEUS_NODE_ADDON="$PWD/build/release/node/libmorpheus_node.node" \
 MORPHEUS_STEMLIB="$PWD/stemlib" \
 MORPHEUS_CRUNCHER="$PWD/build/release/cruncher" \
 MORPHEUS_WASM_MODULE="$PWD/build/wasm/wasm/morpheus.mjs" \
-deno run --allow-env --allow-ffi --allow-read --allow-run \
-  bench/compare.ts --iterations 20 --warmup 2 --contexts 1,2,4
+node bench/compare.mjs --iterations 20 --warmup 2 --contexts 1,2,4
 ```
 
 The module is measured under both data placements the facade offers, selected
@@ -88,10 +101,10 @@ with `--wasm-data memfs,nodefs` (default both):
   system call reached through Emscripten's JavaScript file system layer.
 
 Warm measurements (`wasm-<mode>`, `wasm-<mode>-generation-<lemma>-warm`) run
-over a pool of Deno workers, one WebAssembly instance and one Greek context per
-worker, with the `WebAssembly.Module` compiled once and shared through
-structured cloning (`bench/wasm_pool.ts`, `bench/wasm_worker.ts`); word
-assignment is identical to the FFI model operation for operation. Their
+over a pool of worker threads, one WebAssembly instance and one Greek context
+per worker, with the `WebAssembly.Module` compiled once and shared through
+structured cloning (`bench/wasm-pool.mjs`, `bench/wasm-worker.mjs`); word
+assignment is identical to the native model operation for operation. Their
 `startup_ms` covers worker spawn, instantiation, data placement and context
 creation. Cold measurements (`wasm-<mode>-cold`,
 `wasm-<mode>-generation-<lemma>-cold`) compile and instantiate the module from
@@ -125,9 +138,9 @@ with SHA-256
 `d877dadd080a31ae75c8f970fb179a6638b54a2db0afd11c336eb9b2e33cf977`.
 Generation was introduced in schema 2; the first accepted 0.3.0 report
 establishes its performance baseline instead of fabricating a comparison
-with 0.2.0. The release validator accepts schema 2 only, so the schema 1
-reports are checked for integrity, not revalidated, by the `release_metadata`
-test, which verifies every retained sidecar.
+with 0.2.0. The release validator accepts schemas 2 and 3 only, so the
+schema 1 reports are checked for integrity, not revalidated, by the
+`release_metadata` test, which verifies every retained sidecar.
 
 The accepted 0.3.0 preparation report is retained at
 [`bench/release-evidence/benchmark-0.3.0.json`](../bench/release-evidence/benchmark-0.3.0.json)
@@ -199,7 +212,7 @@ Before accepting the file as release evidence, validate both its completeness
 and the revisions it claims:
 
 ```sh
-deno run --allow-read bench/validate.ts benchmark.json \
+node bench/validate.mjs benchmark.json \
   --label release-candidate \
   --revision "$(git rev-parse HEAD)" \
   --stemlib-revision "$(git -C vendor/alpheios-morpheus rev-parse HEAD)" \
@@ -208,26 +221,32 @@ deno run --allow-read bench/validate.ts benchmark.json \
 
 The validator requires full 40-character Git object IDs, compiler and platform
 metadata, SHA-256 identities for both the analysis corpus and complete
-generation index, analysis FFI with 1, 2, and 4 contexts, persistent and cold
-`cruncher`, and both generation workloads with 1, 2, and 4 warm contexts plus
-cold samples. It does not impose timing thresholds; accepting or rejecting a
-measured regression remains an explicit release decision.
+generation index, native analysis with 1, 2, and 4 contexts, persistent and
+cold `cruncher`, and both generation workloads with 1, 2, and 4 warm contexts
+plus cold samples. It does not impose timing thresholds; accepting or
+rejecting a measured regression remains an explicit release decision. It
+accepts schema 3 (native engine `node`, Node.js runtime and binding version
+recorded) and the retained schema 2 reports (native engine `ffi`, Deno
+runtime recorded).
 
-Benchmark schema 2 records the Deno runtime, target platform, hardware
-concurrency, corpus path and SHA-256 digest, generation lemmas and index digest,
-source and stemlib revisions, compiler label, run parameters, and raw
-measurements. The revision and compiler values may instead be supplied through
-`MORPHEUS_BENCHMARK_REVISION`, `MORPHEUS_STEMLIB_REVISION`, and
-`MORPHEUS_BENCHMARK_COMPILER`.
+Benchmark schema 3 records the Node.js, V8 and libuv versions, the operating
+system, architecture and kernel release, the binding package and version,
+hardware concurrency, corpus path and SHA-256 digest, generation lemmas and
+index digest, source and stemlib revisions, compiler label, run parameters,
+and raw measurements. The revision and compiler values may instead be
+supplied through `MORPHEUS_BENCHMARK_REVISION`, `MORPHEUS_STEMLIB_REVISION`,
+and `MORPHEUS_BENCHMARK_COMPILER`.
 
 ## Measurements
 
 The runner reports seven execution models:
 
-- `ffi`: structured analysis through the Deno binding, including native result
-  copying into TypeScript objects. Each configured context count is measured;
-  work is distributed evenly and each context retains its required serial
-  queue.
+- `node`: structured analysis through the Node.js binding, including the
+  copy of native results into JavaScript objects (`ffi` in schema 2 reports:
+  the same measurement through the Deno binding). Each configured context
+  count is measured; work is distributed evenly and each context retains its
+  required serial queue. Its `startup_ms` for the first context count
+  includes loading the library and binding its symbols.
 - `cruncher-persistent`: all measured words are sent through one `cruncher`
   process. Its one-time startup is amortized over the corpus, approximating the
   throughput behavior of a retained process worker. The measurement includes
@@ -248,15 +267,15 @@ The runner reports seven execution models:
 
 For each model the report includes elapsed time, operations per second, mean
 time per operation, returned result records where available, and startup time
-where it can be isolated. FFI measurements also sample the Deno process RSS,
-which includes the loaded native library, contexts, caches, native results, and
-copied TypeScript objects.
+where it can be isolated. Native binding measurements also sample the
+process RSS, which includes the loaded native library, contexts, caches,
+native results, and copied JavaScript objects.
 
 The persistent-process startup is included in its elapsed time and amortized
 over every measured word; it is not reported separately. The cold-process
 startup value is the mean end-to-end duration per sample. RSS for child
 `cruncher` processes is not currently sampled, so memory columns are reported
-only for FFI measurements.
+only for in-process measurements.
 
 The default corpus is the set of unique `input` values from the option-free
 Greek fixtures in `test/fixture.json`. This keeps both engines in their shared
@@ -268,10 +287,10 @@ correctness. Those contracts remain covered by the fixture tests.
 ## Interpreting results
 
 Run benchmarks on otherwise idle native hardware, use a release build for
-deployment decisions, and retain the JSON report with compiler, Deno, stemlib,
-CPU, and operating-system metadata. Compare at least:
+deployment decisions, and retain the JSON report with compiler, Node.js,
+stemlib, CPU, and operating-system metadata. Compare at least:
 
-1. single-context analysis FFI latency against persistent-`cruncher` throughput;
+1. single-context analysis latency against persistent-`cruncher` throughput;
 2. analysis and warm generation scaling across context counts;
 3. small versus maximal generation latency and returned record counts;
 4. RSS growth per additional warmed context and workload;
@@ -287,20 +306,31 @@ Pass a prior JSON report with `--baseline` to compare matching engine/context
 configurations:
 
 ```sh
-deno run --allow-env --allow-ffi --allow-read --allow-run \
-  bench/compare.ts --baseline previous.json --json > current.json
+node bench/compare.mjs --baseline previous.json --json > current.json
 ```
 
 The output adds percentage changes for throughput, mean latency, peak RSS, and
-RSS growth. Positive throughput is an improvement; positive latency or memory
-is an increase. Schema 2 baselines require matching corpus and generation-index
-digests, generation lemmas, and every engine/context pair. A schema 1 baseline
-must use the same corpus and contain only historical analysis configurations;
-each must exist in the current report. New schema 2 generation measurements are
-deliberately omitted from that legacy comparison.
+RSS growth, with `comparisonBaselineSchemaVersion` and `comparisonScope`.
+Positive throughput is an improvement; positive latency or memory is an
+increase. A schema 3 baseline (`complete` scope) requires matching corpus and
+generation-index digests, generation lemmas, and every native engine/context
+pair; WebAssembly rows absent from the baseline are skipped.
+
+A schema 1 or 2 baseline was measured by the retired Deno harness: its `ffi`
+and generation rows timed the Deno FFI binding and its cold rows include
+Deno's process spawning, so none of them is comparable with the Node.js
+binding's rows, however close the native work is. With such a baseline the
+scope is `cross-runtime` and only `cruncher-persistent` is compared: that row
+times one `cruncher` process over the whole measured corpus, where the
+harness's spawn and pipe costs are amortized over hundreds of operations.
+The first schema 3 report accepted as release evidence therefore
+establishes the baseline of the native binding, generation and cold rows;
+the release decision records the `cruncher-persistent` continuity with the
+schema 2 evidence instead of fabricating the other comparisons.
 
 No timing threshold is enforced in CI because shared-runner variance would make
-it unstable. CI type-checks the runner, tests report comparison and corpus
-validation deterministically, tests the release-evidence validator, and
-executes a one-iteration end-to-end smoke run. Release decisions use repeated
+it unstable. CI tests report comparison, corpus validation and the
+release-evidence validator deterministically (`node --test bench/test`),
+validates the accepted 0.4.5 evidence, and executes a one-iteration
+end-to-end smoke run against that evidence as a cross-runtime baseline. Release decisions use repeated
 measurements on controlled hardware.
