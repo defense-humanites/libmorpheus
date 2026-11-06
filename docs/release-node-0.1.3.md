@@ -79,10 +79,26 @@ smoke test, which acquires the declared runtime (now 0.4.5) and both
 datasets in an empty application and checks Greek analysis, Latin multiple
 interpretations and Greek dual generation.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. confirm the tagged Linux CI and platform runs on the candidate commit;
-2. explicitly authorize creation of `node-v0.1.3`;
-3. after publication, record the workflow and smoke-test outcome here.
+- Tag: `node-v0.1.3`, created by the maintainer on 2026-11-06 on
+  `ad58831719a0d9f60dbac2599f8ab76a947af7b8`, the merge of this decision.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/42218361244)
+  and [platform](https://github.com/defense-humanites/libmorpheus/actions/runs/42218361257)
+  (Linux x86_64 and aarch64 glibc, macOS arm64, Alpine x86_64 and aarch64),
+  both passed at the first attempt.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42218361485);
+  the four packages are on npm at 0.1.3 with `latest` moved, tarball
+  integrity `sha512-te3cFOtvzSdOW0KPtYiPl1xibS00N12L35GGRGlUoewJOOviGMJ/PWWak58veD2RkRzVq3iUuSOs2PQ/WVWaOA==`
+  (`@libmorpheus/node`),
+  `sha512-mCa7ihqVt8GdYOcp7XMkYF9y84y7dU3J3glL3+fdS1TBYTed41VWSjCfVX6GIv3g0T27jSQNDNwilqn1zBuGUQ==`
+  (`node-darwin-arm64`),
+  `sha512-6EHi38LGMErY6Vu8plKoxPtbjGCrLl62OyVOXM38hNrTWmugu6KtHyL8C8DA96NzlkVlut72StwyJ2NMI1SWVQ==`
+  (`node-linux-arm64-gnu`),
+  `sha512-KXgIcr5n0V7MiTo0tj3pDdeVrkwc4GNI17QpQ8qo/n76nEUS5Yj1lne7Ufez5sZaN3HjlwB0Fj8mnqF3t9lL3A==`
+  (`node-linux-x64-gnu`).
+- Published npm smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42219507188):
+  an empty application installed the published packages, acquired the
+  declared native runtime 0.4.5 and both datasets from the public endpoints,
+  and preserved Greek analysis, Latin multiple interpretations and Greek
+  dual generation.
