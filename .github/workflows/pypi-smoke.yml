@@ -13,7 +13,7 @@ on:
       package_version:
         description: Published libmorpheus version
         required: true
-        default: 0.1.1
+        default: 0.2.0
         type: string
 
 permissions:
@@ -97,3 +97,29 @@ jobs:
             "$GITHUB_WORKSPACE/bindings/python/test/runtime_smoke.py" \
             "$GITHUB_WORKSPACE/build/dev/libmorpheus.so" \
             "$GITHUB_WORKSPACE/stemlib"
+
+      - name: Acquire the declared runtime and the Perseids data with the published commands
+        # The public endpoints, as an application would use them: the
+        # declared native release and the pinned dataset, then an analysis
+        # through what was acquired.
+        run: |
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/python-pypi-smoke/bin/libmorpheus-setup" \
+            --dataset perseids \
+            --native-output "$RUNNER_TEMP/acquired-native" \
+            --data-output "$RUNNER_TEMP/acquired-data"
+          test -f "$RUNNER_TEMP/acquired-native/MORPHEUS-NATIVE.json"
+          test -f "$RUNNER_TEMP/acquired-data/MORPHEUS-DATA.json"
+          "$RUNNER_TEMP/python-pypi-smoke/bin/python" - <<'PY'
+          import json, os
+          import libmorpheus as m
+          temp = os.environ["RUNNER_TEMP"]
+          native = json.load(open(f"{temp}/acquired-native/MORPHEUS-NATIVE.json"))
+          assert native["nativeVersion"] == m.MORPHEUS_NATIVE_VERSION, native
+          with m.Library(f"{temp}/acquired-native/{native['libraryPath']}") as library:
+              with library.context(f"{temp}/acquired-data", m.Language.LATIN) as context:
+                  assert any(a.lemma == "amo" for a in context.analyze("amatus"))
+              with library.context(f"{temp}/acquired-data", m.Language.GREEK) as context:
+                  assert any(a.lemma == "e)/kstasis" for a in context.analyze("e)/kstasis"))
+          print("acquired runtime and data analyze Latin and Greek")
+          PY

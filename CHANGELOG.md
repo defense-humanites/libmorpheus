@@ -26,11 +26,23 @@ the corpus.
   `libmorpheus-native` and `libmorpheus-setup` acquire the `v0.4.5` archives,
   so applications receive the native changes since 0.3.2, the Latin
   stem-class resolution of 0.4.5 included. C ABI 2 unchanged.
-- Python binding 0.1.1 (prepared; `docs/release-python-0.1.1.md`) declares
+- Python binding 0.1.1 (`docs/release-python-0.1.1.md`, published) declares
   native release 0.4.5 instead of 0.3.2 for the same reason; the binding has
   no acquisition command, so the declaration directs applications to the
   `v0.4.5` archives and is verified by the release workflow. Source
   unchanged.
+
+### Added
+
+- Python binding 0.2.0 (prepared; `docs/release-python-0.2.0.md`) acquires
+  the native runtime and the stem data at parity with the Node.js binding:
+  `libmorpheus-native`, `libmorpheus-data` (`--subset`, `--languages`,
+  `--manifest`) and `libmorpheus-setup`, as console scripts, `python -m`
+  modules and functions, standard library only, with the same pinned sources,
+  verification, receipts and rollback; the `python_package_metadata` guard
+  keeps the pins identical with `@libmorpheus/data`. Experimental generation
+  takes a prepared index through `--gener-index`, verified against the pinned
+  digest, since the Python package cannot run the WebAssembly preparer.
 
 - The runtime benchmark harness runs under Node.js and measures the
   Node.js binding (`bindings/js/node`, Node-API) instead of the Deno FFI

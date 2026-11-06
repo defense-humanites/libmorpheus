@@ -42,15 +42,30 @@ dependencies. Install the typed, universal wheel:
 python -m pip install libmorpheus
 ```
 
-The wheel contains neither the native library nor linguistic stem data. Install
-a compatible native `libmorpheus` release and stemlib as described below, then
-create `app.py`:
+The wheel contains neither the native library nor linguistic stem data.
+Package installation runs no scripts and downloads nothing. Acquire the
+matching native library and the Perseids dataset for Greek and Latin analysis
+with the explicit setup command:
+
+```sh
+libmorpheus-setup --dataset perseids
+```
+
+The output directories must not already exist and must not overlap; the
+command refuses to overwrite an installation or dataset. It creates
+`./morpheus-native` and `./morpheus-data` by default (`--native-output`,
+`--data-output`). Then create `app.py`:
 
 ```python
+import json
+from pathlib import Path
+
 from libmorpheus import Language, Library, Option
 
-with Library("/path/to/libmorpheus.so") as library:
-    with library.context("/path/to/stemlib", Language.GREEK) as context:
+receipt = json.loads(Path("morpheus-native/MORPHEUS-NATIVE.json").read_text())
+
+with Library(Path("morpheus-native") / receipt["libraryPath"]) as library:
+    with library.context("morpheus-data", Language.GREEK) as context:
         analyses = context.analyze(
             "a)/nqrwpos",
             Option.STRICT_CASE,
@@ -76,11 +91,9 @@ library_path = os.environ["MORPHEUS_LIBRARY"]
 stemlib_path = os.environ["MORPHEUS_STEMLIB"]
 ```
 
-Version `0.1.1` deliberately leaves runtime and data acquisition outside the
-Python package. The [native releases](https://github.com/defense-humanites/libmorpheus/releases)
-and [runtime-data guide](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md)
-provide the required components; a complete source-checkout recipe appears
-below.
+The acquisition commands, their receipts and the pinned sources are described
+under [Native library and runtime data](#native-library-and-runtime-data); a
+complete source-checkout recipe appears below.
 
 ## In-depth overview
 
@@ -250,42 +263,75 @@ Neither is part of the Python wheel or source distribution.
 
 | Distribution | Native library | Stem data | What to do |
 | --- | --- | --- | --- |
-| PyPI wheel or source distribution | Not included | Not included | Install a compatible native release and acquire a stemlib. |
+| PyPI wheel or source distribution | Not included | Not included | Run `libmorpheus-setup`, or `libmorpheus-native` and `libmorpheus-data`. |
 | Recursive project checkout | Build with CMake | Perseids submodule | Pass the build output and `stemlib/` paths explicitly. |
 
-Binding and runtime versions are independent. Python binding `0.1.1` targets
+Binding and runtime versions are independent. Python binding `0.2.0` targets
 native runtime `0.4.5` and requires C ABI `2`. The package exports
 `MORPHEUS_PYTHON_VERSION`, `MORPHEUS_NATIVE_VERSION`, and
 `MORPHEUS_NATIVE_ABI_VERSION`; `__version__` is the conventional alias for the
 Python package version.
 
+The three commands use only the standard library, download over HTTPS from
+pinned sources, bound every download in size, verify before writing, write
+into a directory that must not exist, and remove it again if anything fails.
+Each is also importable (`acquire_native()`, `acquire_data()`,
+`setup_morpheus()`) and runnable as a module (`python -m libmorpheus.native`,
+`python -m libmorpheus.data`, `python -m libmorpheus.setup`). Their options
+and receipts match the Node.js binding's commands.
+
 ### Acquire stem data
 
-For analysis from a source checkout, use its recursively initialized
-`stemlib/` directory. It contains the Perseids dataset for Ancient Greek and
-Latin. The Alpheios dataset is a Greek-only alternative under
-`vendor/alpheios-morpheus/dist/stemlib`.
-
-Experimental generation requires a prepared Alpheios directory containing a
-validated `gener.index`:
-
 ```sh
-sh tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
+libmorpheus-data --dataset <alpheios|perseids> --output <directory>
+                 [--subset <full|runtime>] [--languages <grc,lat>]
+                 [--manifest] [--gener-index <path>]
 ```
 
-The output directory must not already exist. Pass its absolute path to
-`Library.context()`. See the complete
+The command downloads the pinned upstream revision of the dataset (the audited
+Alpheios or Perseids tree), verifies its file count, tree digest and license
+digest, and writes it with `UPSTREAM-LICENSE` and a provenance receipt,
+`MORPHEUS-DATA.json` (dataset, languages, source repository and revision,
+digests of the whole tree and of the written subset). Alpheios provides Greek
+analysis and experimental generation; Perseids provides Greek and Latin
+analysis.
+
+- `--subset runtime` writes only the files the libmorpheus runtime reads
+  (about 10 MiB for Perseids instead of the whole tree); `--languages`
+  keeps only the named ISO 639-3 languages.
+- `--manifest` also writes `stemlib-manifest.json` (path, size and SHA-256 of
+  every written file), the list a server or a WebAssembly deployment loads
+  from.
+- `--gener-index <path>` installs a prepared experimental Greek generation
+  index (`gener.index`, Alpheios only) after verifying that its SHA-256 is
+  the pinned digest of the index derived from the audited revisions. The
+  Python package does not prepare the index itself: prepare it once with
+  `npx libmorpheus-data --dataset alpheios --with-gener` from the
+  `@libmorpheus/data` package, or from a source checkout with
+  `sh tools/prepare-runtime-data.sh`, and pass the resulting file.
+
+For analysis from a source checkout, its recursively initialized `stemlib/`
+directory (Perseids) and `vendor/alpheios-morpheus/dist/stemlib` (Alpheios)
+can be passed to `Library.context()` directly. See the
 [runtime-data guide](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md)
 for pinned sources, validation, and redistribution boundaries.
 
 ### Acquire the native library
 
-Version `0.1.1` does not download native code during `pip install` and provides
-no Python acquisition command. Install the compatible `v0.4.5` native archive
-from the [GitHub releases page](https://github.com/defense-humanites/libmorpheus/releases),
-or build the runtime from a matching source checkout as shown above. Pass the
-actual `.so` or `.dylib` path to `Library`; the binding does not search system
-paths or environment variables implicitly.
+```sh
+libmorpheus-native --output <directory>
+```
+
+The command downloads the archive of the declared native release (`v0.4.5`)
+for this host (Linux x86-64 glibc, Linux aarch64 glibc or macOS arm64; musl
+hosts are refused rather than given an incompatible binary), verifies it
+against the SHA-256 sidecar published with the release, extracts it with
+symbolic links materialized as files, and writes the receipt
+`MORPHEUS-NATIVE.json`, whose `libraryPath` names the shared library to pass
+to `Library`. The archives can also be installed by hand from the
+[GitHub releases page](https://github.com/defense-humanites/libmorpheus/releases),
+or the runtime built from a matching source checkout as shown above. The
+binding does not search system paths or environment variables implicitly.
 
 ### Language and data coverage
 
