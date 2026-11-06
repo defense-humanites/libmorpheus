@@ -434,6 +434,22 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.5")
         "release-0.4.5.md is missing: ${expected_patch_release_value}")
     endif()
   endforeach()
+  # The Node.js harness baseline measured on the unchanged 0.4.5 sources.
+  set(node_baseline_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.5-node.json")
+  set(node_baseline_checksum
+      "a3095c98c8be95000aeef79fb86e6a4158757320f8d34da54147f9d4e9d9975f")
+  if(NOT EXISTS "${node_baseline_path}" OR
+     NOT EXISTS "${node_baseline_path}.sha256")
+    message(FATAL_ERROR "0.4.5 Node.js harness baseline is missing")
+  endif()
+  file(SHA256 "${node_baseline_path}" actual_node_baseline_checksum)
+  string(FIND "${release_decision}" "${node_baseline_checksum}"
+              node_baseline_checksum_at)
+  if(NOT actual_node_baseline_checksum STREQUAL node_baseline_checksum OR
+     node_baseline_checksum_at EQUAL -1)
+    message(FATAL_ERROR "0.4.5 Node.js harness baseline digest differs")
+  endif()
   set(benchmark_path
       "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.5.json")
   set(benchmark_checksum

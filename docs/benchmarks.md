@@ -202,6 +202,19 @@ latencies are within noise, and the 0.4.5 release decision revises the
 reading of the four-context maximal generation's RSS growth, which the
 report shows to vary between runs under one Deno version.
 
+The first schema 3 report, from the Node.js harness, is retained at
+[`bench/release-evidence/benchmark-0.4.5-node.json`](../bench/release-evidence/benchmark-0.4.5-node.json)
+with its companion SHA-256 file. It was produced on 2026-11-06 on the same
+controlled Apple Silicon host and toolchain as the 0.4.5 report (Apple
+Clang 2100.4.1.1; Node.js 26.13.0, binding 0.1.2), from the merge of the
+harness migration, whose native sources are those of `v0.4.5`. It is the
+baseline of the native binding, generation and cold rows for the next
+release; its `cruncher-persistent` row, the one compared with the 0.4.5
+report, differs by +0.1 %. The addendum of the
+[0.4.5 release decision](release-0.4.5.md#addendum-nodejs-harness-baseline)
+records what the two harnesses measure differently on an unchanged
+library.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be
@@ -332,5 +345,6 @@ No timing threshold is enforced in CI because shared-runner variance would make
 it unstable. CI tests report comparison, corpus validation and the
 release-evidence validator deterministically (`node --test bench/test`),
 validates the accepted 0.4.5 evidence, and executes a one-iteration
-end-to-end smoke run against that evidence as a cross-runtime baseline. Release decisions use repeated
+end-to-end smoke run against the retained schema 3 baseline, checking
+that every measured row is compared. Release decisions use repeated
 measurements on controlled hardware.

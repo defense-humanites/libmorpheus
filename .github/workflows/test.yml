@@ -426,8 +426,8 @@ jobs:
             --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
 
       - name: Smoke-test benchmark runner
-        # One iteration of every native model against a schema 2 baseline:
-        # the cross-runtime comparison must find its row.
+        # One iteration of every native model against the retained schema 3
+        # baseline: every measured row must find its counterpart.
         env:
           MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
           MORPHEUS_NODE_ADDON: ${{ github.workspace }}/build/dev/node/libmorpheus_node.node
@@ -441,12 +441,12 @@ jobs:
             node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json \
-            --baseline bench/release-evidence/benchmark-0.4.5.json \
+            --baseline bench/release-evidence/benchmark-0.4.5-node.json \
             > build/benchmark-smoke.json
           node -e '
             const report = JSON.parse(require("node:fs").readFileSync("build/benchmark-smoke.json", "utf8"));
-            if (report.schemaVersion !== 3 || report.comparisonScope !== "cross-runtime") throw new Error(JSON.stringify(report));
-            if (report.comparison.length !== 1 || report.comparison[0].engine !== "cruncher-persistent") throw new Error(JSON.stringify(report.comparison));
+            if (report.schemaVersion !== 3 || report.comparisonScope !== "complete") throw new Error(JSON.stringify(report));
+            if (report.comparison.length !== report.measurements.length) throw new Error(JSON.stringify(report.comparison));
           '
 
       - name: Acquire pinned native runtime with Node.js
