@@ -215,6 +215,21 @@ report, differs by +0.1 %. The addendum of the
 records what the two harnesses measure differently on an unchanged
 library.
 
+The second schema 3 report on the same sources,
+[`bench/release-evidence/benchmark-0.4.5-node-packed.json`](../bench/release-evidence/benchmark-0.4.5-node-packed.json)
+with its companion SHA-256 file, was produced on 2026-11-06 on the same
+host from `2e8ebe63c6d0f915390c06e351e77efe3a8d25d8`, the merge of the
+Node.js binding's packed result encoding (issue #47, pull request #48),
+with the native sources still those of `v0.4.5`. Compared with the first
+report (`complete` scope), the thirteen result counts are identical,
+analysis and the `cruncher` rows are within noise, and generation falls by
+44 to 58 % per warm operation (maximal paradigm: 6.3, 3.7 and 3.8 ms at
+one, two and four contexts against 11.2, 8.7 and 8.7 ms) and 15 % cold,
+now below the Deno-harness figures. **This report is the baseline of the
+next native release**: the harness measures through the binding, and a
+comparison with the earlier report would attribute the binding's change
+to the library.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be
