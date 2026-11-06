@@ -76,7 +76,7 @@ library_path = os.environ["MORPHEUS_LIBRARY"]
 stemlib_path = os.environ["MORPHEUS_STEMLIB"]
 ```
 
-Version `0.1.0` deliberately leaves runtime and data acquisition outside the
+Version `0.1.1` deliberately leaves runtime and data acquisition outside the
 Python package. The [native releases](https://github.com/defense-humanites/libmorpheus/releases)
 and [runtime-data guide](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md)
 provide the required components; a complete source-checkout recipe appears
@@ -253,8 +253,8 @@ Neither is part of the Python wheel or source distribution.
 | PyPI wheel or source distribution | Not included | Not included | Install a compatible native release and acquire a stemlib. |
 | Recursive project checkout | Build with CMake | Perseids submodule | Pass the build output and `stemlib/` paths explicitly. |
 
-Binding and runtime versions are independent. Python binding `0.1.0` targets
-native runtime `0.3.2` and requires C ABI `2`. The package exports
+Binding and runtime versions are independent. Python binding `0.1.1` targets
+native runtime `0.4.5` and requires C ABI `2`. The package exports
 `MORPHEUS_PYTHON_VERSION`, `MORPHEUS_NATIVE_VERSION`, and
 `MORPHEUS_NATIVE_ABI_VERSION`; `__version__` is the conventional alias for the
 Python package version.
@@ -280,8 +280,8 @@ for pinned sources, validation, and redistribution boundaries.
 
 ### Acquire the native library
 
-Version `0.1.0` does not download native code during `pip install` and provides
-no Python acquisition command. Install the compatible `v0.3.2` native archive
+Version `0.1.1` does not download native code during `pip install` and provides
+no Python acquisition command. Install the compatible `v0.4.5` native archive
 from the [GitHub releases page](https://github.com/defense-humanites/libmorpheus/releases),
 or build the runtime from a matching source checkout as shown above. Pass the
 actual `.so` or `.dylib` path to `Library`; the binding does not search system
@@ -311,7 +311,7 @@ installed native library.
 The release qualification matrix covers Python 3.11 and 3.14 on Linux with the
 real runtime and an ABI fixture. The native release currently provides Linux
 x86-64 glibc, Linux aarch64 glibc, and macOS arm64 archives. Windows is not
-supported by native runtime `0.3.2`.
+supported by native runtime `0.4.5`.
 
 ## Documentation
 
