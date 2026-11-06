@@ -138,8 +138,10 @@ toolchain as the accepted 0.4.5 report, with Node.js 26.13.0 and binding
 `bench/release-evidence/benchmark-0.4.5-node.json`, SHA-256
 `a3095c98c8be95000aeef79fb86e6a4158757320f8d34da54147f9d4e9d9975f`, and
 passes the validator with the recorded revision and compiler. All thirteen
-result counts equal those of the 0.4.5 report. It is the baseline the next
-release is compared with.
+result counts equal those of the 0.4.5 report. It was the baseline for the
+next release until the binding's result marshalling changed (below); the
+report that followed that change, `benchmark-0.4.5-node-packed.json`,
+is the baseline now (see [benchmarks.md](benchmarks.md)).
 
 The one row the harness compares across the runtime change,
 `cruncher-persistent`, differs by +0.1 % (642.0 µs against 641.2 µs): the
@@ -169,10 +171,15 @@ runtimes, not the library:
   JavaScript. Cold maximal generation shows the same marshalling
   cost (+15 %); cold small generation, dominated by loading the index, is
   unchanged (−0.3 %). This is a property of the Node.js binding's result
-  marshalling, measurable from now on, and a candidate improvement for its
-  track (decoding from a packed buffer, as the Deno and WebAssembly
-  facades do); the four-context maximal generation grew the process by
-  43 MiB here, a figure the 0.4.5 decision already records as bimodal.
+  marshalling, measurable from now on; issue #47 and pull request #48
+  replaced it with one packed buffer per operation decoded in JavaScript,
+  as the Deno and WebAssembly facades do, and the report taken after that
+  change on the same sources (`benchmark-0.4.5-node-packed.json`,
+  SHA-256 `6877146bfdddcd2fe63507c4e3db061cfbd364656926b473356b53008fde9c11`)
+  puts maximal warm generation at 6.3, 3.7 and 3.8 ms, 16 to 36 % below
+  the Deno figures, with analysis unchanged. The four-context maximal
+  generation grew the process by 43 MiB in the first report and 86 MiB in
+  the second, a figure the 0.4.5 decision already records as bimodal.
 - Peak RSS is lower throughout (27.7 MiB against 61.4 MiB at one analysis
   context): the Node.js process is smaller than the Deno one before the
   library loads; growth during the analysis rows is 11.1 MiB against

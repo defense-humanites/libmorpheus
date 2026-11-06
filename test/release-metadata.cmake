@@ -450,6 +450,22 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.4.5")
      node_baseline_checksum_at EQUAL -1)
     message(FATAL_ERROR "0.4.5 Node.js harness baseline digest differs")
   endif()
+  # The report after the binding's packed result encoding (#48), which
+  # supersedes the first one as the next release's baseline.
+  set(node_packed_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.5-node-packed.json")
+  set(node_packed_checksum
+      "6877146bfdddcd2fe63507c4e3db061cfbd364656926b473356b53008fde9c11")
+  if(NOT EXISTS "${node_packed_path}" OR NOT EXISTS "${node_packed_path}.sha256")
+    message(FATAL_ERROR "0.4.5 packed-encoding baseline is missing")
+  endif()
+  file(SHA256 "${node_packed_path}" actual_node_packed_checksum)
+  string(FIND "${release_decision}" "${node_packed_checksum}"
+              node_packed_checksum_at)
+  if(NOT actual_node_packed_checksum STREQUAL node_packed_checksum OR
+     node_packed_checksum_at EQUAL -1)
+    message(FATAL_ERROR "0.4.5 packed-encoding baseline digest differs")
+  endif()
   set(benchmark_path
       "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.4.5.json")
   set(benchmark_checksum

@@ -441,7 +441,7 @@ jobs:
             node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json \
-            --baseline bench/release-evidence/benchmark-0.4.5-node.json \
+            --baseline bench/release-evidence/benchmark-0.4.5-node-packed.json \
             > build/benchmark-smoke.json
           node -e '
             const report = JSON.parse(require("node:fs").readFileSync("build/benchmark-smoke.json", "utf8"));
