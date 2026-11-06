@@ -65,5 +65,9 @@ example against a local stemlib, this time with a Latin check such as
   (`morpheus.mjs`),
   `09a8841ad754ebb67f1ae218153d7a4492a4d2dd20e4a5abcff54ad85f8f8f50`
   (`morpheus.wasm`).
-- JSR end-to-end check: pending (maintainer, from `jsr:@libmorpheus/wasm@0.1.3`
-  with the Latin check `analyze("latin", "amatus")`).
+- JSR end-to-end check: done by the maintainer on 2026-11-06 with Deno,
+  from `jsr:@libmorpheus/wasm@0.1.3` and the README's Node.js/Deno example
+  against a local stemlib. The module served by JSR instantiated,
+  `analyze("greek", "e)/kstasis")` returned the expected single analysis,
+  as for 0.1.2, and `analyze("latin", "amatus")` returned one analysis with
+  lemma `amo`, the Latin reading 0.1.0 to 0.1.2 dropped.
