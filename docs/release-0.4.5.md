@@ -126,3 +126,54 @@ accepted benchmark report and its sidecar:
 
 WebAssembly binding 0.1.3 was tagged on the same commit afterwards; see
 [`release-wasm-0.1.3.md`](release-wasm-0.1.3.md).
+
+## Addendum: Node.js harness baseline
+
+The benchmark harness moved from Deno to Node.js after this release
+(pull request #45, merged as `efc97598a48590c5a9217bf43fb12a2ccf51432a`,
+with the native sources of `v0.4.5` unchanged). On 2026-11-06 the maintainer
+produced the first schema 3 report on that commit, on the same host and
+toolchain as the accepted 0.4.5 report, with Node.js 26.13.0 and binding
+0.1.2; it is retained as
+`bench/release-evidence/benchmark-0.4.5-node.json`, SHA-256
+`a3095c98c8be95000aeef79fb86e6a4158757320f8d34da54147f9d4e9d9975f`, and
+passes the validator with the recorded revision and compiler. All thirteen
+result counts equal those of the 0.4.5 report. It is the baseline the next
+release is compared with.
+
+The one row the harness compares across the runtime change,
+`cruncher-persistent`, differs by +0.1 % (642.0 µs against 641.2 µs): the
+library's own analysis cost is unchanged, as it must be on identical
+sources. The other rows are not compared by the harness, and the
+differences between the two reports describe the bindings and the
+runtimes, not the library:
+
+- Analysis through the Node.js binding costs the same as through the Deno
+  FFI binding: 660.9, 412.9 and 276.0 µs at one, two and four contexts
+  against 662.4, 421.3 and 280.1 µs, with the same 740 analyses.
+- Opening the library and the first context takes 1.6 ms through the
+  Node-API addon (`dlopen` and symbol lookup) against 1.1 to 6.0 s in the
+  schema 2 reports; that start-up was Deno's FFI symbol preparation, not
+  the library's. Cold `cruncher` falls 9.5 % (3.00 ms against 3.31 ms per
+  process), the spawning cost of the two runtimes, which is why the cold
+  rows are excluded from the cross-runtime comparison.
+- Warm generation is slower through the Node.js binding: +16 % for the
+  small paradigm and +50 % for the maximal one at one context (11.2 ms
+  against 7.5 ms for 2,918 forms), and the maximal workload no longer
+  scales with contexts (8.7 ms at two and four contexts, against 5.8 and
+  5.4 ms). The native generation runs on the thread pool, but the addon
+  then builds every result object on the main thread, field by field,
+  through Node-API calls (about thirty-five per form, plus one
+  `ArrayBuffer` for its morph flags), before the JavaScript semantic
+  decoding; the Deno binding decoded the same results from a byte buffer in
+  JavaScript. Cold maximal generation shows the same marshalling
+  cost (+15 %); cold small generation, dominated by loading the index, is
+  unchanged (−0.3 %). This is a property of the Node.js binding's result
+  marshalling, measurable from now on, and a candidate improvement for its
+  track (decoding from a packed buffer, as the Deno and WebAssembly
+  facades do); the four-context maximal generation grew the process by
+  43 MiB here, a figure the 0.4.5 decision already records as bimodal.
+- Peak RSS is lower throughout (27.7 MiB against 61.4 MiB at one analysis
+  context): the Node.js process is smaller than the Deno one before the
+  library loads; growth during the analysis rows is 11.1 MiB against
+  24.9 MiB at one context.
