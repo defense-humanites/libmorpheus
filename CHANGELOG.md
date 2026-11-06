@@ -26,6 +26,11 @@ the corpus.
   `libmorpheus-native` and `libmorpheus-setup` acquire the `v0.4.5` archives,
   so applications receive the native changes since 0.3.2, the Latin
   stem-class resolution of 0.4.5 included. C ABI 2 unchanged.
+- Python binding 0.1.1 (prepared; `docs/release-python-0.1.1.md`) declares
+  native release 0.4.5 instead of 0.3.2 for the same reason; the binding has
+  no acquisition command, so the declaration directs applications to the
+  `v0.4.5` archives and is verified by the release workflow. Source
+  unchanged.
 
 - The runtime benchmark harness runs under Node.js and measures the
   Node.js binding (`bindings/js/node`, Node-API) instead of the Deno FFI

@@ -6,9 +6,13 @@ endif()
 
 set(python_dir "${MORPHEUS_SOURCE_DIR}/bindings/python")
 file(READ "${python_dir}/pyproject.toml" pyproject)
+string(REGEX MATCH "\nversion = \"([0-9.]+)\"" _ "${pyproject}")
+set(python_version "${CMAKE_MATCH_1}")
+if(NOT python_version STREQUAL "0.1.1")
+  message(FATAL_ERROR "Unexpected Python package version: ${python_version}")
+endif()
 foreach(required IN ITEMS
     "name = \"libmorpheus\""
-    "version = \"0.1.0\""
     "requires-python = \">=3.11\""
     "license = \"AGPL-3.0-or-later\""
     "dependencies = []"
@@ -22,14 +26,19 @@ endforeach()
 
 file(READ "${python_dir}/src/libmorpheus/_version.py" version_module)
 foreach(required IN ITEMS
-    "MORPHEUS_PYTHON_VERSION = \"0.1.0\""
-    "MORPHEUS_NATIVE_VERSION = \"0.3.2\""
+    "MORPHEUS_PYTHON_VERSION = \"${python_version}\""
+    "MORPHEUS_NATIVE_VERSION = \"0.4.5\""
     "MORPHEUS_NATIVE_ABI_VERSION = 2")
   string(FIND "${version_module}" "${required}" required_at)
   if(required_at EQUAL -1)
     message(FATAL_ERROR "Python version metadata is missing: ${required}")
   endif()
 endforeach()
+
+file(READ "${python_dir}/README.md" python_readme)
+if(NOT python_readme MATCHES "Python binding `${python_version}` targets\nnative runtime `0.4.5`")
+  message(FATAL_ERROR "Python README disagrees with the declared versions")
+endif()
 
 foreach(required IN ITEMS
     LICENSE NOTICE README.md pyproject.toml
@@ -46,7 +55,7 @@ endforeach()
 foreach(required_file IN ITEMS
     "${MORPHEUS_SOURCE_DIR}/.github/workflows/python-release.yml"
     "${MORPHEUS_SOURCE_DIR}/.github/workflows/pypi-smoke.yml"
-    "${MORPHEUS_SOURCE_DIR}/docs/release-python-0.1.0.md")
+    "${MORPHEUS_SOURCE_DIR}/docs/release-python-${python_version}.md")
   if(NOT EXISTS "${required_file}")
     message(FATAL_ERROR "Missing Python release contract: ${required_file}")
   endif()
