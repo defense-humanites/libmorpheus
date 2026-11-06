@@ -589,10 +589,16 @@ jobs:
 
       - name: Install and import the wheel
         run: |
+          expected="$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          print(tomllib.loads(Path("bindings/python/pyproject.toml").read_text())["project"]["version"])
+          PY
+          )"
           python -m pip install --no-deps bindings/python/dist/*.whl
           cd "$RUNNER_TEMP"
           python -c \
-            'import libmorpheus; assert libmorpheus.__version__ == "0.1.0"'
+            "import libmorpheus; assert libmorpheus.__version__ == '$expected', libmorpheus.__version__"
 
   char-signedness:
     if: github.event_name == 'push'
