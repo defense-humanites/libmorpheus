@@ -11,6 +11,17 @@ the corpus.
 
 ### Changed
 
+- Node.js binding: the addon returns the records of one operation as a
+  single packed buffer in the C ABI's layout, decoded in JavaScript, instead
+  of building every result object on the main thread through Node-API calls
+  (about thirty-five per form, plus an `ArrayBuffer` for its morph flags;
+  issue #47). Analyses and generated forms are unchanged, raw and semantic
+  alike, over 3,000 Greek headwords, the Latin fixtures and five paradigms;
+  the maximal generation benchmark falls by about half per operation and
+  scales with contexts again. The facade requires the addon's
+  `recordEncoding`, so a rebuilt addon is needed with this facade (the npm
+  platform packages are rebuilt by the binding's release).
+
 - The runtime benchmark harness runs under Node.js and measures the
   Node.js binding (`bindings/js/node`, Node-API) instead of the Deno FFI
   binding: `bench/compare.mjs`, `bench/validate.mjs` and `bench/report.mjs`

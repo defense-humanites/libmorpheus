@@ -251,6 +251,12 @@ They return numeric normalized traits, `structSize`, the complete 11-byte public
 morphology vector, and a numeric truncation mask. The semantic methods return
 named morphology flags and truncated fields.
 
+The addon hands the records of one operation to JavaScript as a single
+packed buffer in the C ABI's layout, decoded by the facade; the generated
+forms of a large paradigm therefore cost one copy per operation rather than
+one Node-API call per field. The facade checks the addon's `recordEncoding`
+at load and refuses an addon built from an older source tree.
+
 Close contexts before their parent library. `context.close()` waits for queued
 work and is idempotent. `library.close()` is synchronous and rejects while any
 child context remains open. A `try`/`finally` block provides deterministic
@@ -293,8 +299,10 @@ facade at the result during development:
 export MORPHEUS_NODE_ADDON="$PWD/build/node/node/libmorpheus_node.node"
 ```
 
-`MORPHEUS_NODE_ADDON` is a development override. Published applications should
-normally use the optional platform package selected by npm.
+`MORPHEUS_NODE_ADDON` must be an absolute path; it is a development override,
+and published applications should normally use the optional platform package
+selected by npm. The addon and the facade are matched: an addon from another
+source tree is refused at load when its result encoding differs.
 
 ## Native library and runtime data
 
