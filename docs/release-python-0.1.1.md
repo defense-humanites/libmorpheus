@@ -57,10 +57,25 @@ environment. The public-package smoke test then installs exactly version
 Greek dual-generation checks against a runtime built from the tagged
 sources.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
+- Tag: `python-v0.1.1`, created by the maintainer on 2026-11-06 on
+  `889db68a1ebcb9578b34c61eb61d7986cba5d749`, the merge of this decision.
+- Tagged Linux CI: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42224729250).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42224729051);
+  `libmorpheus` 0.1.1 is on PyPI; the wheel
+  `libmorpheus-0.1.1-py3-none-any.whl` has SHA-256
+  `26c1c2369a463fab0009db9364eb289615f11a8f3eb465c089faf34c0be7af2b`.
+- Published PyPI smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42225502565):
+  the public wheel installed in an isolated environment and preserved Greek
+  analysis, Latin multiple analyses and Greek dual generation against a
+  runtime built from the tagged sources.
 
-1. confirm the final tagged CI candidate and package file lists;
-2. explicitly authorize creation of `python-v0.1.1`;
-3. after publication, record the workflow and smoke-test outcome here.
+## Next version
+
+The maintainer asks that the following Python versions reach parity with
+`@libmorpheus/node` in acquisition: a native-runtime command and a data
+command (and a combined setup), pinning the declared native release and the
+audited upstream data revisions, verifying downloads, and writing receipts,
+so that an application needs no manual download. That is the next change on
+this track.
