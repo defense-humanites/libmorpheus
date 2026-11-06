@@ -420,108 +420,47 @@ static bool node_morpheus_set_uint32(napi_env env, napi_value object,
          napi_set_named_property(env, object, name, value) == napi_ok;
 }
 
-static bool node_morpheus_set_string(napi_env env, napi_value object,
-                                     const char *name, const char *text,
-                                     size_t capacity) {
-  napi_value value;
-  size_t length = 0;
-  while (length < capacity && text[length] != '\0') length++;
-  return napi_create_string_utf8(env, text, length, &value) == napi_ok &&
-         napi_set_named_property(env, object, name, value) == napi_ok;
-}
+/*
+ * Results cross into JavaScript as one packed buffer per operation: the
+ * `count` records copied from the library (`morpheus_analysis` or
+ * `morpheus_generation`, `recordSize` bytes each, the C ABI's layout), followed
+ * by `count` little-endian uint32 truncated-field masks. index.js decodes the
+ * records; building one object per record through Node-API calls here made a
+ * maximal generation (2,918 forms) cost about 35 calls per form on the main
+ * thread (issue #47).
+ */
+#define NODE_MORPHEUS_RECORD_ENCODING 1u
 
-static bool node_morpheus_set_flags(napi_env env, napi_value object,
-                                    const uint8_t *flags) {
+static bool node_morpheus_packed_result(napi_env env,
+                                        const node_morpheus_operation *operation,
+                                        napi_value *output) {
+  const size_t record_size = operation->kind == NODE_MORPHEUS_ANALYZE
+                                 ? sizeof(morpheus_analysis)
+                                 : sizeof(morpheus_generation);
+  const void *records = operation->kind == NODE_MORPHEUS_ANALYZE
+                            ? (const void *)operation->analyses
+                            : (const void *)operation->generations;
+  const size_t records_bytes = operation->count * record_size;
+  const size_t truncated_bytes =
+      operation->count * sizeof(morpheus_truncated_fields);
   void *data = NULL;
   napi_value buffer;
-  napi_value array;
-  if (napi_create_arraybuffer(env, MORPHEUS_MORPH_FLAG_CAPACITY, &data,
+  napi_value object;
+  if (napi_create_arraybuffer(env, records_bytes + truncated_bytes, &data,
                               &buffer) != napi_ok) {
     return false;
   }
-  memcpy(data, flags, MORPHEUS_MORPH_FLAG_CAPACITY);
-  return napi_create_typedarray(env, napi_uint8_array,
-                                MORPHEUS_MORPH_FLAG_CAPACITY, buffer, 0u,
-                                &array) == napi_ok &&
-         napi_set_named_property(env, object, "morphFlags", array) == napi_ok;
-}
-
-static bool node_morpheus_analysis_value(napi_env env,
-                                         const morpheus_analysis *analysis,
-                                         morpheus_truncated_fields truncated,
-                                         napi_value *output) {
-  napi_value object;
-  if (napi_create_object(env, &object) != napi_ok) return false;
-#define NODE_MORPHEUS_U32(js_name, field)                                  \
-  if (!node_morpheus_set_uint32(env, object, js_name, analysis->field))     \
-    return false
-  NODE_MORPHEUS_U32("structSize", struct_size);
-  NODE_MORPHEUS_U32("partOfSpeech", part_of_speech);
-  NODE_MORPHEUS_U32("dialect", dialect);
-  NODE_MORPHEUS_U32("geographicRegion", geographic_region);
-  NODE_MORPHEUS_U32("person", person);
-  NODE_MORPHEUS_U32("number", number);
-  NODE_MORPHEUS_U32("gender", gender);
-  NODE_MORPHEUS_U32("grammaticalCase", grammatical_case);
-  NODE_MORPHEUS_U32("tense", tense);
-  NODE_MORPHEUS_U32("mood", mood);
-  NODE_MORPHEUS_U32("voice", voice);
-  NODE_MORPHEUS_U32("degree", degree);
-#undef NODE_MORPHEUS_U32
-#define NODE_MORPHEUS_TEXT(js_name, field, capacity)                        \
-  if (!node_morpheus_set_string(env, object, js_name, analysis->field,      \
-                                capacity))                                  \
-    return false
-  NODE_MORPHEUS_TEXT("raw", raw, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("workword", workword, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("lemma", lemma, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("preverb", preverb, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("augment", augment, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("stem", stem, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("suffix", suffix, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("ending", ending, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("crasis", crasis, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("dictionaryForm", dictionary_form,
-                     MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("englishForm", english_form, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("rawPreverb", raw_preverb, MORPHEUS_TEXT_CAPACITY);
-  NODE_MORPHEUS_TEXT("domains", domains, MORPHEUS_DOMAIN_CAPACITY);
-#undef NODE_MORPHEUS_TEXT
-  if (!node_morpheus_set_flags(env, object, analysis->morph_flags) ||
-      !node_morpheus_set_uint32(env, object, "truncatedFields", truncated)) {
-    return false;
+  if (operation->count != 0u) {
+    memcpy(data, records, records_bytes);
+    memcpy((uint8_t *)data + records_bytes, operation->truncated_fields,
+           truncated_bytes);
   }
-  *output = object;
-  return true;
-}
-
-static bool node_morpheus_generation_value(
-    napi_env env, const morpheus_generation *generation,
-    morpheus_truncated_fields truncated, napi_value *output) {
-  napi_value object;
-  if (napi_create_object(env, &object) != napi_ok) return false;
-#define NODE_MORPHEUS_U32(js_name, field)                                   \
-  if (!node_morpheus_set_uint32(env, object, js_name, generation->field))   \
-    return false
-  NODE_MORPHEUS_U32("structSize", struct_size);
-  NODE_MORPHEUS_U32("partOfSpeech", part_of_speech);
-  NODE_MORPHEUS_U32("dialect", dialect);
-  NODE_MORPHEUS_U32("geographicRegion", geographic_region);
-  NODE_MORPHEUS_U32("person", person);
-  NODE_MORPHEUS_U32("number", number);
-  NODE_MORPHEUS_U32("gender", gender);
-  NODE_MORPHEUS_U32("grammaticalCase", grammatical_case);
-  NODE_MORPHEUS_U32("tense", tense);
-  NODE_MORPHEUS_U32("mood", mood);
-  NODE_MORPHEUS_U32("voice", voice);
-  NODE_MORPHEUS_U32("degree", degree);
-#undef NODE_MORPHEUS_U32
-  if (!node_morpheus_set_string(env, object, "surface", generation->surface,
-                                MORPHEUS_TEXT_CAPACITY) ||
-      !node_morpheus_set_string(env, object, "lemma", generation->lemma,
-                                MORPHEUS_TEXT_CAPACITY) ||
-      !node_morpheus_set_flags(env, object, generation->morph_flags) ||
-      !node_morpheus_set_uint32(env, object, "truncatedFields", truncated)) {
+  if (napi_create_object(env, &object) != napi_ok ||
+      !node_morpheus_set_uint32(env, object, "count",
+                                (uint32_t)operation->count) ||
+      !node_morpheus_set_uint32(env, object, "recordSize",
+                                (uint32_t)record_size) ||
+      napi_set_named_property(env, object, "buffer", buffer) != napi_ok) {
     return false;
   }
   *output = object;
@@ -592,22 +531,8 @@ static void node_morpheus_complete(napi_env env, napi_status async_status,
   node_morpheus_operation *operation = data;
   napi_value value = NULL;
   if (async_status == napi_ok && operation->status == MORPHEUS_OK &&
-      napi_create_array_with_length(env, operation->count, &value) == napi_ok) {
-    for (size_t index = 0; index < operation->count; index++) {
-      napi_value record;
-      bool converted = operation->kind == NODE_MORPHEUS_ANALYZE
-                           ? node_morpheus_analysis_value(
-                                 env, &operation->analyses[index],
-                                 operation->truncated_fields[index], &record)
-                           : node_morpheus_generation_value(
-                                 env, &operation->generations[index],
-                                 operation->truncated_fields[index], &record);
-      if (!converted || napi_set_element(env, value, (uint32_t)index, record) !=
-                            napi_ok) {
-        value = NULL;
-        break;
-      }
-    }
+      !node_morpheus_packed_result(env, operation, &value)) {
+    value = NULL;
   }
 
   if (value != NULL) {
@@ -791,7 +716,15 @@ static napi_value node_morpheus_generate(napi_env env,
 }
 
 static napi_value node_morpheus_init(napi_env env, napi_value exports) {
+  napi_value record_encoding;
+  if (napi_create_uint32(env, NODE_MORPHEUS_RECORD_ENCODING,
+                         &record_encoding) != napi_ok) {
+    node_morpheus_throw_last_error(env, "Unable to initialize addon");
+    return NULL;
+  }
   const napi_property_descriptor properties[] = {
+      {"recordEncoding", NULL, NULL, NULL, NULL, record_encoding,
+       napi_enumerable, NULL},
       {"openLibrary", NULL, node_morpheus_open_library, NULL, NULL, NULL,
        napi_default, NULL},
       {"closeLibrary", NULL, node_morpheus_close_library, NULL, NULL, NULL,

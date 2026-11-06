@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Antoine Boquet
 
+import { Buffer } from "node:buffer";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -48,6 +49,129 @@ function loadAddon() {
 }
 
 const addon = loadAddon();
+
+// The addon returns the records of one operation as a single packed buffer
+// (the C ABI's morpheus_analysis / morpheus_generation layout, followed by
+// the truncated-field masks) that this module decodes; see decodeRecords().
+const RECORD_ENCODING = 1;
+if (addon.recordEncoding !== RECORD_ENCODING) {
+  throw new Error(
+    `The libmorpheus Node-API addon encodes results as ${addon.recordEncoding ?? "an earlier"}` +
+      ` format; this package expects ${RECORD_ENCODING}. Rebuild or update the addon.`,
+  );
+}
+
+const TEXT_CAPACITY = 64;
+const DOMAIN_CAPACITY = 24;
+const MORPH_FLAG_CAPACITY = 11;
+const NUMBER_FIELDS = 12;
+const NUMBERS_SIZE = NUMBER_FIELDS * 4;
+const ANALYSIS_TEXT_FIELDS = [
+  "raw", "workword", "lemma", "preverb", "augment", "stem", "suffix",
+  "ending", "crasis", "dictionaryForm", "englishForm", "rawPreverb",
+];
+const ANALYSIS_MINIMUM_SIZE = NUMBERS_SIZE + ANALYSIS_TEXT_FIELDS.length *
+    TEXT_CAPACITY + DOMAIN_CAPACITY + MORPH_FLAG_CAPACITY;
+const GENERATION_MINIMUM_SIZE = NUMBERS_SIZE + 2 * TEXT_CAPACITY +
+  MORPH_FLAG_CAPACITY;
+const littleEndian = true;
+
+function cString(bytes, offset, capacity) {
+  let end = bytes.indexOf(0, offset);
+  if (end < 0 || end > offset + capacity) end = offset + capacity;
+  return bytes.toString("utf8", offset, end);
+}
+
+function packedView(packed, minimumRecordSize) {
+  const { count, recordSize, buffer } = packed;
+  if (!Number.isInteger(count) || !Number.isInteger(recordSize) ||
+      !(buffer instanceof ArrayBuffer) || recordSize < minimumRecordSize ||
+      buffer.byteLength !== count * (recordSize + 4)) {
+    throw new Error("Malformed result buffer from the libmorpheus addon");
+  }
+  return {
+    count,
+    recordSize,
+    bytes: Buffer.from(buffer),
+    view: new DataView(buffer),
+    truncatedBase: count * recordSize,
+  };
+}
+
+function decodeAnalysisRecords(packed) {
+  const { count, recordSize, bytes, view, truncatedBase } = packedView(
+    packed,
+    ANALYSIS_MINIMUM_SIZE,
+  );
+  const records = new Array(count);
+  for (let index = 0; index < count; index++) {
+    const base = index * recordSize;
+    const record = {
+      structSize: view.getUint32(base, littleEndian),
+      partOfSpeech: view.getUint32(base + 4, littleEndian),
+      dialect: view.getUint32(base + 8, littleEndian),
+      geographicRegion: view.getUint32(base + 12, littleEndian),
+      person: view.getUint32(base + 16, littleEndian),
+      number: view.getUint32(base + 20, littleEndian),
+      gender: view.getUint32(base + 24, littleEndian),
+      grammaticalCase: view.getUint32(base + 28, littleEndian),
+      tense: view.getUint32(base + 32, littleEndian),
+      mood: view.getUint32(base + 36, littleEndian),
+      voice: view.getUint32(base + 40, littleEndian),
+      degree: view.getUint32(base + 44, littleEndian),
+    };
+    let offset = base + NUMBERS_SIZE;
+    for (const field of ANALYSIS_TEXT_FIELDS) {
+      record[field] = cString(bytes, offset, TEXT_CAPACITY);
+      offset += TEXT_CAPACITY;
+    }
+    record.domains = cString(bytes, offset, DOMAIN_CAPACITY);
+    offset += DOMAIN_CAPACITY;
+    record.morphFlags = new Uint8Array(
+      packed.buffer,
+      offset,
+      MORPH_FLAG_CAPACITY,
+    ).slice();
+    record.truncatedFields = view.getUint32(truncatedBase + index * 4, littleEndian);
+    records[index] = record;
+  }
+  return records;
+}
+
+function decodeGenerationRecords(packed) {
+  const { count, recordSize, bytes, view, truncatedBase } = packedView(
+    packed,
+    GENERATION_MINIMUM_SIZE,
+  );
+  const records = new Array(count);
+  for (let index = 0; index < count; index++) {
+    const base = index * recordSize;
+    const textBase = base + NUMBERS_SIZE;
+    records[index] = {
+      structSize: view.getUint32(base, littleEndian),
+      partOfSpeech: view.getUint32(base + 4, littleEndian),
+      dialect: view.getUint32(base + 8, littleEndian),
+      geographicRegion: view.getUint32(base + 12, littleEndian),
+      person: view.getUint32(base + 16, littleEndian),
+      number: view.getUint32(base + 20, littleEndian),
+      gender: view.getUint32(base + 24, littleEndian),
+      grammaticalCase: view.getUint32(base + 28, littleEndian),
+      tense: view.getUint32(base + 32, littleEndian),
+      mood: view.getUint32(base + 36, littleEndian),
+      voice: view.getUint32(base + 40, littleEndian),
+      degree: view.getUint32(base + 44, littleEndian),
+      surface: cString(bytes, textBase, TEXT_CAPACITY),
+      lemma: cString(bytes, textBase + TEXT_CAPACITY, TEXT_CAPACITY),
+      morphFlags: new Uint8Array(
+        packed.buffer,
+        textBase + 2 * TEXT_CAPACITY,
+        MORPH_FLAG_CAPACITY,
+      ).slice(),
+      truncatedFields: view.getUint32(truncatedBase + index * 4, littleEndian),
+    };
+  }
+  return records;
+}
 
 export const MorpheusLanguage = {
   Greek: 0,
@@ -443,7 +567,7 @@ export class MorpheusContext {
 
   analyzeRaw(betaCode, options = 0n) {
     return this.#enqueue(() => addon.analyze(this.#native, betaCode, options)
-      .catch((error) => { throw asMorpheusError(error); }));
+      .then(decodeAnalysisRecords, (error) => { throw asMorpheusError(error); }));
   }
 
   generate(lemma, options = {}) {
@@ -455,7 +579,7 @@ export class MorpheusContext {
   generateRaw(lemma, options = {}) {
     const encoded = nativeGenerationOptions(options);
     return this.#enqueue(() => addon.generate(this.#native, lemma, encoded)
-      .catch((error) => { throw asMorpheusError(error); }));
+      .then(decodeGenerationRecords, (error) => { throw asMorpheusError(error); }));
   }
 
   async close() {
