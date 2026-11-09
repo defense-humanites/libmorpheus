@@ -2,38 +2,35 @@
 
 # Acquiring runtime data
 
-The native archives and the JSR package intentionally contain no linguistic
-data. Applications select a compiled stem library at runtime; experimental Greek
-generation additionally requires a validated `gener.index` at that stemlib's
-root.
+The native archives and the binding packages intentionally contain no
+linguistic data. Applications select a compiled stem library at runtime;
+experimental Greek generation additionally requires a validated `gener.index`
+at that stemlib's root.
 
-The native runtime is likewise separate from the JSR source package. Binding
-and runtime versions are independent; each binding declares the exact native
-release and ABI acquired by `/native` and `/setup`. JSR cannot run a package
-hook after `deno add`; use the combined setup entrypoint to install that
-declared GitHub Release archive and selected data without a native toolchain:
+The native runtime is likewise separate from the binding packages. Binding and
+runtime versions are independent; each binding declares the exact native
+release and ABI its acquisition commands install. Package installation runs no
+script, so the Node.js and Python bindings provide an explicit combined setup
+command that installs the declared GitHub Release archive and the selected data
+without a native toolchain:
 
 ```sh
-deno x \
-  --allow-net=github.com,release-assets.githubusercontent.com,codeload.github.com \
-  --allow-read=./morpheus-native,./morpheus-data \
-  --allow-write=./morpheus-native,./morpheus-data \
-  jsr:@libmorpheus/deno/setup \
-  --dataset perseids
+npx libmorpheus-setup --dataset perseids     # Node.js binding
+libmorpheus-setup --dataset perseids         # Python binding
 ```
 
-Use `--dataset alpheios --with-gener` for Greek analysis and experimental
-generation. The command verifies the release and dataset, writes both receipts,
-and rolls back its new native directory if data acquisition fails. The two
-outputs must be absent and non-overlapping. Separate `/native` and `/data`
-commands remain available for independent acquisition.
+Use `--dataset alpheios` for the Greek-only reference dataset (the Node.js
+command also takes `--with-gener` for experimental generation; the Python one
+installs a prepared index with `--gener-index`). The commands verify the release
+and dataset, write both receipts, and remove the new native directory if data
+acquisition fails. The two outputs must be absent and non-overlapping. Separate
+`libmorpheus-native` and `libmorpheus-data` commands remain available for
+independent acquisition.
 
 The native installer verifies the release SHA-256 sidecar and extracts only
-safe archive entries. Its receipt records both the Deno binding version and the
-installed native version. It supports Linux x86-64 glibc, Linux aarch64 glibc,
-and macOS arm64. Import `nativeLibraryPath` from the package's `/native` export
-to obtain the `.so` or `.dylib` path. Loading it remains an FFI operation and
-therefore requires `deno run --allow-ffi`.
+safe archive entries. Its receipt records both the binding version and the
+installed native version, and names the shared library to load. It supports
+Linux x86-64 glibc, Linux aarch64 glibc, and macOS arm64.
 
 Deployments that need the data without any native binding — the WebAssembly
 binding under Node.js, Deno or Bun, browsers, Cloudflare Workers — use the
@@ -63,17 +60,11 @@ documents it.
 | Reference analysis      | `vendor/alpheios-morpheus/dist/stemlib`            | Ancient Greek           | Not required                     |
 | Experimental generation | Prepared directory described below                 | Ancient Greek           | Included after local preparation |
 
-JSR users can acquire either dataset without Git or a C toolchain. For Greek and
+Either dataset can be acquired without Git or a C toolchain. For Greek and
 Latin analysis:
 
 ```sh
-deno x \
-  --allow-net=codeload.github.com \
-  --allow-read=./morpheus-data \
-  --allow-write=./morpheus-data \
-  jsr:@libmorpheus/deno@0.4.0/data \
-  --dataset perseids \
-  --output ./morpheus-data
+npx @libmorpheus/data --dataset perseids --output ./morpheus-data
 ```
 
 Use `--dataset alpheios` for the Greek-only reference dataset. The command
@@ -92,23 +83,16 @@ git clone --depth 1 --branch v0.3.2 --recurse-submodules \
 
 ## Prepare Greek generation data
 
-JSR users can add `--with-gener` to the Alpheios acquisition command:
+The data package can add `--with-gener` to the Alpheios acquisition command:
 
 ```sh
-deno x \
-  --allow-net=codeload.github.com \
-  --allow-read=./morpheus-greek-data \
-  --allow-write=./morpheus-greek-data \
-  jsr:@libmorpheus/deno@0.4.0/data \
-  --dataset alpheios \
-  --with-gener \
-  --output ./morpheus-greek-data
+npx @libmorpheus/data --dataset alpheios --with-gener --output ./morpheus-greek-data
 ```
 
 This route needs no C toolchain. It downloads the pinned Alpheios data directly
 for the output and the pinned Perseids data as in-memory support for historical
 derivation rules. The bundled internal WebAssembly preparer expands the source
-corpus; an internal TypeScript builder emits the index. Both intermediate and
+corpus; an internal JavaScript builder emits the index. Both intermediate and
 final digests must match the native reference before the command succeeds. It
 refuses an existing output directory rather than overwriting data.
 
@@ -128,15 +112,14 @@ experimental generation. The expected SHA-256 of its `gener.index` in version
 ```
 
 The native preparer and index builder remain internal build-time programs. The
-JSR command exposes only the acquisition operation; its WebAssembly preparer and
-TypeScript index builder remain internal modules, not part of the C or default
-Deno API.
+data package exposes only the acquisition operation; its WebAssembly preparer
+and JavaScript index builder remain internal modules, not part of the C API.
 
 ## Distribution boundary
 
 The prepared directory contains Alpheios linguistic data and an index derived
-from it. `libmorpheus` does not place either one in native archives, the JSR
-package, or downloadable release assets. Review the
+from it. `libmorpheus` does not place either one in native archives, binding
+packages, or downloadable release assets. Review the
 [provenance and licensing evidence](provenance.md) before redistributing a
 prepared directory. The local preparation workflow does not change the MPL/AGPL
 code boundary described in the [licensing guide](licensing.md).

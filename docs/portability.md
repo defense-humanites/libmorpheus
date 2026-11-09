@@ -5,18 +5,18 @@
 The runtime has explicit continuous-integration targets for its supported
 native-package and container platforms:
 
-| Target | C library and fixtures | Deno FFI | Execution mode |
+| Target | C library and fixtures | Node.js binding | Execution mode |
 | --- | --- | --- | --- |
 | Linux x86_64, glibc | Yes | Yes | Native Ubuntu runner |
 | Linux aarch64, glibc | Yes | Yes | Native Ubuntu ARM64 runner |
-| Linux x86_64, musl | Yes | Image smoke test | Native Alpine container |
-| Linux aarch64, musl | Yes | Image smoke test | Native ARM64 Alpine container |
+| Linux x86_64, musl | Yes | No | Native Alpine container |
+| Linux aarch64, musl | Yes | No | Native ARM64 Alpine container |
 | macOS arm64 | Yes | Yes | Native Apple Silicon runner |
 
-The Alpine jobs build both the minimal `runtime` image and the reusable
-`deno-runtime` image. The macOS job compiles with AppleClang, executes the
-complete CTest suite, and runs the Deno FFI tests against the generated
-`libmorpheus.dylib`.
+The Alpine jobs build the minimal `runtime` image, whose build runs the test
+suite, and smoke-test `cruncher` in it. The macOS job compiles with AppleClang,
+executes the complete CTest suite, and runs the Node.js binding's tests against
+the generated `libmorpheus.dylib`.
 
 The architecture matrix is intentionally separate from ordinary pull-request
 CI. It runs weekly, on manual request, and for native `v*` version tags. Tagged
@@ -65,8 +65,6 @@ stem-type table loader refuses an unknown stem class instead of leaving its
 all-ones failure value to the sign of `long` (issue #37). Big-endian
 targets and non-8-bit-byte C implementations are not currently supported.
 See [wasm.md](wasm.md) for the WebAssembly qualification.
-The Deno binding additionally requires a 64-bit `x86_64` or `aarch64`
-runtime.
 
 ## Local checks
 
@@ -82,11 +80,8 @@ For Alpine, the Dockerfile runs the suite during the build:
 
 ```sh
 docker build --target runtime -t morpheus .
-docker build --target deno-runtime -t morpheus-deno .
 ```
 
 The build uses the canonical runtime-data preparer and embeds its validated
 Alpheios `gener.index` beside the Greek stemlib. Platform CI checks the index
-digest, verifies that no source-tree binding was copied into the image, then
-runs real Deno analysis and experimental generation through the public JSR
-package on both Alpine architectures, including preservation of dual forms.
+digest and analyzes a form with `cruncher` on both Alpine architectures.

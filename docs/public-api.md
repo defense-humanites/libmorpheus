@@ -144,17 +144,18 @@ bit `1 << (n % 8)`. The bridge translates each selected historical flag into
 this representation; raw engine bytes and sparse historical flag numbers are
 not returned.
 
-The Deno binding exposes the same indices through `MorpheusMorphFlag` and
+The Node.js binding exposes the same indices through `MorpheusMorphFlag` and
 returns either the public byte vector (`analyzeRaw()` and `generateRaw()`) or
-stable names (`analyze()` and `generate()`). `hasMorpheusMorphFlag()` accepts
-either representation or a readonly array of analyses or generations.
+stable names (`analyze()` and `generate()`); the Python binding returns the
+byte vector from `analyze_raw()` and `generate_raw()` and the names from
+`analyze()` and `generate()`, and `has_morph_flag()` accepts either.
 
 ## Fixed-capacity text
 
 Every text field is NUL-terminated. At most `capacity - 1` bytes are copied.
 `morpheus_result_truncated_fields()` reports any truncated field; zero means all
-text was complete. The Deno semantic API returns named truncated fields, while
-the raw API preserves the mask.
+text was complete. The bindings' semantic APIs return named truncated fields,
+while their raw APIs preserve the mask.
 
 ## Request options
 

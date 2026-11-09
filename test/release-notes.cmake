@@ -87,7 +87,6 @@ endfunction()
 read_json_version(bindings/js/wasm/package.json wasm_version)
 read_json_version(bindings/js/data/package.json data_version)
 read_json_version(bindings/js/node/package.json node_version)
-read_json_version(bindings/js/deno/jsr.json deno_version)
 file(READ "${MORPHEUS_SOURCE_DIR}/bindings/python/pyproject.toml" pyproject)
 string(REGEX MATCH "\nversion = \"([0-9.]+)\"" _ "${pyproject}")
 set(python_version "${CMAKE_MATCH_1}")
@@ -96,7 +95,6 @@ foreach(current_tag IN ITEMS
         "wasm-v${wasm_version}"
         "data-v${data_version}"
         "node-v${node_version}"
-        "deno-v${deno_version}"
         "python-v${python_version}")
   if(NOT EXISTS "${notes_dir}/${current_tag}.md")
     message(FATAL_ERROR "Missing release notes for the current version: docs/release-notes/${current_tag}.md")
@@ -105,7 +103,7 @@ endforeach()
 
 # Every workflow that creates a GitHub release titles it with the tag and
 # takes its body from the notes.
-foreach(workflow IN ITEMS platform wasm-release data-release deno-release)
+foreach(workflow IN ITEMS platform wasm-release data-release)
   file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/${workflow}.yml" contents)
   string(FIND "${contents}" "docs/release-notes/\${tag}.md" notes_at)
   string(FIND "${contents}" "name: tag," title_at)

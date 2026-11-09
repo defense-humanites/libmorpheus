@@ -2,21 +2,21 @@
 
 # Release qualification
 
-This checklist defines the independent native-runtime, Deno-binding,
-Node.js-binding, Python-binding, and WebAssembly-binding release tracks. Native releases cover the C
-library, installed metadata, containers, `cruncher`, and pinned fixture data.
-Deno releases cover the TypeScript binding, its acquisition commands,
-standalone archive, and JSR package. Node.js releases cover the ESM facade,
+This checklist defines the independent native-runtime, Node.js-binding,
+Python-binding, WebAssembly-binding and data-package release tracks. Native
+releases cover the C library, installed metadata, the container, `cruncher`,
+and pinned fixture data. Node.js releases cover the ESM facade,
 acquisition commands, and three optional Node-API addon packages on npm. Python
 releases cover the pure-Python `ctypes` facade and its acquisition commands on
 PyPI. WebAssembly releases
 cover the Emscripten-compiled runtime module and its JavaScript facade,
 published as one package on npm and JSR. Historical standalone utilities are
-outside these release contracts.
+outside these release contracts. The Deno binding track ended with
+`deno-v0.4.3` (`release-deno-0.4.3.md`): the binding, its workflows and its
+container target were removed afterwards, and libmorpheus no longer depends on
+Deno.
 
-Native releases use `v<version>` tags. Deno binding releases use
-`deno-v<version>` tags and declare the compatible native release and ABI in
-`bindings/js/deno/internal/version.ts`. Node.js binding releases use
+Native releases use `v<version>` tags. Node.js binding releases use
 `node-v<version>` tags and declare native compatibility in
 `bindings/js/node/internal/native-manifest.js`. Python binding releases use
 `python-v<version>` tags and declare compatibility in
@@ -50,13 +50,6 @@ historical evidence.
 - Keep `MORPHEUS_ABI_VERSION` and `SOVERSION` unchanged only for compatible
   additions. A removed function, changed signature, reassigned constant, or
   changed `morpheus_analysis` layout requires an explicit ABI/SONAME decision.
-- For a Deno release, update `bindings/js/deno/jsr.json` and
-  `MORPHEUS_DENO_VERSION` together. Review `MORPHEUS_NATIVE_VERSION` and
-  `MORPHEUS_NATIVE_ABI_VERSION` independently; they identify the already
-  published native release acquired by the binding.
-- Confirm that the Deno `ABI_VERSION` and native structure declarations match
-  the binding's declared native ABI. They need not match a newer native ABI
-  being developed concurrently on `main`.
 - For a Node.js release, update `bindings/js/node/package.json`,
   `MORPHEUS_NODE_VERSION`, and all three `npm/*/package.json` templates
   together. Keep every optional dependency pinned to that exact package
@@ -96,13 +89,12 @@ historical evidence.
 ## 3. Required CI
 
 The Linux workflow in `.github/workflows/test.yml` deliberately has two
-levels. Pull requests run the native CMake and Deno jobs. Pushes to `main`
+levels. Pull requests run the native CMake and binding jobs. Pushes to `main`
 additionally run the optimized build, sanitizers, byte-signedness matrix, and
 inherited Makefile compatibility check. Native `v*` tags delegate optimized
-package verification to the architecture workflow. Deno `deno-v*` tags run the
-Linux binding checks before their dedicated publication workflow builds the
-standalone source archive. Superseded runs are cancelled, except for immutable
-version-tag runs.
+package verification to the architecture workflow. Binding tags run the Linux
+checks their publication workflow waits for. Superseded runs are cancelled,
+except for immutable version-tag runs.
 
 The expensive native architecture workflow in `.github/workflows/platform.yml`
 runs weekly, on explicit manual dispatch, and for every native `v*` or Node.js
@@ -113,11 +105,6 @@ track. Packages and checksums are retained as short-lived CI artifacts on
 non-tag runs. After a native version tag passes the full platform matrix and
 separate Linux CI, the tag workflow publishes only the verified native assets
 and benchmark evidence to the native GitHub release.
-
-The Deno publication workflow runs only for `deno-v*` tags. It requires Linux
-CI on the tagged commit, verifies that the declared native `v<version>` release
-and all six native archive files exist, builds the standalone binding archive,
-publishes a separate non-latest GitHub release, and then publishes JSR.
 
 The Node.js publication workflow runs only for `node-v*` tags or explicit
 recovery dispatches. A tag launches both Linux CI and the complete native
@@ -151,7 +138,7 @@ both workflow files:
 - signed- and unsigned-`char` conversion builds;
 - Alpine x86-64 and aarch64;
 - Apple Silicon arm64;
-- Deno type checking and FFI tests;
+- Node.js and Python binding tests;
 - inherited Makefile compatibility.
 
 Documentation-only work does not bypass the Linux documentation and release
@@ -200,16 +187,12 @@ every qualification job of its own run.
 
 ## 5. Runtime artifacts
 
-- Build the runtime and `deno-runtime` container targets for linux/amd64 and
-  linux/arm64.
+- Build the `runtime` container target for linux/amd64 and linux/arm64.
 - Treat container builds as qualification only. Do not publish an image
   embedding the Alpheios stemlib until its redistribution terms have been
   confirmed; this restriction does not apply to data-free native packages.
-- Require both images to contain the canonical Alpheios `gener.index` digest.
-  Require `deno-runtime` to contain no copied Deno binding: applications must
-  consume the normal JSR dependency. Smoke-test `cruncher`, then run real Deno
-  analysis and experimental generation from JSR against the prepared stemlib,
-  including a dual-form assertion, rather than merely checking that Deno starts.
+- Require the image to contain the canonical Alpheios `gener.index` digest and
+  smoke-test `cruncher` in it.
 - Inspect the native installation and confirm it contains only the public
   header, shared library, CMake package files, `libmorpheus.pc`, and optional
   `cruncher` executable.
@@ -241,7 +224,7 @@ every qualification job of its own run.
   paragraph and list item on one line. The release title is the tag. The
   `release_notes` test requires notes for the current version of every track,
   rejects hard-wrapped lines and requires the link to the decision when one
-  exists; every release workflow (native, WebAssembly, data, Deno, Node.js,
+  exists; every release workflow (native, WebAssembly, data, Node.js,
   Python) publishes them. Node.js and Python releases carry the files their
   registry serves, checked against the registry's digests
   (`tools/registry-release-assets.py`). Binding releases never become the
@@ -264,31 +247,16 @@ every qualification job of its own run.
 - For a native release, tag the exact fully qualified commit as `v<version>`.
   The platform workflow rebuilds all three native archives, adds the accepted
   benchmark evidence, and publishes eight files after the separate tagged Linux
-  workflow passes. It does not publish or version the Deno binding.
+  workflow passes. It does not publish or version any binding.
 - Install a produced native package into a fresh prefix and repeat one CMake and
   one `pkg-config` consumer smoke test. Verify the qualification-only container
   by digest on both architectures.
-- For a Deno release, run `deno publish --dry-run` from `bindings/js/deno` and
-  inspect the exact file list. Require `jsr.json` to match
-  `MORPHEUS_DENO_VERSION`; verify that the independent
-  `MORPHEUS_NATIVE_VERSION` release exists with the declared ABI.
-- Tag the qualified binding commit as `deno-v<version>`. The dedicated workflow
-  waits for Linux CI, publishes `libmorpheus-deno-<version>.tar.gz` and its
-  checksum in a separate GitHub release, then publishes the same version to
-  JSR. Neither binding artifact embeds a native library or stem data.
-- Before the first publication, link `@libmorpheus/deno` to
-  `defense-humanites/libmorpheus` in the package's JSR settings. This one-time
-  association authorizes tokenless GitHub Actions publication through OIDC.
-- Do not move any published tag. If JSR rejects metadata after the
-  Deno GitHub release succeeds and that version is still unpublished, correct
-  only `bindings/js/deno/jsr.json` on `main` and manually dispatch
-  `Recover JSR publication` with the `deno-v<version>` tag. The recovery refuses
-  broader binding changes.
-- After JSR publication, manually dispatch `Published JSR smoke test` with the
-  exact package version. It starts with an empty Deno application and obtains
-  the public JSR package, its declared native archive, Alpheios data plus
-  generation index, and Perseids data. Require Greek and Latin analysis plus
-  experimental Greek generation to pass before closing the Deno release.
+- JSR packages (`@libmorpheus/wasm`, `@libmorpheus/data`) are checked and
+  published with JSR's own command-line tool, `npx jsr@0.14.3 publish`, which
+  runs the registry's publisher itself; libmorpheus has no Deno dependency.
+  Each JSR package must be linked to `defense-humanites/libmorpheus` in its JSR
+  settings once, which authorizes tokenless publication through OIDC. Never
+  move a published tag.
 - npm requires a package to exist before it can acquire a trusted publisher.
   Before the first Node.js release, run `bootstrap-npm.mjs`, inspect its four
   inert `0.0.0` packages, and publish them interactively with npm dist-tag
@@ -346,7 +314,8 @@ every qualification job of its own run.
   repository `libmorpheus`, workflow filename `wasm-release.yml` and
   `npm publish` permission; the versioned workflow needs no token.
 - For a WebAssembly release, build `dist/` locally with the pinned Emscripten,
-  run `deno publish --dry-run` and `npm pack --dry-run --ignore-scripts` from
+  run `npx jsr@0.14.3 publish --dry-run --allow-dirty` and
+  `npm pack --dry-run --ignore-scripts` from
   `bindings/js/wasm`, and inspect both file lists: the loader, the module, the
   facade, its types, the version module, licenses and README, and nothing
   else. Tag the exact qualified commit as `wasm-v<version>`. The dedicated
@@ -358,14 +327,14 @@ every qualification job of its own run.
   pre-release GitHub release named by the tag. The package never contains
   linguistic data; `wasm_package_metadata` enforces that at every CI run.
 - If one registry accepts the version and the other rejects it, or the job
-  times out while JSR is still processing the upload (`deno publish` returns
+  times out while JSR is still processing the upload (the `jsr` command returns
   only once JSR has processed it, and JSR may queue it for long), do not move
   the tag. Fix only package metadata on `main` if a registry requires it and
   manually dispatch `Publish WebAssembly binding` with the existing tag; both
   the npm and the JSR steps skip an exact version already present, so the
   dispatch resumes at the GitHub release.
-- For a data acquisition package release, run `npm test`, `deno test -A
-  --no-check test/*.test.js`, `deno publish --dry-run` and `npm pack
+- For a data acquisition package release, run `npm test`,
+  `npx jsr@0.14.3 publish --dry-run --allow-dirty` and `npm pack
   --dry-run --ignore-scripts` from `bindings/js/data`, and tag the exact
   qualified commit as `data-v<version>`. `data-release.yml` waits for the
   tagged Linux CI, repeats those checks, acquires a dataset with the command
@@ -375,9 +344,10 @@ every qualification job of its own run.
   idempotent, so a recovery dispatch with `release_tag` resumes at the
   release; the npm placeholder and the JSR link are prepared as for the
   WebAssembly binding.
-- After publication, exercise the package from JSR itself (`deno add
-  jsr:@libmorpheus/wasm@<version>`, then the README's Node.js/Deno example
-  against a local stemlib) and record the outcome in the release decision.
+- After publication, exercise the package from JSR itself (`npx jsr add
+  @libmorpheus/wasm@<version>` in an empty Node.js project, then the README's
+  example against a local stemlib) and record the outcome in the release
+  decision.
   JSR transforms published files (it rewrites `.wasm` import names and
   resolves README links against its own pages), so neither the qualification
   workflow nor a local static server stands in for it; 0.1.0 passed both and

@@ -97,12 +97,9 @@ jobs:
       - name: Verify both package manifests against the built module
         working-directory: bindings/js/wasm
         run: |
-          curl -fsSL https://deno.land/install.sh | DENO_INSTALL="$HOME/.deno" sh -s v2.9.5
-          export PATH="$HOME/.deno/bin:$PATH"
           mkdir -p dist
           cp ../../../build/wasm/wasm/morpheus.mjs ../../../build/wasm/wasm/morpheus.wasm dist/
-          deno check index.mjs
-          deno publish --dry-run
+          npx --yes jsr@0.14.3 publish --dry-run --allow-dirty
           npm pack --dry-run --ignore-scripts .
           rm -r dist
 

@@ -62,10 +62,10 @@ The following remain MPL-2.0 even where the current path was created locally:
 - `tools/gener-derivation-manifest.tsv` and the generation-derivation fixtures,
   which record and exercise inherited rule data and behavior.
 
-The same MPL treatment applies to the Deno and Node copies of the generation
-corpus manifest and compiled preparer under `bindings/js/*/internal/`. The
+The same MPL treatment applies to the data package's copies of the generation
+corpus manifest and compiled preparer under `bindings/js/data/internal/`. The
 compiled preparer also contains the permissively licensed Emscripten runtime;
-its accompanying license text is included in each standalone binding package.
+its accompanying license text is included in the package.
 
 The WebAssembly binding package (`bindings/js/wasm/`, published as
 `@libmorpheus/wasm`) is the one package that ships the compiled runtime. Its

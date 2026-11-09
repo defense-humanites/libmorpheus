@@ -5,7 +5,6 @@ if(NOT DEFINED MORPHEUS_SOURCE_DIR)
 endif()
 
 set(agpl_files
-    .github/workflows/deno-release.yml
     .github/workflows/node-release.yml
     .github/workflows/npm-smoke.yml
     .github/workflows/platform.yml
@@ -91,25 +90,6 @@ set(agpl_files
     bindings/python/test/runtime_smoke.py
     bindings/python/test/test_binding.py
     test/npm-published-smoke.mjs
-    bindings/js/deno/NOTICE
-    bindings/js/deno/README.md
-    bindings/js/deno/data.ts
-    bindings/js/deno/internal/data_internal.ts
-    bindings/js/deno/internal/data_manifest.ts
-    bindings/js/deno/test/data_test.ts
-    bindings/js/deno/internal/gener_index_internal.ts
-    bindings/js/deno/test/gener_preparer_test.ts
-    bindings/js/deno/internal/gener_runtime_internal.ts
-    bindings/js/deno/mod.ts
-    bindings/js/deno/test/mod_test.ts
-    bindings/js/deno/native.ts
-    bindings/js/deno/internal/native_internal.ts
-    bindings/js/deno/internal/native_manifest.ts
-    bindings/js/deno/test/native_test.ts
-    bindings/js/deno/setup.ts
-    bindings/js/deno/internal/setup_internal.ts
-    bindings/js/deno/test/setup_test.ts
-    bindings/js/deno/internal/version.ts
     include/morpheus/morpheus.h
     src/api/gener_index.c
     src/api/gener_index.h
@@ -153,9 +133,7 @@ endforeach()
 foreach(mpl_file IN ITEMS
         bindings/js/data/internal/gener-manifest.js
         bindings/js/data/internal/gener-preparer.mjs
-        bindings/js/deno/internal/gener_manifest.ts
-        bindings/js/deno/internal/gener_preparer.mjs
-        include/morpheus/compat.h
+                include/morpheus/compat.h
         src/anal/anal_internal.h
         src/anal/cruncher_internal.h
         src/bridge/legacy_values.c
@@ -258,15 +236,6 @@ foreach(data_sidecar IN ITEMS package.json jsr.json)
             "AGPL SPDX sidecar missing for bindings/js/data/${data_sidecar}")
   endif()
 endforeach()
-
-file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/deno/jsr.json.license"
-     jsr_license)
-string(FIND "${jsr_license}"
-       "SPDX-License-Identifier: AGPL-3.0-or-later" jsr_spdx_at)
-if(jsr_spdx_at EQUAL -1)
-  message(FATAL_ERROR
-          "AGPL SPDX sidecar missing for bindings/js/deno/jsr.json")
-endif()
 
 file(READ "${MORPHEUS_SOURCE_DIR}/bindings/js/node/package.json.license"
      node_package_license)

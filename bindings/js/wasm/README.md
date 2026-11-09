@@ -16,7 +16,7 @@ stem library at runtime, exactly as the native library does. See
 Experimental. The module exposes the complete stable C ABI (version 2) and the
 historical `cruncher` text output. The facade returns the numeric codes of the
 C structures (`MorpheusRawAnalysis`, `MorpheusRawGeneration`) rather than the
-named decoding offered by the Deno and Node.js bindings. The module is
+named decoding offered by the Node.js and Python bindings. The module is
 single-threaded; use one instance per worker for parallel work.
 
 ## Installing

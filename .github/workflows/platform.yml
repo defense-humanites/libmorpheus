@@ -14,9 +14,6 @@ on:
       - 'test/test-installed-package.cmake'
       - 'test/test-installed-pkgconfig.cmake'
       - 'test/test-release-package.cmake'
-      - 'test/package-deno-binding.cmake'
-      - 'test/test-deno-binding-package.cmake'
-      - 'bindings/js/deno/**'
       - 'bindings/js/node/**'
       - 'tools/prepare-runtime-data.sh'
   push:
@@ -116,11 +113,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -168,22 +160,6 @@ jobs:
           -DMORPHEUS_BUILD_DIR=${{ github.workspace }}/build/release
           -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/release/packages
           -P test/test-release-package.cmake
-
-      - name: Package Deno binding
-        run: >-
-          cmake
-          -DMORPHEUS_SOURCE_DIR=${{ github.workspace }}
-          -DMORPHEUS_BUILD_DIR=${{ github.workspace }}/build/release
-          -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/release/packages
-          -P test/package-deno-binding.cmake
-
-      - name: Verify standalone Deno binding package
-        run: >-
-          cmake
-          -DMORPHEUS_SOURCE_DIR=${{ github.workspace }}
-          -DMORPHEUS_BUILD_DIR=${{ github.workspace }}/build/release
-          -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/release/packages
-          -P test/test-deno-binding-package.cmake
 
       - name: Smoke-test generation qualification
         env:
@@ -238,14 +214,6 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Preserve Deno binding package
-        uses: actions/upload-artifact@v4
-        with:
-          name: libmorpheus-deno-binding
-          path: build/release/packages/libmorpheus-deno-*.tar.gz*
-          if-no-files-found: error
-          retention-days: 14
-
       - name: Preserve Node.js platform package
         if: needs.activity.outputs.package-artifacts == 'true'
         uses: actions/upload-artifact@v4
@@ -268,11 +236,6 @@ jobs:
 
       - name: Verify native architecture
         run: test "$(uname -m)" = aarch64
-
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -309,21 +272,11 @@ jobs:
             exit 1
           fi
 
-      - name: Check binding
-        run: deno check bindings/js/deno/mod.ts bindings/js/deno/test/mod_test.ts
-
-      - name: Prepare Deno generation fixture
+      - name: Prepare the generation fixture
         run: >-
           build/release/morpheus_gener_index_builder
           stemlib/gener.index
           test/generation-service-source.txt
-
-      - name: Test binding
-        env:
-          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.so
-          MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
-          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
-        run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
 
       - name: Link the in-tree data package into the Node.js binding
         working-directory: bindings/js/node
@@ -426,53 +379,6 @@ jobs:
           docker run --rm --entrypoint sh morpheus:ci -c \
             'echo "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6  /opt/morpheus/share/morpheus/stemlib/gener.index" | sha256sum -c -'
 
-      - name: Build Alpine Deno base image
-        run: docker build --target deno-runtime --tag morpheus-deno:ci .
-
-      - name: Smoke-test Deno analysis and generation
-        run: |
-          docker run --rm --entrypoint sh morpheus-deno:ci -c \
-            'echo "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6  /opt/morpheus/share/morpheus/stemlib/gener.index" | sha256sum -c -'
-          docker run --rm --entrypoint sh morpheus-deno:ci -c \
-            'test ! -e /opt/morpheus/share/morpheus/deno'
-          docker run --rm morpheus-deno:ci eval \
-            --minimum-dependency-age=0 \
-            --allow-env=MORPHEUS_LIBRARY,MORPHEUS_STEMLIB \
-            --allow-ffi=/opt/morpheus/lib/libmorpheus.so \
-            --allow-read=/opt/morpheus/share/morpheus/stemlib '
-            import {
-              MorpheusLanguage,
-              MorpheusLibrary,
-              MorpheusOption,
-            } from "jsr:@libmorpheus/deno@0.4.2";
-            using library = new MorpheusLibrary(
-              Deno.env.get("MORPHEUS_LIBRARY")!,
-            );
-            await using context = library.createContext(
-              Deno.env.get("MORPHEUS_STEMLIB")!,
-              MorpheusLanguage.Greek,
-            );
-            const formerlyCrashing = await context.analyze(
-              "a)mfestan", MorpheusOption.IgnoreAccents,
-            );
-            if (formerlyCrashing.length === 0) {
-              throw new Error("a)mfestan analysis smoke failed");
-            }
-            const analyses = await context.analyze("a)/nqrwpos");
-            if (analyses.length === 0) throw new Error("analysis smoke failed");
-            for (const [word, expected] of [["a)nalow", 26], ["a(napinw", 39]]) {
-              const found = await context.analyze(word, MorpheusOption.IgnoreAccents);
-              if (found.length !== expected) {
-                throw new Error(`${word}: expected ${expected} analyses, got ${found.length}`);
-              }
-            }
-            const forms = await context.generate("lo/gos");
-            if (forms.length === 0) throw new Error("generation smoke failed");
-            if (!forms.some((form) => form.grammaticalNumber === "dual")) {
-              throw new Error("generation lost dual forms");
-            }
-          '
-
   apple-silicon:
     needs: activity
     if: needs.activity.outputs.run-platforms == 'true'
@@ -486,11 +392,6 @@ jobs:
 
       - name: Verify native architecture
         run: test "$(uname -m)" = arm64
-
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -543,21 +444,11 @@ jobs:
             *) echo "unexpected deployment target: $deployment_target" >&2; exit 1 ;;
           esac
 
-      - name: Check binding
-        run: deno check bindings/js/deno/mod.ts bindings/js/deno/test/mod_test.ts
-
-      - name: Prepare Deno generation fixture
+      - name: Prepare the generation fixture
         run: >-
           build/release/morpheus_gener_index_builder
           stemlib/gener.index
           test/generation-service-source.txt
-
-      - name: Test binding
-        env:
-          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/release/libmorpheus.dylib
-          MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
-          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
-        run: deno test --allow-env --allow-ffi bindings/js/deno/test/mod_test.ts
 
       - name: Link the in-tree data package into the Node.js binding
         working-directory: bindings/js/node

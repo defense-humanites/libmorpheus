@@ -65,13 +65,6 @@ if(BUILD_TESTING)
       -P "${PROJECT_SOURCE_DIR}/test/stemlib-redistribution-policy.cmake"
   )
   add_test(
-    NAME jsr_package_metadata
-    COMMAND
-      "${CMAKE_COMMAND}"
-      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
-      -P "${PROJECT_SOURCE_DIR}/test/jsr-package-metadata.cmake"
-  )
-  add_test(
     NAME node_package_metadata
     COMMAND
       "${CMAKE_COMMAND}"
@@ -1058,14 +1051,14 @@ target_compile_options(
 )
 
 option(
-  MORPHEUS_BUILD_DENO_GENER_PREPARER
-  "Build the internal generation source preparer as an Emscripten module"
+  MORPHEUS_BUILD_JS_GENER_PREPARER
+  "Build the internal generation source preparer as an Emscripten module for @libmorpheus/data"
   OFF
 )
-if(MORPHEUS_BUILD_DENO_GENER_PREPARER)
+if(MORPHEUS_BUILD_JS_GENER_PREPARER)
   if(NOT EMSCRIPTEN)
     message(FATAL_ERROR
-      "MORPHEUS_BUILD_DENO_GENER_PREPARER requires Emscripten")
+      "MORPHEUS_BUILD_JS_GENER_PREPARER requires Emscripten")
   endif()
   set_target_properties(
     morpheus_gener_source_preparer
@@ -1845,7 +1838,7 @@ if(MORPHEUS_BUILD_WASM)
     COMMENT "Stamping morpheus.mjs with its SPDX and provenance header"
   )
 endif()
-if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER AND NOT EMSCRIPTEN)
+if(NOT MORPHEUS_BUILD_JS_GENER_PREPARER AND NOT EMSCRIPTEN)
   install(
     TARGETS morpheus
     EXPORT MorpheusTargets
@@ -1877,7 +1870,7 @@ write_basic_package_version_file(
   VERSION ${PROJECT_VERSION}
   COMPATIBILITY SameMajorVersion
 )
-if(NOT MORPHEUS_BUILD_DENO_GENER_PREPARER AND NOT EMSCRIPTEN)
+if(NOT MORPHEUS_BUILD_JS_GENER_PREPARER AND NOT EMSCRIPTEN)
   install(
     EXPORT MorpheusTargets
     NAMESPACE Morpheus::

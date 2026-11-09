@@ -6,7 +6,6 @@ on:
       - main
     tags:
       - "v*"
-      - "deno-v*"
       - "node-v*"
       - "python-v*"
       - "wasm-v*"
@@ -209,111 +208,7 @@ jobs:
       - name: Test ThreadSanitizer
         run: ctest --preset thread-sanitizer
 
-  deno:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Check out sources and stemlib
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
-
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.5
-
-      - name: Dry-run JSR package
-        working-directory: bindings/js/deno
-        run: |
-          deno lint --rules-include=no-slow-types mod.ts
-          deno publish --dry-run
-
-      - name: Test the data acquisition package under Deno and dry-run its JSR manifest
-        # The package is published to JSR as well as npm; its fixture-based
-        # tests (tar reader, zlib, crypto, the Emscripten preparer, main
-        # module detection) must pass through Deno's node: compatibility.
-        working-directory: bindings/js/data
-        run: |
-          deno test -A --no-check test/data.test.js test/gener.test.js test/main-module.test.js
-          deno check data.js
-          deno publish --dry-run
-          deno run -A data.js --help | grep -F 'Usage: libmorpheus-data'
-
-      - name: Configure library
-        run: cmake --preset dev
-
-      - name: Build library
-        run: cmake --build --preset dev
-
-      - name: Prepare Deno generation fixture
-        run: >-
-          build/dev/morpheus_gener_index_builder
-          stemlib/gener.index
-          test/generation-service-source.txt
-
-      - name: Package Deno binding
-        run: >-
-          cmake
-          -DMORPHEUS_SOURCE_DIR=${{ github.workspace }}
-          -DMORPHEUS_BUILD_DIR=${{ github.workspace }}/build/dev
-          -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/dev/packages
-          -P test/package-deno-binding.cmake
-
-      - name: Verify standalone Deno binding package
-        run: >-
-          cmake
-          -DMORPHEUS_SOURCE_DIR=${{ github.workspace }}
-          -DMORPHEUS_BUILD_DIR=${{ github.workspace }}/build/dev
-          -DMORPHEUS_PACKAGE_DIR=${{ github.workspace }}/build/dev/packages
-          -P test/test-deno-binding-package.cmake
-
-      - name: Check binding
-        run: |
-          deno check bindings/js/deno/mod.ts bindings/js/deno/test/mod_test.ts \
-            bindings/js/deno/data.ts bindings/js/deno/test/data_test.ts \
-            bindings/js/deno/native.ts bindings/js/deno/test/native_test.ts \
-            bindings/js/deno/setup.ts bindings/js/deno/test/setup_test.ts \
-            bindings/js/deno/test/gener_preparer_test.ts
-
-      - name: Test binding
-        env:
-          MORPHEUS_LIBRARY: ${{ github.workspace }}/build/dev/libmorpheus.so
-          MORPHEUS_STEMLIB: ${{ github.workspace }}/stemlib
-          MORPHEUS_ALPHEIOS_STEMLIB: ${{ github.workspace }}/vendor/alpheios-morpheus/dist/stemlib
-        run: >-
-          deno test --allow-env --allow-ffi --allow-read --allow-write
-          bindings/js/deno/test/mod_test.ts bindings/js/deno/test/data_test.ts
-          bindings/js/deno/test/native_test.ts
-          bindings/js/deno/test/setup_test.ts
-          bindings/js/deno/test/gener_preparer_test.ts
-
-      - name: Test native acquisition with path-scoped permissions
-        run: |
-          mkdir -p build/deno-scoped-native
-          deno test \
-            --filter 'native extraction materializes versioned library links' \
-            --allow-read="$PWD/build/deno-scoped-native" \
-            --allow-write="$PWD/build/deno-scoped-native" \
-            bindings/js/deno/test/native_test.ts
-
-      - name: Acquire and verify pinned Deno datasets
-        run: |
-          deno run --allow-net=codeload.github.com \
-            --allow-read=build --allow-write=build \
-            bindings/js/deno/data.ts --dataset alpheios \
-            --with-gener \
-            --output build/data-test-alpheios
-          deno run --allow-net=codeload.github.com \
-            --allow-read=build --allow-write=build \
-            bindings/js/deno/data.ts --dataset perseids \
-            --output build/data-test-perseids
-          test -f build/data-test-alpheios/Greek/steminds/nomind
-          cmake -E sha256sum build/data-test-alpheios/gener.index | \
-            grep -F '5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6'
-          test -f build/data-test-perseids/Latin/steminds/nomind
-
-  deno-gener-preparer:
+  gener-preparer:
     runs-on: ubuntu-latest
     container: emscripten/emsdk:4.0.15
     timeout-minutes: 15
@@ -330,27 +225,25 @@ jobs:
 
       - name: Configure WebAssembly preparer
         run: >-
-          emcmake cmake -S . -B build/deno-gener-wasm
+          emcmake cmake -S . -B build/gener-wasm
           -DBUILD_TESTING=OFF
-          -DMORPHEUS_BUILD_DENO_GENER_PREPARER=ON
+          -DMORPHEUS_BUILD_JS_GENER_PREPARER=ON
 
       - name: Build WebAssembly preparer
         run: >-
-          cmake --build build/deno-gener-wasm
+          cmake --build build/gener-wasm
           --target morpheus_gener_source_preparer
 
       - name: Upload WebAssembly preparer
         uses: actions/upload-artifact@v4
         with:
-          name: deno-gener-preparer
-          path: build/deno-gener-wasm/gener_preparer.mjs
+          name: gener-preparer
+          path: build/gener-wasm/gener_preparer.mjs
           if-no-files-found: error
 
-      - name: Verify checked-in WebAssembly preparers
+      - name: Verify the checked-in WebAssembly preparer
         run: |
-          cmp build/deno-gener-wasm/gener_preparer.mjs \
-            bindings/js/deno/internal/gener_preparer.mjs
-          cmp build/deno-gener-wasm/gener_preparer.mjs \
+          cmp build/gener-wasm/gener_preparer.mjs \
             bindings/js/data/internal/gener-preparer.mjs
 
   node:
@@ -472,6 +365,12 @@ jobs:
       - name: Test the data acquisition package
         working-directory: bindings/js/data
         run: npm test
+
+      - name: Dry-run the data package's JSR publication
+        # JSR's own command-line tool, which runs the registry's publisher
+        # itself; libmorpheus does not depend on Deno.
+        working-directory: bindings/js/data
+        run: npx --yes jsr@0.14.3 publish --dry-run --allow-dirty
 
       - name: Acquire the runtime subset with the data package and analyze it
         # The subset the tool writes must be the subset the WebAssembly

@@ -123,52 +123,26 @@ foreach(retained_sidecar IN LISTS retained_benchmark_sidecars)
   endif()
 endforeach()
 
-file(READ "${MORPHEUS_SOURCE_DIR}/.github/workflows/deno-release.yml"
-     deno_release_workflow)
-foreach(expected_workflow_value IN ITEMS
-        "deno-v*"
-        "MORPHEUS_DENO_VERSION"
-        "MORPHEUS_NATIVE_VERSION"
-        "libmorpheus-deno-"
-        "workflow_id: 'test.yml'"
-        "deno publish --dry-run"
-        "run: deno publish"
-        "id-token: write")
-  string(FIND "${deno_release_workflow}" "${expected_workflow_value}"
-              workflow_value_at)
-  if(workflow_value_at EQUAL -1)
-    message(FATAL_ERROR
-      "Deno release workflow is missing: ${expected_workflow_value}")
-  endif()
-endforeach()
-
+# The Alpine image remains a qualification target for the native runtime and
+# the prepared Alpheios data; the Deno image and binding are withdrawn.
 file(READ "${MORPHEUS_SOURCE_DIR}/Dockerfile" dockerfile)
 foreach(expected_container_value IN ITEMS
         "tools/prepare-runtime-data.sh /opt/morpheus-runtime-data"
         "/opt/morpheus-runtime-data"
-        "ENV MORPHEUS_LIBRARY=/opt/morpheus/lib/libmorpheus.so"
-        "ENV MORPHEUS_STEMLIB=/opt/morpheus/share/morpheus/stemlib"
-        "jsr:@libmorpheus/deno@0.4.2"
-        "test ! -e /opt/morpheus/share/morpheus/deno"
-        "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6"
-        "generation lost dual forms")
+        "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
   string(FIND "${dockerfile}${platform_workflow}"
               "${expected_container_value}" container_value_at)
   if(container_value_at EQUAL -1)
     message(FATAL_ERROR
-      "Docker generation qualification is missing: ${expected_container_value}")
+      "Container qualification is missing: ${expected_container_value}")
   endif()
 endforeach()
-string(FIND "${dockerfile}" "bindings/js/deno" embedded_deno_binding_at)
-if(NOT embedded_deno_binding_at EQUAL -1)
-  message(FATAL_ERROR "deno-runtime still embeds the source-tree Deno binding")
-endif()
-string(FIND "${platform_workflow}"
-  "from \"/opt/morpheus/share/morpheus/deno/mod.ts\""
-  local_deno_import_at)
-if(NOT local_deno_import_at EQUAL -1)
-  message(FATAL_ERROR "container qualification still imports a bundled binding")
-endif()
+foreach(withdrawn IN ITEMS "deno-runtime" "DENO_IMAGE" "denoland/")
+  string(FIND "${dockerfile}${platform_workflow}" "${withdrawn}" withdrawn_at)
+  if(NOT withdrawn_at EQUAL -1)
+    message(FATAL_ERROR "The withdrawn Deno image reappears: ${withdrawn}")
+  endif()
+endforeach()
 
 if(MORPHEUS_PROJECT_VERSION STREQUAL "0.3.0")
   string(FIND "${release_decision}"
