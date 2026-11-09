@@ -254,10 +254,15 @@ int init_prvb_tab(void)
 
 void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 {
+	morpheus_runtime_context *context = morpheus_runtime_context_current();
+	const char *prvb_tab;
 	int i;
-	
+
+	if( ! context->preverb_morphflag_table )
+		if(!init_prvb_tab()) return;
+	prvb_tab = context->preverb_morphflag_table;
 	for(i=1;i<=TABSIZE;i++) {
-		if( is_prvb_morphflag(i) && has_morphflag(word_mf,i) ) {
+		if( prvb_tab[i] && has_morphflag(word_mf,i) ) {
 				zap_morphflag(word_mf,i);
 				add_morphflag(prvb_mf,i);
 		}
