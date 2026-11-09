@@ -146,6 +146,23 @@ analysis.
 > extensive, but sufficient real-world use is still required before this
 > qualification can be removed.
 
+Generation needs Alpheios data **and** a prepared generation index,
+`gener.index`, at the root of the stemlib directory; analysis needs neither.
+The Python package does not prepare the index yet: prepare it once with the
+Node.js data package, then install it with the Alpheios data, which verifies
+it against the pinned digest:
+
+```sh
+npx @libmorpheus/data --dataset alpheios --with-gener --output ./alpheios-node
+libmorpheus-data --dataset alpheios --gener-index ./alpheios-node/gener.index \
+  --output ./morpheus-greek-data
+```
+
+A source checkout can prepare it with `sh tools/prepare-runtime-data.sh`
+instead; see [Acquire stem data](#acquire-stem-data). Without the index,
+`generate()` raises `MorpheusError` ("stemlib is unavailable or incomplete"). The
+example below uses such a directory:
+
 ```python
 from libmorpheus import (
     Dialect,
@@ -160,7 +177,7 @@ from libmorpheus import (
 try:
     with Library("/usr/local/lib/libmorpheus.so") as library:
         with library.context(
-            "/path/to/stemlib", Language.GREEK
+            "/path/to/morpheus-greek-data", Language.GREEK
         ) as context:
             duals = context.generate(
                 "lo/gos",
