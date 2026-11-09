@@ -18,8 +18,10 @@ the corpus.
   publish GitHub releases too, carrying the npm tarballs or the wheel and
   source distribution served by their registry, verified against the
   registry's digests, with `SHA256SUMS`. A manual `Release notes` workflow
-  applies the notes to published releases and creates the missing Node.js and
-  Python ones; the `release_notes` test guards the notes and the workflows.
+  applies the notes and titles to published releases, and
+  `tools/backfill-binding-releases.sh` creates, from a maintainer's machine,
+  the releases of the Node.js and Python tags published before; the
+  `release_notes` test guards the notes, the workflows and the script.
 
 - Node.js binding: the addon returns the records of one operation as a
   single packed buffer in the C ABI's layout, decoded in JavaScript, instead
