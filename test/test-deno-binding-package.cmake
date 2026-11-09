@@ -148,8 +148,8 @@ if(notice_link_at EQUAL -1)
   message(FATAL_ERROR "Packaged Deno README does not link to its notice")
 endif()
 foreach(required_text IN ITEMS
+    "This package is no longer maintained"
     "Standalone release archive"
-    "Docker image"
     "Native library and runtime data"
     "@libmorpheus/deno/setup"
     "--dataset perseids"
