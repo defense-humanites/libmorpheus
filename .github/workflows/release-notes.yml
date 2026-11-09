@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Bring published GitHub releases in line with docs/release-notes/: the tag as
+# title, the notes file as body. Tags and assets are never touched. With
+# `backfill`, Node.js and Python binding tags that have no GitHub release yet
+# get one, carrying the files their registry serves, verified against the
+# registry's own digests. Run manually, on the maintainer's authorization.
+
+name: Release notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Space-separated tags, or "all" for every docs/release-notes file
+        required: true
+        default: all
+        type: string
+      backfill:
+        description: Create missing node-v*/python-v* releases from their registry files
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-notes
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update release titles and notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Select tags
+        id: select
+        env:
+          REQUESTED: ${{ inputs.tags }}
+        run: |
+          if test "$REQUESTED" = all; then
+            tags="$(ls docs/release-notes | sed 's/\.md$//' | tr '\n' ' ')"
+          else
+            tags="$REQUESTED"
+          fi
+          for tag in $tags; do
+            test -f "docs/release-notes/$tag.md" || {
+              echo "::error::no docs/release-notes/$tag.md"
+              exit 1
+            }
+            git show-ref --verify --quiet "refs/tags/$tag" || {
+              echo "::error::no tag $tag"
+              exit 1
+            }
+          done
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Stage registry files for binding tags without a release
+        if: inputs.backfill
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAGS: ${{ steps.select.outputs.tags }}
+        run: |
+          for tag in $TAGS; do
+            case "$tag" in
+              node-v*) registry=npm; version="${tag#node-v}" ;;
+              python-v*) registry=pypi; version="${tag#python-v}" ;;
+              *) continue ;;
+            esac
+            if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$tag" >/dev/null 2>&1; then
+              continue
+            fi
+            python3 -I tools/registry-release-assets.py "$registry" "$version" \
+              "$RUNNER_TEMP/backfill/$tag"
+          done
+
+      - name: Apply titles, notes and backfilled releases
+        uses: actions/github-script@v8
+        env:
+          TAGS: ${{ steps.select.outputs.tags }}
+          BACKFILL_ROOT: ${{ runner.temp }}/backfill
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const { execSync } = require('child_process')
+            const publish = require('./.github/scripts/binding-release.cjs')
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            for (const tag of process.env.TAGS.split(/\s+/).filter(Boolean)) {
+              const body = fs.readFileSync(`docs/release-notes/${tag}.md`, 'utf8')
+              let release
+              try {
+                release = (await github.rest.repos.getReleaseByTag({ owner, repo, tag })).data
+              } catch (error) {
+                if (error.status !== 404) throw error
+              }
+              if (release !== undefined) {
+                if (release.name === tag && release.body === body) {
+                  core.info(`${tag}: already current`)
+                  continue
+                }
+                await github.rest.repos.updateRelease({
+                  owner,
+                  repo,
+                  release_id: release.id,
+                  name: tag,
+                  body,
+                })
+                core.info(`${tag}: title and notes updated`)
+                continue
+              }
+              const staged = path.join(process.env.BACKFILL_ROOT, tag)
+              if (!fs.existsSync(staged)) {
+                core.notice(`${tag}: no GitHub release; run with backfill to create it`)
+                continue
+              }
+              const sha = execSync(`git rev-list -n 1 refs/tags/${tag}`).toString().trim()
+              await publish({ github, context, core, tag, sha, assetDirectory: staged })
+            }

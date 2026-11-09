@@ -159,16 +159,13 @@ jobs:
               if (error.status !== 404) throw error
             }
             if (existing === undefined) {
-              const notesPath = `docs/release-deno-${process.env.BINDING_VERSION}.md`
-              const body = fs.existsSync(notesPath)
-                ? fs.readFileSync(notesPath, 'utf8')
-                : `Compatible native runtime: ${process.env.NATIVE_VERSION} (ABI ${process.env.NATIVE_ABI}).`
+              const body = fs.readFileSync(`docs/release-notes/${tag}.md`, 'utf8')
               existing = await github.rest.repos.createRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag_name: tag,
                 target_commitish: context.sha,
-                name: `libmorpheus Deno binding ${process.env.BINDING_VERSION}`,
+                name: tag,
                 body,
                 draft: true,
                 prerelease: false,
