@@ -112,4 +112,11 @@ both sides run the same runtime sources.
   (`morpheus.wasm`). A module built outside CI from `f1bfad7`, whose
   runtime sources are those of the tag, with the pinned Emscripten 4.0.15,
   has the same two digests.
-- JSR end-to-end check: pending (maintainer).
+- JSR end-to-end check: done by the maintainer on 2026-11-09 under
+  Node.js and Deno, from `@libmorpheus/wasm@0.1.4` as JSR serves it and the
+  README's example against a local stemlib: the module instantiated and the
+  analyses were as expected. With the Alpheios dataset, which is Greek
+  only, the README's Latin context fails as it should, with
+  `StemlibError`, but the message names the language by its number
+  (`opening /stemlib for language 1 failed`); naming it is left to the
+  facade's next release.
