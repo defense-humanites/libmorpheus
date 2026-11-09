@@ -20,8 +20,8 @@ the corpus.
   such as the Greek-only Alpheios dataset opened for Latin; the WebAssembly
   README's example says so. Each binding ships the change in its next
   release.
-- Node.js binding 0.1.4 (prepared; `docs/release-node-0.1.4.md`) and Python
-  binding 0.2.1 (prepared; `docs/release-python-0.2.1.md`) declare native
+- Node.js binding 0.1.4 (`docs/release-node-0.1.4.md`) and Python binding
+  0.2.1 (`docs/release-python-0.2.1.md`), both published, declare native
   release 0.4.6 instead of 0.4.5: `libmorpheus-native` and
   `libmorpheus-setup` acquire the `v0.4.6` archives, so applications receive
   its faster analysis, and both carry the named context error above. C ABI
