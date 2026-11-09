@@ -1,6 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Typed Python binding for the libmorpheus native runtime."""
 
+from ._acquisition import (
+    AcquisitionError,
+    acquire_data,
+    acquire_native,
+    setup_morpheus,
+    verify_gener_index,
+)
 from ._library import Context, Library, MorpheusError
 from ._types import (
     Analysis,
@@ -34,6 +41,7 @@ from ._version import (
 __version__ = MORPHEUS_PYTHON_VERSION
 
 __all__ = [
+    "AcquisitionError",
     "Analysis",
     "Case",
     "Context",
@@ -61,5 +69,9 @@ __all__ = [
     "TruncatedField",
     "Voice",
     "__version__",
+    "acquire_data",
+    "acquire_native",
     "has_morph_flag",
+    "setup_morpheus",
+    "verify_gener_index",
 ]

@@ -48,7 +48,12 @@ WebAssembly binding's README for the list) and `--manifest` adds a
 `stemlib-manifest.json` with every file's path, size and SHA-256, for
 `fetchStemlib()`, bundlers and `writeStemlib()` callers. The command is the
 Node.js binding's `libmorpheus-data`, published on its own with those two
-additions; `bindings/js/data/README.md` documents it.
+additions; `bindings/js/data/README.md` documents it. The Python package
+provides the same command with the same options, pins, receipts and runtime
+subset (`libmorpheus-data`, `python -m libmorpheus.data`, `acquire_data()`),
+except that it installs a prepared `gener.index` through `--gener-index`
+after checking its digest instead of preparing one; `bindings/python/README.md`
+documents it.
 
 ## Choose a dataset
 

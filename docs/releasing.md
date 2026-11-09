@@ -8,7 +8,8 @@ library, installed metadata, containers, `cruncher`, and pinned fixture data.
 Deno releases cover the TypeScript binding, its acquisition commands,
 standalone archive, and JSR package. Node.js releases cover the ESM facade,
 acquisition commands, and three optional Node-API addon packages on npm. Python
-releases cover the pure-Python `ctypes` facade on PyPI. WebAssembly releases
+releases cover the pure-Python `ctypes` facade and its acquisition commands on
+PyPI. WebAssembly releases
 cover the Emscripten-compiled runtime module and its JavaScript facade,
 published as one package on npm and JSR. Historical standalone utilities are
 outside these release contracts.
