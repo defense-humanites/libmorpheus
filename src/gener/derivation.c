@@ -141,8 +141,10 @@ conjoin_rule(gk_string *rule, char *word)
 	contracted = do_euph(rule,(Dialect)0);
 	if (!contracted)
 		return 1;
+	/* do_euph() returns an allocated array; keep its first form only. */
 	*rule = *contracted;
-	return copy_text(word,MAXWORDSIZE,gkstring_of(contracted));
+	FreeGkString(contracted);
+	return copy_text(word,MAXWORDSIZE,gkstring_of(rule));
 }
 
 static void

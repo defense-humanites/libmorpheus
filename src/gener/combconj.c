@@ -347,8 +347,10 @@ void conjoinX(gk_string *gstr,char * s1,char * s2)
         return;
     }
 
+    /* do_euph() returns an allocated array; keep its first form only. */
     *gstr = *newgstr;
-    conj_copy(s1, gkstring_of(newgstr), MAXWORDSIZE);
+    FreeGkString(newgstr);
+    conj_copy(s1, gkstring_of(gstr), MAXWORDSIZE);
 
     return;
 }

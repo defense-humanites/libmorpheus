@@ -185,7 +185,8 @@ jobs:
 
       - name: Test sanitizers
         env:
-          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1:strict_string_checks=1
+          # Leak detection covers the whole suite since the do_euph() leaks were fixed.
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1:strict_string_checks=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: ctest --preset sanitizers
 
