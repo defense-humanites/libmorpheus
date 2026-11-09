@@ -43,6 +43,14 @@ if(BUILD_TESTING)
       -P "${PROJECT_SOURCE_DIR}/test/release-metadata.cmake"
   )
   add_test(
+    NAME release_notes
+    COMMAND
+      "${CMAKE_COMMAND}"
+      "-DMORPHEUS_SOURCE_DIR=${PROJECT_SOURCE_DIR}"
+      "-DMORPHEUS_PROJECT_VERSION=${PROJECT_VERSION}"
+      -P "${PROJECT_SOURCE_DIR}/test/release-notes.cmake"
+  )
+  add_test(
     NAME license_boundary
     COMMAND
       "${CMAKE_COMMAND}"

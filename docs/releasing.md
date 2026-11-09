@@ -232,6 +232,25 @@ every qualification job of its own run.
 
 ## 6. Publish and verify
 
+- Write the GitHub release notes before tagging: `docs/release-notes/<tag>.md`
+  (`v0.4.6.md`, `wasm-v0.1.4.md`, `python-v0.2.1.md`…). It is the release body
+  as published, so keep it short and for users: one summary line naming the
+  package and the native release and ABI it carries, a few bullets on what
+  changes for them, an install line for bindings, and a link to the release
+  decision. GitHub renders every line break of a release body, so write each
+  paragraph and list item on one line. The release title is the tag. The
+  `release_notes` test requires notes for the current version of every track,
+  rejects hard-wrapped lines and requires the link to the decision when one
+  exists; every release workflow (native, WebAssembly, data, Deno, Node.js,
+  Python) publishes them. Node.js and Python releases carry the files their
+  registry serves, checked against the registry's digests
+  (`tools/registry-release-assets.py`). Binding releases never become the
+  repository's latest release.
+- To change the notes or title of a published release, edit the notes file on
+  `main` and run the `Release notes` workflow for that tag (`tags: v0.4.5`);
+  `tags: all` applies every notes file, and `backfill` creates the missing
+  Node.js and Python releases from their registry files. Tags and assets are
+  never touched.
 - Integrate the release-preparation branch into `main` with a normal merge
   commit. Do not squash or rebase when the branch contains reviewable release
   history that must remain visible.

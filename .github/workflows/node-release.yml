@@ -229,3 +229,35 @@ jobs:
           publish_if_missing \
             "@libmorpheus/node" \
             ./bindings/js/node
+
+  github-release:
+    name: Publish the GitHub release from the npm registry files
+    needs: publish-node
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+    steps:
+      - name: Check out the binding tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Stage the published files, verified against the registry
+        run: |
+          python3 -I tools/registry-release-assets.py npm \
+            "${RELEASE_TAG#node-v}" "$RUNNER_TEMP/release-assets"
+
+      - name: Create or complete the release
+        uses: actions/github-script@v8
+        env:
+          ASSET_DIRECTORY: ${{ runner.temp }}/release-assets
+        with:
+          script: |
+            const publish = require('./.github/scripts/binding-release.cjs')
+            const { execSync } = require('child_process')
+            const tag = process.env.RELEASE_TAG
+            const sha = execSync('git rev-parse HEAD').toString().trim()
+            await publish({ github, context, core, tag, sha, assetDirectory: process.env.ASSET_DIRECTORY })

@@ -11,6 +11,16 @@ the corpus.
 
 ### Changed
 
+- GitHub releases take their title from the tag (`v0.4.5`, `wasm-v0.1.3`…)
+  and their body from `docs/release-notes/<tag>.md`, a short user-facing
+  summary written one line per paragraph, instead of the whole release
+  decision with its hard line breaks. Node.js and Python binding tags now
+  publish GitHub releases too, carrying the npm tarballs or the wheel and
+  source distribution served by their registry, verified against the
+  registry's digests, with `SHA256SUMS`. A manual `Release notes` workflow
+  applies the notes to published releases and creates the missing Node.js and
+  Python ones; the `release_notes` test guards the notes and the workflows.
+
 - Node.js binding: the addon returns the records of one operation as a
   single packed buffer in the C ABI's layout, decoded in JavaScript, instead
   of building every result object on the main thread through Node-API calls

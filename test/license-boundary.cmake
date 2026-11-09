@@ -14,6 +14,8 @@ set(agpl_files
     .github/workflows/wasm.yml
     .github/workflows/wasm-release.yml
     .github/workflows/data-release.yml
+    .github/workflows/release-notes.yml
+    tools/registry-release-assets.py
     CHANGELOG.md
     CMakeLists.txt
     docs/release-node-0.1.0.md
@@ -128,6 +130,8 @@ file(GLOB agpl_support_files
      "${MORPHEUS_SOURCE_DIR}/cmake/*.cmake"
      "${MORPHEUS_SOURCE_DIR}/cmake/*.in"
      "${MORPHEUS_SOURCE_DIR}/docs/*.md"
+     "${MORPHEUS_SOURCE_DIR}/docs/release-notes/*.md"
+     "${MORPHEUS_SOURCE_DIR}/.github/scripts/*.cjs"
      "${MORPHEUS_SOURCE_DIR}/test/*.c"
      "${MORPHEUS_SOURCE_DIR}/test/*.cmake"
      "${MORPHEUS_SOURCE_DIR}/test/install-consumer/CMakeLists.txt"

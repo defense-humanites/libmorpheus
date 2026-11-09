@@ -745,13 +745,13 @@ jobs:
             }
 
             const tag = context.ref.replace('refs/tags/', '')
-            const notes = `docs/release-${tag.slice(1)}.md`
+            const notes = `docs/release-notes/${tag}.md`
             const release = await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: tag,
               target_commitish: context.sha,
-              name: `libmorpheus ${tag.slice(1)}`,
+              name: tag,
               body: fs.readFileSync(notes, 'utf8'),
               draft: true,
               prerelease: false,
