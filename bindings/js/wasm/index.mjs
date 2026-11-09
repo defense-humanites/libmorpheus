@@ -702,7 +702,7 @@ export class Morpheus {
         language,
         contextSlot,
       );
-      this._check(status, `opening ${stemlib} for language ${language} failed`);
+      this._check(status, `opening ${stemlib} for ${LANGUAGE_DIRECTORIES[language]} failed`);
       const context = new MorpheusContext(this, module, module.getValue(contextSlot, "i32"), language);
       this.#contexts.add(context);
       return context;

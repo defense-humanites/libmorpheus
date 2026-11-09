@@ -5,6 +5,7 @@ import test from "node:test";
 
 import {
   MorpheusDialect,
+  MorpheusError,
   MorpheusLanguage,
   MorpheusLibrary,
   MorpheusNumber,
@@ -107,6 +108,22 @@ test("decodes raw records from the addon's packed buffer", async () => {
     assert.deepEqual(empty, []);
   } finally {
     await context.close();
+    library.close();
+  }
+});
+
+test("names the stemlib and the language a context fails to open", () => {
+  assert.ok(nativeLibrary);
+  const library = new MorpheusLibrary(nativeLibrary);
+  try {
+    assert.throws(
+      () => library.createContext("/nonexistent-morpheus-stemlib", MorpheusLanguage.Latin),
+      (error) =>
+        error instanceof MorpheusError &&
+        error.status === 8 &&
+        /^opening \/nonexistent-morpheus-stemlib for Latin failed: /.test(error.message),
+    );
+  } finally {
     library.close();
   }
 });

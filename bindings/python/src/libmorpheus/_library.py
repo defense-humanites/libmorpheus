@@ -44,6 +44,13 @@ def _message(native: NativeLibrary, status: int) -> str:
     return message.decode("utf-8") if message else f"Morpheus status {status}"
 
 
+def _language_name(language: int) -> str:
+    try:
+        return Language(int(language)).name.capitalize()
+    except ValueError:
+        return f"language {int(language)}"
+
+
 def _check(native: NativeLibrary, status: int) -> None:
     if status != Status.OK:
         raise MorpheusError(status, _message(native, status))
@@ -157,7 +164,14 @@ class Library:
                 int(language),
                 ctypes.byref(pointer),
             )
-            _check(native, status)
+            if status != Status.OK:
+                # Name the stemlib and the language: an incomplete stemlib is
+                # the usual cause, such as a Greek-only dataset opened for Latin.
+                raise MorpheusError(
+                    status,
+                    f"opening {path} for {_language_name(language)} failed: "
+                    f"{_message(native, status)}",
+                )
             if not pointer:
                 raise RuntimeError("libmorpheus returned a null context")
             self._contexts += 1
