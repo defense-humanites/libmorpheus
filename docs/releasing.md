@@ -37,8 +37,8 @@ tag for the native and Deno tracks.
 
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
-`release-node-0.1.3.md` or `release-wasm-0.1.4.md`. The current native
-candidate is recorded in `release-0.4.6.md`; the earlier decisions remain
+`release-node-0.1.3.md` or `release-wasm-0.1.4.md`. The most recent native
+release is recorded in `release-0.4.6.md`; the earlier decisions remain
 historical evidence.
 
 ## 1. Version and compatibility decisions
@@ -158,6 +158,13 @@ whole build and test, and the publication job then runs on the same
 attempt. The tag never moves. A tagged run queues independently of a
 dispatch and may obtain a runner first; the publication job still waits for
 every qualification job of its own run.
+
+A run that ends at once with no job, or with only some of its jobs created and
+no failed step (GitHub Actions did not create jobs for at least half an hour
+around the `v0.4.6` tag), has qualified nothing: wait until GitHub creates
+jobs again, re-run all jobs of each of the tag's runs, and check that every
+run lists all its jobs before reading its result. Nothing is published until
+the platform run's own qualification jobs pass, so the tag stays where it is.
 
 ## 4. ABI and consumer checks
 
