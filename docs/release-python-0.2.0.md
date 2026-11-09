@@ -55,7 +55,12 @@ with `npx libmorpheus-data --dataset alpheios --with-gener` or
 `sh tools/prepare-runtime-data.sh` from a source checkout. Preparing it in
 Python would require either a native entry point for the preparer in the
 library's public API or a Python port of the preparer; that remains the one
-acquisition difference between the bindings.
+acquisition difference between the bindings. The maintainer's orientation
+(2026-11-09): the preparer is to be exposed in the public C API at the
+latest when generation stops being experimental, which closes the
+difference for every binding at once; until then the index is prepared with
+the Node.js package or a source checkout and installed through
+`--gener-index`.
 
 Everything is standard library (`urllib`, `zlib`, `tarfile`, `hashlib`,
 `argparse`); the package keeps no runtime dependency. Every download is
