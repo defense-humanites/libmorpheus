@@ -43,9 +43,15 @@ standalone archive, publish it as the release's assets, and publish the JSR
 package. After publication, a maintainer may archive the package in its JSR
 settings if JSR offers it, so that the page marks it as no longer maintained.
 
-## Remaining authorization
+## Publication record
 
-1. confirm the tagged CI candidate;
-2. explicitly authorize creation of `deno-v0.4.3`;
-3. after publication, record the outcome here; the removal of the binding from
-   the repository follows in its own pull request.
+- Tag: `deno-v0.4.3`, created by the maintainer on 2026-11-09 on
+  `78b122376868596ec81e976e3508c1341ea1776f`, the merge of this decision.
+- Tagged Linux CI: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42621217458).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42621217202):
+  the [`deno-v0.4.3` release](https://github.com/defense-humanites/libmorpheus/releases/tag/deno-v0.4.3)
+  carries `libmorpheus-deno-0.4.3.tar.gz` and its sidecar, with the tag as
+  title and the release notes as body, and JSR accepted
+  `@libmorpheus/deno@0.4.3`, which shows the deprecation notice.
+- The binding, its workflows and the `deno-runtime` Docker target were then
+  removed from the repository; this version is the last.
