@@ -9,32 +9,43 @@ the corpus.
 
 ## [Unreleased]
 
-### Deprecated
+## [0.4.6] - 2026-11-09
 
-- Deno binding 0.4.3 (prepared; `docs/release-deno-0.4.3.md`) is the final
-  release of `@libmorpheus/deno`: it declares native 0.4.5 instead of 0.4.2
-  and carries a deprecation notice in its README and module documentation,
-  directing new code to `@libmorpheus/wasm` or `@libmorpheus/node`. The
-  binding, its release workflow and the `deno-runtime` Docker target are
-  removed from the repository after this release; the JSR package stays
-  available, frozen.
+Target project version: **0.4.6**. C ABI: **2**. Shared-library SONAME: **1**.
 
-### Removed
-
-- The Deno binding (`bindings/js/deno/`), its release, JSR-recovery and
-  JSR-smoke workflows, its standalone-archive packaging and checks, the
-  `jsr_package_metadata` test, and the `deno-runtime` Docker target, after
-  the final `deno-v0.4.3` release. libmorpheus no longer depends on Deno:
-  CI no longer installs it, the Alpine image is qualified with `cruncher`,
-  and `@libmorpheus/wasm` and `@libmorpheus/data` are checked and published
-  to JSR with JSR's own `jsr` command-line tool (`npx jsr@0.14.3 publish`),
-  their tests running under Node.js. The CMake option that builds the
-  WebAssembly generation preparer is renamed
-  `MORPHEUS_BUILD_JS_GENER_PREPARER` (formerly
-  `MORPHEUS_BUILD_DENO_GENER_PREPARER`); its only consumer is the data
-  package.
+This native release makes analysis about three times faster on the
+controlled Apple Silicon host and about 2.8 times faster on Linux, with
+results unchanged, and fixes a memory leak in the generation source
+preparer. It is the release WebAssembly binding 0.1.4 is compiled from and
+declares. The binding releases published since 0.4.5 (Node.js 0.1.3,
+Python 0.1.1 and 0.2.0, and the final Deno 0.4.3) and the benchmark harness
+migration are listed below.
 
 ### Changed
+
+- Analysis is faster, with identical output over 4,176 Greek lemmas, the
+  benchmark corpus and the Latin irregular forms (pull requests #61 and
+  #62). On the controlled Apple Silicon host, `cruncher -T` analyzes 24,000
+  words in 4.9 s instead of 14.8 s; on a 2-vCPU Linux host, 10.2 s instead
+  of 28.5 s. Five hot paths, found by profiling, account for it:
+  `xfer_prvbflags()`, called for every candidate key, tested 112 flag
+  numbers through a thread-local lookup of the runtime context each (more
+  than half of all instructions); it now tests the eight preverb flags
+  directly. The stem and dictionary string comparisons use a fixed byte
+  mapping instead of a per-context table; `MatchMorphKey()` reads the
+  context once; a raw preverb whose first byte differs is rejected before it
+  is compared; and each context keeps the stem index files it reads open,
+  keyed by full path, until it is destroyed, where an analysis opened and
+  closed `steminds/nomind` about five times per word. A context therefore
+  holds up to four more open files.
+- The benchmark harness compares the WebAssembly pool and the Node.js
+  binding on equal terms (pull request #60): `bench/release.sh` sizes the
+  libuv thread pool to the widest context count (`UV_THREADPOOL_SIZE`,
+  recorded as `runtime.uvThreadpoolSize`; the validator rejects native rows
+  wider than the pool), and the pool sends one request per operation and
+  returns every result to the main thread (`wasmResultDelivery`), as the
+  binding does. The first controlled-host comparison is retained as
+  `bench/release-evidence/benchmark-0.4.5-wasm-comparison.json`.
 
 - GitHub releases take their title from the tag (`v0.4.5`, `wasm-v0.1.3`…)
   and their body from `docs/release-notes/<tag>.md`, a short user-facing
@@ -58,7 +69,7 @@ the corpus.
   scales with contexts again. The facade requires the addon's
   `recordEncoding`, so a rebuilt addon is needed with this facade (the npm
   platform packages are rebuilt by the binding's release).
-- Node.js binding 0.1.3 (prepared; `docs/release-node-0.1.3.md`) ships that
+- Node.js binding 0.1.3 (`docs/release-node-0.1.3.md`, published) ships that
   encoding and declares native release 0.4.5 instead of 0.3.2:
   `libmorpheus-native` and `libmorpheus-setup` acquire the `v0.4.5` archives,
   so applications receive the native changes since 0.3.2, the Latin
@@ -69,9 +80,44 @@ the corpus.
   `v0.4.5` archives and is verified by the release workflow. Source
   unchanged.
 
+### Fixed
+
+- The generation source preparer no longer leaks the euphony forms
+  `do_euph()` returns: its derivation expansion, like the `do_conj` stemlib
+  tool, copied the first form and never freed the array (311,460 bytes in
+  537 allocations over the generation corpus). Neither the library nor the
+  WebAssembly module links that code; the preparer bundled with
+  `@libmorpheus/data` is a short-lived process. The sanitizer CI job now
+  runs with leak detection.
+
+### Deprecated
+
+- Deno binding 0.4.3 (`docs/release-deno-0.4.3.md`, published) is the final
+  release of `@libmorpheus/deno`: it declares native 0.4.5 instead of 0.4.2
+  and carries a deprecation notice in its README and module documentation,
+  directing new code to `@libmorpheus/wasm` or `@libmorpheus/node`. The
+  binding, its release workflow and the `deno-runtime` Docker target are
+  removed from the repository after this release; the JSR package stays
+  available, frozen.
+
+### Removed
+
+- The Deno binding (`bindings/js/deno/`), its release, JSR-recovery and
+  JSR-smoke workflows, its standalone-archive packaging and checks, the
+  `jsr_package_metadata` test, and the `deno-runtime` Docker target, after
+  the final `deno-v0.4.3` release. libmorpheus no longer depends on Deno:
+  CI no longer installs it, the Alpine image is qualified with `cruncher`,
+  and `@libmorpheus/wasm` and `@libmorpheus/data` are checked and published
+  to JSR with JSR's own `jsr` command-line tool (`npx jsr@0.14.3 publish`),
+  their tests running under Node.js. The CMake option that builds the
+  WebAssembly generation preparer is renamed
+  `MORPHEUS_BUILD_JS_GENER_PREPARER` (formerly
+  `MORPHEUS_BUILD_DENO_GENER_PREPARER`); its only consumer is the data
+  package.
+
 ### Added
 
-- Python binding 0.2.0 (prepared; `docs/release-python-0.2.0.md`) acquires
+- Python binding 0.2.0 (`docs/release-python-0.2.0.md`, published) acquires
   the native runtime and the stem data at parity with the Node.js binding:
   `libmorpheus-native`, `libmorpheus-data` (`--subset`, `--languages`,
   `--manifest`) and `libmorpheus-setup`, as console scripts, `python -m`
