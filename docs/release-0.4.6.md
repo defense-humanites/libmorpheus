@@ -94,31 +94,59 @@ sandbox (765–795 µs against 1,505–1,520 µs per word at one context).
 - C ABI: **2**
 - SONAME major: **1**
 - Previous release tag: `v0.4.5`
-- Benchmark evidence: pending (maintainer's schema 3 report from the
-  controlled Apple Silicon host, on the candidate commit)
+- Benchmark evidence: **accepted**
 - Pre-release Linux CI: pending (the tagged commit's run)
 - Pre-release platform qualification: pending (manual dispatch with
   `package_artifacts` on the exact candidate commit)
 
-## Expected benchmark outcome
+## Benchmark evidence
 
-The release report is compared with
+The schema 3 report from source revision
+`f1bfad784df8af7cea1e0a05c5fcb506c0c22161` (the merge of the release
+preparation) uses the pinned Alpheios stemlib revision
+`4632415fe93c85e9fdca47a0c5a13f31385f0023` on the controlled Apple Silicon
+host, with the toolchain of the baseline (Apple Clang 21 build 2100.4.1.1,
+Node.js 26.13.0, binding 0.1.3, libuv thread pool of four). It is retained
+as [`benchmark-0.4.6.json`](../bench/release-evidence/benchmark-0.4.6.json);
+its SHA-256 is
+`1ada96f98cf069ced13384198f3defa4e3f9de228d68d9960d44f3dd0241f448`. The
+release validator passes with the recorded source revision and compiler,
+and the comparison with
 [`benchmark-0.4.5-node-packed.json`](../bench/release-evidence/benchmark-0.4.5-node-packed.json),
 the schema 3 baseline measured through the Node.js binding on the `v0.4.5`
-sources (`complete` scope):
+sources, has `complete` scope. All thirteen result counts equal the
+baseline's.
 
-```sh
-sh bench/release.sh benchmark-0.4.6.json \
-  bench/release-evidence/benchmark-0.4.5-node-packed.json
-```
+| Row | 0.4.5 (µs) | 0.4.6 (µs) | Change |
+| --- | --- | --- | --- |
+| `node`, 1 context | 649 | 215 | −66.9 % |
+| `node`, 2 contexts | 412 | 132 | −67.9 % |
+| `node`, 4 contexts | 276 | 88 | −68.3 % |
+| `cruncher-persistent` | 650 | 202 | −68.9 % |
+| `cruncher-cold` | 3,269 | 2,743 | −16.1 % |
+| maximal generation, warm, 1 / 2 / 4 contexts | 6,284 / 3,670 / 3,838 | 5,729 / 3,598 / 3,751 | −8.8 / −2.0 / −2.3 % |
+| small generation, warm, 1 / 2 / 4 contexts | 120 / 28 / 33 | 120 / 27 / 31 | −0.2 / −2.9 / −5.7 % |
+| maximal / small generation, cold | 22,555 / 15,032 | 21,077 / 14,820 | −6.6 / −1.4 % |
 
-All thirteen result counts must equal the baseline's. The analysis rows
-(`node` at one, two and four contexts, `cruncher-persistent`) should fall by
-roughly half, as `cruncher` does above; `cruncher-cold` less, since one
-analysis per process pays start-up. Generation reads its index rather than
-scanning keys and shares fewer of the changed paths; its rows may move
-less, in either direction within noise. The report records `runtime.uvThreadpoolSize` (four, the default, for one to
-four contexts).
+Analysis throughput triples at every width (+202 %, +212 % and +215 %),
+beyond the halving the preparation expected: the release benchmark analyzes
+the same 24 words, whose candidate keys pass through the changed paths, and
+agrees with the `cruncher` A/B above (about 205 µs per word). The binding
+adds little next to the runtime, before as after: `node` at one context is
+within 13 µs of `cruncher-persistent` (215 against 202 µs; 649 against
+650 µs in the baseline). `cruncher-cold` gains less because process
+start-up and the first loading of the indices dominate one analysis per
+process. Generation moves by −0.2 % to −8.8 %, all in the same direction
+but within the run-to-run variation recorded for those rows; no claim is
+made for it.
+
+Peak RSS is within −2.9 % to +7.8 % of the baseline on every row. The RSS
+growth of the two- and four-context analysis rows (3.6 and 0.5 MiB against
+0.5 and 2.6 MiB) moves by a few MiB in opposite directions, as the order of
+allocations within one process does; no row shows the four kept-open index
+files, whose stdio buffers are a few KiB per context. This report replaces
+`benchmark-0.4.5-node-packed.json` as the baseline of the next native
+release.
 
 ## Remaining authorization
 

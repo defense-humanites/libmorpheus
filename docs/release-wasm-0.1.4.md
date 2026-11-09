@@ -23,6 +23,44 @@ context, against 1,505–1,520 µs for 0.1.3. Results are unchanged. The
 leak fixed in 0.4.6 lies in the generation source preparer, which the
 module does not link.
 
+### Where the module gains
+
+Measured on the 2-vCPU Linux sandbox with `bench/compare.mjs` (one
+context, 10 iterations, two alternated rounds, the published 0.1.3 module
+against modules built with Emscripten 4.0.15 after #61 and on `f1bfad7`,
+mean µs per analyzed word; the host's noise is about ±15 %):
+
+| Module | MEMFS | NODEFS |
+| --- | --- | --- |
+| 0.1.3 (`v0.4.5` sources) | 1,595 / 1,542 | 1,633 / 1,505 |
+| after #61 | 1,093 / 1,252 | 1,357 / 1,527 |
+| 0.1.4 candidate | 846 / 912 | 1,087 / 816 |
+
+Result counts are identical throughout; warm and cold generation do not
+move beyond noise. Change by change:
+
+- **The preverb flag transfer (#61, #62)** is the largest gain with MEMFS.
+  The module has no threads, so `_Thread_local` is a plain global and the
+  context read never cost what `_tlv_get_addr` costs natively; but the
+  transfer still made two function calls and a flag test for each of 112
+  flag numbers, for every candidate key. #61 removed the context read from
+  the loop, #62 the loop itself (eight direct tests, no call into the
+  context).
+- **The kept-open stem indices (#62)** matter most with NODEFS, where every
+  `fopen`/`fclose` was a host system call through Emscripten's JavaScript
+  file system, about five times per word. With MEMFS the open itself stays
+  inside the module, but it still resolved the path through the JavaScript
+  file system, allocated a stream and a stdio buffer and freed them again.
+- **The first-byte rejection of raw preverbs (#62)** saves a `strlen` and a
+  `strncmp` per raw preverb tried. The module's libc (musl, compiled to
+  WebAssembly) has no vectorized string functions, so each call costs more
+  than in glibc, and the share of this change is larger than natively.
+- **The context-free string comparisons and `MatchMorphKey()` (#62)** save
+  a call and a load per comparison or key field; small in the module, where
+  the context read was cheap.
+- **The leak fix (#63)** does not concern the module, which does not link
+  the generation source preparer.
+
 The facade is unchanged. The distribution, behavioral, qualification,
 publication and licensing contracts of [0.1.3](release-wasm-0.1.3.md) are
 otherwise unchanged: one package, `@libmorpheus/wasm`, on npm and JSR from
