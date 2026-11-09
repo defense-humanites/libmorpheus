@@ -138,8 +138,7 @@ The first comparison on the controlled host, from the harness before both
 corrections, is retained at
 [`bench/release-evidence/benchmark-0.4.5-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison.json);
 [wasm.md](wasm.md#controlled-host-2026-11-09) reads it. It is not a
-baseline for the next release, whose native rows compare with
-`benchmark-0.4.5-node-packed.json`.
+release baseline.
 
 Pass a previous report as the second argument to add the normalized comparison:
 
@@ -248,10 +247,21 @@ report (`complete` scope), the thirteen result counts are identical,
 analysis and the `cruncher` rows are within noise, and generation falls by
 44 to 58 % per warm operation (maximal paradigm: 6.3, 3.7 and 3.8 ms at
 one, two and four contexts against 11.2, 8.7 and 8.7 ms) and 15 % cold,
-now below the Deno-harness figures. **This report is the baseline of the
-next native release**: the harness measures through the binding, and a
-comparison with the earlier report would attribute the binding's change
-to the library.
+now below the Deno-harness figures. It was the baseline of 0.4.6: the
+harness measures through the binding, and a comparison with the earlier
+report would attribute the binding's change to the library.
+
+The accepted 0.4.6 report is retained at
+[`bench/release-evidence/benchmark-0.4.6.json`](../bench/release-evidence/benchmark-0.4.6.json)
+with its companion SHA-256 file. It was produced on 2026-11-09 on the same
+host and toolchain (Node.js 26.13.0, binding 0.1.3) from
+`f1bfad784df8af7cea1e0a05c5fcb506c0c22161`, the merge of the 0.4.6
+preparation. Compared with `benchmark-0.4.5-node-packed.json` (`complete`
+scope), the thirteen result counts are identical, analysis throughput
+triples (mean latency −67 to −69 % for `node` and `cruncher-persistent`),
+`cruncher-cold` falls by 16 % and generation stays within noise; the
+[0.4.6 release decision](release-0.4.6.md#benchmark-evidence) reads it.
+**This report is the baseline of the next native release.**
 
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
