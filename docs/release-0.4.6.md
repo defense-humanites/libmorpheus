@@ -95,9 +95,13 @@ sandbox (765–795 µs against 1,505–1,520 µs per word at one context).
 - SONAME major: **1**
 - Previous release tag: `v0.4.5`
 - Benchmark evidence: **accepted**
-- Pre-release Linux CI: pending (the tagged commit's run)
-- Pre-release platform qualification: pending (manual dispatch with
-  `package_artifacts` on the exact candidate commit)
+- Pre-release Linux CI: [passed on `3815b33`](https://github.com/defense-humanites/libmorpheus/actions/runs/42666741342)
+- Pre-release platform qualification: [passed on `3815b33`](https://github.com/defense-humanites/libmorpheus/actions/runs/42667750278)
+  (manual dispatch with `package_artifacts`, second attempt)
+- Tagged platform run and release publication: [passed on `3815b33`](https://github.com/defense-humanites/libmorpheus/actions/runs/42673800068)
+  (second attempt)
+- Release: [`v0.4.6`](https://github.com/defense-humanites/libmorpheus/releases/tag/v0.4.6),
+  created on 2026-11-09 on `3815b33ab79686fa344531e7dfad11ff399d974f`
 
 ## Benchmark evidence
 
@@ -148,16 +152,39 @@ files, whose stdio buffers are a few KiB per context. This report replaces
 `benchmark-0.4.5-node-packed.json` as the baseline of the next native
 release.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
+The tag was created by the maintainer on 2026-11-09 on `3815b33`, the merge
+of the accepted benchmark evidence, a descendant of the measured revision
+`f1bfad7` that differs from it only by that evidence and these documents.
 
-1. run `bench/release.sh` on the candidate commit on the controlled host,
-   have the report reviewed against the baseline and committed with its
-   sidecar as `bench/release-evidence/benchmark-0.4.6.json`;
-2. dispatch the platform workflow with `package_artifacts` for the candidate
-   commit and inspect the three native archives;
-3. confirm the final tagged Linux CI and platform runs and record their links
-   above;
-4. explicitly authorize creation of `v0.4.6`, then of `wasm-v0.1.4` on the
-   same commit or a descendant with an unchanged runtime.
+The Linux CI of the merge commit on `main` passed at its first attempt,
+including the push-only sanitizer (now with leak detection),
+ThreadSanitizer, byte-conversion, legacy-make and release jobs. The manual
+`package_artifacts` dispatch passed at its second attempt: its first
+`apple-silicon` job was cancelled before any step ran, for want of a macOS
+runner, as during the 0.4.4 dispatch. The maintainer inspected the three
+archives it produced.
+
+The tag's first runs, at 18:24 UTC, ended within a minute with **no job
+created** (platform, Linux CI and WebAssembly alike), and a rerun of Linux
+CI at 18:26 created two of its eleven jobs: GitHub Actions was not creating
+jobs at the time, as a redundant dispatch made at 18:13 had already shown
+(two of its six jobs). No step ran and nothing was published. Re-run in
+full from 19:03 UTC, every run created all its jobs and passed: the
+platform run (second attempt) qualified the three platforms and published
+the release, Linux CI passed at its third attempt and WebAssembly at its
+second. The tag never moved.
+
+The release carries the three native archives and their digests, plus the
+accepted benchmark report and its sidecar:
+
+| Asset | SHA-256 |
+|---|---|
+| `libmorpheus-0.4.6-Linux-x86_64-glibc.tar.gz` | `33d6ca3ab5e271afcd9c4a8d1ca87ff4f64fb50a24e8b2b425671bbf2f85cbfb` |
+| `libmorpheus-0.4.6-Linux-aarch64-glibc.tar.gz` | `de28dddc7f8e5dbeb0a3d897508dc0778d4281e61196841c368baaa34542c824` |
+| `libmorpheus-0.4.6-macOS-arm64.tar.gz` | `53a068fcb85c600a65dec1963e213027b114868d3f00c760718cb0c7ad3dbd5c` |
+| `benchmark-0.4.6.json` | `1ada96f98cf069ced13384198f3defa4e3f9de228d68d9960d44f3dd0241f448` |
+
+WebAssembly binding 0.1.4 was tagged on the same commit afterwards; see
+[`release-wasm-0.1.4.md`](release-wasm-0.1.4.md).

@@ -90,12 +90,26 @@ The third N-API / WebAssembly comparison, which decides the future of the
 Node.js binding, is to be taken with this module and native 0.4.6, so that
 both sides run the same runtime sources.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. publish native 0.4.6 first (`v0.4.6`), since the binding declares it;
-2. confirm the tagged Linux CI and WebAssembly runs on the candidate commit;
-3. explicitly authorize creation of `wasm-v0.1.4`;
-4. after publication, run the JSR end-to-end check above and record its
-   outcome here.
+- Tag: `wasm-v0.1.4`, created by the maintainer on 2026-11-09 on
+  `3815b33ab79686fa344531e7dfad11ff399d974f`, the commit of
+  [`v0.4.6`](release-0.4.6.md), after that native release was published.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/42680633049)
+  and [WebAssembly](https://github.com/defense-humanites/libmorpheus/actions/runs/42680633282),
+  both passed at their first attempt.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42680633347);
+  the rebuilt module reproduced the qualified artifact byte for byte, npm
+  (`latest` now `0.1.4`, tarball integrity
+  `sha512-CH8aZCRd/04LwF1IuZJ5AkXgSpwrCVmXefa0VCSiJZ8X2BD0vrXdwhX3CceZsBgIS3LsOkNp0nXWUEwpuo3MTw==`)
+  and JSR both accepted the version, and the
+  [`wasm-v0.1.4` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/wasm-v0.1.4)
+  carries the module files.
+- Module digests (`SHA256SUMS`):
+  `f03b6c9c93e187315bbbdd6a748407b13b175491e78f816f2bfa3432d74db05c`
+  (`morpheus.mjs`),
+  `6b8c1937d38b3fd48081a8202753ddf85b9fe7e2650944f72e5a1c0a3d974f74`
+  (`morpheus.wasm`). A module built outside CI from `f1bfad7`, whose
+  runtime sources are those of the tag, with the pinned Emscripten 4.0.15,
+  has the same two digests.
+- JSR end-to-end check: pending (maintainer).
