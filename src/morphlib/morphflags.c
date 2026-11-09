@@ -222,12 +222,28 @@ int is_prvb_morphflag(long mnum)
 }
  
 
+/*
+ * The morph flags that belong to a preverb rather than to the word it is
+ * attached to. init_prvb_tab() builds its lookup table from this list.
+ */
+static const int preverb_morphflags[] = {
+	DISSIMILATION,
+	PREVB_AUGMENT,
+	ELIDE_PREVERB,
+	ROOT_PREVERB,
+	RAW_PREVERB,
+	UNASP_PREVERB,
+	APOCOPE,
+	DOUBLED_CONS
+};
+
 void * zogalloc(size_t, size_t);
 
 int init_prvb_tab(void)
 {
 	morpheus_runtime_context *context = morpheus_runtime_context_current();
 	char *prvb_tab;
+	size_t i;
 	
 	if( context->preverb_morphflag_table ) return(1);
 	prvb_tab = (char *)calloc((size_t)(TABSIZE+1),(size_t)(sizeof * prvb_tab) );
@@ -240,31 +256,25 @@ int init_prvb_tab(void)
 	context->preverb_morphflag_table = prvb_tab;
 	
 
-	prvb_tab[DISSIMILATION] = 1;
-	prvb_tab[PREVB_AUGMENT] = 1;
-	prvb_tab[ELIDE_PREVERB] = 1;
-	prvb_tab[ROOT_PREVERB] = 1;
-	prvb_tab[RAW_PREVERB] = 1;
-	prvb_tab[UNASP_PREVERB] = 1;
-	prvb_tab[APOCOPE] = 1;
-	prvb_tab[DOUBLED_CONS] = 1;
+	for(i=0;i<sizeof preverb_morphflags / sizeof preverb_morphflags[0];i++)
+		prvb_tab[preverb_morphflags[i]] = 1;
 	return(1);
 
 }
 
+/*
+ * Move the preverb flags of a word to its preverb. Called for every
+ * candidate key, so it tests the eight preverb flags directly rather than
+ * every flag number against the context's table.
+ */
 void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 {
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	const char *prvb_tab;
-	int i;
+	size_t i;
 
-	if( ! context->preverb_morphflag_table )
-		if(!init_prvb_tab()) return;
-	prvb_tab = context->preverb_morphflag_table;
-	for(i=1;i<=TABSIZE;i++) {
-		if( prvb_tab[i] && has_morphflag(word_mf,i) ) {
-				zap_morphflag(word_mf,i);
-				add_morphflag(prvb_mf,i);
+	for(i=0;i<sizeof preverb_morphflags / sizeof preverb_morphflags[0];i++) {
+		if( has_morphflag(word_mf,preverb_morphflags[i]) ) {
+				zap_morphflag(word_mf,preverb_morphflags[i]);
+				add_morphflag(prvb_mf,preverb_morphflags[i]);
 		}
 	}
 }

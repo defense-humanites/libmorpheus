@@ -112,10 +112,19 @@ int nextpreverb(char *word, char *oldprevb, char *pblemma, gk_string *gstr)
 
 int has_rawpreverb(char *curpb, gk_string *pbentry)
 {
+  const char *raw;
+
   if (!valid_preverb_argument(curpb) ||
       !valid_preverb_argument(pbentry))
     return(0);
-  return(!Xstrncmp(curpb,gkstring_of(pbentry),Xstrlen(gkstring_of(pbentry))));
+  raw = gkstring_of(pbentry);
+  /*
+   * nextpreverb() tries every raw preverb against the word: a non-empty
+   * preverb whose first byte differs cannot match, so skip the comparison.
+   */
+  if (raw[0] && raw[0] != curpb[0])
+    return(0);
+  return(!Xstrncmp(curpb,raw,Xstrlen(raw)));
 }
 
 int is_rawpreverb(char *s)

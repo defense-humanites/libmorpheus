@@ -11,6 +11,8 @@
 #include "runtime_context.h"
 
 #define MORPHEUS_END_CACHE_SIZE 45
+/* Stem index files kept open per context by ChckFullIndex(). */
+#define MORPHEUS_INDEX_FILE_CACHE_SIZE 4
 #define MORPHEUS_DERIVATION_BUFFER_COUNT 4
 #define MORPHEUS_DERIVATION_CACHE_SIZE 12
 #define MORPHEUS_AUGMENT_STEM_COUNT 12
@@ -25,9 +27,7 @@ struct morpheus_runtime_context {
 	void *public_generation_index;
 	void *public_generation_service;
 	void (*public_generation_cleanup)(struct morpheus_runtime_context *);
-	unsigned char comparison_table[MORPHEUS_BYTE_TABLE_SIZE];
 	unsigned char beta_table[MORPHEUS_BYTE_TABLE_SIZE];
-	int comparison_table_initialized;
 	int beta_table_initialized;
 	char *hidden_morphflag_table;
 	char *preverb_morphflag_table;
@@ -47,6 +47,8 @@ struct morpheus_runtime_context {
 	int ending_cache_initialized;
 	int ending_start_match;
 	FILE *suffix_table_file;
+	char *index_file_paths[MORPHEUS_INDEX_FILE_CACHE_SIZE];
+	FILE *index_files[MORPHEUS_INDEX_FILE_CACHE_SIZE];
 	int suffix_table_unavailable;
 	gk_string *ending_store;
 	int ending_store_count;
