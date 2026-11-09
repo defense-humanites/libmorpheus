@@ -19,7 +19,12 @@ import {
   MorpheusOption,
 } from "../bindings/js/node/index.js";
 import { isMainModule } from "./main-module.mjs";
-import { compareReports, CURRENT_SCHEMA_VERSION } from "./report.mjs";
+import {
+  compareReports,
+  CURRENT_SCHEMA_VERSION,
+  uvThreadpoolSize,
+  WASM_RESULT_DELIVERY,
+} from "./report.mjs";
 import {
   compileWasmModule,
   createWasmInstance,
@@ -635,11 +640,11 @@ async function benchmarkWasmWarmGeneration(
   });
   const startupMs = performance.now() - startupStart;
   try {
-    await pool.generate(lemma, 1 + configuration.warmupIterations);
+    await pool.generate(lemma, 1 + configuration.warmupIterations, GENERATION_RESULT_LIMIT);
     const operations = configuration.iterations * contextCount;
     const start = performance.now();
     const [results, peakRss] = await sampleRss(() =>
-      pool.generate(lemma, configuration.iterations)
+      pool.generate(lemma, configuration.iterations, GENERATION_RESULT_LIMIT)
     );
     const durationMs = performance.now() - start;
     return summarize(
@@ -804,6 +809,14 @@ export async function main(arguments_) {
   const stemlibPath = requireEnvironment("MORPHEUS_STEMLIB");
   const cruncherPath = requireEnvironment("MORPHEUS_CRUNCHER");
   const words = await loadWords(configuration.fixturePath);
+  const threadpoolSize = uvThreadpoolSize(process.env.UV_THREADPOOL_SIZE);
+  const widestContexts = Math.max(...configuration.contextCounts);
+  if (threadpoolSize < widestContexts) {
+    console.error(
+      `warning: UV_THREADPOOL_SIZE is ${threadpoolSize}; native rows above ` +
+        `${threadpoolSize} contexts share ${threadpoolSize} threads`,
+    );
+  }
   /** @type {Measurement[]} */
   const measurements = [];
 
@@ -875,6 +888,7 @@ export async function main(arguments_) {
       node: process.versions.node,
       v8: process.versions.v8,
       uv: process.versions.uv,
+      uvThreadpoolSize: threadpoolSize,
     },
     binding: { package: "@libmorpheus/node", version: MORPHEUS_NODE_VERSION },
     hardwareConcurrency: availableParallelism(),
@@ -898,6 +912,7 @@ export async function main(arguments_) {
       ? null
       : await fileSha256(new URL("./morpheus.wasm", pathToFileURL(wasmModulePath))),
     wasmRuntimeBytes,
+    wasmResultDelivery: wasmModulePath === null ? null : WASM_RESULT_DELIVERY,
     measurements,
   };
   const compared = configuration.baselinePath

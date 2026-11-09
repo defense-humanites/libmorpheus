@@ -6,7 +6,9 @@ import { test } from "node:test";
 import {
   compareReports,
   CROSS_RUNTIME_ENGINES,
+  uvThreadpoolSize,
   validateReleaseBenchmark,
+  WASM_RESULT_DELIVERY,
 } from "../report.mjs";
 import { parseCommandLine } from "../validate.mjs";
 
@@ -197,6 +199,26 @@ test("WebAssembly measurements present in the baseline are compared", () => {
   assert.equal(wasm?.throughputChangePercent, 100);
 });
 
+test("WebAssembly rows delivered differently are not compared", () => {
+  const counted = report([measurement("node", 1, 100, 10), measurement("wasm-memfs", 1, 50, 20)]);
+  const delivered = {
+    ...report([measurement("node", 1, 100, 10), measurement("wasm-memfs", 1, 40, 25)]),
+    wasmResultDelivery: WASM_RESULT_DELIVERY,
+  };
+  const { comparison } = compareReports(counted, delivered);
+  assert.deepEqual(comparison.map((entry) => entry.engine), ["node"]);
+  const again = compareReports(delivered, { ...delivered });
+  assert.ok(again.comparison.some((entry) => entry.engine === "wasm-memfs"));
+});
+
+test("the libuv thread pool size follows libuv's reading of the variable", () => {
+  assert.equal(uvThreadpoolSize(undefined), 4);
+  assert.equal(uvThreadpoolSize(""), 4);
+  assert.equal(uvThreadpoolSize("0"), 4);
+  assert.equal(uvThreadpoolSize("8"), 8);
+  assert.equal(uvThreadpoolSize("4096"), 1024);
+});
+
 const sourceRevision = "1".repeat(40);
 const stemlibRevision = "2".repeat(40);
 const expected = {
@@ -305,6 +327,32 @@ test("a schema 3 release benchmark names the Node.js runtime and binding", () =>
         expected,
       ),
     /lacks node:1/,
+  );
+});
+
+test("native rows may not outnumber the libuv thread pool", () => {
+  const wide = {
+    ...releaseReport(),
+    measurements: [...releaseMeasurements("node"), releaseMeasurement("node", 8)],
+  };
+  // Reports predating the field were taken with four threads and four contexts.
+  validateReleaseBenchmark(releaseReport(), expected);
+  validateReleaseBenchmark({ ...wide, runtime: { ...runtime, uvThreadpoolSize: 8 } }, expected);
+  assert.throws(
+    () => validateReleaseBenchmark({ ...wide, runtime: { ...runtime, uvThreadpoolSize: 4 } }, expected),
+    /node with 8 contexts exceeds the libuv thread pool/,
+  );
+  validateReleaseBenchmark(
+    {
+      ...releaseReport(),
+      runtime: { ...runtime, uvThreadpoolSize: 4 },
+      measurements: [...releaseMeasurements("node"), releaseMeasurement("wasm-memfs", 8)],
+    },
+    expected,
+  );
+  assert.throws(
+    () => validateReleaseBenchmark({ ...releaseReport(), wasmResultDelivery: "batch" }, expected),
+    /unknown wasmResultDelivery/,
   );
 });
 

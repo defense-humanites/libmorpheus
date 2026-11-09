@@ -104,7 +104,14 @@ Warm measurements (`wasm-<mode>`, `wasm-<mode>-generation-<lemma>-warm`) run
 over a pool of worker threads, one WebAssembly instance and one Greek context
 per worker, with the `WebAssembly.Module` compiled once and shared through
 structured cloning (`bench/wasm-pool.mjs`, `bench/wasm-worker.mjs`); word
-assignment is identical to the native model operation for operation. Their
+assignment is identical to the native model operation for operation. Each
+operation is one request to a worker, and its results are structured-cloned
+back to the main thread, where the harness counts them: the pool pays what a
+native binding call pays, a dispatch off the main thread and the results
+materialized on it. Such reports record `wasmResultDelivery: "main-thread"`.
+Reports without the field come from the first pool, which ran each worker's
+batch inside the worker and returned only a count; `--baseline` does not
+compare WebAssembly rows across the two deliveries. Their
 `startup_ms` covers worker spawn, instantiation, data placement and context
 creation. Cold measurements (`wasm-<mode>-cold`,
 `wasm-<mode>-generation-<lemma>-cold`) compile and instantiate the module from
@@ -117,6 +124,22 @@ MEMFS payload per instance). WebAssembly measurements are optional additions:
 context count, and the release validation does not require them.
 `bench/release.sh` passes the variable through unchanged, so exporting
 `MORPHEUS_WASM_MODULE` before running it adds the models to a release report.
+
+The Node.js binding runs every asynchronous call on the libuv thread pool,
+four threads unless `UV_THREADPOOL_SIZE` is set, so native rows wider than the
+pool measure the pool rather than the contexts. `bench/release.sh` sets the
+variable to the widest context count (at least four) unless it is already
+set; `compare.mjs` records the size as `runtime.uvThreadpoolSize` and warns
+when a context count exceeds it, and the release validator rejects native
+rows wider than the recorded pool. Reports that predate the field were taken
+with the default four threads.
+
+The first comparison on the controlled host, from the harness before both
+corrections, is retained at
+[`bench/release-evidence/benchmark-0.4.5-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison.json);
+[wasm.md](wasm.md#controlled-host-2026-11-09) reads it. It is not a
+baseline for the next release, whose native rows compare with
+`benchmark-0.4.5-node-packed.json`.
 
 Pass a previous report as the second argument to add the normalized comparison:
 

@@ -30,7 +30,7 @@
  * @property {string} generatedAt
  * @property {string | null} label
  * @property {{ os: string, arch: string, release: string }} platform
- * @property {{ node: string, v8: string, uv: string }} runtime
+ * @property {{ node: string, v8: string, uv: string, uvThreadpoolSize?: number }} runtime
  * @property {{ package: string, version: string }} binding
  * @property {number} hardwareConcurrency
  * @property {string | null} sourceRevision
@@ -47,6 +47,7 @@
  * @property {string | null} [wasmModule]
  * @property {string | null} [wasmModuleSha256]
  * @property {number | null} [wasmRuntimeBytes]
+ * @property {WasmResultDelivery | null} [wasmResultDelivery]
  * @property {readonly Measurement[]} measurements
  */
 
@@ -61,6 +62,39 @@
  */
 
 export const CURRENT_SCHEMA_VERSION = 3;
+
+/**
+ * How the WebAssembly pool hands results to the harness. `main-thread`: one
+ * request per operation, every result structured-cloned to the main thread,
+ * as the native binding materializes its results there. Reports without the
+ * field ran each worker's batch inside the worker and returned only a count;
+ * their WebAssembly rows measure less work and are not compared with these.
+ *
+ * @typedef {"main-thread"} WasmResultDelivery
+ */
+export const WASM_RESULT_DELIVERY = "main-thread";
+
+/** libuv's default when `UV_THREADPOOL_SIZE` is unset. */
+const DEFAULT_UV_THREADPOOL_SIZE = 4;
+
+/**
+ * The size of the libuv thread pool that runs every asynchronous call of the
+ * Node.js binding. libuv reads `UV_THREADPOOL_SIZE` once, when the pool
+ * starts, and clamps it to [1, 1024]; the value must therefore come from the
+ * environment of the process, which `bench/release.sh` sets.
+ *
+ * @param {string | undefined} value
+ */
+export function uvThreadpoolSize(value) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return DEFAULT_UV_THREADPOOL_SIZE;
+  return Math.min(parsed, 1024);
+}
+
+/** @param {any} report */
+function wasmResultDelivery(report) {
+  return report?.wasmResultDelivery ?? "worker-count";
+}
 
 /** Analysis engine of the native binding measured by each schema. */
 export const NATIVE_ANALYSIS_ENGINE = Object.freeze({ 2: "ffi", 3: "node" });
@@ -140,6 +174,12 @@ export function compareReports(baseline, current) {
   const pairs = [];
   for (const measurement of current.measurements) {
     if (scope === "cross-runtime" && !CROSS_RUNTIME_ENGINES.includes(measurement.engine)) {
+      continue;
+    }
+    if (
+      isWasmEngine(measurement.engine) &&
+      wasmResultDelivery(baseline) !== wasmResultDelivery(current)
+    ) {
       continue;
     }
     const previous = baselineMeasurements.get(measurementKey(measurement));
@@ -346,6 +386,28 @@ export function validateReleaseBenchmark(report, expected) {
     throw new Error("measurements must be an array");
   }
   report.measurements.forEach(validateMeasurement);
+
+  // A Node.js binding call runs on the libuv thread pool; native rows wider
+  // than the pool would measure the pool, not the contexts. Reports that
+  // predate the field were all taken with the default four threads and at
+  // most four contexts.
+  if (schemaVersion === 3 && report.runtime.uvThreadpoolSize !== undefined) {
+    requireInteger(report.runtime.uvThreadpoolSize, "runtime.uvThreadpoolSize", 1);
+    for (const { engine, contexts } of report.measurements) {
+      if (!isWasmEngine(engine) && contexts > report.runtime.uvThreadpoolSize) {
+        throw new Error(
+          `${engine} with ${contexts} contexts exceeds the libuv thread pool ` +
+            `(${report.runtime.uvThreadpoolSize}); set UV_THREADPOOL_SIZE`,
+        );
+      }
+    }
+  }
+  if (
+    report.wasmResultDelivery !== undefined && report.wasmResultDelivery !== null &&
+    report.wasmResultDelivery !== WASM_RESULT_DELIVERY
+  ) {
+    throw new Error(`unknown wasmResultDelivery: ${report.wasmResultDelivery}`);
+  }
 
   const configurations = new Set(
     report.measurements.map(({ engine, contexts }) => `${engine}:${contexts}`),
