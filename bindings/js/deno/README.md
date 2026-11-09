@@ -2,6 +2,16 @@
 
 # libmorpheus for Deno
 
+> [!WARNING]
+> **This package is no longer maintained. Version 0.4.3 is its final
+> release.** Deno's maintainers announced the end of its development in
+> October 2026, and libmorpheus no longer depends on Deno. Version 0.4.3
+> acquires native libmorpheus 0.4.5, the last fixes it will receive; it stays
+> available on JSR but will get no further release. For new code, use
+> [`@libmorpheus/wasm`](https://jsr.io/@libmorpheus/wasm), which runs under
+> Deno without FFI permissions, or, on Node.js,
+> [`@libmorpheus/node`](https://www.npmjs.com/package/@libmorpheus/node).
+
 `libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
 morphological analyzer for Ancient Greek and Latin. It turns the historical C
 programs into an installable C17 shared library with a stable, opaque ABI and a
@@ -23,7 +33,6 @@ TypeScript objects before their C allocations are released.
    4. [Raw access and cleanup](#raw-access-and-cleanup)
 3. [Other installation options](#other-installation-options)
    1. [Standalone release archive](#standalone-release-archive)
-   2. [Docker image](#docker-image)
 4. [Native library and runtime data](#native-library-and-runtime-data)
    1. [Acquire stem data](#acquire-stem-data)
    2. [Acquire the native library](#acquire-the-native-library)
@@ -259,54 +268,6 @@ release. Extract the binding beside a compatible native archive, import
 path to `MorpheusLibrary`. The binding archive contains neither native binaries
 nor stem data.
 
-### Docker image
-
-The repository's locally built
-[`deno-runtime` image target](https://github.com/defense-humanites/libmorpheus/blob/main/Dockerfile)
-bundles Deno, the native library, and the pinned Alpheios stemlib prepared with
-its validated `gener.index`. It deliberately does not copy this binding into the
-image:
-
-```sh
-git clone --recurse-submodules \
-  https://github.com/defense-humanites/libmorpheus.git
-cd libmorpheus
-git checkout v0.4.2
-docker build --target deno-runtime -t morpheus-deno:0.4.2 .
-```
-
-Containerized applications declare `@libmorpheus/deno` as the same normal
-JSR dependency used outside Docker:
-
-```sh
-deno add jsr:@libmorpheus/deno@0.4.2
-```
-
-Application code imports `@libmorpheus/deno` and reads only
-`MORPHEUS_LIBRARY` and `MORPHEUS_STEMLIB`, which already contain the container
-paths. It does not call `/setup` or depend on how the image provisioned those
-paths:
-
-```ts
-import {
-  MorpheusLanguage,
-  MorpheusLibrary,
-} from "@libmorpheus/deno";
-
-using library = new MorpheusLibrary(Deno.env.get("MORPHEUS_LIBRARY")!);
-await using context = library.createContext(
-  Deno.env.get("MORPHEUS_STEMLIB")!,
-  MorpheusLanguage.Greek,
-);
-```
-
-Applications still need Deno's FFI permission. Greek `analyze()` and
-experimental `generate()` are both qualified in the image; CI checks the
-26- and 39-analysis Alpheios cases and that generation preserves dual forms.
-Build the image from the `v0.4.2` source tag to include the corrected native
-runtime. The image is a qualification and application-build target, not a
-published registry image.
-
 ## Native library and runtime data
 
 The binding needs both a native `libmorpheus` library and a compatible stemlib.
@@ -316,13 +277,12 @@ What must be acquired depends on the distribution:
 | --- | --- | --- | --- |
 | JSR package | Not included | Not included | Run `/setup`, or use `/native` and `/data` separately |
 | Standalone binding archive | Not included | Not included | Install the matching native release and acquire a stemlib as described below |
-| `deno-runtime` Docker image | Included | Alpheios included | Add the binding from JSR; use `MORPHEUS_LIBRARY` and `MORPHEUS_STEMLIB` without running `/setup` |
 
-The following acquisition commands therefore apply to the JSR package and the
-standalone binding archive, not to the Docker image.
+The following acquisition commands apply to the JSR package and the
+standalone binding archive.
 
-Binding and runtime versions are independent. Binding `0.4.2` currently
-acquires native runtime `0.4.2` and requires C ABI `2`; these compatibility
+Binding and runtime versions are independent. Binding `0.4.3` currently
+acquires native runtime `0.4.5` and requires C ABI `2`; these compatibility
 values are declared in `internal/version.ts`. The main module exports
 `MORPHEUS_DENO_VERSION`; the `/native` module exports
 `MORPHEUS_NATIVE_VERSION` and `MORPHEUS_NATIVE_ABI_VERSION` for tooling.
@@ -336,7 +296,7 @@ deno x \
   --allow-net=codeload.github.com \
   --allow-read=./morpheus-data \
   --allow-write=./morpheus-data \
-  jsr:@libmorpheus/deno@0.4.2/data \
+  jsr:@libmorpheus/deno@0.4.3/data \
   --dataset perseids \
   --output ./morpheus-data
 ```
@@ -352,7 +312,7 @@ deno x \
   --allow-net=codeload.github.com \
   --allow-read=./morpheus-greek-data \
   --allow-write=./morpheus-greek-data \
-  jsr:@libmorpheus/deno@0.4.2/data \
+  jsr:@libmorpheus/deno@0.4.3/data \
   --dataset alpheios \
   --with-gener \
   --output ./morpheus-greek-data
@@ -377,7 +337,7 @@ deno x \
   --allow-net=github.com,release-assets.githubusercontent.com \
   --allow-read=./morpheus-native \
   --allow-write=./morpheus-native \
-  jsr:@libmorpheus/deno@0.4.2/native \
+  jsr:@libmorpheus/deno@0.4.3/native \
   --output ./morpheus-native
 ```
 
@@ -410,7 +370,7 @@ The operation and selected dataset together determine language coverage:
 | `analyze()` | Yes | Yes | A stemlib for the selected language |
 | `generate()` | Yes | No | Alpheios data prepared with `gener.index` |
 | Perseids | Yes | Yes | No |
-| Alpheios | Yes | No | With `--with-gener`; already prepared in Docker |
+| Alpheios | Yes | No | With `--with-gener` |
 
 See the [stem-library inventory](https://github.com/defense-humanites/libmorpheus/blob/main/docs/stem-libraries.md)
 for dataset origins and repository locations.

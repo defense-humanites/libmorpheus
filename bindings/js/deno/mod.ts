@@ -5,6 +5,10 @@
  * Deno FFI binding for libmorpheus Greek and Latin analysis and experimental
  * Greek lemma generation.
  *
+ * **No longer maintained: version 0.4.3 is the final release.** It acquires
+ * native libmorpheus 0.4.5. Use `jsr:@libmorpheus/wasm` (no FFI permission
+ * needed) or, on Node.js, `npm:@libmorpheus/node` for new code.
+ *
  * The separately distributed native library and stem data must be supplied at
  * runtime. Applications need Deno's `--allow-ffi` permission.
  *

@@ -9,6 +9,16 @@ the corpus.
 
 ## [Unreleased]
 
+### Deprecated
+
+- Deno binding 0.4.3 (prepared; `docs/release-deno-0.4.3.md`) is the final
+  release of `@libmorpheus/deno`: it declares native 0.4.5 instead of 0.4.2
+  and carries a deprecation notice in its README and module documentation,
+  directing new code to `@libmorpheus/wasm` or `@libmorpheus/node`. The
+  binding, its release workflow and the `deno-runtime` Docker target are
+  removed from the repository after this release; the JSR package stays
+  available, frozen.
+
 ### Changed
 
 - GitHub releases take their title from the tag (`v0.4.5`, `wasm-v0.1.3`…)
