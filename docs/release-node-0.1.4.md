@@ -50,8 +50,29 @@ smoke test acquires. The tag's workflow also creates the `node-v0.1.4`
 GitHub release, titled with the tag, from `docs/release-notes/node-v0.1.4.md`
 and the four tarballs npm serves, checked against the registry's integrity.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must confirm the tagged Linux CI and
-platform runs on the candidate commit and explicitly authorize creation of
-`node-v0.1.4`.
+- Tag: `node-v0.1.4`, created by the maintainer on 2026-11-09 on
+  `515b24de5b58c69b278c8df6cbe9021afb87a30f`, the merge of this decision.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/42692804388)
+  and [platform](https://github.com/defense-humanites/libmorpheus/actions/runs/42692803811)
+  (Linux x86_64 and aarch64 glibc, macOS arm64, Alpine x86_64 and aarch64),
+  both passed at the first attempt.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42692803731);
+  the four packages are on npm at 0.1.4 with `latest` moved, tarball
+  integrity `sha512-XiLsBUHQWk/hzLVcc0y5uTdOmEufhFjU7JtJPDesFmd9E+MIcPr22/r7aH9AiZ06uyTflyMAT0ZrZWnaArZQMw==`
+  (`@libmorpheus/node`),
+  `sha512-V7tq13zdSWCjQ/gKS+RIfhjdV8dmoq+YBYZZATXltnZahWJe1aflYfpk7FveLORRcuAi5FGe0nma4DFmzb1bLA==`
+  (`node-darwin-arm64`),
+  `sha512-3CH3kuRlalHRdnLK/mjVlwhgiXbyqmEex9os1RyZGcex4OBeqP/sKqAt+7g4FMUwu5UNCWdiEDrzjRUyQI4vsw==`
+  (`node-linux-arm64-gnu`),
+  `sha512-4guuzRiQEeSPbCfSf5SBgq66F2YCnzxU3aif/Ri4msBIaFO/BA8IvSKYvCx3wNDc+iIrXfZfFIubJnqu0lyvTA==`
+  (`node-linux-x64-gnu`).
+- GitHub release: [`node-v0.1.4`](https://github.com/defense-humanites/libmorpheus/releases/tag/node-v0.1.4),
+  with the four tarballs npm serves and `SHA256SUMS`; the repository's
+  latest release stays `v0.4.6`.
+- Published npm smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42694137516):
+  an empty application installed the published packages, acquired the
+  declared native runtime 0.4.6 and both datasets from the public endpoints,
+  and preserved Greek analysis, Latin multiple interpretations and Greek
+  dual generation.
