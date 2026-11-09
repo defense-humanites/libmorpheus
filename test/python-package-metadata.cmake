@@ -8,7 +8,7 @@ set(python_dir "${MORPHEUS_SOURCE_DIR}/bindings/python")
 file(READ "${python_dir}/pyproject.toml" pyproject)
 string(REGEX MATCH "\nversion = \"([0-9.]+)\"" _ "${pyproject}")
 set(python_version "${CMAKE_MATCH_1}")
-if(NOT python_version STREQUAL "0.2.0")
+if(NOT python_version STREQUAL "0.2.1")
   message(FATAL_ERROR "Unexpected Python package version: ${python_version}")
 endif()
 foreach(required IN ITEMS
@@ -30,7 +30,7 @@ endforeach()
 file(READ "${python_dir}/src/libmorpheus/_version.py" version_module)
 foreach(required IN ITEMS
     "MORPHEUS_PYTHON_VERSION = \"${python_version}\""
-    "MORPHEUS_NATIVE_VERSION = \"0.4.5\""
+    "MORPHEUS_NATIVE_VERSION = \"0.4.6\""
     "MORPHEUS_NATIVE_ABI_VERSION = 2")
   string(FIND "${version_module}" "${required}" required_at)
   if(required_at EQUAL -1)
@@ -39,7 +39,7 @@ foreach(required IN ITEMS
 endforeach()
 
 file(READ "${python_dir}/README.md" python_readme)
-if(NOT python_readme MATCHES "Python binding `${python_version}` targets\nnative runtime `0.4.5`")
+if(NOT python_readme MATCHES "Python binding `${python_version}` targets\nnative runtime `0.4.6`")
   message(FATAL_ERROR "Python README disagrees with the declared versions")
 endif()
 
