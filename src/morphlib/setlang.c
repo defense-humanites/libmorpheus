@@ -45,6 +45,11 @@ morpheus_runtime_context_destroy(morpheus_runtime_context *context)
 		FreeGkString(context->consonant_euphony_table);
 	if (context->suffix_table_file)
 		fclose(context->suffix_table_file);
+	for (i = 0; i < MORPHEUS_INDEX_FILE_CACHE_SIZE; i++) {
+		if (context->index_files[i])
+			fclose(context->index_files[i]);
+		free(context->index_file_paths[i]);
+	}
 	if (context->ending_store)
 		FreeGkString(context->ending_store);
 	destroy_end_index(context->dictionary_entry_index);

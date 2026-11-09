@@ -37,21 +37,27 @@ main(void)
 	morpheus_runtime_context_set_language(greek,GREEK);
 	morpheus_runtime_context_set_language(latin,LATIN);
 
+	/*
+	 * The first lookup of a language loads its dictionary tags and opens
+	 * its stem index; each context keeps that index open, so later lookups
+	 * open nothing until the language changes.
+	 */
 	previous = morpheus_runtime_context_activate(greek);
 	assert_indeclinable("kai",2);
-	assert_indeclinable("kai",1);
+	assert_indeclinable("kai",0);
 
 	morpheus_runtime_context_activate(latin);
 	assert_indeclinable("et",2);
-	assert_indeclinable("et",1);
+	assert_indeclinable("et",0);
 
 	morpheus_runtime_context_activate(greek);
-	assert_indeclinable("kai",1);
+	assert_indeclinable("kai",0);
 	morpheus_runtime_context_set_language(greek,LATIN);
 	assert_indeclinable("et",2);
+	assert_indeclinable("et",0);
 
 	morpheus_runtime_context_activate(latin);
-	assert_indeclinable("et",1);
+	assert_indeclinable("et",0);
 
 	morpheus_runtime_context_activate(greek);
 	{

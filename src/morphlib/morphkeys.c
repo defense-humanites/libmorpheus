@@ -496,21 +496,28 @@ char *
 
 const Morph_args *
 MatchMorphKey(char *field)
-{		
+{
+	/* Called for every field of every candidate key: fetch the context once. */
+	morpheus_runtime_context *context = KEY_CONTEXT;
+	const Morph_args **table;
+	int count;
 	int rval;
-	
-	if( ! keys_inited && !init_keys() )
-		return(NULL);
 
-	rval=binlook( (char *)key_table , field , nkeys , (int)sizeof * key_table , 1 ,  keycomp2);
+	if( !(context->morph_keys_initialized &&
+	      context->morph_key_language == context->language) && !init_keys() )
+		return(NULL);
+	table = context->morph_key_table;
+	count = context->morph_key_count;
+
+	rval=binlook( (char *)table , field , count , (int)sizeof * table , 1 ,  keycomp2);
 	if( rval < 0 ) {
 
 		return(NULL);
 	}
-	while(rval+1 < nkeys &&
-	      strcmp(field,key_table[rval+1]->morph_key) == 0)
+	while(rval+1 < count &&
+	      strcmp(field,table[rval+1]->morph_key) == 0)
 		rval++;
-	return(*(key_table+rval));
+	return(table[rval]);
 }
 
 Stemtype

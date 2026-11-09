@@ -158,10 +158,76 @@ return( roff  );
 }
 
 
+/*
+ * ChckFullIndex() reads one entry of a stem index per lookup, several
+ * times per analyzed word. Opening the file each time made open() and
+ * close() a measurable part of an analysis, so the context keeps the few
+ * index files it reads open, keyed by their full path, until it is
+ * destroyed. A file that fails a seek or a read is closed and forgotten.
+ */
+static FILE *
+open_index_file(char *fname, int *cached)
+{
+	morpheus_runtime_context *context = morpheus_runtime_context_current();
+	char path[BUFSIZ];
+	FILE *f;
+	int i;
+
+	*cached = 0;
+	MorphPathName(fname,path);
+	if (!path[0]) return(NULL);
+	for (i = 0; i < MORPHEUS_INDEX_FILE_CACHE_SIZE; i++) {
+		if (context->index_files[i] &&
+		    strcmp(context->index_file_paths[i],path) == 0) {
+			*cached = 1;
+			return(context->index_files[i]);
+		}
+	}
+	if ((f = MorphFopen(fname,"r")) == NULL) return(NULL);
+	for (i = 0; i < MORPHEUS_INDEX_FILE_CACHE_SIZE; i++) {
+		if (!context->index_files[i]) {
+			char *copy = malloc(strlen(path) + 1);
+
+			if (!copy) break;
+			strcpy(copy,path);
+			context->index_file_paths[i] = copy;
+			context->index_files[i] = f;
+			*cached = 1;
+			break;
+		}
+	}
+	return(f);
+}
+
+static void
+release_index_file(FILE *f, int cached, int failed)
+{
+	morpheus_runtime_context *context;
+	int i;
+
+	if (!cached) {
+		fclose(f);
+		return;
+	}
+	if (!failed) return;
+	context = morpheus_runtime_context_current();
+	for (i = 0; i < MORPHEUS_INDEX_FILE_CACHE_SIZE; i++) {
+		if (context->index_files[i] == f) {
+			fclose(f);
+			free(context->index_file_paths[i]);
+			context->index_files[i] = NULL;
+			context->index_file_paths[i] = NULL;
+			return;
+		}
+	}
+}
+
 int ChckFullIndex(char *s, char *keys, char *fname, long offset,
                   int (*scmp)(const char *, const char *, size_t))
 {
 	FILE * f;
+	int cached;
+	int failed = 0;
 	register char * a;
 	char buf[BUFSIZ*4];
 	size_t slen;
@@ -176,14 +242,14 @@ int firstline = 1;
 		return(0);
 	}
 
-	if( (f=MorphFopen(fname,"r"))==NULL) {
+	if( (f=open_index_file(fname,&cached))==NULL) {
 		fprintf(stderr,"ChckFullIndex(): could not open:%s\n", fname );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(0);
 	}
 	if (offset < 0 || fseek(f,offset,SEEK_SET) != 0) {
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
-		fclose(f);
+		release_index_file(f,cached,1);
 		return(0);
 	}
 /*
@@ -226,11 +292,12 @@ firstline = 0;
 	if (ferror(f)) {
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		rval = 0;
+		failed = 1;
 	}
 /*
 fprintf(stderr,"ends comp [%d] s [%s] buf [%s]\n", comp , s , buf );
 getchar();
 */
-	fclose(f);
+	release_index_file(f,cached,failed);
 	return(rval);
 }

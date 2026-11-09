@@ -3,6 +3,17 @@
 
 #include "morphstrcmp.proto.h"
 
+/*
+ * The comparison order of morphstrcmp() and dictstrcmp(): byte order, with
+ * the iota subscript matching as an 'i'. It is the same for every context,
+ * so it needs no table and no lookup of the runtime context, which the
+ * stem and dictionary lookups would otherwise pay on every comparison.
+ */
+static unsigned char compare_byte(unsigned char c)
+{
+	return(c == '|' ? (unsigned char)'i' : c);
+}
+
 static int compare_nulls(const char *s1, const char *s2, int *result)
 {
 	if (s1 && s2) return(0);
@@ -16,21 +27,16 @@ static int compare_nulls(const char *s1, const char *s2, int *result)
  */
 int morphstrcmp(char *s1, char *s2)
 {
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	unsigned char *comptab = context->comparison_table;
 	int result;
 
 	if (compare_nulls(s1,s2,&result)) return(result);
-	if( ! context->comparison_table_initialized ) {
-		init_comptab();
-	}
 /*
 fprintf(stderr,"looking at [%s] and [%s]\n", s1, s2 );
 */
 	while(1) {
-		if(comptab[(unsigned char)*s1] != comptab[(unsigned char)*s2])
-			return((int)(comptab[(unsigned char)*s1] -
-				comptab[(unsigned char)*s2]));
+		if(compare_byte((unsigned char)*s1) != compare_byte((unsigned char)*s2))
+			return((int)(compare_byte((unsigned char)*s1) -
+				compare_byte((unsigned char)*s2)));
 		if (*s1=='\0')
 			return(0);
 		s1++; s2++;
@@ -70,41 +76,31 @@ int betastrcmp(char *s1, char *s2)
 
 int morphstrncmp(const char *s1, const char *s2, size_t n)
 {
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	unsigned char *comptab = context->comparison_table;
 	int result;
 
 	if (!n) return(0);
 	if (compare_nulls(s1,s2,&result)) return(result);
-	if( ! context->comparison_table_initialized ) {
-		init_comptab();
-	}
-	for (; --n && (comptab[(unsigned char)*s1] ==
-		comptab[(unsigned char)*s2]); s1++, s2++) {
+	for (; --n && (compare_byte((unsigned char)*s1) ==
+		compare_byte((unsigned char)*s2)); s1++, s2++) {
 		if (!*s1) break;
 	}
 		
-	return ((int)(comptab[(unsigned char)*s1] -
-		comptab[(unsigned char)*s2]));
+	return ((int)(compare_byte((unsigned char)*s1) -
+		compare_byte((unsigned char)*s2)));
 }
 
 int dictstrcmp(char *s1, char *s2)
 {
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	unsigned char *comptab = context->comparison_table;
 	int result;
 
 	if (compare_nulls(s1,s2,&result)) return(result);
-	if( ! context->comparison_table_initialized ) {
-		init_comptab();
-	}
 
 	while(1) {
 		while(! isalpha((unsigned char)*s1) && *s1 != '|'  && *s1 != HARDLONG && *s1 ) s1++;
 		while(! isalpha((unsigned char)*s2) && *s2 != '|'  && *s2 != HARDLONG && *s2 ) s2++;
-		if(comptab[(unsigned char)*s1] != comptab[(unsigned char)*s2])
-			return(comptab[(unsigned char)*s1] -
-				comptab[(unsigned char)*s2]);
+		if(compare_byte((unsigned char)*s1) != compare_byte((unsigned char)*s2))
+			return(compare_byte((unsigned char)*s1) -
+				compare_byte((unsigned char)*s2));
 		if (*s1=='\0'||isspace((unsigned char)*s1))
 
 			return(0);
@@ -121,35 +117,20 @@ int dictstrcmp(char *s1, char *s2)
 
 int dictstrncmp(const char *s1, const char *s2, size_t n)
 {
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	unsigned char *comptab = context->comparison_table;
 	int result;
 
 	if (!n) return(0);
 	if (compare_nulls(s1,s2,&result)) return(result);
-	if (!context->comparison_table_initialized) init_comptab();
 	while (n--) {
 		while (*s1 && !isalpha((unsigned char)*s1)) s1++;
 		while (*s2 && !isalpha((unsigned char)*s2)) s2++;
-		result = (int)comptab[(unsigned char)*s1] -
-		         (int)comptab[(unsigned char)*s2];
+		result = (int)compare_byte((unsigned char)*s1) -
+		         (int)compare_byte((unsigned char)*s2);
 		if (result || !*s1) return(result);
 		s1++;
 		s2++;
 	}
 	return(0);
-}
-
-void init_comptab(void)
-{
-	morpheus_runtime_context *context = morpheus_runtime_context_current();
-	unsigned char *comptab = context->comparison_table;
-	int i;
-	
-	context->comparison_table_initialized = 1;
-	for(i=0;i<MORPHEUS_BYTE_TABLE_SIZE;i++)
-		comptab[i] = (unsigned char)i;
-	comptab['|'] = 'i'; /* iota subscript matches as an 'i' */
 }
 
 void init_betatab(void)
