@@ -19,8 +19,9 @@ before republishing what you acquire.
 
 ## Usage
 
-The package is published on npm and on JSR; the command runs under
-Node.js 20+, Deno 2 and Bun:
+The package is published on npm and on JSR. The command is tested under
+Node.js 20+; it uses only Node.js built-in modules, so it also runs under
+Deno 2 and Bun through their Node.js compatibility:
 
 ```sh
 # Greek and Latin analysis: the Perseids dataset, runtime files only,

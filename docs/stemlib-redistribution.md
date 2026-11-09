@@ -91,7 +91,7 @@ The following remain allowed:
 The following remain blocked:
 
 - stemlib payloads in GitHub Release assets;
-- stemlib payloads in native, Node.js, Python, or Deno packages;
+- stemlib payloads in native, Node.js, Python, WebAssembly or data packages;
 - publication of the prepared data in container images;
 - upload of runtime archives as retained CI artifacts.
 

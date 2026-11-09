@@ -85,9 +85,9 @@ twice and overlays selected output directories into `dist/stemlib/Greek`.
 ## Greek baseline
 
 The reference inputs and runtime outputs are pinned together by the Alpheios
-submodule revision. The Deno acquisition command additionally verifies the
+submodule revision. The data acquisition package additionally verifies the
 selected 237-file distribution tree with the digest recorded in
-`bindings/js/deno/internal/data_manifest.ts`. This proves acquisition integrity;
+`bindings/js/data/internal/data-manifest.js`. This proves acquisition integrity;
 it does not prove that rebuilding the inputs produces the same tree.
 
 The pin was audited against Alpheios `master` on 2026-08-31. Upstream was then

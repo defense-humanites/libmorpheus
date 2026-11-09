@@ -19,6 +19,21 @@ the corpus.
   removed from the repository after this release; the JSR package stays
   available, frozen.
 
+### Removed
+
+- The Deno binding (`bindings/js/deno/`), its release, JSR-recovery and
+  JSR-smoke workflows, its standalone-archive packaging and checks, the
+  `jsr_package_metadata` test, and the `deno-runtime` Docker target, after
+  the final `deno-v0.4.3` release. libmorpheus no longer depends on Deno:
+  CI no longer installs it, the Alpine image is qualified with `cruncher`,
+  and `@libmorpheus/wasm` and `@libmorpheus/data` are checked and published
+  to JSR with JSR's own `jsr` command-line tool (`npx jsr@0.14.3 publish`),
+  their tests running under Node.js. The CMake option that builds the
+  WebAssembly generation preparer is renamed
+  `MORPHEUS_BUILD_JS_GENER_PREPARER` (formerly
+  `MORPHEUS_BUILD_DENO_GENER_PREPARER`); its only consumer is the data
+  package.
+
 ### Changed
 
 - GitHub releases take their title from the tag (`v0.4.5`, `wasm-v0.1.3`…)

@@ -1,5 +1,4 @@
 ARG ALPINE_VERSION=3.22
-ARG DENO_IMAGE=denoland/deno:alpine
 
 FROM alpine:${ALPINE_VERSION} AS build
 
@@ -30,21 +29,6 @@ COPY --from=build \
 
 ENV LD_LIBRARY_PATH=/opt/morpheus/lib
 ENV MORPHLIB=/opt/morpheus/share/morpheus/stemlib
-
-FROM ${DENO_IMAGE} AS deno-runtime
-
-USER root
-COPY --from=build /opt/morpheus /opt/morpheus
-COPY --from=build \
-  /opt/morpheus-runtime-data \
-  /opt/morpheus/share/morpheus/stemlib
-
-ENV LD_LIBRARY_PATH=/opt/morpheus/lib
-ENV MORPHEUS_LIBRARY=/opt/morpheus/lib/libmorpheus.so
-ENV MORPHEUS_STEMLIB=/opt/morpheus/share/morpheus/stemlib
-
-USER deno
-WORKDIR /app
 
 FROM runtime-base AS runtime
 

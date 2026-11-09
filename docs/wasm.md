@@ -21,8 +21,8 @@ qualified.
 - **The public structures are fixed-layout.** `morpheus_analysis` (852 bytes)
   and `morpheus_generation` (188 bytes) contain only `uint32_t` words,
   fixed-capacity `char` arrays and a `uint8_t` bit set, so their offsets are
-  identical on `wasm32` and `x86-64`; the Deno binding's decoders apply
-  unchanged.
+  identical on `wasm32` and `x86-64`; the decoders of the JavaScript
+  bindings apply unchanged.
 - **I/O goes through `stdio`.** The runtime opens stemlib files with
   `fopen`/`fread`/`fseek` and the compatibility layer writes through
   `open_memstream`, all of which Emscripten's musl provides. No `mmap`, no
@@ -235,8 +235,9 @@ cost it targets.
 - Single-threaded by design. A `-pthread` build would require shared memory
   and cross-origin isolation in browsers; nothing in the runtime needs it.
 - The facade returns the numeric codes of the C structures. The named decoding
-  (part-of-speech, dialect and morph-flag names) exists in the Deno binding
-  and can be shared with the WebAssembly facade in a later change.
+  (part-of-speech, dialect and morph-flag names) exists in the Node.js binding,
+  which decodes the same fixed layout since #48, and can be shared with the
+  WebAssembly facade in a later change.
 - Publication follows the `wasm-v<version>` track described in
   [releasing.md](releasing.md): `bindings/js/wasm/` is one package for npm
   and JSR, `wasm_package_metadata` guards its manifests, and

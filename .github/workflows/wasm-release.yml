@@ -41,7 +41,7 @@ jobs:
           submodules: recursive
           ref: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
 
-      - name: Install supported CMake, Node.js and Deno
+      - name: Install supported CMake and Node.js
         # GITHUB_PATH prepends: the last directory written ends up first.
         # Order matters here: the emsdk image ships a Node.js whose npm is
         # too old for OIDC publication and a cmake older than the project's
@@ -54,17 +54,14 @@ jobs:
           echo "/usr/bin" >> "$GITHUB_PATH"
           python3 -m pip install --user cmake==3.31.6
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          curl -fsSL https://deno.land/install.sh | DENO_INSTALL="$HOME/.deno" sh -s v2.9.5
-          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
 
       - name: Show the tools later steps will use
         run: |
           echo "PATH=$PATH"
-          command -v cmake node npm deno emcc
+          command -v cmake node npm emcc
           cmake --version | head -n 1
           node --version
           npm --version
-          deno --version | head -n 1
 
       - name: Verify binding version, tree version and ABI
         id: metadata
@@ -205,8 +202,7 @@ jobs:
           mkdir -p dist
           cp ../../../build/wasm-release/wasm/morpheus.mjs \
              ../../../build/wasm-release/wasm/morpheus.wasm dist/
-          deno check index.mjs
-          deno publish --dry-run
+          npx --yes jsr@0.14.3 publish --dry-run --allow-dirty
           npm pack --dry-run --ignore-scripts .
 
       - name: Test the packaged facade from an npm tarball
@@ -259,8 +255,10 @@ jobs:
       - name: Publish JSR package
         # Like the npm step, skip an exact version JSR already holds, so a
         # recovery dispatch after a timed-out run reaches the release step.
-        # deno publish returns only once JSR has processed the upload; when
-        # JSR queues it for long, the job may time out after npm succeeded.
+        # The jsr command returns only once JSR has processed the upload;
+        # when JSR queues it for long, the job may time out after npm
+        # succeeded. jsr is JSR's own publisher (it runs the registry's
+        # tooling itself); libmorpheus does not depend on Deno.
         working-directory: bindings/js/wasm
         env:
           BINDING_VERSION: ${{ steps.metadata.outputs.binding-version }}
@@ -272,7 +270,7 @@ jobs:
               echo "@libmorpheus/wasm@$BINDING_VERSION is already published on JSR."
               ;;
             404)
-              deno publish
+              npx --yes jsr@0.14.3 publish --allow-dirty
               ;;
             *)
               echo "::error title=jsr::unexpected HTTP $status from JSR for version $BINDING_VERSION"

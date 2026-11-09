@@ -15,9 +15,7 @@ comes with JavaScript and Python bindings.
 4. [Install and consume from C](#install-and-consume-from-c)
 5. [Runtime data](#runtime-data)
    1. [Rebuild and qualify the stemlibs](#rebuild-and-qualify-the-stemlibs)
-6. [Alpine container images](#alpine-container-images)
-   1. [`runtime`](#runtime)
-   2. [`deno-runtime`](#deno-runtime)
+6. [Alpine container image](#alpine-container-image)
 7. [`cruncher`](#cruncher)
 8. [Releases and platform support](#releases-and-platform-support)
 9. [Architecture and provenance](#architecture-and-provenance)
@@ -48,12 +46,16 @@ Bindings expose the native C API to other language ecosystems.
 
 | Binding | Description | Documentation |
 | --- | --- | --- |
-| Deno 2 | Typed TypeScript API for analysis and experimental Greek generation, published on JSR | [Deno binding guide](bindings/js/deno/README.md) |
 | Node.js 20+ | ESM facade over an asynchronous Node-API addon | [Node.js binding guide](bindings/js/node/README.md) |
 | Python 3.11+ | Pure-Python `ctypes` facade over the stable C ABI | [Python binding guide](bindings/python/README.md) |
 | WebAssembly (experimental) | Emscripten build of the complete C ABI for browsers, workers and JavaScript runtimes; no native toolchain at run time | [WebAssembly guide](bindings/js/wasm/README.md), [build and qualification](docs/wasm.md) |
 
 Native consumers should instead use the [public C API](docs/public-api.md).
+
+The Deno FFI binding, `@libmorpheus/deno`, is no longer maintained: version
+0.4.3, its final release, stays available on JSR, and its sources remain in
+the history up to the `deno-v0.4.3` tag. Deno applications can use the
+WebAssembly binding from JSR, which needs no FFI permission.
 
 ## Build the native library
 
@@ -279,15 +281,11 @@ redistribution right. The
 trees and licensing evidence and keeps every payload publication channel
 closed pending an explicit review.
 
-## Alpine container images
+## Alpine container image
 
-We provide two Alpine container images to facilitate the use of the library.
-The Dockerfile supports `linux/amd64` and `linux/arm64` with BuildKit/QEMU.
-These images are local qualification and application-build targets.
-
-### `runtime`
-
-The default Alpine multi-stage image builds and tests the C17 runtime on musl,
+The Dockerfile supports `linux/amd64` and `linux/arm64` with BuildKit/QEMU. Its
+image is a local qualification and application-build target. The default
+Alpine multi-stage image builds and tests the C17 runtime on musl,
 then ships the installed library, `cruncher`, runtime dependencies, and the
 prepared `alpheios-project` stemlib:
 
@@ -295,19 +293,6 @@ prepared `alpheios-project` stemlib:
 docker build --target runtime -t morpheus .
 printf 'a)/nqrwpos\n' | docker run --rm -i morpheus -S
 ```
-
-### `deno-runtime`
-
-The `deno-runtime` target adds Deno while preinstalling only the native runtime
-and prepared data:
-
-```sh
-docker build --target deno-runtime -t morpheus-deno .
-```
-
-Applications consume the binding as a normal JSR dependency. See the
-[Deno binding guide](bindings/js/deno/README.md#docker-image) for the preconfigured
-paths and a consumer example.
 
 ## `cruncher`
 
@@ -333,9 +318,8 @@ for:
 - Linux aarch64 glibc;
 - macOS arm64.
 
-The Deno binding has an independent version and uses `deno-v<version>` tags for
-its standalone source archive and JSR publication. Each binding version declares
-the native runtime release and ABI it supports.
+Each binding is versioned independently and declares the native runtime
+release and ABI it supports.
 
 The Node.js binding is versioned independently with `node-v<version>` tags. npm
 publishes the ESM facade as `@libmorpheus/node` and a matching optional Node-API
@@ -360,7 +344,7 @@ runtime regressions:
 - `alpheios_greek_fixtures` checks Greek reference cases against the pinned
   Alpheios dataset.
 
-Public ABI, installed-package, parallel-context, Deno, ASan/UBSan, and TSan
+Public ABI, installed-package, parallel-context, binding, ASan/UBSan, and TSan
 tests complement those fixtures.
 
 ## Architecture and provenance
@@ -388,7 +372,7 @@ This is a mixed-license repository:
 
 - inherited engine, bridge, compatibility, and derived internal code remain
   under [MPL-2.0](LICENSE);
-- the normalized public API, Deno binding, and marked independently written
+- the normalized public API, the bindings, and marked independently written
   support files use
   [AGPL-3.0-or-later](LICENSE-AGPL-3.0-or-later).
 

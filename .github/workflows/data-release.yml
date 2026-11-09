@@ -41,18 +41,12 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.9.5
-
       - name: Show the tools later steps will use
         run: |
-          command -v cmake node npm deno
+          command -v cmake node npm
           cmake --version | head -n 1
           node --version
           npm --version
-          deno --version | head -n 1
 
       - name: Verify package version and contract
         id: metadata
@@ -126,13 +120,11 @@ jobs:
             }
             throw new Error('Timed out waiting for tagged Linux CI')
 
-      - name: Test the package under Node.js and Deno and verify both manifests
+      - name: Test the package and verify both manifests
         working-directory: bindings/js/data
         run: |
           npm test
-          deno test -A --no-check test/data.test.js test/gener.test.js test/main-module.test.js
-          deno check data.js
-          deno publish --dry-run
+          npx --yes jsr@0.14.3 publish --dry-run --allow-dirty
           npm pack --dry-run --ignore-scripts .
 
       - name: Acquire a dataset with the packaged command from an npm tarball
@@ -204,7 +196,7 @@ jobs:
               echo "@libmorpheus/data@$PACKAGE_VERSION is already published on JSR."
               ;;
             404)
-              deno publish
+              npx --yes jsr@0.14.3 publish --allow-dirty
               ;;
             *)
               echo "::error title=jsr::unexpected HTTP $status from JSR for version $PACKAGE_VERSION"

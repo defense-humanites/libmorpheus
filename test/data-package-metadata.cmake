@@ -227,16 +227,6 @@ if(NOT data_archive_sha STREQUAL node_archive_sha)
   message(FATAL_ERROR
     "internal/archive.js differs between the data package and the Node.js binding")
 endif()
-# The Deno binding still carries its own copy of the generation preparer;
-# it must not drift from the data package's (the preparer CI job compares
-# both with a fresh build).
-file(SHA256 "${data_dir}/internal/gener-preparer.mjs" data_preparer_sha)
-file(SHA256 "${MORPHEUS_SOURCE_DIR}/bindings/js/deno/internal/gener_preparer.mjs"
-     deno_preparer_sha)
-if(NOT data_preparer_sha STREQUAL deno_preparer_sha)
-  message(FATAL_ERROR
-    "internal/gener-preparer.mjs differs between the data package and the Deno binding")
-endif()
 
 # --- No linguistic data -------------------------------------------------------
 
