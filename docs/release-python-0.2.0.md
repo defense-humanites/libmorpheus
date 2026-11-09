@@ -99,10 +99,27 @@ generation checks against a runtime built from the tagged sources, and, new,
 runs the published `libmorpheus-setup` against the public endpoints and
 analyzes Latin and Greek through the acquired runtime and data.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
-
-1. confirm the final tagged CI candidate and package file lists;
-2. explicitly authorize creation of `python-v0.2.0`;
-3. after publication, record the workflow and smoke-test outcome here.
+- Tag: `python-v0.2.0`, created by the maintainer on 2026-11-09 on
+  `db857be6040566c23c9d4bcdb48100ec12e48b96`, the merge of this decision,
+  after the maintainer's pre-publication check on macOS arm64 (Homebrew
+  Python 3.13): unit tests and runtime smoke, the built wheel in an empty
+  environment, `libmorpheus-setup --dataset perseids` against the public
+  endpoints (native target `macos-arm64`), installation of a `gener.index`
+  prepared by `@libmorpheus/data` through `--gener-index` with generation of
+  `lo/gos`, and the refusals of an unpinned index and of existing outputs.
+- Tagged Linux CI: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42598061068).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42598061025);
+  `libmorpheus` 0.2.0 is on PyPI; the wheel
+  `libmorpheus-0.2.0-py3-none-any.whl` has SHA-256
+  `740b4b1b36527e8a2b99e7575ce08c95b3aeb0bf9d4129749c803fba9ab6d959`.
+- Published PyPI smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42599188241):
+  the public wheel repeated the analysis and generation checks against a
+  runtime built from the tagged sources, and its published
+  `libmorpheus-setup` acquired the declared runtime and the Perseids data from
+  the public endpoints, through which Latin and Greek were analyzed.
+- After publication, the maintainer noted that the README's generation
+  section did not say that `gener.index` must be prepared and installed
+  first; the section now says so (on the PyPI page from the next release,
+  since PyPI shows the README of the published version).
