@@ -7,6 +7,11 @@ set -eu
 # MORPHEUS_BENCHMARK_LABEL, MORPHEUS_BENCHMARK_STEMLIB,
 # MORPHEUS_BENCHMARK_ITERATIONS, MORPHEUS_BENCHMARK_WARMUP,
 # MORPHEUS_BENCHMARK_CONTEXTS, and MORPHEUS_BENCHMARK_COLD_SAMPLES.
+# MORPHEUS_WASM_MODULE adds the WebAssembly rows (docs/benchmarks.md).
+#
+# Every call of the Node.js binding runs on the libuv thread pool, four
+# threads unless UV_THREADPOOL_SIZE says otherwise; the wrapper sizes the
+# pool to the widest context count (at least four) unless it is set.
 
 usage()
 {
@@ -79,6 +84,22 @@ iterations=${MORPHEUS_BENCHMARK_ITERATIONS:-20}
 warmup=${MORPHEUS_BENCHMARK_WARMUP:-2}
 contexts=${MORPHEUS_BENCHMARK_CONTEXTS:-1,2,4}
 cold_samples=${MORPHEUS_BENCHMARK_COLD_SAMPLES:-10}
+
+widest_contexts=4
+old_ifs=${IFS}
+IFS=,
+for context_count in ${contexts}; do
+  case "${context_count}" in
+    ''|*[!0-9]*)
+      echo "MORPHEUS_BENCHMARK_CONTEXTS must list positive integers: ${contexts}" >&2
+      exit 1
+      ;;
+  esac
+  [ "${context_count}" -le "${widest_contexts}" ] || widest_contexts=${context_count}
+done
+IFS=${old_ifs}
+UV_THREADPOOL_SIZE=${UV_THREADPOOL_SIZE:-${widest_contexts}}
+export UV_THREADPOOL_SIZE
 
 case "${stemlib}" in
   /*) ;;

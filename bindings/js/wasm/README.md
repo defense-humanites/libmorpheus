@@ -92,7 +92,7 @@ things are the application's responsibility, whichever runtime it targets.
    (`writeStemlib()`) rather than mounting a host directory
    (`mountDirectory()`): a mounted directory turns every historical
    `open`/`seek`/`read`/`close` into a system call reached through
-   JavaScript, which the [benchmark](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md#performance-against-the-native-ffi-path)
+   JavaScript, which the [benchmark](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md#performance-against-the-native-binding)
    shows is the slow placement. Mounting is for development and tests.
 4. **Instance lifetime and concurrency.** One instance costs tens of
    milliseconds to create and holds its own data (`writeStemlib()` adopts the

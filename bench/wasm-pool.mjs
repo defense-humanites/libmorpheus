@@ -3,6 +3,12 @@
 // A pool of benchmark workers, each holding one WebAssembly instance and one
 // Greek context. The compiled module and the stemlib bytes are shared with
 // every worker through structured cloning; memories are separate.
+//
+// Each operation is one request, and its results are structured-cloned back
+// to the main thread, so the pool pays what the native binding pays per call:
+// a dispatch off the main thread, then the results materialized on it. The
+// first pool ran a whole batch per worker and returned only a count, which
+// left both costs out (`wasmResultDelivery` in docs/benchmarks.md).
 
 import { Worker } from "node:worker_threads";
 
@@ -27,6 +33,14 @@ import { Worker } from "node:worker_threads";
  */
 
 const workerUrl = new URL("./wasm-worker.mjs", import.meta.url);
+
+/** @param {WorkerResponse} response */
+function resultsOf(response) {
+  if (response.type !== "results") {
+    throw new Error(`unexpected worker response: ${response.type}`);
+  }
+  return response.results;
+}
 
 class PoolWorker {
   /** @type {Worker} */
@@ -122,43 +136,49 @@ export class WasmPool {
 
   /**
    * Analyze `operations` words distributed round-robin, exactly as the native
-   * benchmark assigns them to its contexts. Returns the total analysis count.
+   * benchmark assigns them to its contexts: worker `i` takes operations `i`,
+   * `i + size`, and so on, awaiting each before sending the next. Returns the
+   * total analysis count, counted on the main thread.
    *
    * @param {readonly string[]} words
    * @param {number} operations
    */
   async analyze(words, operations) {
-    const responses = await Promise.all(
-      this.#workers.map((worker, index) =>
-        worker.request({
-          type: "analyze",
-          words,
-          first: index,
-          step: this.#workers.length,
-          operations,
-        })
-      ),
+    const counts = await Promise.all(
+      this.#workers.map(async (worker, index) => {
+        let results = 0;
+        for (let operation = index; operation < operations; operation += this.#workers.length) {
+          results += resultsOf(
+            await worker.request({ type: "analyze", word: words[operation % words.length] }),
+          ).length;
+        }
+        return results;
+      }),
     );
-    return responses.reduce(
-      (sum, response) => sum + (response.type === "done" ? response.results : 0),
-      0,
-    );
+    return counts.reduce((sum, count) => sum + count, 0);
   }
 
   /**
-   * Generate `iterations` times on every worker. Returns the total result count.
+   * Generate `iterations` times on every worker, one request per generation.
+   * Returns the total result count, counted on the main thread.
    *
    * @param {string} lemma
    * @param {number} iterations
+   * @param {number} resultLimit
    */
-  async generate(lemma, iterations) {
-    const responses = await Promise.all(
-      this.#workers.map((worker) => worker.request({ type: "generate", lemma, iterations })),
+  async generate(lemma, iterations, resultLimit) {
+    const counts = await Promise.all(
+      this.#workers.map(async (worker) => {
+        let results = 0;
+        for (let iteration = 0; iteration < iterations; iteration++) {
+          results += resultsOf(
+            await worker.request({ type: "generate", lemma, resultLimit }),
+          ).length;
+        }
+        return results;
+      }),
     );
-    return responses.reduce(
-      (sum, response) => sum + (response.type === "done" ? response.results : 0),
-      0,
-    );
+    return counts.reduce((sum, count) => sum + count, 0);
   }
 
   async close() {

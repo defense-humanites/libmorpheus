@@ -154,11 +154,90 @@ and must not be modified afterwards; the runtime only reads them. The distributi
 facade package embeds a stemlib, and the [redistribution
 policy](stemlib-redistribution.md) applies to any application that serves one.
 
-## Performance against the native FFI path
+<!-- Anchor of this section before 2026-11, linked from the README published
+with @libmorpheus/wasm 0.1.3 and earlier. -->
+<a id="performance-against-the-native-ffi-path"></a>
+
+## Performance against the native binding
 
 `bench/compare.mjs` measures the module next to the native binding on the
 same corpus when `MORPHEUS_WASM_MODULE` is set; [benchmarks.md](benchmarks.md)
-describes the execution models. The run below was taken with the Deno
+describes the execution models.
+
+### Controlled host, 2026-11-09
+
+The first comparison on the controlled host is retained at
+[`bench/release-evidence/benchmark-0.4.5-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison.json)
+(SHA-256 `7a13105332a7a7f3141ed1ce187e5fcd5d45d561fd3298a0553dd9ae71167999`).
+It was produced with `bench/release.sh` on the Apple Silicon host of the
+release reports (12 cores, Apple Clang 2100.4.1.1, Node.js 26.13.0, binding
+0.1.3) from `6017445d3c08ce9f8ed6755a990b08d69932f743`, whose native sources
+are those of `v0.4.5`, with the published `wasm-v0.1.3` module
+(`morpheus.wasm` SHA-256 `09a8841a…`), 20 iterations and 1, 2, 4 and 8
+contexts. Throughput in operations per second:
+
+| Workload | Engine | 1 | 2 | 4 | 8 |
+| --- | --- | --- | --- | --- | --- |
+| Analysis | `node` | 1533 | 2475 | 3676 | 3656 |
+| Analysis | `wasm-memfs` | 2477 | 4181 | 6273 | 6977 |
+| Analysis | `wasm-nodefs` | 2084 | 3511 | 5228 | 6019 |
+| Maximal generation (`i(/hmi`) | native | 166 | 276 | 267 | 271 |
+| Maximal generation | `wasm-memfs` | 162 | 311 | 576 | 1002 |
+| Maximal generation | `wasm-nodefs` | 162 | 307 | 577 | 1042 |
+
+Read with the limits of the next section:
+
+- **Analysis.** MEMFS runs 1.6 to 1.9 times the native throughput at every
+  width, NODEFS 1.4 to 1.65 times. At one context the native library itself
+  is the slower one: `cruncher-persistent`, which makes no Node.js call,
+  takes 630 µs per word against 404 µs for MEMFS, whereas the 2-vCPU Linux
+  sandbox below showed native ahead. That is consistent with the I/O-bound
+  lookup pattern described below, which MEMFS reduces to copies, on a host
+  where system calls cost more; a profile of `cruncher` should confirm it
+  before any change to the C runtime.
+- **Generation.** At one context the two are at parity (6.0 against 6.2 ms
+  for the maximal paradigm). The native rows then stay near 270 operations
+  per second from two contexts on, while the pool keeps scaling.
+- **Start-up.** 11 to 20 ms for a pool against 0.5 to 3.4 ms for native
+  contexts; the cold rows remain slower (analysis 4.0–4.5 ms against 3.1 ms
+  for a `cruncher` process; generation 21 and 28 ms against 14.7 and
+  21.4 ms).
+- **Memory.** MEMFS costs about 25 MiB per instance (206 MiB of RSS growth
+  for eight analysis workers), NODEFS about 3.5 MiB, native contexts under
+  7 MiB for eight. These are process-wide figures taken one model after
+  another, hence orders of magnitude only.
+
+### What that run could not decide
+
+The harness at `6017445` measured the two models asymmetrically, in two
+ways the next run corrects:
+
+1. **The libuv thread pool.** Every asynchronous call of the Node.js
+   binding runs on libuv's pool, four threads unless `UV_THREADPOOL_SIZE`
+   says otherwise, so the eight-context native rows ran on four threads
+   (3676 against 3656 operations per second). `bench/release.sh` now sizes
+   the pool to the widest context count, the report records
+   `runtime.uvThreadpoolSize`, and the release validator rejects native rows
+   wider than the pool.
+2. **Where results land.** The native binding decodes every result into
+   JavaScript objects on the main thread, one call at a time across all
+   contexts; the pool ran each worker's batch inside the worker and returned
+   only a count. The maximal paradigm returns 2918 forms per call, and serial
+   decoding on the main thread would explain the native ceiling near 270
+   operations per second (3.7 ms per call). The pool now sends one request
+   per operation and posts every result back to the main thread, as an
+   application consuming them there would receive them; such reports record
+   `wasmResultDelivery: "main-thread"`, and `--baseline` does not compare
+   WebAssembly rows across deliveries.
+
+If the generation ceiling persists once both sides deliver to the main
+thread, it belongs to the binding, and applications pay it too: decoding
+lazily or off the main thread would lift it. The decision on the Node.js
+binding's future waits for that run.
+
+### Earlier sandbox run (Deno harness)
+
+The run below was taken with the Deno
 harness retired after 0.4.5 (`ffi` is the Deno FFI binding; the Node.js
 harness measures the Node-API binding as `node`, in the same process as the
 worker pool). It is **indicative only**: a shared
@@ -224,11 +303,11 @@ What the numbers say, within that noise:
   models), so use `rss_growth` per measurement rather than `peak_rss` for
   attribution.
 
-The decisive comparison is on a quiet multi-core host with the release
-procedure; the harness is in place for it. The result also answers whether a
-per-context file-descriptor cache in the C runtime is worth pursuing: it would
-help native and NODEFS deployments, while MEMFS already removes most of the
-cost it targets.
+The controlled-host runs above take up the decisive comparison. The
+single-context gap they show on macOS is also the measure of what a
+per-context file-descriptor cache (or an in-memory stemlib) in the C runtime
+could gain: it would help native and NODEFS deployments, while MEMFS already
+removes most of the cost it targets.
 
 ## Known limits and follow-ups
 
