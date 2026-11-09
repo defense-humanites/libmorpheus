@@ -248,9 +248,14 @@ every qualification job of its own run.
   repository's latest release.
 - To change the notes or title of a published release, edit the notes file on
   `main` and run the `Release notes` workflow for that tag (`tags: v0.4.5`);
-  `tags: all` applies every notes file, and `backfill` creates the missing
-  Node.js and Python releases from their registry files. Tags and assets are
-  never touched.
+  `tags: all` applies every notes file. Tags and assets are never touched, and
+  a tag without a release is only reported: GitHub refuses a workflow token
+  the creation of a release on an existing tag whose workflow files differ
+  from `main`'s (it requires the `workflows` permission). The Node.js and
+  Python tags published before their track had GitHub releases are therefore
+  completed from a maintainer's machine with
+  `sh tools/backfill-binding-releases.sh` (`gh` with the `workflow` scope),
+  which attaches the registry files verified against the registry's digests.
 - Integrate the release-preparation branch into `main` with a normal merge
   commit. Do not squash or rebase when the branch contains reviewable release
   history that must remain visible.

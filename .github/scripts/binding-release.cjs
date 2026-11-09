@@ -40,8 +40,9 @@ module.exports = async function publishBindingRelease({
     release = (await github.rest.repos.createRelease({
       owner,
       repo,
+      // The tag exists: GitHub ignores target_commitish for an existing tag,
+      // and `sha` only documents which commit the release describes.
       tag_name: tag,
-      target_commitish: sha,
       name: tag,
       body,
       draft: true,

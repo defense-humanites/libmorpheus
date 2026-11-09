@@ -16,6 +16,7 @@ set(agpl_files
     .github/workflows/data-release.yml
     .github/workflows/release-notes.yml
     tools/registry-release-assets.py
+    tools/backfill-binding-releases.sh
     CHANGELOG.md
     CMakeLists.txt
     docs/release-node-0.1.0.md
