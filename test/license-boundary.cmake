@@ -20,8 +20,10 @@ set(agpl_files
     CMakeLists.txt
     docs/release-node-0.1.0.md
     docs/release-node-0.1.3.md
+    docs/release-node-0.1.4.md
     docs/release-python-0.1.1.md
     docs/release-python-0.2.0.md
+    docs/release-python-0.2.1.md
     docs/release-deno-0.4.3.md
     cmake/stamp-gener-preparer.cmake
     bindings/js/node/CMakeLists.txt
