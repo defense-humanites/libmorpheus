@@ -9,6 +9,18 @@ the corpus.
 
 ## [Unreleased]
 
+### Changed
+
+- The error raised when a context cannot be opened names the stemlib path
+  and the language instead of the language's number, in the WebAssembly
+  facade (`opening /stemlib for Latin failed: stemlib is unavailable or
+  incomplete`), and now also in the Node.js and Python bindings, whose
+  message gave only the status text. The status is unchanged
+  (`StemlibError`, 8). The usual cause is a stemlib without that language,
+  such as the Greek-only Alpheios dataset opened for Latin; the WebAssembly
+  README's example says so. Each binding ships the change in its next
+  release.
+
 ## [0.4.6] - 2026-11-09
 
 Target project version: **0.4.6**. C ABI: **2**. Shared-library SONAME: **1**.

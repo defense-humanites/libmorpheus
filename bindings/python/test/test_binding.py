@@ -146,6 +146,17 @@ class BindingTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "library is closed"):
             library.context("fixture-stemlib", Language.GREEK)
 
+    def test_names_the_stemlib_and_language_a_context_fails_to_open(self) -> None:
+        with Library(self.library_path) as library:
+            with self.assertRaises(MorpheusError) as caught:
+                library.context("missing-stemlib", Language.LATIN)
+        self.assertEqual(caught.exception.status, Status.STEMLIB_ERROR)
+        self.assertEqual(
+            str(caught.exception),
+            "opening missing-stemlib for Latin failed: "
+            "stemlib is unavailable or incomplete",
+        )
+
     def test_validates_python_inputs_before_native_calls(self) -> None:
         with Library(self.library_path) as library:
             with self.assertRaisesRegex(ValueError, "NUL byte"):

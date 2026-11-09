@@ -134,7 +134,9 @@ SHA-256; the facade takes any iterable of `[path, bytes]`, and
 
 A long-lived server keeps one instance (or one per worker thread) with the
 data in memory and one context per language. The example reads a stemlib
-tree placed next to the script (`./stemlib/Greek`, `./stemlib/Latin`):
+tree placed next to the script (`./stemlib/Greek`, `./stemlib/Latin`). The
+Alpheios dataset is Greek only: with it, drop the Latin context, which
+would otherwise fail with `StemlibError` (`opening … for Latin failed`):
 
 ```js
 import { readFile, readdir } from "node:fs/promises";

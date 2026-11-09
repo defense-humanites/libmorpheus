@@ -36,6 +36,7 @@ const char *morpheus_status_message(morpheus_status status) {
     case MORPHEUS_INPUT_TOO_LONG: return "input too long";
     case MORPHEUS_OUT_OF_RANGE: return "out of range";
     case MORPHEUS_BUFFER_TOO_SMALL: return "buffer too small";
+    case MORPHEUS_STEMLIB_ERROR: return "stemlib is unavailable or incomplete";
     default: return "fixture error";
   }
 }
@@ -46,6 +47,9 @@ morpheus_status morpheus_open_path(
   if (abi_version != MORPHEUS_ABI_VERSION) return MORPHEUS_ABI_MISMATCH;
   if (stemlib_path == NULL || stemlib_path_length == 0u || context == NULL)
     return MORPHEUS_INVALID_ARGUMENT;
+  if (stemlib_path_length == strlen("missing-stemlib") &&
+      memcmp(stemlib_path, "missing-stemlib", stemlib_path_length) == 0)
+    return MORPHEUS_STEMLIB_ERROR;
   morpheus_context *created = calloc(1u, sizeof(*created));
   if (created == NULL) return MORPHEUS_NO_MEMORY;
   created->language = language;

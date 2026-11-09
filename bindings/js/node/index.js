@@ -481,6 +481,11 @@ export class MorpheusError extends Error {
   }
 }
 
+function languageName(language) {
+  const entry = Object.entries(MorpheusLanguage).find(([, value]) => value === language);
+  return entry ? entry[0] : `language ${language}`;
+}
+
 function asMorpheusError(error) {
   if (error instanceof MorpheusError) return error;
   if (error instanceof Error && Number.isInteger(error.status)) {
@@ -530,7 +535,14 @@ export class MorpheusLibrary {
       this.#contexts++;
       return new MorpheusContext(native, () => this.#contexts--);
     } catch (error) {
-      throw asMorpheusError(error);
+      const failure = asMorpheusError(error);
+      if (!(failure instanceof MorpheusError)) throw failure;
+      // Name the stemlib and the language: an incomplete stemlib is the
+      // usual cause, such as a Greek-only dataset opened for Latin.
+      throw new MorpheusError(
+        failure.status,
+        `opening ${stemlibPath} for ${languageName(language)} failed: ${failure.message}`,
+      );
     }
   }
 

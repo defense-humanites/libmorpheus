@@ -238,7 +238,10 @@ test("opening an incomplete stemlib reports MORPHEUS_STEMLIB_ERROR", async () =>
   morpheus.writeStemlib({ "Latin/rule_files/stemtypes.table": "x" }, "/partial");
   assert.throws(
     () => morpheus.open({ stemlib: "/partial", language: MorpheusLanguage.Latin }),
-    (error) => error instanceof MorpheusError && error.status === MorpheusStatus.StemlibError,
+    (error) =>
+      error instanceof MorpheusError &&
+      error.status === MorpheusStatus.StemlibError &&
+      error.message.startsWith("opening /partial for Latin failed: "),
   );
 });
 
