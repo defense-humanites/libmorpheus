@@ -26,6 +26,13 @@ the corpus.
   `libmorpheus-setup` acquire the `v0.4.6` archives, so applications receive
   its faster analysis, and both carry the named context error above. C ABI
   2 unchanged.
+- The N-API / WebAssembly comparison is concluded (`docs/wasm.md`): on the
+  same runtime sources (native 0.4.6, module 0.1.4) the Node.js binding
+  analyzes faster at every concurrency measured and starts and holds
+  contexts more cheaply, so it stays; the pool remains ahead only for
+  wide-parallel generation of large paradigms, a main-thread decoding cost
+  of the binding. The WebAssembly README now says when to prefer
+  `@libmorpheus/node`, and the two further comparison reports are retained.
 
 ## [0.4.6] - 2026-11-09
 

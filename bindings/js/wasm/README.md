@@ -19,6 +19,14 @@ C structures (`MorpheusRawAnalysis`, `MorpheusRawGeneration`) rather than the
 named decoding offered by the Node.js and Python bindings. The module is
 single-threaded; use one instance per worker for parallel work.
 
+For a Node.js server on Linux x86-64 or aarch64 (glibc) or macOS arm64,
+[`@libmorpheus/node`](https://www.npmjs.com/package/@libmorpheus/node) is
+the faster choice: on the same runtime it analyzes faster at every
+concurrency measured, starts contexts in milliseconds and uses less memory
+per context. This package is the choice wherever a native addon cannot go:
+browsers, Deno, edge runtimes, and Node.js on other platforms. See
+[the comparison](https://github.com/defense-humanites/libmorpheus/blob/main/docs/wasm.md#outcome-the-nodejs-binding-stays).
+
 ## Installing
 
 The package is published as `@libmorpheus/wasm` on npm and on JSR from the
