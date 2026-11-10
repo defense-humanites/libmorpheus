@@ -203,6 +203,13 @@ filters remove them. Set `exclude_duals=True` when dual forms are unwanted.
 `result_limit=0` uses the native default of 4,096; a nonzero value is a hard
 safety ceiling, not a truncation request. The explicit maximum is 65,536.
 
+A lemma's source record that the engine cannot generate (for example, one
+whose stem class has no ending table) is skipped rather than failing the
+request. `generate()` and `generate_raw()` return a `Generations` tuple whose
+`skipped_records` attribute counts those records: zero when every record was
+generated, and nonzero with an empty tuple when every record of a known lemma
+failed.
+
 ### Use parallel contexts
 
 Calls are synchronous at the Python surface. One context deliberately

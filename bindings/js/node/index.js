@@ -54,7 +54,7 @@ const addon = loadAddon();
 // The addon returns the records of one operation as a single packed buffer
 // (the C ABI's morpheus_analysis / morpheus_generation layout, followed by
 // the truncated-field masks) that this module decodes; see decodeRecords().
-const RECORD_ENCODING = 1;
+const RECORD_ENCODING = 2;
 if (addon.recordEncoding !== RECORD_ENCODING) {
   throw new Error(
     `The libmorpheus Node-API addon encodes results as ${addon.recordEncoding ?? "an earlier"}` +
@@ -542,6 +542,26 @@ function decodeGenerations(packed) {
   return records;
 }
 
+// generate() and generateRaw() return an array that also carries the
+// generation result's count of skipped source records, as a read-only,
+// non-enumerable property: printing or spreading the array is unchanged.
+function withSkippedRecords(records, packed) {
+  return Object.defineProperty(records, "skippedRecords", {
+    value: packed.skippedRecords,
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  });
+}
+
+function decodeGenerationResult(packed) {
+  return withSkippedRecords(decodeGenerations(packed), packed);
+}
+
+function decodeRawGenerationResult(packed) {
+  return withSkippedRecords(decodeGenerationRecords(packed), packed);
+}
+
 export class MorpheusError extends Error {
   constructor(status, message) {
     super(message);
@@ -653,13 +673,13 @@ export class MorpheusContext {
   generate(lemma, options = {}) {
     const encoded = nativeGenerationOptions(options);
     return this.#enqueue(() => addon.generate(this.#native, lemma, encoded)
-      .then(decodeGenerations, (error) => { throw asMorpheusError(error); }));
+      .then(decodeGenerationResult, (error) => { throw asMorpheusError(error); }));
   }
 
   generateRaw(lemma, options = {}) {
     const encoded = nativeGenerationOptions(options);
     return this.#enqueue(() => addon.generate(this.#native, lemma, encoded)
-      .then(decodeGenerationRecords, (error) => { throw asMorpheusError(error); }));
+      .then(decodeRawGenerationResult, (error) => { throw asMorpheusError(error); }));
   }
 
   async close() {

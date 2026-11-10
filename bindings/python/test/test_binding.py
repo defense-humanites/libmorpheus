@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import pickle
 import subprocess
 import tempfile
 import unittest
 
 from libmorpheus import (
     GenerationOptions,
+    Generations,
     Language,
     Library,
     MorpheusError,
@@ -74,6 +76,25 @@ class BindingTest(unittest.TestCase):
         self.assertTrue(has_morph_flag(analyses, "rare"))
         self.assertFalse(has_morph_flag(analyses, "enclitic"))
         self.assertEqual(raw[1].truncated_fields, int(TruncatedField.LEMMA))
+
+    def test_reports_skipped_generation_records(self) -> None:
+        with Library(self.library_path) as library:
+            with library.context("fixture-stemlib", Language.GREEK) as context:
+                generations = context.generate("lo/gos")
+                partial = context.generate("partial")
+                raw_partial = context.generate_raw("partial")
+                missing = context.generate("missing")
+
+        self.assertIsInstance(generations, Generations)
+        self.assertIsInstance(generations, tuple)
+        self.assertEqual(generations.skipped_records, 0)
+        self.assertEqual(len(partial), 0)
+        self.assertEqual(partial.skipped_records, 2)
+        self.assertEqual(raw_partial.skipped_records, 2)
+        self.assertEqual(missing, ())
+        self.assertEqual(missing.skipped_records, 0)
+        restored = pickle.loads(pickle.dumps(partial))
+        self.assertEqual(restored.skipped_records, 2)
 
     def test_preserves_multiple_generations_masks_and_duals(self) -> None:
         with Library(self.library_path) as library:

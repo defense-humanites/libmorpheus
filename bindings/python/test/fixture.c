@@ -17,6 +17,7 @@ struct morpheus_result {
 
 struct morpheus_generation_result {
   size_t count;
+  size_t skipped;
   morpheus_generation generations[3];
   morpheus_truncated_fields truncated[3];
 };
@@ -231,6 +232,11 @@ morpheus_status morpheus_generate(
 
   morpheus_generation_result *created = calloc(1u, sizeof(*created));
   if (created == NULL) return MORPHEUS_NO_MEMORY;
+  if (length == 7u && memcmp(lemma, "partial", 7u) == 0) {
+    created->skipped = 2u;
+    *result = created;
+    return MORPHEUS_OK;
+  }
   if (length != 6u || memcmp(lemma, "lo/gos", 6u) != 0) {
     *result = created;
     return MORPHEUS_OK;
@@ -278,6 +284,11 @@ morpheus_status morpheus_generation_result_truncated_fields(
   if (index >= result->count) return MORPHEUS_OUT_OF_RANGE;
   *fields = result->truncated[index];
   return MORPHEUS_OK;
+}
+
+size_t morpheus_generation_result_skipped_records(
+    const morpheus_generation_result *result) {
+  return result == NULL ? 0u : result->skipped;
 }
 
 void morpheus_generation_result_free(morpheus_generation_result *result) {

@@ -204,6 +204,12 @@ class NativeLibrary:
             ctypes.c_size_t,
             ctypes.POINTER(ctypes.c_uint32),
         )
+        self.generation_result_skipped_records = _function(
+            self.held,
+            "morpheus_generation_result_skipped_records",
+            ctypes.c_size_t,
+            ctypes.c_void_p,
+        )
         self.generation_result_free = _function(
             self.held,
             "morpheus_generation_result_free",

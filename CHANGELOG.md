@@ -15,6 +15,14 @@ the corpus.
   lemma's source records generation skipped because the engine could not
   generate them (#78). The function is an ABI 2 addition: existing callers
   are unaffected.
+- The bindings expose that count on the generation result, which keeps
+  its type: an array with a read-only, non-enumerable `skippedRecords`
+  property from `generate()` in the WebAssembly facade and from
+  `generate()` and `generateRaw()` in the Node.js binding, and a
+  `Generations` tuple with a `skipped_records` attribute from `generate()`
+  and `generate_raw()` in the Python binding. The Node.js addon's record
+  encoding becomes 2. The Node.js and Python bindings require the native
+  library that provides `morpheus_generation_result_skipped_records()`.
 
 ### Changed
 

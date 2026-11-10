@@ -178,12 +178,22 @@ export class MorpheusError extends Error {
   constructor(status: number, message: string);
 }
 
+/**
+ * The records of one generation request. `skippedRecords` counts the lemma's
+ * source records that the engine could not generate and skipped (records,
+ * not forms, independent of the filters); a nonzero count with no records
+ * means that every record of a known lemma failed.
+ */
+export type MorpheusGenerations = MorpheusRawGeneration[] & {
+  readonly skippedRecords: number;
+};
+
 export class MorpheusContext {
   readonly language: MorpheusLanguage;
   readonly closed: boolean;
   analyze(betaCode: string, options?: bigint | number | MorpheusAnalyzeOptions): MorpheusRawAnalysis[];
   analyzeCompat(betaCode: string, flags?: number): MorpheusCompatOutput;
-  generate(lemma: string, options?: MorpheusGenerationOptions): MorpheusRawGeneration[];
+  generate(lemma: string, options?: MorpheusGenerationOptions): MorpheusGenerations;
   close(): void;
   [Symbol.dispose]?(): void;
 }

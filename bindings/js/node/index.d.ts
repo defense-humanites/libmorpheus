@@ -303,6 +303,16 @@ export declare class MorpheusLibrary {
   close(): void;
 }
 
+/**
+ * The records of one generation request. `skippedRecords` counts the lemma's
+ * source records that the engine could not generate and skipped (records,
+ * not forms, independent of the filters); a nonzero count with no records
+ * means that every record of a known lemma failed.
+ */
+export type MorpheusGenerations<T> = readonly T[] & {
+  readonly skippedRecords: number;
+};
+
 export declare class MorpheusContext {
   private constructor();
   analyze(betaCode: string, options?: bigint): Promise<readonly MorpheusAnalysis[]>;
@@ -313,10 +323,10 @@ export declare class MorpheusContext {
   generate(
     lemma: string,
     options?: MorpheusGenerationOptions,
-  ): Promise<readonly MorpheusGeneration[]>;
+  ): Promise<MorpheusGenerations<MorpheusGeneration>>;
   generateRaw(
     lemma: string,
     options?: MorpheusGenerationOptions,
-  ): Promise<readonly MorpheusRawGeneration[]>;
+  ): Promise<MorpheusGenerations<MorpheusRawGeneration>>;
   close(): Promise<void>;
 }

@@ -19,6 +19,10 @@ C structures (`MorpheusRawAnalysis`, `MorpheusRawGeneration`) rather than the
 named decoding offered by the Node.js and Python bindings. The module is
 single-threaded; use one instance per worker for parallel work.
 
+`generate()` skips a lemma's source record that the engine cannot generate
+instead of failing, and the returned array carries the count as a read-only,
+non-enumerable `skippedRecords` property.
+
 For a Node.js server on Linux x86-64 or aarch64 (glibc) or macOS arm64,
 [`@libmorpheus/node`](https://www.npmjs.com/package/@libmorpheus/node) is
 the faster choice: on the same runtime it analyzes faster at every
