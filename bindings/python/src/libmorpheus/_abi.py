@@ -96,6 +96,10 @@ def _function(library: ctypes.CDLL, name: str, restype: object, *argtypes: objec
     return function
 
 
+def _no_skipped_records(result: object) -> int:
+    return 0
+
+
 class NativeLibrary:
     """Validated ctypes function table for one native shared library."""
 
@@ -204,6 +208,18 @@ class NativeLibrary:
             ctypes.c_size_t,
             ctypes.POINTER(ctypes.c_uint32),
         )
+        # Libraries before the skipped-record count fail the request on a
+        # record they cannot generate instead of skipping it: for them the
+        # count is zero.
+        try:
+            self.generation_result_skipped_records = _function(
+                self.held,
+                "morpheus_generation_result_skipped_records",
+                ctypes.c_size_t,
+                ctypes.c_void_p,
+            )
+        except RuntimeError:
+            self.generation_result_skipped_records = _no_skipped_records
         self.generation_result_free = _function(
             self.held,
             "morpheus_generation_result_free",

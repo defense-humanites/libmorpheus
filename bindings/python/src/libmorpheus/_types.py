@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 from functools import lru_cache
-from typing import Sequence, TypeAlias
+from typing import Iterable, Self, Sequence, TypeAlias, TypeVar
 
 
 class Language(IntEnum):
@@ -329,6 +329,29 @@ class Generation:
     lemma: str
     morph_flags: tuple[MorphFlagName, ...]
     truncated_fields: tuple[str, ...]
+
+
+_Record = TypeVar("_Record")
+
+
+class Generations(tuple[_Record, ...]):
+    """The records of one generation request.
+
+    A tuple of the generated records that also carries ``skipped_records``:
+    the number of the lemma's source records that the engine could not
+    generate and skipped. It counts records, not forms, and does not depend
+    on the request's filters; a nonzero count with no records means that
+    every record of a known lemma failed.
+    """
+
+    def __new__(cls, records: Iterable[_Record] = (), skipped_records: int = 0) -> Self:
+        created = super().__new__(cls, records)
+        created._skipped_records = skipped_records
+        return created
+
+    @property
+    def skipped_records(self) -> int:
+        return self._skipped_records
 
 
 PART_OF_SPEECH_NAMES = tuple(

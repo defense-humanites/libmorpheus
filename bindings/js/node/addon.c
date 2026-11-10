@@ -39,6 +39,8 @@ typedef struct {
                                             size_t, void *, size_t);
   morpheus_status (*generation_result_truncated_fields)(
       const morpheus_generation_result *, size_t, morpheus_truncated_fields *);
+  size_t (*generation_result_skipped_records)(
+      const morpheus_generation_result *);
   void (*generation_result_free)(morpheus_generation_result *);
 } node_morpheus_library;
 
@@ -65,6 +67,7 @@ typedef struct {
   morpheus_generation_options generation_options;
   morpheus_status status;
   size_t count;
+  size_t skipped_records;
   morpheus_analysis *analyses;
   morpheus_generation *generations;
   morpheus_truncated_fields *truncated_fields;
@@ -260,6 +263,17 @@ static napi_value node_morpheus_open_library(napi_env env,
                      morpheus_generation_result_copy);
   NODE_MORPHEUS_LOAD(library, generation_result_truncated_fields,
                      morpheus_generation_result_truncated_fields);
+  /*
+   * Optional: libraries before the skipped-record count fail the request on
+   * a record they cannot generate instead of skipping it, so for them the
+   * count is zero.
+   */
+  if (!node_morpheus_load_symbol(library->dynamic_library,
+                                 "morpheus_generation_result_skipped_records",
+                                 &library->generation_result_skipped_records,
+                                 sizeof(library->generation_result_skipped_records))) {
+    library->generation_result_skipped_records = NULL;
+  }
   NODE_MORPHEUS_LOAD(library, generation_result_free,
                      morpheus_generation_result_free);
   free(path);
@@ -427,9 +441,10 @@ static bool node_morpheus_set_uint32(napi_env env, napi_value object,
  * by `count` little-endian uint32 truncated-field masks. index.js decodes the
  * records; building one object per record through Node-API calls here made a
  * maximal generation (2,918 forms) cost about 35 calls per form on the main
- * thread (issue #47).
+ * thread (issue #47). Encoding 2 adds `skippedRecords`, the generation
+ * result's count of source records the engine skipped (zero for analysis).
  */
-#define NODE_MORPHEUS_RECORD_ENCODING 1u
+#define NODE_MORPHEUS_RECORD_ENCODING 2u
 
 static bool node_morpheus_packed_result(napi_env env,
                                         const node_morpheus_operation *operation,
@@ -460,6 +475,8 @@ static bool node_morpheus_packed_result(napi_env env,
                                 (uint32_t)operation->count) ||
       !node_morpheus_set_uint32(env, object, "recordSize",
                                 (uint32_t)record_size) ||
+      !node_morpheus_set_uint32(env, object, "skippedRecords",
+                                (uint32_t)operation->skipped_records) ||
       napi_set_named_property(env, object, "buffer", buffer) != napi_ok) {
     return false;
   }
@@ -505,6 +522,10 @@ static void node_morpheus_execute(napi_env env, void *data) {
       &operation->generation_options, &result);
   if (operation->status != MORPHEUS_OK) return;
   operation->count = library->generation_result_count(result);
+  operation->skipped_records =
+      library->generation_result_skipped_records != NULL
+          ? library->generation_result_skipped_records(result)
+          : 0u;
   operation->generations =
       calloc(operation->count, sizeof(*operation->generations));
   operation->truncated_fields =

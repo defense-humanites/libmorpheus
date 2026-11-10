@@ -22,6 +22,7 @@ from ._types import (
     Analysis,
     Generation,
     GenerationOptions,
+    Generations,
     Language,
     Option,
     RawAnalysis,
@@ -390,17 +391,23 @@ class Context:
 
     def generate(
         self, lemma: str, options: GenerationOptions = GenerationOptions()
-    ) -> tuple[Generation, ...]:
-        """Generate normalized forms through the experimental native API."""
+    ) -> Generations[Generation]:
+        """Generate normalized forms through the experimental native API.
+
+        The returned tuple's ``skipped_records`` counts the lemma's source
+        records that the engine could not generate.
+        """
         return self._generate(lemma, options, _named_generation)
 
     def generate_raw(
         self, lemma: str, options: GenerationOptions = GenerationOptions()
-    ) -> tuple[RawGeneration, ...]:
+    ) -> Generations[RawGeneration]:
         """Generate lossless ABI records through the experimental native API."""
         return self._generate(lemma, options, _raw_generation_from)
 
-    def _generate(self, lemma: str, options: GenerationOptions, build: Callable) -> tuple:
+    def _generate(
+        self, lemma: str, options: GenerationOptions, build: Callable
+    ) -> Generations:
         encoded, buffer = encoded_buffer(lemma, "Beta Code lemma")
         native_options = _generation_options(options)
         with self._lock:
@@ -415,14 +422,17 @@ class Context:
             )
             _check(self._native, status)
             try:
-                return _copy_records(
-                    self._native,
-                    result,
-                    self._native.generation_result_count(result),
-                    self._native.generation_record_size,
-                    self._native.generation_result_copy,
-                    self._native.generation_result_truncated_fields,
-                    build,
+                return Generations(
+                    _copy_records(
+                        self._native,
+                        result,
+                        self._native.generation_result_count(result),
+                        self._native.generation_record_size,
+                        self._native.generation_result_copy,
+                        self._native.generation_result_truncated_fields,
+                        build,
+                    ),
+                    self._native.generation_result_skipped_records(result),
                 )
             finally:
                 self._native.generation_result_free(result)

@@ -494,7 +494,14 @@ export class MorpheusContext {
           const bytes = module.HEAPU8.slice(buffer, buffer + size);
           generations.push(decodeGeneration(bytes, module.getValue(fieldsSlot, "i32") >>> 0));
         }
-        return generations;
+        // The count of source records the engine skipped travels with the
+        // array as a read-only, non-enumerable property.
+        return Object.defineProperty(generations, "skippedRecords", {
+          value: module._morpheus_generation_result_skipped_records(result) >>> 0,
+          enumerable: false,
+          writable: false,
+          configurable: false,
+        });
       } finally {
         module._morpheus_generation_result_free(result);
       }

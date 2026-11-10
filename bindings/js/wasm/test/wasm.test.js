@@ -273,6 +273,14 @@ test(
       assert.equal(forms.length > 0, true);
       assert.equal(forms.every((form) => form.lemma === "lo/gos"), true);
       assert.equal(forms.some((form) => form.surface === "lo/gos"), true);
+      assert.equal(forms.skippedRecords, 0);
+      // The public generation fixture's "partial" lemma has one record the
+      // engine cannot generate: it is skipped and counted.
+      const partial = context.generate("partial");
+      assert.equal(partial.length, 18);
+      assert.equal(partial.skippedRecords, 1);
+      assert.deepEqual(Object.keys(partial), Object.keys([...partial]));
+      assert.equal(context.generate("missing").skippedRecords, 0);
     } finally {
       context.close();
     }

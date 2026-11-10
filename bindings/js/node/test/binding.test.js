@@ -35,6 +35,33 @@ test("analyzes Greek and preserves multiple semantic records", async () => {
   }
 });
 
+test("reports skipped generation records without changing the array", async () => {
+  const library = new MorpheusLibrary(nativeLibrary);
+  const context = library.createContext(stemlib, MorpheusLanguage.Greek);
+  try {
+    const complete = await context.generate("lo/gos");
+    assert.equal(complete.skippedRecords, 0);
+    // The fixture's "partial" lemma has one record the engine cannot generate.
+    const partial = await context.generate("partial");
+    assert.equal(partial.length, 18);
+    assert.equal(partial.skippedRecords, 1);
+    assert.equal((await context.generateRaw("partial")).skippedRecords, 1);
+    assert.equal(
+      (await context.generate("partial", { number: MorpheusNumber.Dual })).skippedRecords,
+      1,
+    );
+    const missing = await context.generate("missing");
+    assert.equal(missing.length, 0);
+    assert.equal(missing.skippedRecords, 0);
+    assert.ok(Array.isArray(partial));
+    assert.deepEqual(Object.keys(partial), Object.keys([...partial]));
+    assert.throws(() => { "use strict"; partial.skippedRecords = 5; }, TypeError);
+  } finally {
+    await context.close();
+    library.close();
+  }
+});
+
 test("serializes calls and preserves experimental dual generation", async () => {
   const library = new MorpheusLibrary(nativeLibrary);
   const context = library.createContext(stemlib, MorpheusLanguage.Greek);

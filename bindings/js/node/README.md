@@ -224,6 +224,12 @@ interpretations unless filters remove them. `excludeDuals` is available when
 dual forms are unwanted. The default native limit is 4,096 and the explicit
 hard maximum is 65,536.
 
+A lemma's source record that the engine cannot generate (for example, one
+whose stem class has no ending table) is skipped rather than failing the
+request. The returned array carries the count as a read-only, non-enumerable
+`skippedRecords` property: zero when every record was generated, and nonzero
+with an empty array when every record of a known lemma failed.
+
 ### Use parallel contexts
 
 One context deliberately queues analysis and generation calls because the
