@@ -73,6 +73,13 @@ def run_threads(contexts, work):
 
 
 def main() -> int:
+    if sys.version_info < (3, 11):
+        print(
+            f"python-bench.py: Python {sys.version_info[0]}.{sys.version_info[1]} "
+            "is too old; the binding requires 3.11 or later",
+            file=sys.stderr,
+        )
+        return 2
     config = json.load(sys.stdin)
     sys.path.insert(0, config["package"])
     import libmorpheus

@@ -6,7 +6,7 @@
 // WebAssembly module over a pool of worker threads. Produces a schema 3
 // report; see docs/benchmarks.md.
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { availableParallelism, release } from "node:os";
@@ -505,6 +505,34 @@ async function benchmarkColdGeneration(libraryPath, stemlibPath, lemma, label, s
   );
 }
 
+/** The oldest Python the binding supports (bindings/python/pyproject.toml). */
+const MINIMUM_PYTHON = [3, 11];
+
+/**
+ * Check MORPHEUS_PYTHON before any measurement, so that an unsuitable
+ * interpreter (such as the Python 3.9 that Xcode installs as `python3` on
+ * macOS) fails the run at once rather than after the native rows.
+ *
+ * @param {string} pythonExecutable
+ */
+export function checkPython(pythonExecutable) {
+  const probe = spawnSync(
+    pythonExecutable,
+    ["-I", "-c", "import sys; print('%d.%d' % sys.version_info[:2])"],
+    { encoding: "utf8" },
+  );
+  if (probe.error || probe.status !== 0) {
+    throw new Error(`MORPHEUS_PYTHON (${pythonExecutable}) could not be run`);
+  }
+  const [major, minor] = probe.stdout.trim().split(".").map(Number);
+  if (major < MINIMUM_PYTHON[0] || (major === MINIMUM_PYTHON[0] && minor < MINIMUM_PYTHON[1])) {
+    throw new Error(
+      `MORPHEUS_PYTHON (${pythonExecutable}) is Python ${major}.${minor}; the binding ` +
+        `requires ${MINIMUM_PYTHON.join(".")} or later`,
+    );
+  }
+}
+
 /**
  * The Python binding rows (`python`, `python-generation-<lemma>-warm`), measured
  * by bench/python-bench.py with the interpreter named by MORPHEUS_PYTHON and
@@ -866,6 +894,8 @@ export async function main(arguments_) {
         `${threadpoolSize} contexts share ${threadpoolSize} threads`,
     );
   }
+  const pythonExecutable = process.env.MORPHEUS_PYTHON ?? null;
+  if (pythonExecutable) checkPython(pythonExecutable);
   /** @type {Measurement[]} */
   const measurements = [];
 
@@ -927,7 +957,6 @@ export async function main(arguments_) {
     wasmRuntimeBytes = wasm.runtimeBytes;
   }
 
-  const pythonExecutable = process.env.MORPHEUS_PYTHON ?? null;
   /** @type {{ version: string, implementation: string, binding: string } | null} */
   let python = null;
   if (pythonExecutable) {
