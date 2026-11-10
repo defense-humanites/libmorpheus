@@ -30,3 +30,6 @@
 :le:partial
 :no:log os_ou masc
 :no:log codex_unknown
+
+:le:h(du/s
+:aj:h(duter os_h_on irreg_comp

@@ -28,6 +28,19 @@ the corpus.
   return no forms and a nonzero count. The other 106,147 lemmas return the
   same records as before, apart from the hyphen below. Allocation failures
   still fail the request.
+- Generated records carry the morphology flags that analysis reports for
+  the same form: the word's flags together with those of its preverb, stem
+  and ending, as `checkgenwds.c` combines them (#78, item 5). Generation
+  read only the word's flags and lost the stem's, among them the irregular
+  comparative and superlative markers, so ἡδύτερος and ἥδιστος (`h(duter
+  os_h_on irreg_comp`, `h(dist … irreg_superl`) came out positive. Over the
+  Alpheios index, 11,964 adjective, 28 adverb and 4 noun records change
+  degree, and 101,125 lemmas have records that gain flags; surfaces, other
+  traits, counts and skipped records are unchanged. On 400 random lemmas, every generated
+  record that matches an analysis of its surface now has the same degree
+  (32,192 of 32,192, against 32,100) and 98.1 % the same flags (27.2 %
+  before); the rest differ by flags that analysis derives on its own path,
+  such as reduplication.
 - Generated surfaces no longer carry the stem-boundary hyphen of the stem
   source (`a)nqr-w/pwn` becomes `a)nqrw/pwn`; 1,268,920 forms of 11,823
   lemmas in the Alpheios index).
