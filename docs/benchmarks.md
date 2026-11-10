@@ -71,6 +71,35 @@ The wrapper uses the checksummed complete index produced by the `gener_corpus`
 CTest and exposes it through a temporary stemlib root. It never writes
 `gener.index` into the tracked stemlib or the pinned Alpheios submodule.
 
+## Python binding rows
+
+Setting `MORPHEUS_PYTHON` to a Python 3.11 or later interpreter adds the
+Python binding to the same run: `compare.mjs` starts
+[`bench/python-bench.py`](../bench/python-bench.py) in isolated mode
+(`-I -B`), which imports the binding of this source tree
+(`bindings/python/src`) and opens the same library and stemlib. It measures
+the same workloads with the same assignment of operations as the Node.js
+rows: `python` analyzes the corpus words round-robin over each context
+count, and `python-generation-<lemma>-warm` generates `iterations` times
+per context. Each context runs in its own thread, as a Python application
+would use them; `ctypes` releases the GIL during each native call, and the
+binding's normalization runs under it. `startupMs` covers opening the
+contexts.
+
+Memory comes from `getrusage` in the Python process: `peakRssBytes` is that
+process's peak resident set and `rssGrowthBytes` the growth of the peak during
+the measurement, so they describe the Python process alone and are not
+comparable with the Node.js rows' figures. The report records
+`python: { version, implementation, binding }`. Python rows are optional:
+`--baseline` compares them only when the baseline has the same engine and
+context count, the release validation does not require them (but requires
+the `python` record when they are present), and the libuv thread-pool bound
+does not apply to them. `bench/release.sh` passes the variable through:
+
+```sh
+MORPHEUS_PYTHON="$(command -v python3)" sh bench/release.sh benchmark.json
+```
+
 ## WebAssembly execution models
 
 Setting `MORPHEUS_WASM_MODULE` to a built `morpheus.mjs` (see

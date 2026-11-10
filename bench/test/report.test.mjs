@@ -211,6 +211,22 @@ test("WebAssembly rows delivered differently are not compared", () => {
   assert.ok(again.comparison.some((entry) => entry.engine === "wasm-memfs"));
 });
 
+test("Python rows are optional in the baseline and compared when present", () => {
+  const without = report([measurement("node", 1, 100, 10)]);
+  const withPython = {
+    ...report([measurement("node", 1, 100, 10), measurement("python", 1, 90, 11)]),
+    python: { version: "3.13.0", implementation: "CPython", binding: "0.2.1" },
+  };
+  assert.deepEqual(
+    compareReports(without, withPython).comparison.map((entry) => entry.engine),
+    ["node"],
+  );
+  assert.deepEqual(
+    compareReports(withPython, { ...withPython }).comparison.map((entry) => entry.engine),
+    ["node", "python"],
+  );
+});
+
 test("the libuv thread pool size follows libuv's reading of the variable", () => {
   assert.equal(uvThreadpoolSize(undefined), 4);
   assert.equal(uvThreadpoolSize(""), 4);
@@ -353,6 +369,19 @@ test("native rows may not outnumber the libuv thread pool", () => {
   assert.throws(
     () => validateReleaseBenchmark({ ...releaseReport(), wasmResultDelivery: "batch" }, expected),
     /unknown wasmResultDelivery/,
+  );
+});
+
+test("Python rows need their runtime record and escape the libuv bound", () => {
+  const python = { version: "3.13.0", implementation: "CPython", binding: "0.2.1" };
+  const rows = [...releaseMeasurements("node"), releaseMeasurement("python", 8)];
+  validateReleaseBenchmark(
+    { ...releaseReport(), runtime: { ...runtime, uvThreadpoolSize: 4 }, python, measurements: rows },
+    expected,
+  );
+  assert.throws(
+    () => validateReleaseBenchmark({ ...releaseReport(), measurements: rows }, expected),
+    /Python rows require the python runtime record/,
   );
 });
 

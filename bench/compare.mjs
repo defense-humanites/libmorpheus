@@ -10,7 +10,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { availableParallelism, release } from "node:os";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   MORPHEUS_NODE_VERSION,
@@ -506,6 +506,55 @@ async function benchmarkColdGeneration(libraryPath, stemlibPath, lemma, label, s
 }
 
 /**
+ * The Python binding rows (`python`, `python-generation-<lemma>-warm`), measured
+ * by bench/python-bench.py with the interpreter named by MORPHEUS_PYTHON and
+ * the binding of this source tree, on the same library, stemlib, corpus,
+ * iterations and context counts as the Node.js rows.
+ *
+ * @param {string} pythonExecutable
+ * @param {string} libraryPath
+ * @param {string} stemlibPath
+ * @param {readonly string[]} words
+ * @param {Configuration} configuration
+ * @returns {Promise<{ python: { version: string, implementation: string, binding: string }, measurements: Measurement[] }>}
+ */
+async function benchmarkPython(pythonExecutable, libraryPath, stemlibPath, words, configuration) {
+  const script = fileURLToPath(new URL("./python-bench.py", import.meta.url));
+  const input = JSON.stringify({
+    package: fileURLToPath(new URL("../bindings/python/src", import.meta.url)),
+    library: libraryPath,
+    stemlib: stemlibPath,
+    words,
+    contexts: configuration.contextCounts,
+    iterations: configuration.iterations,
+    warmupIterations: configuration.warmupIterations,
+    resultLimit: GENERATION_RESULT_LIMIT,
+    generationLemmas: configuration.generationSmallLemma === null ||
+        configuration.generationMaximalLemma === null
+      ? []
+      : [
+        [configuration.generationSmallLemma, "small"],
+        [configuration.generationMaximalLemma, "maximal"],
+      ],
+  });
+  // -I: isolated mode, so that neither the environment nor the current
+  // directory can substitute modules; the script adds the binding's path.
+  const child = spawn(pythonExecutable, ["-I", "-B", script], {
+    stdio: ["pipe", "pipe", "inherit"],
+  });
+  const output = [];
+  child.stdout.on("data", (chunk) => output.push(chunk));
+  const exitCode = new Promise((resolve, reject) => {
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+  child.stdin.end(input);
+  const code = await exitCode;
+  if (code !== 0) throw new Error(`python-bench.py exited with status ${code}`);
+  return JSON.parse(Buffer.concat(output).toString("utf8"));
+}
+
+/**
  * @typedef {object} WasmShared
  * @property {URL} moduleUrl
  * @property {string} stemlibPath
@@ -878,6 +927,21 @@ export async function main(arguments_) {
     wasmRuntimeBytes = wasm.runtimeBytes;
   }
 
+  const pythonExecutable = process.env.MORPHEUS_PYTHON ?? null;
+  /** @type {{ version: string, implementation: string, binding: string } | null} */
+  let python = null;
+  if (pythonExecutable) {
+    const rows = await benchmarkPython(
+      pythonExecutable,
+      libraryPath,
+      stemlibPath,
+      words,
+      configuration,
+    );
+    measurements.push(...rows.measurements);
+    python = rows.python;
+  }
+
   /** @type {BenchmarkReport} */
   const report = {
     schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -913,6 +977,7 @@ export async function main(arguments_) {
       : await fileSha256(new URL("./morpheus.wasm", pathToFileURL(wasmModulePath))),
     wasmRuntimeBytes,
     wasmResultDelivery: wasmModulePath === null ? null : WASM_RESULT_DELIVERY,
+    python,
     measurements,
   };
   const compared = configuration.baselinePath

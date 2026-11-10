@@ -11,6 +11,11 @@ the corpus.
 
 ### Changed
 
+- The benchmark harness measures the Python binding next to the Node.js
+  binding when `MORPHEUS_PYTHON` names an interpreter: `python` analysis
+  rows and `python-generation-<lemma>-warm` rows at the same context counts,
+  one thread per context, from the binding of the source tree. The rows are
+  optional in baselines and release reports.
 - Python binding: `analyze()` and `generate()` cache the name tuples of
   normalized records per code (morph flags keyed by their 11 bytes) instead
   of recomputing them for every record, where the morph flags alone took 84
