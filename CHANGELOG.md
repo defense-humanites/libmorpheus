@@ -21,8 +21,9 @@ the corpus.
   `generate()` and `generateRaw()` in the Node.js binding, and a
   `Generations` tuple with a `skipped_records` attribute from `generate()`
   and `generate_raw()` in the Python binding. The Node.js addon's record
-  encoding becomes 2. The Node.js and Python bindings require the native
-  library that provides `morpheus_generation_result_skipped_records()`.
+  encoding becomes 2. The Node.js and Python bindings still load an earlier
+  native library, which fails the request instead of skipping a record:
+  with it, the count is zero.
 
 ### Changed
 

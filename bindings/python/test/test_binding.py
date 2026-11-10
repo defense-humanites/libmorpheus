@@ -33,22 +33,31 @@ class BindingTest(unittest.TestCase):
             prefix="libmorpheus-python-test-"
         )
         cls.library_path = Path(cls.temporary.name) / "libmorpheus-fixture.so"
-        subprocess.run(
-            [
-                os.environ.get("CC", "cc"),
-                "-std=c17",
-                "-shared",
-                "-fPIC",
-                "-Wall",
-                "-Wextra",
-                "-Werror",
-                f"-I{repository / 'include'}",
-                str(Path(__file__).with_name("fixture.c")),
-                "-o",
-                str(cls.library_path),
-            ],
-            check=True,
+        # A library from before the skipped-record count, without that symbol.
+        cls.earlier_library_path = (
+            Path(cls.temporary.name) / "libmorpheus-fixture-earlier.so"
         )
+        for path, definitions in (
+            (cls.library_path, []),
+            (cls.earlier_library_path, ["-DMORPHEUS_FIXTURE_WITHOUT_SKIPPED_RECORDS"]),
+        ):
+            subprocess.run(
+                [
+                    os.environ.get("CC", "cc"),
+                    "-std=c17",
+                    "-shared",
+                    "-fPIC",
+                    "-Wall",
+                    "-Wextra",
+                    "-Werror",
+                    *definitions,
+                    f"-I{repository / 'include'}",
+                    str(Path(__file__).with_name("fixture.c")),
+                    "-o",
+                    str(path),
+                ],
+                check=True,
+            )
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -95,6 +104,17 @@ class BindingTest(unittest.TestCase):
         self.assertEqual(missing.skipped_records, 0)
         restored = pickle.loads(pickle.dumps(partial))
         self.assertEqual(restored.skipped_records, 2)
+
+    def test_reports_no_skipped_records_with_an_earlier_library(self) -> None:
+        # Earlier libraries fail the request instead of skipping a record.
+        with Library(self.earlier_library_path) as library:
+            with library.context("fixture-stemlib", Language.GREEK) as context:
+                partial = context.generate("partial")
+                generations = context.generate("lo/gos")
+
+        self.assertEqual(partial.skipped_records, 0)
+        self.assertEqual(len(generations), 3)
+        self.assertEqual(generations.skipped_records, 0)
 
     def test_preserves_multiple_generations_masks_and_duals(self) -> None:
         with Library(self.library_path) as library:

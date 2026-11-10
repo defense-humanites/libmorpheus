@@ -286,10 +286,12 @@ morpheus_status morpheus_generation_result_truncated_fields(
   return MORPHEUS_OK;
 }
 
+#ifndef MORPHEUS_FIXTURE_WITHOUT_SKIPPED_RECORDS
 size_t morpheus_generation_result_skipped_records(
     const morpheus_generation_result *result) {
   return result == NULL ? 0u : result->skipped;
 }
+#endif
 
 void morpheus_generation_result_free(morpheus_generation_result *result) {
   free(result);
