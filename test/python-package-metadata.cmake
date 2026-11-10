@@ -8,7 +8,7 @@ set(python_dir "${MORPHEUS_SOURCE_DIR}/bindings/python")
 file(READ "${python_dir}/pyproject.toml" pyproject)
 string(REGEX MATCH "\nversion = \"([0-9.]+)\"" _ "${pyproject}")
 set(python_version "${CMAKE_MATCH_1}")
-if(NOT python_version STREQUAL "0.2.1")
+if(NOT python_version STREQUAL "0.2.2")
   message(FATAL_ERROR "Unexpected Python package version: ${python_version}")
 endif()
 foreach(required IN ITEMS

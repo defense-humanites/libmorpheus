@@ -11,6 +11,12 @@ the corpus.
 
 ### Changed
 
+- Node.js binding 0.2.0 (prepared; `docs/release-node-0.2.0.md`) and Python
+  binding 0.2.2 (prepared; `docs/release-python-0.2.2.md`) ship the decoding
+  changes below; both still declare native 0.4.6. Node.js takes the minor
+  version for its frozen shared name arrays. The controlled-host comparisons
+  of both bindings are retained as
+  `bench/release-evidence/benchmark-0.4.6-bindings-{1,2}.json`.
 - Python binding: generation no longer slows down with threads. The result
   accessors (count, copy, truncation mask, free), called once or twice per
   record, now keep the GIL (`ctypes.PyDLL`); through `CDLL` each released

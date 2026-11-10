@@ -331,6 +331,18 @@ jobs:
             --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
             --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
           node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.4.6-bindings-1.json \
+            --label bindings \
+            --revision fdfd5769e754d92f3cdd4c9d4f40f557460f79aa \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+          node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.4.6-bindings-2.json \
+            --label bindings \
+            --revision 53c6db91844b11905d84261ca6977f8aabbbf163 \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+          node bench/validate.mjs \
             bench/release-evidence/benchmark-0.4.5-wasm-comparison.json \
             --label wasm-comparison \
             --revision 6017445d3c08ce9f8ed6755a990b08d69932f743 \

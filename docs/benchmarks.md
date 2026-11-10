@@ -313,6 +313,17 @@ generation −31 to −71 %; peak RSS of the generation rows −52 to −59 %;
 analysis within noise (−0.8 to −3.7 %). The native runtime is unchanged, so
 this is the binding's own cost removed.
 
+Two comparisons of the Node.js and Python bindings on that host, with
+`MORPHEUS_PYTHON` set, are retained as
+[`benchmark-0.4.6-bindings-1.json`](../bench/release-evidence/benchmark-0.4.6-bindings-1.json)
+(`fdfd576`, Python with cached name tuples) and
+[`benchmark-0.4.6-bindings-2.json`](../bench/release-evidence/benchmark-0.4.6-bindings-2.json)
+(`53c6db9`, Python accessors keeping the GIL). Both bindings analyze at the
+runtime's speed; maximal warm generation reaches 274 / 560 / 933 operations
+per second through Node.js and 102 / 136 / 136 through Python at one, two
+and four contexts, against 68 / 69 / 42 for Python in the first run. The
+[Python 0.2.2 decision](release-python-0.2.2.md) reads them.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be

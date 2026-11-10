@@ -283,7 +283,7 @@ Neither is part of the Python wheel or source distribution.
 | PyPI wheel or source distribution | Not included | Not included | Run `libmorpheus-setup`, or `libmorpheus-native` and `libmorpheus-data`. |
 | Recursive project checkout | Build with CMake | Perseids submodule | Pass the build output and `stemlib/` paths explicitly. |
 
-Binding and runtime versions are independent. Python binding `0.2.1` targets
+Binding and runtime versions are independent. Python binding `0.2.2` targets
 native runtime `0.4.6` and requires C ABI `2`. The package exports
 `MORPHEUS_PYTHON_VERSION`, `MORPHEUS_NATIVE_VERSION`, and
 `MORPHEUS_NATIVE_ABI_VERSION`; `__version__` is the conventional alias for the

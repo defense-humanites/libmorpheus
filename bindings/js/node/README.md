@@ -321,7 +321,7 @@ compatible stemlib. The npm installation supplies only the first component.
 | Native `libmorpheus` runtime | No | Run `libmorpheus-setup` or `libmorpheus-native`. |
 | Linguistic stem data | No | Run `libmorpheus-setup` or `libmorpheus-data`. |
 
-Binding and runtime versions are independent. Binding `0.1.4` currently
+Binding and runtime versions are independent. Binding `0.2.0` currently
 acquires native runtime `0.4.6` and requires C ABI `2`. The main module exports
 `MORPHEUS_NODE_VERSION`; the `/native` module exports
 `MORPHEUS_NATIVE_VERSION` and `MORPHEUS_NATIVE_ABI_VERSION` for tooling.
@@ -408,7 +408,7 @@ runtime acquisition currently support:
 
 On Linux, musl environments are rejected rather than loading an incompatible
 binary. npm optional dependencies must remain enabled. There is no Windows or
-macOS x86-64 prebuilt package in version `0.1.4`.
+macOS x86-64 prebuilt package in version `0.2.0`.
 
 ## Documentation
 
