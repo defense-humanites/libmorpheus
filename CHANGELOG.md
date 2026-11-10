@@ -16,6 +16,29 @@ the corpus.
   rows and `python-generation-<lemma>-warm` rows at the same context counts,
   one thread per context, from the binding of the source tree. The rows are
   optional in baselines and release reports.
+- Python binding: `analyze()` and `generate()` cache the name tuples of
+  normalized records per code (morph flags keyed by their 11 bytes) instead
+  of recomputing them for every record, where the morph flags alone took 84
+  tests per record. Tuples being immutable, sharing them is invisible to
+  callers; the records are equal to the previous ones over 34,267 generated
+  forms and 2,667 Greek and Latin analyses. Generating the largest paradigm
+  (`i(/hmi`, 2,918 forms) takes about 36 ms instead of 173 ms on a Linux
+  test host, most of it now the per-record copy of `generate_raw()`; that
+  normalization ran under the GIL and capped multithreaded generation.
+- Node.js binding: `analyze()` and `generate()` decode the packed records
+  straight into the named objects, and their name arrays (dialects, regions,
+  genders, cases, voices, morph flags, truncated fields) are frozen and
+  shared between records with the same values, as the `readonly` types
+  already declared. The objects are otherwise identical (34,267 generated
+  forms and 2,667 Greek and Latin analyses compared with the previous
+  decoder). Generating the largest paradigm (`i(/hmi`, 2,918 forms) costs
+  about 4 ms of main-thread work instead of 20 ms on a Linux test host,
+  garbage collection included. On the controlled host
+  (`bench/release-evidence/benchmark-0.4.6-node-decoding.json`) it takes
+  3.17, 1.60 and 1.02 ms at one, two and four contexts instead of 5.73, 3.60
+  and 3.75 ms: the ceiling near 270 operations per second is gone. An
+  application that changes one of these arrays must now copy it first.
+  `analyzeRaw()` and `generateRaw()` are unchanged.
 - The error raised when a context cannot be opened names the stemlib path
   and the language instead of the language's number, in the WebAssembly
   facade (`opening /stemlib for Latin failed: stemlib is unavailable or

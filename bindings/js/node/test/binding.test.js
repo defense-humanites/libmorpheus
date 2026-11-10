@@ -10,6 +10,7 @@ import {
   MorpheusLibrary,
   MorpheusNumber,
   MorpheusOption,
+  hasMorpheusMorphFlag,
 } from "../index.js";
 
 const nativeLibrary = process.env.MORPHEUS_LIBRARY;
@@ -61,6 +62,45 @@ test("serializes calls and preserves experimental dual generation", async () => 
       }))[0].surface,
       "prw=ton",
     );
+  } finally {
+    await context.close();
+    library.close();
+  }
+});
+
+test("shares frozen name arrays between records and keeps raw records raw", async () => {
+  const library = new MorpheusLibrary(nativeLibrary);
+  const context = library.createContext(stemlib, MorpheusLanguage.Greek);
+  try {
+    const generations = await context.generate("lo/gos");
+    const arrayFields = [
+      "dialects", "geographicRegions", "genders", "grammaticalCases",
+      "voices", "morphFlags", "truncatedFields",
+    ];
+    for (const generation of generations) {
+      for (const field of arrayFields) {
+        assert.ok(Array.isArray(generation[field]), field);
+        assert.ok(Object.isFrozen(generation[field]), field);
+      }
+      assert.throws(() => generation.genders.push("neuter"), TypeError);
+    }
+    // Records with the same codes share one array; a copy is mutable.
+    const singular = generations.filter((item) => item.grammaticalNumber === "singular");
+    assert.ok(singular.length > 1);
+    assert.equal(singular[0].genders, singular[1].genders);
+    const copy = [...singular[0].genders];
+    copy.push("neuter");
+    assert.notDeepEqual(copy, singular[0].genders);
+    // The named and raw views agree on the morph flags.
+    const analyses = await context.analyze("bi/ou", MorpheusOption.StrictCase);
+    const raw = await context.analyzeRaw("bi/ou", MorpheusOption.StrictCase);
+    assert.equal(analyses.length, raw.length);
+    for (let index = 0; index < raw.length; index++) {
+      assert.ok(Object.isFrozen(analyses[index].morphFlags));
+      for (const name of analyses[index].morphFlags) {
+        assert.ok(hasMorpheusMorphFlag(raw[index], name), name);
+      }
+    }
   } finally {
     await context.close();
     library.close();
