@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MPL-2.0
+# Default principal parts added at lemma end (docs/gener-derivations.md).
+
+# No request: every part the table defines.
+:le:a)gaqopoie/w
+:de:a)gaqopoi ew_denom
+
+# A voice-restricted request covers its part (no active future), a stem-type
+# choice covers its part (perfp_s, not the first perfect middle rule), and an
+# explicit record covers its part (no regular perfect active).
+:le:a)kou/w
+:vs:a)khko perf_act,attic_redupl
+:de:a)kou reg_conj
+;pr
+;fu mid
+;ao
+;pp,perfp_s
+
+# A dialect-restricted request does not cover its part: the regular future
+# is added beside the Ionic one.
+:le:a)gge/llw
+:de:a)gg ellw
+;pr
+;fu epic ionic end:e/w
+
+# A tense on the :de: line confines the group to its requests.
+:le:a)rxeu/w
+:de:a)rx euw pres
+
+# A present formation would reach every part: the group is confined too.
+:le:pres-reduplicate
+:de:b azw pres_redupl
+;pr
+
+# A middle group gets no aorist passive.
+:le:a)gwni/zomai
+:de:a)gwn izw mid
+;pr

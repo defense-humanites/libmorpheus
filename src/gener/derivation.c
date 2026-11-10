@@ -325,6 +325,87 @@ rule_matches(const derivation_request *request, const gk_string *rule)
 	       suffix_matches(gkstring_of(rule),request->suffix);
 }
 
+static int
+scan_keys(const char *keys, gk_string *constraints)
+{
+	const gk_string blank = { 0 };
+	char local[LONGSTRING * 2];
+	char *cursor;
+	gk_word *word;
+
+	if (!keys || !copy_text(local,sizeof local,keys))
+		return 0;
+	/* As the generator does, commas join the first token's keys. */
+	for (cursor = local; *cursor && isspace((unsigned char)*cursor); cursor++)
+		;
+	for (; *cursor && !isspace((unsigned char)*cursor); cursor++) {
+		if (*cursor == ',')
+			*cursor = ' ';
+	}
+	*constraints = blank;
+	word = CreatGkword(1);
+	if (!word)
+		return 0;
+	ScanAsciiKeys(local,word,constraints,NULL);
+	FreeGkword(word);
+	return 1;
+}
+
+int
+morpheus_gener_keys_voice(const char *keys, int *voice)
+{
+	gk_string constraints;
+
+	if (!voice || !scan_keys(keys,&constraints))
+		return 0;
+	*voice = (int)voice_of(forminfo_of(&constraints));
+	return 1;
+}
+
+int
+morpheus_gener_keys_confine(const char *keys, int *confined)
+{
+	gk_string constraints;
+
+	if (!confined || !scan_keys(keys,&constraints))
+		return 0;
+	*confined = tense_of(forminfo_of(&constraints)) ||
+	            mood_of(forminfo_of(&constraints)) ||
+	            has_morphflag(morphflags_of(&constraints),PRES_REDUPL) ||
+	            has_morphflag(morphflags_of(&constraints),N_INFIX);
+	return 1;
+}
+
+int
+morpheus_gener_record_traits(const char *record, int *part, int *restricted)
+{
+	static const Stemtype parts[] = {
+		PP_PR, PP_FU, PP_AO, PP_PF, PP_PP, PP_AP, PP_FP
+	};
+	gk_string constraints;
+	const char *keys;
+	Stemtype principal;
+	size_t index;
+
+	if (!record || !part || !restricted || strncmp(record,":vs:",4))
+		return 0;
+	keys = record + 4;
+	while (*keys && !isspace((unsigned char)*keys))
+		keys++;
+	if (!scan_keys(keys,&constraints))
+		return 0;
+	principal = stemtype_of(&constraints) & PPARTMASK;
+	*part = -1;
+	for (index = 0; index != sizeof parts / sizeof parts[0]; index++) {
+		if (principal == parts[index])
+			*part = (int)index;
+	}
+	*restricted = dialect_of(&constraints) ||
+	              tense_of(forminfo_of(&constraints)) ||
+	              mood_of(forminfo_of(&constraints));
+	return 1;
+}
+
 int
 morpheus_gener_expand_derivation(FILE *output, const char *stem,
                                  const char *derivation,

@@ -1,0 +1,33 @@
+:le:a)gaqopoie/w
+:vs:a)gaqopoi  ew_pr ew_denom
+:vs:a)gaqopoihs  reg_fut ew_denom
+:vs:a)gaqopoihs  aor1 ew_denom
+:vs:h)gaqopoihk  perf_act ew_denom
+:vs:h)gaqopoih  perfp_vow ew_denom
+:vs:a)gaqopoihq  aor_pass ew_denom
+:vs:h)gaqopoihs  fut_perf ew_denom mp
+:le:a)kou/w
+:vs:a)khko perf_act,attic_redupl
+:vs:a)kou  w_stem reg_conj
+:vs:a)kous  reg_fut reg_conj mid
+:vs:a)kous  aor1 reg_conj
+:vs:h)kou  perfp_s reg_conj
+:vs:a)kouq  aor_pass reg_conj
+:vs:h)kous  fut_perf reg_conj mp
+:le:a)gge/llw
+:vs:a)ggell  w_stem ellw
+:vs:a)ggel  ew_fut ellw epic ionic end:e/w
+:vs:a)ggel  ew_fut ellw
+:vs:a)ggeil  aor1 ellw
+:vs:h)ggelk  perf_act ellw
+:vs:h)gge  perfp_l ellw
+:vs:a)ggelq  aor_pass ellw
+:le:a)rxeu/w
+:vs:a)rxeu  w_stem euw pres
+:le:pres-reduplicate
+:vs:bibaz  w_stem azw pres_redupl
+:le:a)gwni/zomai
+:vs:a)gwniz  w_stem izw mid
+:vs:a)gwni  ew_fut izw mid
+:vs:a)gwnis  aor1 izw mid
+:vs:h)gwni  perfp_d izw mid

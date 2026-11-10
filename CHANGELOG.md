@@ -27,6 +27,26 @@ the corpus.
 
 ### Changed
 
+- The generation source preparer completes each lemma with the principal
+  parts its derivations define and its records do not cover (#78, item 3;
+  `docs/gener-derivations.md`). The historical `do_conj` expansion emitted
+  only the parts a `:de:` group requests with `;`, or the present alone,
+  whereas analysis keeps the derivation whole and accepts every part:
+  ποιέω had no active aorist, δηλόω no aorist, perfect or aorist passive,
+  ἀγγέλλω no Attic future. A part stays as the sources give it when the
+  lemma has a record for it that no dialect, tense or mood restricts, a
+  group whose keys fix a tense, a mood or a present formation keeps its
+  requests, and a voice on the `:de:` line keeps the parts that can carry
+  it. The Alpheios index grows from 129,097 to 182,760 records (106,427
+  lemmas, five of them new, such as ἀγαπάω); 9,452 lemmas gain forms, the
+  others are unchanged, and no added record fails at generation. Generated
+  forms go from 12.5 to 23.0 million. The index digest becomes
+  `f223ca32…` (prepared source `34583cc7…`) in the tree's data package,
+  Python manifest, runtime-data script and CI; `--requested-parts-only`
+  still reproduces the historical index `5aa76d8c…`, which the benchmark
+  keeps using so that generation rows stay comparable with the baselines.
+  The WebAssembly preparer of `@libmorpheus/data` is regenerated and
+  produces the same index byte for byte.
 - Experimental generation no longer fails a whole lemma on one bad record
   (#78). Over the Alpheios index (106,422 lemmas), 275 lemmas failed with
   `MORPHEUS_INTERNAL_ERROR` because of 346 records: stem classes without an

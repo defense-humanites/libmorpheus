@@ -9,6 +9,8 @@ foreach(required IN ITEMS MORPHEUS_GENER_SOURCE_PREPARER
                           MORPHEUS_GENER_SOURCE_ORPHAN
                           MORPHEUS_GENER_DERIVATION_SOURCE
                           MORPHEUS_GENER_DERIVATION_EXPECTED
+                          MORPHEUS_GENER_DERIVATION_DEFAULTS
+                          MORPHEUS_GENER_DERIVATION_DEFAULTS_EXPECTED
                           MORPHEUS_GENER_DERIVATION_INVALID
                           MORPHEUS_GENER_SOURCE_WORK_DIR)
   if(NOT DEFINED ${required})
@@ -20,8 +22,10 @@ file(MAKE_DIRECTORY "${MORPHEUS_GENER_SOURCE_WORK_DIR}")
 set(derivation "${MORPHEUS_GENER_SOURCE_WORK_DIR}/derivation.txt")
 set(derivation_index "${MORPHEUS_GENER_SOURCE_WORK_DIR}/derivation.mgi")
 file(REMOVE "${derivation}" "${derivation_index}")
+# The historical do_conj "full" oracle covers the requested parts only.
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+          --requested-parts-only
           "${derivation}" "${MORPHEUS_GENER_DERIVATION_SOURCE}"
   RESULT_VARIABLE derivation_result
   OUTPUT_VARIABLE derivation_output
@@ -38,6 +42,30 @@ execute_process(
 )
 if(NOT derivation_compare_result EQUAL 0)
   message(FATAL_ERROR "derivation expansion differs from the historical full oracle")
+endif()
+
+# By default, each lemma also receives the principal parts its records do
+# not cover (docs/gener-derivations.md).
+set(defaults "${MORPHEUS_GENER_SOURCE_WORK_DIR}/defaults.txt")
+file(REMOVE "${defaults}")
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+          "${defaults}" "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
+  RESULT_VARIABLE defaults_result
+  OUTPUT_VARIABLE defaults_output
+  ERROR_VARIABLE defaults_error
+)
+if(NOT defaults_result EQUAL 0)
+  message(FATAL_ERROR
+    "default principal parts failed (${defaults_result}):\n${defaults_output}${defaults_error}")
+endif()
+execute_process(
+  COMMAND "${CMAKE_COMMAND}" -E compare_files
+          "${defaults}" "${MORPHEUS_GENER_DERIVATION_DEFAULTS_EXPECTED}"
+  RESULT_VARIABLE defaults_compare_result
+)
+if(NOT defaults_compare_result EQUAL 0)
+  message(FATAL_ERROR "default principal parts differ from the expected records")
 endif()
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"

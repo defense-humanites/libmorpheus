@@ -117,11 +117,19 @@ their canonical lemma and complete ordered sequences of structured records are
 identical. The first occurrence is retained; distinct blocks for the same key
 and repeated records within one block are preserved.
 
-The qualified corpus contains 108,650 non-empty blocks before this rule and
-108,215 afterward, so 435 redundant blocks are removed. The resulting index
-contains 106,422 canonical lemmas and 129,097 records. CI prepares and indexes
+The qualified corpus contains 108,655 non-empty blocks before this rule and
+108,220 afterward, so 435 redundant blocks are removed. The resulting index
+contains 106,427 canonical lemmas and 182,760 records. CI prepares and indexes
 the 49 sources twice, requires byte-for-byte reproducibility, and freezes the
-SHA-256 of both the 238,250-line prepared corpus and the final index.
+SHA-256 of both the 292,464-line prepared corpus (`34583cc7…`) and the final
+index (`f223ca32…`).
+
+These figures include the default principal parts described in
+[Greek generation derivations](gener-derivations.md#default-principal-parts).
+Prepared with `--requested-parts-only`, the corpus still gives the historical
+238,250-line source (`1c14949b…`) and the index of data 0.1.0 and native 0.4.6
+(106,422 lemmas, 108,215 blocks, 129,097 records, `5aa76d8c…`); CI checks
+both.
 
 ## Licensing
 

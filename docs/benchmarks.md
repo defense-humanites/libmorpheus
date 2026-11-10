@@ -67,9 +67,17 @@ sh bench/release.sh benchmark-0.4.0.json \
   bench/release-evidence/benchmark-0.3.2.json
 ```
 
-The wrapper uses the checksummed complete index produced by the `gener_corpus`
+The wrapper uses a checksummed complete index produced by the `gener_corpus`
 CTest and exposes it through a temporary stemlib root. It never writes
 `gener.index` into the tracked stemlib or the pinned Alpheios submodule.
+
+That index is the historical one (`historical.mgi`, SHA-256 `5aa76d8c…`):
+the source prepared with `--requested-parts-only`, without the default
+principal parts that the preparer now adds by default (see
+[gener-derivations.md](gener-derivations.md)). Generation rows therefore keep
+measuring the same records as the retained baselines, and a change of data
+does not pass for a change of speed. Adopting the complete index in the
+benchmark takes a new baseline.
 
 ## Python binding rows
 

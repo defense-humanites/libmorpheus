@@ -63,12 +63,47 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "1c14949bb73649056d399b8d5d4f6fc1170ecba51ecc1416c036ec57ebbd4866")
+   "34583cc728a1e83267577519932a25324dad8b1e6dbb7f489994a3bbdbd4e604")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
+   "f223ca3257b85298513cf9984bfc0c63a3aa28f900eef8cf000150a24bb68629")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
+endif()
+
+# Without default principal parts, the preparer still reproduces the index of
+# data 0.1.0 and native 0.4.6, the historical do_conj "full" expansion.
+set(historical_source "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.txt")
+set(historical_index "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.mgi")
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+          --requested-parts-only
+          --exceptions "${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
+          "${historical_source}" ${inputs}
+  RESULT_VARIABLE historical_result
+  OUTPUT_VARIABLE historical_output
+  ERROR_VARIABLE historical_error
+)
+if(NOT historical_result EQUAL 0)
+  message(FATAL_ERROR
+    "historical generation-corpus preparation failed (${historical_result}):\n"
+    "${historical_output}${historical_error}")
+endif()
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
+          "${historical_index}" "${historical_source}"
+  RESULT_VARIABLE historical_index_result
+)
+file(SHA256 "${historical_source}" historical_source_sha256)
+file(SHA256 "${historical_index}" historical_index_sha256)
+if(NOT historical_index_result EQUAL 0 OR
+   NOT historical_source_sha256 STREQUAL
+   "1c14949bb73649056d399b8d5d4f6fc1170ecba51ecc1416c036ec57ebbd4866" OR
+   NOT historical_index_sha256 STREQUAL
+   "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
+  message(FATAL_ERROR
+    "requested-parts-only preparation no longer reproduces the historical index: "
+    "${historical_source_sha256} ${historical_index_sha256}")
 endif()
 execute_process(
   COMMAND "${CMAKE_COMMAND}" -E compare_files "${first_source}" "${second_source}"
@@ -84,7 +119,7 @@ endif()
 
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
-          "${first_index}" 106422 108215 129097
+          "${first_index}" 106427 108220 182760
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output
   ERROR_VARIABLE reader_error

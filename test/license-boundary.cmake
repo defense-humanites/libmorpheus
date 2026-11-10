@@ -179,6 +179,7 @@ foreach(mpl_file IN ITEMS
         src/morphlib/setlang.proto.h
         test/gener-fixture.tsv
         test/gener-derivation-source.txt
+        test/gener-derivation-defaults.txt
         test/gener-derivation-invalid.txt
         test/gener-index-source.txt
         test/gener-index-unexpanded.txt

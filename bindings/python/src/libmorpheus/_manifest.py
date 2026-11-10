@@ -28,7 +28,7 @@ DATA_MANIFEST_FILE = "stemlib-manifest.json"
 #: SHA-256 of the experimental Greek generation index prepared from the
 #: pinned Alpheios and Perseids revisions (``gener.index``). The Python package
 #: does not prepare the index itself; it verifies and installs one.
-GENER_INDEX_SHA256 = "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6"
+GENER_INDEX_SHA256 = "f223ca3257b85298513cf9984bfc0c63a3aa28f900eef8cf000150a24bb68629"
 
 
 @dataclass(frozen=True)

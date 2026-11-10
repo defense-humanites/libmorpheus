@@ -130,7 +130,9 @@ ctest --preset release
   exit 1
 }
 
-generation_index="${build_dir}/test-gener-corpus/first.mgi"
+# The historical index (requested parts only) keeps the generation rows
+# comparable with the retained baselines; see docs/benchmarks.md.
+generation_index="${build_dir}/test-gener-corpus/historical.mgi"
 [ -f "${generation_index}" ] || {
   echo "qualified generation index was not produced by CTest" >&2
   exit 1
