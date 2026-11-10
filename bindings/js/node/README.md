@@ -148,6 +148,11 @@ try {
 stemlib `indecl` class remains `"unknown"` because it does not identify a
 lexical category. An empty dialect array means no recorded restriction.
 
+The arrays are frozen and shared between the records that carry the same
+values, as their `readonly` types declare: a paradigm of thousands of forms
+holds only a few dozen distinct arrays. Copy one (`[...analysis.genders]`)
+before changing it.
+
 Options are `bigint` bit flags and may be combined with `|`. For example,
 strict case plus accent-insensitive fallback is:
 

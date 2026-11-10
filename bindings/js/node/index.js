@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Antoine Boquet
 
 import { Buffer } from "node:buffer";
+import os from "node:os";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -75,6 +76,7 @@ const ANALYSIS_MINIMUM_SIZE = NUMBERS_SIZE + ANALYSIS_TEXT_FIELDS.length *
 const GENERATION_MINIMUM_SIZE = NUMBERS_SIZE + 2 * TEXT_CAPACITY +
   MORPH_FLAG_CAPACITY;
 const littleEndian = true;
+const littleEndianHost = os.endianness() === "LE";
 
 function cString(bytes, offset, capacity) {
   let end = bytes.indexOf(0, offset);
@@ -407,70 +409,137 @@ function dialectNames(value) {
   return DIALECT_NAME_ORDER.filter((name) => selected.has(name));
 }
 
-function semanticAnalysis(raw) {
-  const morphFlags = [];
-  for (const [code, name] of MORPH_FLAG_NAMES) {
-    if (hasMorpheusMorphFlag(raw, code)) morphFlags.push(name);
-  }
-  return {
-    partOfSpeech: exactName(raw.partOfSpeech, PART_OF_SPEECH_NAMES) ?? "unknown",
-    dialects: dialectNames(raw.dialect),
-    geographicRegions: maskNames(raw.geographicRegion, REGION_NAMES),
-    person: exactName(raw.person, PERSON_NAMES),
-    grammaticalNumber: exactName(raw.number, NUMBER_NAMES),
-    genders: maskNames(raw.gender, GENDER_NAMES),
-    grammaticalCases: maskNames(raw.grammaticalCase, CASE_NAMES),
-    tense: exactName(raw.tense, TENSE_NAMES),
-    mood: exactName(raw.mood, MOOD_NAMES),
-    voices: maskNames(raw.voice, VOICE_NAMES, VOICE_EXACT_NAMES),
-    degree: exactName(raw.degree, DEGREE_NAMES),
-    raw: raw.raw,
-    workword: raw.workword,
-    lemma: raw.lemma,
-    preverb: raw.preverb,
-    augment: raw.augment,
-    stem: raw.stem,
-    suffix: raw.suffix,
-    ending: raw.ending,
-    crasis: raw.crasis,
-    dictionaryForm: raw.dictionaryForm,
-    englishForm: raw.englishForm,
-    rawPreverb: raw.rawPreverb,
-    domains: raw.domains,
-    morphFlags,
-    truncatedFields: maskNames(raw.truncatedFields, TRUNCATED_FIELD_NAMES),
+// The named fields of analyses and generations are frozen arrays shared
+// between every record with the same code: a paradigm of thousands of forms
+// holds a few dozen distinct values, and building fresh arrays for each form
+// made their allocation and collection most of the main thread's work. The
+// arrays are read-only, as their types declare; an application that needs to
+// change one copies it. A cache stops growing at NAME_CACHE_LIMIT entries and
+// then computes uncached, still frozen.
+const NAME_CACHE_LIMIT = 4096;
+const EMPTY_NAMES = Object.freeze([]);
+
+function nameCache(compute) {
+  const cache = new Map();
+  return (key) => {
+    let names = cache.get(key);
+    if (names === undefined) {
+      const computed = compute(key);
+      names = computed.length === 0 ? EMPTY_NAMES : Object.freeze(computed);
+      if (cache.size < NAME_CACHE_LIMIT) cache.set(key, names);
+    }
+    return names;
   };
 }
 
-function semanticGeneration(raw) {
-  const morphFlags = [];
-  const truncatedFields = [];
+const cachedDialects = nameCache(dialectNames);
+const cachedRegions = nameCache((value) => maskNames(value, REGION_NAMES));
+const cachedGenders = nameCache((value) => maskNames(value, GENDER_NAMES));
+const cachedCases = nameCache((value) => maskNames(value, CASE_NAMES));
+const cachedVoices = nameCache(
+  (value) => maskNames(value, VOICE_NAMES, VOICE_EXACT_NAMES),
+);
+const cachedTruncatedFields = nameCache(
+  (value) => maskNames(value, TRUNCATED_FIELD_NAMES),
+);
+const cachedGenerationTruncatedFields = nameCache((value) => {
+  const names = [];
+  if (value & MorpheusTruncatedField.Workword) names.push("surface");
+  if (value & MorpheusTruncatedField.Lemma) names.push("lemma");
+  return names;
+});
+
+// Morph flags are keyed by their 11 bytes read as Latin-1, which is exact;
+// the names keep the order of MORPH_FLAG_NAMES.
+const ZERO_MORPH_FLAGS = "\0".repeat(MORPH_FLAG_CAPACITY);
+const cachedMorphFlags = nameCache((key) => {
+  const names = [];
   for (const [code, name] of MORPH_FLAG_NAMES) {
-    if (hasMorpheusMorphFlag(raw, code)) morphFlags.push(name);
+    if ((key.charCodeAt(code >> 3) & (1 << (code & 7))) !== 0) names.push(name);
   }
-  if (raw.truncatedFields & MorpheusTruncatedField.Workword) {
-    truncatedFields.push("surface");
+  return names;
+});
+
+function morphFlagNames(bytes, offset) {
+  const key = bytes.toString("latin1", offset, offset + MORPH_FLAG_CAPACITY);
+  return key === ZERO_MORPH_FLAGS ? EMPTY_NAMES : cachedMorphFlags(key);
+}
+
+// The twelve numeric fields of a record, read through a Uint32Array when the
+// record size keeps them aligned on a little-endian host (every prebuilt
+// platform), through the DataView otherwise.
+function numberReader(packed, recordSize) {
+  if (recordSize % 4 === 0 && littleEndianHost) {
+    const words = new Uint32Array(packed.buffer);
+    const stride = recordSize / 4;
+    return (index, field) => words[index * stride + field];
   }
-  if (raw.truncatedFields & MorpheusTruncatedField.Lemma) {
-    truncatedFields.push("lemma");
-  }
+  const view = new DataView(packed.buffer);
+  return (index, field) => view.getUint32(index * recordSize + field * 4, littleEndian);
+}
+
+function semanticFields(read, index) {
   return {
-    partOfSpeech: exactName(raw.partOfSpeech, PART_OF_SPEECH_NAMES) ?? "unknown",
-    dialects: dialectNames(raw.dialect),
-    geographicRegions: maskNames(raw.geographicRegion, REGION_NAMES),
-    person: exactName(raw.person, PERSON_NAMES),
-    grammaticalNumber: exactName(raw.number, NUMBER_NAMES),
-    genders: maskNames(raw.gender, GENDER_NAMES),
-    grammaticalCases: maskNames(raw.grammaticalCase, CASE_NAMES),
-    tense: exactName(raw.tense, TENSE_NAMES),
-    mood: exactName(raw.mood, MOOD_NAMES),
-    voices: maskNames(raw.voice, VOICE_NAMES, VOICE_EXACT_NAMES),
-    degree: exactName(raw.degree, DEGREE_NAMES),
-    surface: raw.surface,
-    lemma: raw.lemma,
-    morphFlags,
-    truncatedFields,
+    partOfSpeech: exactName(read(index, 1), PART_OF_SPEECH_NAMES) ?? "unknown",
+    dialects: cachedDialects(read(index, 2)),
+    geographicRegions: cachedRegions(read(index, 3)),
+    person: exactName(read(index, 4), PERSON_NAMES),
+    grammaticalNumber: exactName(read(index, 5), NUMBER_NAMES),
+    genders: cachedGenders(read(index, 6)),
+    grammaticalCases: cachedCases(read(index, 7)),
+    tense: exactName(read(index, 8), TENSE_NAMES),
+    mood: exactName(read(index, 9), MOOD_NAMES),
+    voices: cachedVoices(read(index, 10)),
+    degree: exactName(read(index, 11), DEGREE_NAMES),
   };
+}
+
+// analyze() and generate() decode the packed records straight into the named
+// objects, without building the raw records first.
+function decodeAnalyses(packed) {
+  const { count, recordSize, bytes, view, truncatedBase } = packedView(
+    packed,
+    ANALYSIS_MINIMUM_SIZE,
+  );
+  const read = numberReader(packed, recordSize);
+  const records = new Array(count);
+  for (let index = 0; index < count; index++) {
+    const record = semanticFields(read, index);
+    let offset = index * recordSize + NUMBERS_SIZE;
+    for (const field of ANALYSIS_TEXT_FIELDS) {
+      record[field] = cString(bytes, offset, TEXT_CAPACITY);
+      offset += TEXT_CAPACITY;
+    }
+    record.domains = cString(bytes, offset, DOMAIN_CAPACITY);
+    offset += DOMAIN_CAPACITY;
+    record.morphFlags = morphFlagNames(bytes, offset);
+    record.truncatedFields = cachedTruncatedFields(
+      view.getUint32(truncatedBase + index * 4, littleEndian),
+    );
+    records[index] = record;
+  }
+  return records;
+}
+
+function decodeGenerations(packed) {
+  const { count, recordSize, bytes, view, truncatedBase } = packedView(
+    packed,
+    GENERATION_MINIMUM_SIZE,
+  );
+  const read = numberReader(packed, recordSize);
+  const records = new Array(count);
+  for (let index = 0; index < count; index++) {
+    const record = semanticFields(read, index);
+    const textBase = index * recordSize + NUMBERS_SIZE;
+    record.surface = cString(bytes, textBase, TEXT_CAPACITY);
+    record.lemma = cString(bytes, textBase + TEXT_CAPACITY, TEXT_CAPACITY);
+    record.morphFlags = morphFlagNames(bytes, textBase + 2 * TEXT_CAPACITY);
+    record.truncatedFields = cachedGenerationTruncatedFields(
+      view.getUint32(truncatedBase + index * 4, littleEndian),
+    );
+    records[index] = record;
+  }
+  return records;
 }
 
 export class MorpheusError extends Error {
@@ -572,9 +641,8 @@ export class MorpheusContext {
   }
 
   analyze(betaCode, options = 0n) {
-    return this.analyzeRaw(betaCode, options).then((items) =>
-      items.map(semanticAnalysis)
-    );
+    return this.#enqueue(() => addon.analyze(this.#native, betaCode, options)
+      .then(decodeAnalyses, (error) => { throw asMorpheusError(error); }));
   }
 
   analyzeRaw(betaCode, options = 0n) {
@@ -583,9 +651,9 @@ export class MorpheusContext {
   }
 
   generate(lemma, options = {}) {
-    return this.generateRaw(lemma, options).then((items) =>
-      items.map(semanticGeneration)
-    );
+    const encoded = nativeGenerationOptions(options);
+    return this.#enqueue(() => addon.generate(this.#native, lemma, encoded)
+      .then(decodeGenerations, (error) => { throw asMorpheusError(error); }));
   }
 
   generateRaw(lemma, options = {}) {
