@@ -162,6 +162,11 @@ bit `1 << (n % 8)`. The bridge translates each selected historical flag into
 this representation; raw engine bytes and sparse historical flag numbers are
 not returned.
 
+An analysis and a generated record carry the same flags for the same form:
+those of the word together with those of its preverb, stem and ending. Stem
+flags such as the irregular comparative and superlative markers therefore set
+the generated record's degree as they set the analysis's.
+
 The Node.js binding exposes the same indices through `MorpheusMorphFlag` and
 returns either the public byte vector (`analyzeRaw()` and `generateRaw()`) or
 stable names (`analyze()` and `generate()`); the Python binding returns the

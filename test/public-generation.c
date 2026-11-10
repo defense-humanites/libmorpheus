@@ -172,6 +172,32 @@ int main(int argc, char **argv)
   morpheus_generation_result_free(result);
   result=NULL;
 
+  /*
+   * Stem flags reach the record as they reach an analysis: h(duter is an
+   * irregular comparative stem, so its forms are comparatives.
+   */
+  assert(morpheus_generate(context,(const uint8_t *)"h(du/s",6,NULL,
+                           &result)==MORPHEUS_OK);
+  assert(morpheus_generation_result_count(result));
+  for(i=0;i!=morpheus_generation_result_count(result);i++) {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_IRREGULAR_COMPARATIVE;
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    assert(item.degree==MORPHEUS_DEGREE_COMPARATIVE);
+    assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+  }
+  {
+    size_t all=morpheus_generation_result_count(result);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    options=default_options();
+    options.degree=MORPHEUS_DEGREE_COMPARATIVE;
+    assert(morpheus_generate(context,(const uint8_t *)"h(du/s",6,&options,
+                             &result)==MORPHEUS_OK);
+    assert(morpheus_generation_result_count(result)==all);
+  }
+  morpheus_generation_result_free(result);
+  result=NULL;
+
   /* The stem-boundary hyphen of a)nqr-wp does not reach the surfaces. */
   assert(morpheus_generate(context,(const uint8_t *)"a)/nqrwpos",10,NULL,
                            &result)==MORPHEUS_OK);

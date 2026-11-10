@@ -95,12 +95,37 @@ grow_result(morpheus_normalized_generation_result *result, size_t limit)
 	return 1;
 }
 
+/*
+ * The morphology flags of a form, as analysis reports them for the same form
+ * (checkgenwds.c): the word's own flags with those of its preverb, stem and
+ * ending. The generator leaves stem flags such as irreg_comp on the stem, so
+ * reading only the word's flags lost them, and with them the degree of
+ * irregular comparatives and superlatives.
+ */
+static void
+effective_morphflags(const gk_word *form, MorphFlags *flags)
+{
+	const MorphFlags *sources[4];
+	size_t source;
+	size_t byte;
+
+	sources[0] = morphflags_of(form);
+	sources[1] = morphflags_of(prvb_gstr_of(form));
+	sources[2] = morphflags_of(stem_gstr_of(form));
+	sources[3] = morphflags_of(ends_gstr_of(form));
+	memset(flags,0,MORPHFLAG_STORAGE_BYTES);
+	for (source = 0; source != 4; source++)
+		for (byte = 0; byte != MORPHFLAG_STORAGE_BYTES; byte++)
+			flags[byte] |= sources[source][byte];
+}
+
 static int
 collect_form(const gk_word *form, void *state)
 {
 	collector *collect = state;
 	morpheus_normalized_generation *record;
 	word_form info = forminfo_of(form);
+	MorphFlags flags[MORPHFLAG_STORAGE_BYTES];
 
 	if (collect->result->count == collect->limit) {
 		collect->limit_exceeded = 1;
@@ -131,10 +156,11 @@ collect_form(const gk_word *form, void *state)
 	record->tense = morpheus_public_tense((uint32_t)tense_of(info));
 	record->mood = morpheus_public_mood((uint32_t)mood_of(info));
 	record->voice = morpheus_public_voice((uint32_t)voice_of(info));
+	effective_morphflags(form,flags);
 	record->degree = morpheus_public_degree(
 	    (uint32_t)degree_of(info),
-	    (morpheus_part_of_speech)record->part_of_speech,morphflags_of(form));
-	morpheus_public_morph_flags(record->morph_flags,morphflags_of(form));
+	    (morpheus_part_of_speech)record->part_of_speech,flags);
+	morpheus_public_morph_flags(record->morph_flags,flags);
 	collect->result->count++;
 	return 1;
 }
