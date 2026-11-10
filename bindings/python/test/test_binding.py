@@ -112,6 +112,26 @@ class BindingTest(unittest.TestCase):
             int(TruncatedField.WORKWORD),
         )
 
+    def test_normalized_records_share_their_name_tuples(self) -> None:
+        with Library(self.library_path) as library:
+            with library.context("fixture-stemlib", Language.GREEK) as context:
+                first = context.generate("lo/gos")
+                second = context.generate("lo/gos")
+                raw = context.generate_raw("lo/gos")
+
+        # The same codes give the same tuple object, across calls; tuples are
+        # immutable, so sharing them changes nothing for callers.
+        for left, right in zip(first, second):
+            self.assertIs(left.dialects, right.dialects)
+            self.assertIs(left.genders, right.genders)
+            self.assertIs(left.grammatical_cases, right.grammatical_cases)
+            self.assertIs(left.morph_flags, right.morph_flags)
+            self.assertIs(left.truncated_fields, right.truncated_fields)
+        self.assertEqual(first, second)
+        for normalized, record in zip(first, raw):
+            for name in normalized.morph_flags:
+                self.assertTrue(has_morph_flag(record, name))
+
     def test_generation_filters_limits_and_empty_results(self) -> None:
         with Library(self.library_path) as library:
             with library.context("fixture-stemlib", Language.GREEK) as context:

@@ -11,6 +11,15 @@ the corpus.
 
 ### Changed
 
+- Python binding: `analyze()` and `generate()` cache the name tuples of
+  normalized records per code (morph flags keyed by their 11 bytes) instead
+  of recomputing them for every record, where the morph flags alone took 84
+  tests per record. Tuples being immutable, sharing them is invisible to
+  callers; the records are equal to the previous ones over 34,267 generated
+  forms and 2,667 Greek and Latin analyses. Generating the largest paradigm
+  (`i(/hmi`, 2,918 forms) takes about 36 ms instead of 173 ms on a Linux
+  test host, most of it now the per-record copy of `generate_raw()`; that
+  normalization ran under the GIL and capped multithreaded generation.
 - The error raised when a context cannot be opened names the stemlib path
   and the language instead of the language's number, in the WebAssembly
   facade (`opening /stemlib for Latin failed: stemlib is unavailable or
