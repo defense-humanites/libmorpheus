@@ -102,6 +102,14 @@ class NativeLibrary:
     def __init__(self, path: str | PathLike[str]) -> None:
         self.path = fspath(path)
         self.handle = ctypes.CDLL(self.path)
+        # The result accessors (count, copy, truncation mask, free) are short
+        # memory operations called once or twice per record. Through CDLL
+        # each call released and reacquired the GIL, and with several threads
+        # those thousands of reacquisitions per paradigm queued on the GIL,
+        # so generation became slower with every thread added. PyDLL keeps
+        # the GIL for them; analysis and generation themselves still release
+        # it through CDLL.
+        self.held = ctypes.PyDLL(self.path)
         self.abi_version = _function(
             self.handle, "morpheus_abi_version", ctypes.c_uint32
         )
@@ -141,10 +149,10 @@ class NativeLibrary:
             ctypes.POINTER(ctypes.c_void_p),
         )
         self.result_count = _function(
-            self.handle, "morpheus_result_count", ctypes.c_size_t, ctypes.c_void_p
+            self.held, "morpheus_result_count", ctypes.c_size_t, ctypes.c_void_p
         )
         self.result_copy = _function(
-            self.handle,
+            self.held,
             "morpheus_result_copy",
             ctypes.c_uint32,
             ctypes.c_void_p,
@@ -153,7 +161,7 @@ class NativeLibrary:
             ctypes.c_size_t,
         )
         self.result_truncated_fields = _function(
-            self.handle,
+            self.held,
             "morpheus_result_truncated_fields",
             ctypes.c_uint32,
             ctypes.c_void_p,
@@ -161,7 +169,7 @@ class NativeLibrary:
             ctypes.POINTER(ctypes.c_uint32),
         )
         self.result_free = _function(
-            self.handle, "morpheus_result_free", None, ctypes.c_void_p
+            self.held, "morpheus_result_free", None, ctypes.c_void_p
         )
         self.generate = _function(
             self.handle,
@@ -174,13 +182,13 @@ class NativeLibrary:
             ctypes.POINTER(ctypes.c_void_p),
         )
         self.generation_result_count = _function(
-            self.handle,
+            self.held,
             "morpheus_generation_result_count",
             ctypes.c_size_t,
             ctypes.c_void_p,
         )
         self.generation_result_copy = _function(
-            self.handle,
+            self.held,
             "morpheus_generation_result_copy",
             ctypes.c_uint32,
             ctypes.c_void_p,
@@ -189,7 +197,7 @@ class NativeLibrary:
             ctypes.c_size_t,
         )
         self.generation_result_truncated_fields = _function(
-            self.handle,
+            self.held,
             "morpheus_generation_result_truncated_fields",
             ctypes.c_uint32,
             ctypes.c_void_p,
@@ -197,7 +205,7 @@ class NativeLibrary:
             ctypes.POINTER(ctypes.c_uint32),
         )
         self.generation_result_free = _function(
-            self.handle,
+            self.held,
             "morpheus_generation_result_free",
             None,
             ctypes.c_void_p,

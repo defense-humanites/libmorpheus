@@ -11,6 +11,17 @@ the corpus.
 
 ### Changed
 
+- Python binding: generation no longer slows down with threads. The result
+  accessors (count, copy, truncation mask, free), called once or twice per
+  record, now keep the GIL (`ctypes.PyDLL`); through `CDLL` each released
+  and reacquired it, and with several threads those thousands of
+  reacquisitions per paradigm queued on the GIL (the controlled host
+  measured 68, 69 and 42 maximal generations per second at one, two and
+  four threads). `analyze()` and `generate()` also decode each record's
+  bytes directly into the named object through one reused buffer. On a
+  2-vCPU Linux host, maximal generation goes from 26, 12 and 10 to 41, 47
+  and 43 per second at one, two and four threads; results, named and raw,
+  are byte-identical over the benchmark corpora.
 - The benchmark harness measures the Python binding next to the Node.js
   binding when `MORPHEUS_PYTHON` names an interpreter: `python` analysis
   rows and `python-generation-<lemma>-warm` rows at the same context counts,
