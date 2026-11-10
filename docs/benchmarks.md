@@ -268,6 +268,18 @@ triples (mean latency −67 to −69 % for `node` and `cruncher-persistent`),
 [0.4.6 release decision](release-0.4.6.md#benchmark-evidence) reads it.
 **This report is the baseline of the next native release.**
 
+The Node.js binding's direct decoding with shared frozen name arrays (pull
+request #71) was measured on the same host, toolchain and native runtime
+from `4b12528696cf9420401d5dcce76ee32f1c69828a` and is retained as
+[`benchmark-0.4.6-node-decoding.json`](../bench/release-evidence/benchmark-0.4.6-node-decoding.json).
+Compared with `benchmark-0.4.6.json` (`complete` scope, every result count
+identical): maximal warm generation 3.17, 1.60 and 1.02 ms at one, two and
+four contexts against 5.73, 3.60 and 3.75 ms, so 315, 624 and 985
+operations per second where the binding had stayed near 270; small warm
+generation −31 to −71 %; peak RSS of the generation rows −52 to −59 %;
+analysis within noise (−0.8 to −3.7 %). The native runtime is unchanged, so
+this is the binding's own cost removed.
+
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib
 path, iteration counts, warmup, context list, and cold-sample count can be

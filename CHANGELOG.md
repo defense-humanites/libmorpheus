@@ -12,17 +12,19 @@ the corpus.
 ### Changed
 
 - Node.js binding: `analyze()` and `generate()` decode the packed records
-  straight into the named objects, and their name arrays (dialects,
-  regions, genders, cases, voices, morph flags, truncated fields) are
-  frozen and shared between records with the same values, as the
-  `readonly` types already declared. The objects are otherwise identical
-  (34,267 generated forms and 2,667 Greek and Latin analyses compared with
-  the previous decoder). Generating the largest paradigm (`i(/hmi`, 2,918
-  forms) costs about 4 ms of main-thread work instead of 20 ms on a Linux
-  test host, garbage collection included, which lifts the ceiling that kept
-  wide-parallel generation near 270 operations per second. An application
-  that changes one of these arrays must now copy it first. `analyzeRaw()`
-  and `generateRaw()` are unchanged.
+  straight into the named objects, and their name arrays (dialects, regions,
+  genders, cases, voices, morph flags, truncated fields) are frozen and
+  shared between records with the same values, as the `readonly` types
+  already declared. The objects are otherwise identical (34,267 generated
+  forms and 2,667 Greek and Latin analyses compared with the previous
+  decoder). Generating the largest paradigm (`i(/hmi`, 2,918 forms) costs
+  about 4 ms of main-thread work instead of 20 ms on a Linux test host,
+  garbage collection included. On the controlled host
+  (`bench/release-evidence/benchmark-0.4.6-node-decoding.json`) it takes
+  3.17, 1.60 and 1.02 ms at one, two and four contexts instead of 5.73, 3.60
+  and 3.75 ms: the ceiling near 270 operations per second is gone. An
+  application that changes one of these arrays must now copy it first.
+  `analyzeRaw()` and `generateRaw()` are unchanged.
 - The error raised when a context cannot be opened names the stemlib path
   and the language instead of the language's number, in the WebAssembly
   facade (`opening /stemlib for Latin failed: stemlib is unavailable or
