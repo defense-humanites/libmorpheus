@@ -230,10 +230,84 @@ ways the next run corrects:
    `wasmResultDelivery: "main-thread"`, and `--baseline` does not compare
    WebAssembly rows across deliveries.
 
-If the generation ceiling persists once both sides deliver to the main
-thread, it belongs to the binding, and applications pay it too: decoding
-lazily or off the main thread would lift it. The decision on the Node.js
-binding's future waits for that run.
+### Second run, with the corrected harness
+
+[`benchmark-0.4.5-wasm-comparison-2.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison-2.json)
+(SHA-256 `426c9e66a7e93a42ab2aec7a4215f6cf0fbac80f774507257127d2314f7e2c85`)
+repeats the measurement from `8f99d0f7499e91d939285114094f4f79e0cf3f93`
+(same native sources, binding 0.1.3, module `wasm-v0.1.3`), with a libuv
+pool of eight threads and every WebAssembly result delivered to the main
+thread. Throughput in operations per second:
+
+| Workload | Engine | 1 | 2 | 4 | 8 |
+| --- | --- | --- | --- | --- | --- |
+| Analysis | `node` | 1532 | 2355 | 3544 | 3845 |
+| Analysis | `wasm-memfs` | 2379 | 3840 | 5943 | 6777 |
+| Maximal generation | native | 163 | 276 | 264 | 268 |
+| Maximal generation | `wasm-memfs` | 107 | 207 | 381 | 522 |
+
+Delivery to the main thread cost the pool 3 to 8 % in analysis and about
+3 ms per maximal paradigm (9.3 against 6.2 ms at one context); eight libuv
+threads added 5 % to the native rows. The native generation ceiling did not
+move: it is the binding's main-thread decoding, about 3.7 ms per call of
+2,918 forms, which applications pay as well. The analysis gap remained,
+and profiling `cruncher` traced it to the runtime itself, which native
+0.4.6 corrects ([release-0.4.6.md](release-0.4.6.md)).
+
+### Third run: native 0.4.6 and module 0.1.4
+
+[`benchmark-0.4.6-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.6-wasm-comparison.json)
+(SHA-256 `e1d2841e7b8541fb05d3b2cc9cdb3b388be1332a58c769e842bd165a38d97e19`),
+taken on 2026-11-10 from `52c636972a04c37fb48e9c451300d9fd9b3784c7` with
+binding 0.1.4 on native 0.4.6 and the published `wasm-v0.1.4` module
+(`morpheus.wasm` SHA-256 `6b8c1937…`), compares both models on the same
+runtime sources, with the corrected harness:
+
+| Workload | Engine | 1 | 2 | 4 | 8 |
+| --- | --- | --- | --- | --- | --- |
+| Analysis | `node` | 4395 | 7551 | 11871 | 13800 |
+| Analysis | `wasm-memfs` | 3798 | 6693 | 10949 | 12770 |
+| Analysis | `wasm-nodefs` | 3879 | 6262 | 10116 | 11423 |
+| Maximal generation | native | 176 | 277 | 264 | 269 |
+| Maximal generation | `wasm-memfs` | 110 | 204 | 380 | 536 |
+| Maximal generation | `wasm-nodefs` | 111 | 208 | 381 | 508 |
+
+Every result count is identical across engines and with the second run.
+
+- **Analysis.** The native binding now leads at every width: MEMFS reaches
+  86, 89, 92 and 93 % of its throughput, NODEFS 88, 83, 85 and 83 %. From
+  the second run, native per-operation latency fell by 65 to 72 % and the
+  module's by 37 to 50 %, the module having paid little of the
+  thread-local cost removed in 0.4.6. At one context the binding adds
+  about 20 µs to the runtime (228 against 208 µs for
+  `cruncher-persistent`).
+- **Generation.** Unchanged by 0.4.6, as expected. The binding is faster at
+  one and two contexts (5.7 against 9.1 ms for the maximal paradigm at
+  one); the pool is faster from four, where its decoding runs in parallel
+  in the workers and only the structured clone reaches the main thread (536
+  against 269 operations per second at eight).
+- **Start-up and memory.** Unchanged: 12 to 24 ms per pool against under
+  3.5 ms for native contexts; cold analysis 4.0–4.5 ms against 2.6 ms for a
+  `cruncher` process, cold generation 22 and 29 ms against 16 and 22 ms;
+  about 25 MiB of RSS growth per MEMFS instance (204 MiB for eight analysis
+  workers) against 2 to 12 MiB for all the native contexts of a row.
+
+### Outcome: the Node.js binding stays
+
+The comparison was to decide whether the WebAssembly pool should replace
+the Node.js binding. On the same runtime sources it does not: the binding
+analyzes faster at every width, opens a context in a few milliseconds where
+a pool needs 12 to 24, uses a fraction of the memory per context, and
+decodes named values that the facade does not yet provide. The pool keeps one measured advantage, wide-parallel
+generation of large paradigms, which comes from the binding decoding every
+form on the main thread; that cost belongs to the binding and can be
+reduced there (lighter or lazy decoding of generation records).
+
+The two packages therefore keep distinct roles. `@libmorpheus/node` is the
+choice for Node.js on its prebuilt platforms (Linux x86-64 and aarch64
+glibc, macOS arm64). `@libmorpheus/wasm` is the choice wherever a native
+addon cannot go: browsers, Deno, edge runtimes, and Node.js on platforms
+without a prebuilt addon (Windows, macOS x86-64, musl).
 
 ### Earlier sandbox run (Deno harness)
 
@@ -303,11 +377,10 @@ What the numbers say, within that noise:
   models), so use `rss_growth` per measurement rather than `peak_rss` for
   attribution.
 
-The controlled-host runs above take up the decisive comparison. The
-single-context gap they show on macOS is also the measure of what a
-per-context file-descriptor cache (or an in-memory stemlib) in the C runtime
-could gain: it would help native and NODEFS deployments, while MEMFS already
-removes most of the cost it targets.
+The controlled-host runs above took up the decisive comparison. The
+per-context file cache this section anticipated is part of native 0.4.6,
+together with the removal of the thread-local hot path that the first
+controlled-host run exposed.
 
 ## Known limits and follow-ups
 

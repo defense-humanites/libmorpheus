@@ -330,6 +330,18 @@ jobs:
             --revision 6017445d3c08ce9f8ed6755a990b08d69932f743 \
             --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
             --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+          node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.4.5-wasm-comparison-2.json \
+            --label wasm-comparison \
+            --revision 8f99d0f7499e91d939285114094f4f79e0cf3f93 \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+          node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.4.6-wasm-comparison.json \
+            --label wasm-comparison \
+            --revision 52c636972a04c37fb48e9c451300d9fd9b3784c7 \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
 
       - name: Smoke-test benchmark runner
         # One iteration of every native model against the retained schema 3

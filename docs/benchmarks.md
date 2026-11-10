@@ -138,7 +138,12 @@ The first comparison on the controlled host, from the harness before both
 corrections, is retained at
 [`bench/release-evidence/benchmark-0.4.5-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison.json);
 [wasm.md](wasm.md#controlled-host-2026-11-09) reads it. It is not a
-release baseline.
+release baseline. Two further comparisons are retained beside it:
+[`benchmark-0.4.5-wasm-comparison-2.json`](../bench/release-evidence/benchmark-0.4.5-wasm-comparison-2.json),
+the same sources measured with both corrections, and
+[`benchmark-0.4.6-wasm-comparison.json`](../bench/release-evidence/benchmark-0.4.6-wasm-comparison.json),
+native 0.4.6 through binding 0.1.4 against module 0.1.4, on which
+[wasm.md](wasm.md#outcome-the-nodejs-binding-stays) bases the outcome.
 
 Pass a previous report as the second argument to add the normalized comparison:
 
