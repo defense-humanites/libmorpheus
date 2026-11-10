@@ -7,7 +7,8 @@ set -eu
 # MORPHEUS_BENCHMARK_LABEL, MORPHEUS_BENCHMARK_STEMLIB,
 # MORPHEUS_BENCHMARK_ITERATIONS, MORPHEUS_BENCHMARK_WARMUP,
 # MORPHEUS_BENCHMARK_CONTEXTS, and MORPHEUS_BENCHMARK_COLD_SAMPLES.
-# MORPHEUS_WASM_MODULE adds the WebAssembly rows (docs/benchmarks.md).
+# MORPHEUS_WASM_MODULE adds the WebAssembly rows and MORPHEUS_PYTHON (a Python
+# 3.11+ interpreter) the Python binding rows (docs/benchmarks.md).
 #
 # Every call of the Node.js binding runs on the libuv thread pool, four
 # threads unless UV_THREADPOOL_SIZE says otherwise; the wrapper sizes the

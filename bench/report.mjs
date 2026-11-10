@@ -48,6 +48,7 @@
  * @property {string | null} [wasmModuleSha256]
  * @property {number | null} [wasmRuntimeBytes]
  * @property {WasmResultDelivery | null} [wasmResultDelivery]
+ * @property {{ version: string, implementation: string, binding: string } | null} [python]
  * @property {readonly Measurement[]} measurements
  */
 
@@ -113,6 +114,22 @@ const sha256 = /^[0-9a-f]{64}$/i;
 /** @param {string} engine */
 export function isWasmEngine(engine) {
   return engine === "wasm" || engine.startsWith("wasm-");
+}
+
+/** @param {string} engine */
+export function isPythonEngine(engine) {
+  return engine === "python" || engine.startsWith("python-");
+}
+
+/**
+ * Rows a report may add or omit: the WebAssembly pool (MORPHEUS_WASM_MODULE)
+ * and the Python binding (MORPHEUS_PYTHON). A baseline without them yields
+ * no comparison for them; the native rows are always required.
+ *
+ * @param {string} engine
+ */
+export function isOptionalEngine(engine) {
+  return isWasmEngine(engine) || isPythonEngine(engine);
 }
 
 /**
@@ -184,10 +201,10 @@ export function compareReports(baseline, current) {
     }
     const previous = baselineMeasurements.get(measurementKey(measurement));
     if (!previous) {
-      // WebAssembly measurements are optional additions to a report; a
-      // baseline recorded without the module simply yields no comparison
+      // WebAssembly and Python measurements are optional additions to a
+      // report; a baseline recorded without them simply yields no comparison
       // for them. Every native configuration must still be present.
-      if (isWasmEngine(measurement.engine)) continue;
+      if (isOptionalEngine(measurement.engine)) continue;
       throw new Error(
         `baseline lacks ${measurement.engine} with ${measurement.contexts} contexts`,
       );
@@ -394,13 +411,21 @@ export function validateReleaseBenchmark(report, expected) {
   if (schemaVersion === 3 && report.runtime.uvThreadpoolSize !== undefined) {
     requireInteger(report.runtime.uvThreadpoolSize, "runtime.uvThreadpoolSize", 1);
     for (const { engine, contexts } of report.measurements) {
-      if (!isWasmEngine(engine) && contexts > report.runtime.uvThreadpoolSize) {
+      if (!isOptionalEngine(engine) && contexts > report.runtime.uvThreadpoolSize) {
         throw new Error(
           `${engine} with ${contexts} contexts exceeds the libuv thread pool ` +
             `(${report.runtime.uvThreadpoolSize}); set UV_THREADPOOL_SIZE`,
         );
       }
     }
+  }
+  if (report.python !== undefined && report.python !== null) {
+    requireString(report.python.version, "python.version");
+    requireString(report.python.implementation, "python.implementation");
+    requireString(report.python.binding, "python.binding");
+  }
+  if (report.measurements.some(({ engine }) => isPythonEngine(engine)) && !report.python) {
+    throw new Error("Python rows require the python runtime record");
   }
   if (
     report.wasmResultDelivery !== undefined && report.wasmResultDelivery !== null &&

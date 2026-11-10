@@ -11,6 +11,11 @@ the corpus.
 
 ### Changed
 
+- The benchmark harness measures the Python binding next to the Node.js
+  binding when `MORPHEUS_PYTHON` names an interpreter: `python` analysis
+  rows and `python-generation-<lemma>-warm` rows at the same context counts,
+  one thread per context, from the binding of the source tree. The rows are
+  optional in baselines and release reports.
 - The error raised when a context cannot be opened names the stemlib path
   and the language instead of the language's number, in the WebAssembly
   facade (`opening /stemlib for Latin failed: stemlib is unavailable or

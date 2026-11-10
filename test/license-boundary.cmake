@@ -110,6 +110,7 @@ file(GLOB agpl_support_files
      RELATIVE "${MORPHEUS_SOURCE_DIR}"
      "${MORPHEUS_SOURCE_DIR}/bench/*.sh"
      "${MORPHEUS_SOURCE_DIR}/bench/*.mjs"
+     "${MORPHEUS_SOURCE_DIR}/bench/*.py"
      "${MORPHEUS_SOURCE_DIR}/bench/test/*.mjs"
      "${MORPHEUS_SOURCE_DIR}/cmake/*.cmake"
      "${MORPHEUS_SOURCE_DIR}/cmake/*.in"
