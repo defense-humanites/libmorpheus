@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libmorpheus"
-version = "0.2.1"
+version = "0.2.2"
 description = "Python binding for Ancient Greek and Latin morphology with libmorpheus"
 readme = "README.md"
 requires-python = ">=3.11"
