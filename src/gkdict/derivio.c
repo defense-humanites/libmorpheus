@@ -406,7 +406,7 @@ checkmultredups(char *asuffkeys, char *dstem, char *dstemkeys, char *suffix, cha
 	gkform = CreatGkword(6);
 	gstr = CreatGkString(1);
 	if( ! gkform || ! gstr ) {
-		fprintf(stderr,"no memory for gkform in checkmultredups of [%s]\n",asuffkeys);
+		morpheus_runtime_diagnostic("no memory for gkform in checkmultredups of [%s]\n",asuffkeys);
 		if (gkform) FreeGkword(gkform);
 		if (gstr) FreeGkString(gstr);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
@@ -489,7 +489,7 @@ checkcomderiv2(char *asuffkeys, char *dstem, char *dstemkeys, char *suffix, char
 			int stemlen = snprintf(stembuf,MAXWORDSIZE,"%s%s",dstem,tmpdsuff);
 
 			if( stemlen < 0 || stemlen >= MAXWORDSIZE ) {
-				fprintf(stderr,"derived stem is too long: [%s%s]\n",dstem,tmpdsuff);
+				morpheus_runtime_diagnostic("derived stem is too long: [%s%s]\n",dstem,tmpdsuff);
 				continue;
 			}
 		} else stembuf[0] = 0;
@@ -563,7 +563,7 @@ printf("curstemkyes [%s] %o\n", tmp1 , has_morphflag(morphflags_of(gstr),R_E_I_A
 */
 			keylen = snprintf(tmp2,sizeof tmp2,"%s:%s%s",stembuf,lemma,tmp1);
 			if( keylen < 0 || keylen >= (int)sizeof tmp2 ) {
-				fprintf(stderr,"derivation key is too long\n");
+				morpheus_runtime_diagnostic("derivation key is too long\n");
 				continue;
 			}
 /*
@@ -573,7 +573,7 @@ printf("about to add [%s]\n", tmp2 );
 			used = strlen(rkeys);
 			if( used >= LONGSTRING ||
 			    (size_t)keylen + (used != 0) >= LONGSTRING - used ) {
-				fprintf(stderr,"derivation key buffer is full\n");
+				morpheus_runtime_diagnostic("derivation key buffer is full\n");
 				continue;
 			}
 			if( used ) rkeys[used++] = ' ';

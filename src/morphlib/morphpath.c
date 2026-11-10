@@ -18,7 +18,7 @@ FILE *
 	if (!tmpname[0]) return(NULL);
 
 	if( !(f=fopen(tmpname,mode)) ) {
-		fprintf(stderr,"MorphFopen: could not open [%s]\n", tmpname );
+		morpheus_runtime_diagnostic("MorphFopen: could not open [%s]\n", tmpname );
 /* just die here -- should go up higher but will live with this for now. */
 
 /*
@@ -76,7 +76,7 @@ void MorphPathName(char *shorts, char *full)
 
 	if( ! s ) {
 		full[0] = 0;
-		fprintf(stderr,"MORPHLIB not set in your environment!\n");
+		morpheus_runtime_diagnostic("MORPHLIB not set in your environment!\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return;
 	}
@@ -91,7 +91,7 @@ void MorphPathName(char *shorts, char *full)
 	written = snprintf(full,BUFSIZ,"%s/%s/%s",s,language_directory,shorts);
 	if (written < 0 || written >= BUFSIZ) {
 		full[0] = 0;
-		fprintf(stderr,"MorphPathName: path is too long\n");
+		morpheus_runtime_diagnostic("MorphPathName: path is too long\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return;
 	}

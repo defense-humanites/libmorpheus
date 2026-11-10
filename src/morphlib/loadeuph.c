@@ -53,7 +53,7 @@ load_euph_tab(char *filename, int *gotno, int is_contr)
 	}
 
 	if( (f=MorphFopen(filename,"r")) == NULL ) {
-		fprintf(stderr,"Could not open [%s]\n", filename );
+		morpheus_runtime_diagnostic("Could not open [%s]\n", filename );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(NULL);
 	}
@@ -67,13 +67,13 @@ load_euph_tab(char *filename, int *gotno, int is_contr)
 	
 	euph_table = CreatGkString(nunits+1);
 	if( ! euph_table ) {
-		fprintf(stderr,"no memory for %d-entry euphony table\n", nunits+1 );
+		morpheus_runtime_diagnostic("no memory for %d-entry euphony table\n", nunits+1 );
 		goto no_memory;
 	}
 
 	for(i=0;GetTableLine(line,sizeof line,f);i++) {
 		if( i >= nunits) {
-			printf("hey! more than %d contracts!\n", nunits);
+			morpheus_runtime_diagnostic("hey! more than %d contracts!\n", nunits);
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			goto failed;
 		}

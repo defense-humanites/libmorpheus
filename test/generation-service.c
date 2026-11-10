@@ -107,12 +107,14 @@ generate_and_check(const morpheus_gener_index *index, const char *lemma,
 	morpheus_generation_service *service = NULL;
 	form_summary summary = { UINT64_C(14695981039346656037), 0 };
 	size_t count = 0;
+	size_t skipped = 1;
 
 	assert(morpheus_generation_service_create(index,&service) ==
 	       MORPHEUS_GENERATION_OK);
 	assert(morpheus_generation_service_generate(service,lemma,summarize,&summary,
-	                                            &count) ==
+	                                            &count,&skipped) ==
 	       MORPHEUS_GENERATION_OK);
+	assert(skipped == 0);
 	assert(count == expected_count);
 	assert(summary.nondual_count == expected_nondual_count);
 	assert(summary.fingerprint == expected_fingerprint);
@@ -188,7 +190,7 @@ run_differential(const morpheus_gener_index *index, const char *fixture_path)
 		assert(morpheus_generation_service_create(index,&service) ==
 		       MORPHEUS_GENERATION_OK);
 		assert(morpheus_generation_service_generate(
-		           service,"multiple",summarize_multiple,&summary,&count) ==
+		           service,"multiple",summarize_multiple,&summary,&count,NULL) ==
 		       MORPHEUS_GENERATION_OK);
 		assert(count == 2);
 		assert(summary.saw_first && summary.saw_second);
@@ -203,7 +205,7 @@ run_differential(const morpheus_gener_index *index, const char *fixture_path)
 		assert(morpheus_generation_service_create(index,&service) ==
 		       MORPHEUS_GENERATION_OK);
 		assert(morpheus_generation_service_generate(
-		           service,"comma",summarize,&summary,&count) ==
+		           service,"comma",summarize,&summary,&count,NULL) ==
 		       MORPHEUS_GENERATION_OK);
 		assert(count > 0);
 		morpheus_generation_service_destroy(service);
@@ -253,7 +255,9 @@ static void
 run_failure(const morpheus_gener_index *index)
 {
 	morpheus_generation_service *service = (void *)(uintptr_t)1;
+	form_summary summary = { UINT64_C(14695981039346656037), 0 };
 	size_t count = 123;
+	size_t skipped = 123;
 
 	assert(morpheus_generation_service_create(NULL,&service) ==
 	       MORPHEUS_GENERATION_INVALID);
@@ -261,17 +265,30 @@ run_failure(const morpheus_gener_index *index)
 	assert(morpheus_generation_service_create(index,&service) ==
 	       MORPHEUS_GENERATION_OK);
 	assert(morpheus_generation_service_generate(service,"missing",summarize,NULL,
-	                                            &count) ==
+	                                            &count,&skipped) ==
 	       MORPHEUS_GENERATION_NOT_FOUND);
+	/* Without a skipped-record counter, an unusable record fails the lemma. */
 	assert(morpheus_generation_service_generate(service,"broken",summarize,NULL,
-	                                            &count) ==
+	                                            &count,NULL) ==
 	       MORPHEUS_GENERATION_ENGINE_ERROR);
+	assert(morpheus_generation_service_generate(service,"mixed",summarize,
+	                                            &summary,&count,NULL) ==
+	       MORPHEUS_GENERATION_ENGINE_ERROR);
+	/* With one, the record is skipped and counted, and the others survive. */
+	assert(morpheus_generation_service_generate(service,"broken",summarize,
+	                                            &summary,&count,&skipped) ==
+	       MORPHEUS_GENERATION_OK);
+	assert(count == 0 && skipped == 1);
+	assert(morpheus_generation_service_generate(service,"mixed",summarize,
+	                                            &summary,&count,&skipped) ==
+	       MORPHEUS_GENERATION_OK);
+	assert(count == 1 && skipped == 2);
 	assert(morpheus_generation_service_generate(service,"stop",stop_after_one,
-	                                            NULL,&count) ==
+	                                            NULL,&count,&skipped) ==
 	       MORPHEUS_GENERATION_STOPPED);
-	assert(count == 1);
+	assert(count == 1 && skipped == 0);
 	assert(morpheus_generation_service_generate(service,"broken",NULL,NULL,
-	                                            &count) ==
+	                                            &count,&skipped) ==
 	       MORPHEUS_GENERATION_INVALID);
 	morpheus_generation_service_destroy(service);
 }

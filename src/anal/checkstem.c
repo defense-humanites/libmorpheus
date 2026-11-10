@@ -104,7 +104,7 @@ int checkstem(char *poss_stem, char *endkeys, gk_string *stemtab[], char *keytab
 	*curstemkeys = 0;
 	rval = stemexists(poss_stem,endkeys,curstemkeys,0);
 /*
-fprintf(stderr,"rval %d poss stem [%s] endkeys {%s] curstem [%s]\n", rval, poss_stem,endkeys,curstemkeys);
+morpheus_runtime_diagnostic("rval %d poss stem [%s] endkeys {%s] curstem [%s]\n", rval, poss_stem,endkeys,curstemkeys);
 */
 
 	if( rval ) {
@@ -133,7 +133,7 @@ fprintf(stderr,"rval %d poss stem [%s] endkeys {%s] curstem [%s]\n", rval, poss_
 	for(i=0;i<poss_augs;i++) {
 
 /*
-fprintf(stderr,"%d) %s\n", i , gkstring_of(tstemtab[i]) );
+morpheus_runtime_diagnostic("%d) %s\n", i , gkstring_of(tstemtab[i]) );
 */
 
 		*curstemkeys = 0;
@@ -164,7 +164,7 @@ int stemexists(char *s, char *endkeys, char *stemkeys, int is_nom)
 		return(0);
 	
 /*
-fprintf(stderr,"stemexists: s [%s] stemkeys [%s] endkeys [%s]\n", s , stemkeys, endkeys);
+morpheus_runtime_diagnostic("stemexists: s [%s] stemkeys [%s] endkeys [%s]\n", s , stemkeys, endkeys);
 */
 	rval = chckstem(s,stemkeys,is_nom);
 /*
@@ -173,7 +173,7 @@ if( rval ) printf("rval %d for [%s] with keys [%s]\n", rval , s , stemkeys );
 	if( ! rval ) return(0);
 
 	rval = comstemtypes(s,stemkeys,endkeys);
-/*fprintf(stderr,"endkeys [%s] rval after comstemtypes is %d\n", endkeys, rval );*/
+/*morpheus_runtime_diagnostic("endkeys [%s] rval after comstemtypes is %d\n", endkeys, rval );*/
 	return(rval);
 }
 
@@ -265,7 +265,7 @@ parsefield(char *s, char *buf, int c, int len)
 	for(i=0;*s&&*s!=c&&!isspace((unsigned char)*s);i++) {
 		*buf++ = *s++;
 		if( i >= len ) {
-			fprintf(stderr,"Hey %d chars; %zu s [%s] left!\n", len , Xstrlen(s) ,s );
+			morpheus_runtime_diagnostic("Hey %d chars; %zu s [%s] left!\n", len , Xstrlen(s) ,s );
 			*buf = 0;
 			while(*s&&!isspace((unsigned char)*s)) s++;
 			break;

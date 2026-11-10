@@ -1,4 +1,6 @@
 #include "morphlib_internal.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 static _Thread_local morpheus_runtime_context default_context = { 0, 0 };
 static _Thread_local morpheus_runtime_context *active_context;
@@ -148,6 +150,30 @@ morpheus_runtime_error_record(morpheus_runtime_error error)
 
 	if (context->runtime_error == MORPHEUS_RUNTIME_ERROR_NONE)
 		context->runtime_error = error;
+}
+
+void
+morpheus_runtime_context_set_diagnostics(
+	morpheus_runtime_context *context, int enabled)
+{
+	if (context) context->diagnostics_silenced = !enabled;
+}
+
+int
+morpheus_runtime_context_diagnostics(const morpheus_runtime_context *context)
+{
+	return(context ? !context->diagnostics_silenced : 1);
+}
+
+void
+morpheus_runtime_diagnostic(const char *format, ...)
+{
+	va_list arguments;
+
+	if (morpheus_runtime_context_current()->diagnostics_silenced) return;
+	va_start(arguments,format);
+	vfprintf(stderr,format,arguments);
+	va_end(arguments);
 }
 
 int

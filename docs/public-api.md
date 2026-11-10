@@ -56,6 +56,11 @@ requires another ABI review.
 `morpheus_status_message()` returns borrowed static diagnostic text. Programs
 should branch on the numeric status.
 
+Contexts created by `morpheus_open()` and `morpheus_open_path()` do not write
+to standard output or standard error: failures are reported only through
+status codes. The compatibility API keeps the historical analyzer's messages on
+standard error, as `cruncher` always printed them.
+
 ## Function reference
 
 | Function | Contract |
@@ -78,6 +83,7 @@ should branch on the numeric status.
 | `morpheus_generation_result_copy()` | Copies a generated record into caller storage. |
 | `morpheus_generation_result_get()` | Copies a generated record into `morpheus_generation`. |
 | `morpheus_generation_result_truncated_fields()` | Reports truncated generated text fields. |
+| `morpheus_generation_result_skipped_records()` | Returns the number of source records skipped because they could not be generated. |
 | `morpheus_generation_result_free()` | Destroys a generation result. |
 | `morpheus_compat_analyze()` | Produces historical `cruncher` text and counts. |
 | `morpheus_compat_output_data()` | Returns borrowed formatted bytes. |
@@ -112,6 +118,18 @@ no filter. Equality-valued traits select one value; dialect, region, gender,
 case, and voice fields accept their documented masks. Dialect-neutral forms
 match any requested dialect. `MORPHEUS_GENERATION_EXCLUDE_DUALS` removes dual
 records and conflicts with an explicit dual-number filter.
+
+A lemma has one or more source records in the index. A record that the
+engine cannot generate — for example, one whose stem class has no ending table
+in the stemlib, or whose forced ending matches no table cell — is skipped
+instead of failing the request, and none of its forms are returned.
+`morpheus_generation_result_skipped_records()` reports how many records were
+skipped; it counts records, not forms, and does not depend on the filters. A
+result with no records and a nonzero skipped count is a lemma whose records
+all failed, not an absent one. Allocation failures still fail the request.
+
+Generated surfaces omit the hyphen that marks the stem boundary in the stem
+source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`.
 
 Generation is currently Greek-only. The context loads and validates
 `<stemlib_path>/gener.index` on its first generation call and retains it for

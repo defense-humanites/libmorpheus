@@ -12,6 +12,7 @@ struct morpheus_result {
 };
 struct morpheus_generation_result {
   size_t count;
+  size_t skipped_records;
   morpheus_generation *generations;
   morpheus_truncated_fields *truncated_fields;
 };

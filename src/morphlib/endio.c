@@ -53,7 +53,7 @@ int WriteEnding(FILE *f, gk_string *gstr, int maxend)
 	memcpy(stored_domains,domains_of(gstr),sizeof stored_domains);
 	if(Is_group_name(morphflags_of(gstr))) {
 		if(stored_domains[0]) {
-			fprintf(stderr,"cannot encode group name with domains\n");
+			morpheus_runtime_diagnostic("cannot encode group name with domains\n");
 			return(-1);
 		}
 		stored_domains[LEGACY_GROUP_DOMAIN_INDEX]=(char)(
@@ -86,7 +86,7 @@ int WriteEnding(FILE *f, gk_string *gstr, int maxend)
 
 	return(1);
 	outputerr:
-		fprintf(stderr,"output error!\n");
+		morpheus_runtime_diagnostic("output error!\n");
 		return(-1);
 }
 
@@ -138,7 +138,7 @@ int ReadEnding(FILE *f, gk_string *gstr, int maxend)
 	return(1);
 	inputerr:
 		if( nread < 0 ) {
-			fprintf(stderr,"input error!\n");
+			morpheus_runtime_diagnostic("input error!\n");
 		}
 		return(nread);
 }
@@ -194,7 +194,7 @@ int get_endheader(FILE *f, int *maxp)
 	if(vax_fread(&morph_version,sizeof morph_version,1,f) != 1)
 		return(-1);
 	if( morph_version != MORPH_VERSION ) {
-		fprintf(stderr,"Hey! new version of Morpheus!\n");
+		morpheus_runtime_diagnostic("Hey! new version of Morpheus!\n");
 		return(-1);
 	}
 
@@ -232,10 +232,10 @@ int get_endheader(FILE *f, int *maxp)
 	if(nendings > (size_t)INT_MAX)
 		return(-1);
 	if(payload_size % unitsize) {
-		fprintf(stderr,
+		morpheus_runtime_diagnostic(
 			"endio: payload %zu is not divisible by record size %zu\n",
 			payload_size,unitsize);
-		fprintf(stderr,"Error in endio!\n");
+		morpheus_runtime_diagnostic("Error in endio!\n");
 		return(0);
 	}
 	return((int)nendings);

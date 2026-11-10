@@ -18,6 +18,7 @@ set(MORPHEUS_PUBLIC_API_SYMBOLS
   morpheus_generation_result_count
   morpheus_generation_result_free
   morpheus_generation_result_get
+  morpheus_generation_result_skipped_records
   morpheus_generation_result_truncated_fields
   morpheus_generation_size
   morpheus_open

@@ -1762,6 +1762,7 @@ if(MORPHEUS_BUILD_WASM)
     _morpheus_generation_result_count
     _morpheus_generation_result_free
     _morpheus_generation_result_get
+    _morpheus_generation_result_skipped_records
     _morpheus_generation_result_truncated_fields
     _morpheus_generation_size
     _morpheus_open

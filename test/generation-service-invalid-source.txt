@@ -3,5 +3,10 @@
 :le:broken
 :no:broken codex_unknown
 
+:le:mixed
+:no:mixed codex_unknown
+:wd:mixed indecl
+:aj:mixed codex_unknown
+
 :le:stop
 :wd:stop indecl

@@ -228,7 +228,7 @@ if( d ) set_dialect((gkform+naugs),d);
 			set_workword((gkform+naugs),tmp);
 			naugs++;
 			if( naugs >= maxaugs ) {
-fprintf(stderr,"temp: got naugs %d with max %d\n", naugs , maxaugs );
+morpheus_runtime_diagnostic("temp: got naugs %d with max %d\n", naugs , maxaugs );
 				break;
 			}
 			
@@ -298,7 +298,7 @@ int do_tempaug(gk_word *gkform, int maxaugs)
 			set_workword((gkform+naugs),tmp);
 			naugs++;
 			if( naugs >= maxaugs ) {
-fprintf(stderr,"temp: got naugs %d with max %d\n", naugs , maxaugs );
+morpheus_runtime_diagnostic("temp: got naugs %d with max %d\n", naugs , maxaugs );
 				break;
 			}
 			if( TempAugments[i].uniqueflag ) break;
@@ -567,7 +567,7 @@ int needs_augment(gk_string *gstr)
 	if (!valid_augment_argument(gstr)) return(0);
 	TmpGkword = CreatGkword(2);
 	if( ! TmpGkword ) {
-		fprintf(stderr,"no memory for TmpGkword in needs_augment\n");
+		morpheus_runtime_diagnostic("no memory for TmpGkword in needs_augment\n");
 		return(0);
 	}
 	*(stem_gstr_of(TmpGkword)) = * gstr;
@@ -631,7 +631,7 @@ void simpleaugment(char *s, bool syllabic)
 	if (!valid_augment_argument(s)) return;
 	gkform = CreatGkword(6);
 	if( ! gkform ) {
-		fprintf(stderr,"no memory for gkform in simpleaugment of [%s]\n",s);
+		morpheus_runtime_diagnostic("no memory for gkform in simpleaugment of [%s]\n",s);
 		return;
 	}
 		
@@ -690,7 +690,7 @@ void simpleredupit(char *s, int syllabic, int redupc)
 	if (!valid_augment_argument(s)) return;
 	gkform = CreatGkword(6);
 	if( ! gkform ) {
-		fprintf(stderr,"no memory for gkform in simpleaugment of [%s]\n",s);
+		morpheus_runtime_diagnostic("no memory for gkform in simpleaugment of [%s]\n",s);
 		return;
 	}
 		

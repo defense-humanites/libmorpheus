@@ -23,7 +23,7 @@ load_end_index(endind **slot, char *filename, const char *description)
 	if (*slot) return(*slot);
 	index = calloc(1,sizeof *index);
 	if (!index) {
-		fprintf(stderr,"could not allocate %s\n",description);
+		morpheus_runtime_diagnostic("could not allocate %s\n",description);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		return(NULL);
 	}
@@ -177,17 +177,17 @@ init_endind(char *fname, endind *etags)
  	char * clalloc();
  */
  	if( (f=MorphFopen(fname,"r"))==NULL) {
-		fprintf(stderr,"init_endind: could not open %s\n", fname );
+		morpheus_runtime_diagnostic("init_endind: could not open %s\n", fname );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return( NULL );
 	}
 	if (fseek(f,0L,SEEK_END) != 0 || (file_size = ftell(f)) < 0 ||
 	    fseek(f,0L,SEEK_SET) != 0) {
-		fprintf(stderr,"could not measure %s\n",fname);
+		morpheus_runtime_diagnostic("could not measure %s\n",fname);
 		goto invalid_index;
 	}
 	if ((uintmax_t)file_size > (uintmax_t)(SIZE_MAX-1)) {
-		fprintf(stderr,"ending index is too large: %s\n",fname);
+		morpheus_runtime_diagnostic("ending index is too large: %s\n",fname);
 		goto invalid_index;
 	}
 	file_length = (size_t)file_size;
@@ -198,7 +198,7 @@ init_endind(char *fname, endind *etags)
  */
 	buffer = (char *)calloc(file_length + 1,sizeof *buffer);
 	if (!buffer) {
-		fprintf(stderr,"could not build buffer for endtags\n");
+		morpheus_runtime_diagnostic("could not build buffer for endtags\n");
 		goto no_memory;
 	}
 /*
@@ -214,7 +214,7 @@ init_endind(char *fname, endind *etags)
 
 		nread = vax_fread(buffer+sofar,sizeof *buffer,requested,f);
 		if (nread != requested) {
-			fprintf(stderr,"short read while loading %s\n",fname);
+			morpheus_runtime_diagnostic("short read while loading %s\n",fname);
 			goto invalid_index;
 		}
 		sofar += (size_t)nread;
@@ -228,12 +228,12 @@ init_endind(char *fname, endind *etags)
 		}
 	}
 	if (nlines > (size_t)INT_MAX) {
-		fprintf(stderr,"ending index has too many entries: %s\n",fname);
+		morpheus_runtime_diagnostic("ending index has too many entries: %s\n",fname);
 		goto invalid_index;
 	}
 	if (nlines) pointers = (char **)calloc(nlines,sizeof *pointers);
 	if (nlines && !pointers) {
-		fprintf(stderr,"ran out of memory in init_endind\n");
+		morpheus_runtime_diagnostic("ran out of memory in init_endind\n");
 		goto no_memory;
 	}
 	if (nlines) {
@@ -306,7 +306,7 @@ checkendind(endind *etags, char *endstr, char *keys, int (*scmp)(const char *, c
 		/*comp = morphstrncmp( curtag , *(pp+mid) , taglen );*/
 		comp = (*scmp)( curtag , *(pp+mid) , taglen );
 /*
-fprintf(stderr,"comparing [%s] and [%s]\n", curtag , *(pp+mid) );
+morpheus_runtime_diagnostic("comparing [%s] and [%s]\n", curtag , *(pp+mid) );
 */
 		if( comp < 0 ) 
 			high = mid - 1 ;

@@ -57,7 +57,7 @@ int keycomp1(const void *, const void *);
 	char * lemma;
 	
 	if( ! s || ! Gkword || ! want ) {
-		fprintf(stderr,"Hey! null workspace in scanasciikeys!\n");
+		morpheus_runtime_diagnostic("Hey! null workspace in scanasciikeys!\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(0);
 	} else {
@@ -76,7 +76,7 @@ int keycomp1(const void *, const void *);
 				break;
 /* 
 			  else {
-			 	fprintf(stderr,"hey: got a negation in [%s], but no place to put it!\n", savekeys);
+			 	morpheus_runtime_diagnostic("hey: got a negation in [%s], but no place to put it!\n", savekeys);
 				return;
 			}
 */
@@ -115,7 +115,7 @@ printf("crasis now set to [%s]\n", crasis_of(Gkword) );
 
 		if( ! GetGkFlag(curkey,gstr,endstring_of(Gkword),preverb,lemma) ) {
 		/*
-			fprintf(stderr,"could not match key [%s] in [%s]\n", curkey , s);
+			morpheus_runtime_diagnostic("could not match key [%s] in [%s]\n", curkey , s);
 		*/
 			if( Gkword ) {
 				if( ! oddkeys_of(Gkword) ) {
@@ -198,7 +198,7 @@ static
 		    zap_morphflag(morphflags_of(gstr),ROOT_PREVERB);
 		    add_morphflag(morphflags_of(gstr),HAS_PREVERB);
 		} /* else {
-		    fprintf(stderr,"got handed prevb %s but had no place to put it!\n", field+3);
+		    morpheus_runtime_diagnostic("got handed prevb %s but had no place to put it!\n", field+3);
 		}*/
 		return(1);
 	}
@@ -210,14 +210,14 @@ static
 		    add_morphflag(morphflags_of(gstr),ROOT_PREVERB);
 
 		} /* else {
-		    fprintf(stderr,"got handed prevb %s but had no place to put it!\n", field+3);
+		    morpheus_runtime_diagnostic("got handed prevb %s but had no place to put it!\n", field+3);
 		}*/
 		return(1);
 	}
 
 	if( ! Xstrncmp(field,"le:",Xstrlen("le:")) ) {
 		if( ! lemma ) {
-		    fprintf(stderr,"got handed lemma %s but had no place to put it!\n", field+3);
+		    morpheus_runtime_diagnostic("got handed lemma %s but had no place to put it!\n", field+3);
 		} else {
 			Xstrncpy(lemma,field+3,MAXWORDSIZE);
 		}
@@ -566,7 +566,7 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 	}
 	*snum = 0;
 	if( (f=MorphFopen(fname,"r")) == NULL ) {
-		fprintf(stderr,"could not open [%s]\n", fname );
+		morpheus_runtime_diagnostic("could not open [%s]\n", fname );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(NULL);
 	}
@@ -625,7 +625,7 @@ InitStemSuffs(char *fname, void (*curfunc)(gk_string *, unsigned long),
 		 * it when the table is loaded, on every platform alike.
 		 */
 		if (declnum == (Stemtype)-1) {
-			fprintf(stderr,"%s: unknown stem class [%s] for [%s]\n",
+			morpheus_runtime_diagnostic("%s: unknown stem class [%s] for [%s]\n",
 				fname, decl, stemname);
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			goto failed;
@@ -736,7 +736,7 @@ int init_keys(void)
 		return(0);
 	}
 	if (nstems < 0 || nderivs < 0 || ndomains < 0) {
-		fprintf(stderr,"invalid negative morphology key count\n");
+		morpheus_runtime_diagnostic("invalid negative morphology key count\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		clear_morph_key_state(context);
 		return(0);
@@ -754,7 +754,7 @@ int init_keys(void)
 		 + LENGTH_OF(arg_dialect)
 		 + LENGTH_OF(arg_geogregion);
 	if (key_count > (size_t)INT_MAX) {
-		fprintf(stderr,"morphology key count exceeds the runtime index width\n");
+		morpheus_runtime_diagnostic("morphology key count exceeds the runtime index width\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		clear_morph_key_state(context);
 		return(0);
@@ -762,7 +762,7 @@ int init_keys(void)
 	nkeys = (int)key_count;
 	key_table = (const Morph_args **) calloc(key_count+1,sizeof * key_table );
 	if (!key_table) {
-		fprintf(stderr,"could not allocate morphology key index\n");
+		morpheus_runtime_diagnostic("could not allocate morphology key index\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		clear_morph_key_state(context);
 		return(0);
@@ -786,7 +786,7 @@ int init_keys(void)
 	qsort((void*)key_table,sofar,sizeof * key_table,keycomp1);
 
 	if (sofar > (size_t)INT_MAX) {
-		fprintf(stderr,"morphology key index exceeds the runtime index width\n");
+		morpheus_runtime_diagnostic("morphology key index exceeds the runtime index width\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		clear_morph_key_state(context);
 		return(0);

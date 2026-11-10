@@ -22,7 +22,7 @@ void putsimpleacc(char *s)
 	gkword = (gk_word *) CreatGkword(1);
 
 	if( ! gkword ) {
-		fprintf(stderr,"no memory for gstring in putsimpleacc\n");
+		morpheus_runtime_diagnostic("no memory for gstring in putsimpleacc\n");
 		return;
 	}
 	

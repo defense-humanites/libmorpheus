@@ -23,3 +23,10 @@
 
 :le:multiple
 :wd:deu/teron indecl ionic
+
+:le:a)/nqrwpos
+:no:a)nqr-wp os_ou masc
+
+:le:partial
+:no:log os_ou masc
+:no:log codex_unknown

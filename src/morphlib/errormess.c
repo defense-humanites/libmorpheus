@@ -16,12 +16,12 @@ void ErrorMess(char *s)
 	Xstrncpy(tmp,s,LONGSTRING);
 	CtoPstr(tmp);
 	ErrMesg(tmp);*/
-	fprintf(stderr,"%s\n", s );
+	morpheus_runtime_diagnostic("%s\n", s );
 /*
 	DebugStr(tmp);
 */
 #else
-	fprintf(stderr,"%s\n", s );
+	morpheus_runtime_diagnostic("%s\n", s );
 #endif
 }
 

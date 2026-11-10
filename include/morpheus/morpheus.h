@@ -480,6 +480,9 @@ MORPHEUS_API morpheus_status morpheus_analyze(
  * options may be NULL for defaults. The generation index is loaded lazily
  * from <stemlib_path>/gener.index. On success, the caller owns *result,
  * including when the lemma is absent and the result contains zero records.
+ * A source record that the engine cannot generate (for example, one whose
+ * stem class has no ending table) is skipped rather than failing the request;
+ * morpheus_generation_result_skipped_records() reports how many were.
  */
 MORPHEUS_API morpheus_status morpheus_generate(
     morpheus_context *context, const uint8_t *lemma, size_t length,
@@ -517,6 +520,16 @@ MORPHEUS_API void morpheus_result_free(morpheus_result *result);
 
 /** Return the number of generated interpretations, or zero for NULL. */
 MORPHEUS_API size_t morpheus_generation_result_count(
+    const morpheus_generation_result *result);
+
+/**
+ * Return the number of the lemma's source records that could not be
+ * generated and were skipped, or zero for NULL. It counts records, not forms,
+ * and does not depend on the request's filters. A nonzero count with zero
+ * generated records distinguishes a lemma whose records all failed from an
+ * absent lemma.
+ */
+MORPHEUS_API size_t morpheus_generation_result_skipped_records(
     const morpheus_generation_result *result);
 
 /** Copy one generated interpretation into caller-owned storage. */

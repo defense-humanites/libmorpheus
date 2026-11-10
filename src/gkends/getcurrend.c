@@ -79,14 +79,14 @@ GetCurrentEndList(gk_string *gstr, int *lnump)
 	}
 
 	if( (f=MorphFopen(fname,"rb")) == NULL ) {
-		fprintf(stderr,"stemtype %o, could not open %s\n", stemtype_of(gstr), fname );
+		morpheus_runtime_diagnostic("stemtype %o, could not open %s\n", stemtype_of(gstr), fname );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(NULL);
 	}
 
 	lno = get_endheader(f,&maxend);
 	if( lno <= 0 ) {
-		fprintf(stderr,"problem with endfile [%s]\n", NameOfStemtype(stemtype_of(gstr)) );
+		morpheus_runtime_diagnostic("problem with endfile [%s]\n", NameOfStemtype(stemtype_of(gstr)) );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		xFclose(f);
 		f = NULL;
@@ -107,7 +107,7 @@ morpheus_runtime_context_current()->ending_cache_current, lno,
 	CurEndList = (gk_string *) CreatGkString( lno + 2 );
 
 	if( ! CurEndList ) {
-		fprintf(stderr,"Out of memory loading in %d new endings!\n", lno+2);
+		morpheus_runtime_diagnostic("Out of memory loading in %d new endings!\n", lno+2);
 		xFclose(f);
 		f = NULL;
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
@@ -118,7 +118,7 @@ morpheus_runtime_context_current()->ending_cache_current, lno,
 		rval=ReadEnding(f,CurEndList+i,maxend);
 
 		if (rval <= 0 ) {
-			fprintf(stderr,"hey! fname [%s] wanted [%d] endings got [%d]!\n", fname, lno , i );
+			morpheus_runtime_diagnostic("hey! fname [%s] wanted [%d] endings got [%d]!\n", fname, lno , i );
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			xFclose(f);
 			FreeGkString(CurEndList);
@@ -127,7 +127,7 @@ morpheus_runtime_context_current()->ending_cache_current, lno,
 		set_stemtype(CurEndList+i,stemtype_of(gstr));
 	}
 /*
-fprintf(stderr,"about to close %s\n", NameOfStemtype(stemtype_of(gstr)) );
+morpheus_runtime_diagnostic("about to close %s\n", NameOfStemtype(stemtype_of(gstr)) );
 */
 	xFclose(f);
 	f = NULL;
@@ -164,15 +164,15 @@ cacheconsistent(void)
 		if( ! context->ending_cache[i] ) break;
 		if( ! NameOfStemtype(stemtype_of(context->ending_cache[i])) ) {
 			if( i > 1 ) 
-				printf("%d) prev type %s\n", i, 
+				morpheus_runtime_diagnostic("%d) prev type %s\n", i, 
 					NameOfStemtype(stemtype_of(context->ending_cache[i-1])) );
 			else
-				printf("first stemtype has been zapped!\n");
+				morpheus_runtime_diagnostic("first stemtype has been zapped!\n");
 			break;
 		}
 	}
 	if( i < context->ending_cache_size ) {
-		printf("saw only %d of %d ending tables\n", i,
+		morpheus_runtime_diagnostic("saw only %d of %d ending tables\n", i,
 			context->ending_cache_size);
 	} else
 		context->ending_cache_size = i;

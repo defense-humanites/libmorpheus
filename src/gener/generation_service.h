@@ -30,8 +30,15 @@ morpheus_generation_status morpheus_generation_service_create_at_path(
     morpheus_generation_service **service);
 void morpheus_generation_service_destroy(morpheus_generation_service *service);
 
+/*
+ * With skipped_records NULL, the first record the engine cannot generate fails
+ * the request with MORPHEUS_GENERATION_ENGINE_ERROR. Otherwise such records
+ * are skipped, none of their forms reach the visitor, and their number is
+ * stored in *skipped_records.
+ */
 morpheus_generation_status morpheus_generation_service_generate(
     morpheus_generation_service *service, const char *canonical_lemma,
-    morpheus_generation_visitor visitor, void *state, size_t *form_count);
+    morpheus_generation_visitor visitor, void *state, size_t *form_count,
+    size_t *skipped_records);
 
 #endif

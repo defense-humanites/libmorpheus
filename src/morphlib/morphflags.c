@@ -71,7 +71,7 @@ void add_morphflag(MorphFlags *Mf, int n)
 
 	Mf[index] = (MorphFlags)(Mf[index] | setbit);
 /*
-fprintf(stderr,"n [%d] index [%d] setbit [%o] Mf[index] [%o]\n", n , index, setbit, Mf[index]) ;
+morpheus_runtime_diagnostic("n [%d] index [%d] setbit [%o] Mf[index] [%o]\n", n , index, setbit, Mf[index]) ;
 */
 }
 
@@ -92,7 +92,7 @@ int has_morphflag(MorphFlags *Mf, int n)
 	if(n <= 0 || n > MORPHFLAG_MAX) return(0);
 	mflag_num_to_bits(n,&index,&setbit);
 /*	
-fprintf(stderr,"n %d , index %d setbit [%o] Mf[Index] %o anded [%o]\n", n,index, setbit,Mf[index],
+morpheus_runtime_diagnostic("n %d , index %d setbit [%o] Mf[Index] %o anded [%o]\n", n,index, setbit,Mf[index],
 Mf[index] & (setbit & 0377));
 */	
 	return(Mf[index] & setbit);
@@ -148,7 +148,7 @@ void mflag_num_to_bits(int n, int *ind, MorphFlags *bitnum)
 		*bitnum = (MorphFlags)(1U << (((unsigned int)n % 8U) - 1U));
 	}
 /*
-fprintf(stderr,"num to bits [%d] ind %o bit %o\n", n , *ind, *bitnum );
+morpheus_runtime_diagnostic("num to bits [%d] ind %o bit %o\n", n , *ind, *bitnum );
 */
 }
 
@@ -186,7 +186,7 @@ int init_ugly_tab(void)
 	if( context->hidden_morphflag_table ) return(1);
 	ugly_tab = (char *)calloc((size_t)TABSIZE+1,(size_t)sizeof * ugly_tab );
 	if( ! ugly_tab ) {
-		fprintf(stderr,"could not allocate morphflag display table\n");
+		morpheus_runtime_diagnostic("could not allocate morphflag display table\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		return(0);
 	}
@@ -249,7 +249,7 @@ int init_prvb_tab(void)
 	prvb_tab = (char *)calloc((size_t)(TABSIZE+1),(size_t)(sizeof * prvb_tab) );
 		
 	if (! prvb_tab) {
-		fprintf(stderr,"could not allocate preverb morphflag table\n");
+		morpheus_runtime_diagnostic("could not allocate preverb morphflag table\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		return(0);
 	}
@@ -325,6 +325,6 @@ void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 	return(1);
 	
 /*
-fprintf(stderr,"%o %o %o %o \n", mf[0] , mf[1], mf[2], mf[3] );
+morpheus_runtime_diagnostic("%o %o %o %o \n", mf[0] , mf[1], mf[2], mf[3] );
 */
 }

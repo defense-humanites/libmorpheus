@@ -70,7 +70,7 @@ GenNxtWord(FILE *f, int mode, FILE *fout)
 	stemkeys[0] = 0;
 	Gkword = CreatGkword(1 );
 	if( ! Gkword ) {
-		fprintf(stderr,"could not allocate memory for Gkword in GenNxtWord\n");
+		morpheus_runtime_diagnostic("could not allocate memory for Gkword in GenNxtWord\n");
 		return(0);
 	}
 
@@ -112,6 +112,20 @@ GenNxtWord(FILE *f, int mode, FILE *fout)
 		return(rval? 1 : 0);
 }
 
+/*
+ * ScanAsciiKeys() may allocate unknown keys on the scanned copy of the word.
+ * A failure after a successful scan must release them, or every record the
+ * engine cannot generate would leak them.
+ */
+static gk_word *
+discard_scanned_keys(gk_word *scanned, gk_word *original)
+{
+	if (oddkeys_of(scanned) != oddkeys_of(original))
+		free(oddkeys_of(scanned));
+	oddkeys_of(scanned) = oddkeys_of(original);
+	return(NULL);
+}
+
 gk_word *
 GenStemForms(gk_word *Gkword, char *keys, int mode)
 {
@@ -151,8 +165,8 @@ GenStemForms(gk_word *Gkword, char *keys, int mode)
 printf("stem [%s] stemkeys [%s]\n", stem_of(Gkword), stemkeys);
 */
 	if( ! ScanAsciiKeys(stemkeys,&tmpGkword,stem_gstring,(gk_string *)NULL) ) {
-		fprintf(stderr,"stem [%s] lemma [%s]: Something wrong with stemkeys [%s]\n",gkstring_of(stem_gstring), lemma_of(&tmpGkword), stemkeys );
-		fprintf(stderr,"stemtype:%d\n", stemtype_of(&tmpGkword) );
+		morpheus_runtime_diagnostic("stem [%s] lemma [%s]: Something wrong with stemkeys [%s]\n",gkstring_of(stem_gstring), lemma_of(&tmpGkword), stemkeys );
+		morpheus_runtime_diagnostic("stemtype:%d\n", stemtype_of(&tmpGkword) );
 		if (oddkeys_of(&tmpGkword) != oddkeys_of(Gkword))
 			free(oddkeys_of(&tmpGkword));
 		return(NULL);
@@ -163,7 +177,7 @@ printf("stem [%s] stemkeys [%s]\n", stem_of(Gkword), stemkeys);
  */
  	if( has_morphflag(morphflags_of(Gkword),SYLL_AUGMENT) && 
  		!  has_morphflag(morphflags_of(stem_gstring),SYLL_AUGMENT) )
- 			return(NULL);
+ 			return(discard_scanned_keys(&tmpGkword,Gkword));
  			
 	/*
 	 * don't bother checking for a)n-ei/xomen if the preverb for the current stem is
@@ -172,7 +186,7 @@ printf("stem [%s] stemkeys [%s]\n", stem_of(Gkword), stemkeys);
 
 
 	if( preverb_of(Gkword)[0] && strcmp(preverb_of(Gkword) , preverb_of(&tmpGkword) ) ) {
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	}
 	set_stemtype(&tmpGkword,stemtype_of(stem_gstring));
 	set_derivtype(&tmpGkword,derivtype_of(stem_gstring));
@@ -181,7 +195,7 @@ printf("stem [%s] stemkeys [%s]\n", stem_of(Gkword), stemkeys);
 /*
 printf("failing on dialect with stem d [%o] and dial [%o]\n", dialect_of(stem_gstring), dial);
 */
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	} /*else{
 		set_dialect(stem_gstring,dial);
 	}*/
@@ -194,13 +208,13 @@ printf("endstring %s stemkeys [%s]\n", endstring_of(&tmpGkword),stemkeys );
 /*
 printf("gstring null with stem [%s] stemkeys [%s]  ending [%s] &tmpGkword dial %o\n",stem_of(&tmpGkword) , stemkeys,endstring_of(&tmpGkword), dialect_of(&tmpGkword));
 */
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	}
 
 	if (nends < 0 || nends > (INT_MAX-2)/2) {
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		FreeGkString(gstring);
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	}
 	maxforms = (nends * 2) + 2;
 	gkforms = CreatGkword(maxforms);
@@ -211,18 +225,21 @@ printf("maxforms %d stem %s\n", maxforms, NameOfStemtype(stemtype_of(gstring)) )
 }
 */
 	if( ! gkforms ) {
-		fprintf(stderr,"no memory for %d gkforms of %s in genwd\n", 
+		morpheus_runtime_diagnostic("no memory for %d gkforms of %s in genwd\n", 
 		maxforms, lemma_of(Gkword) );
 		FreeGkString(gstring);
 		gstring = NULL;
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	}
 	set_stemtype(&tmpGkword,stemtype_of(gstring));
 
 	if(!AddWdEndings(&tmpGkword,gstring,gkforms,maxforms)) {
 		FreeGkString(gstring);
+		/* Forms copied from tmpGkword borrow its unknown keys. */
+		if (oddkeys_of(gkforms) == oddkeys_of(&tmpGkword))
+			oddkeys_of(gkforms) = NULL;
 		FreeGkword(gkforms);
-		return(NULL);
+		return(discard_scanned_keys(&tmpGkword,Gkword));
 	}
 	
 	FreeGkString(gstring);
@@ -255,12 +272,12 @@ GenIrregForm(gk_word *Gkword, char *keys, int mode)
  */
 	gstring = (gk_string *) CreatGkString(2);
 	if( ! gstring  ) {
-		fprintf(stderr,"could not allocate memory for gstring  in GenIrregForm\n");
+		morpheus_runtime_diagnostic("could not allocate memory for gstring  in GenIrregForm\n");
 		return(NULL);
 	}
 	gkforms = (gk_word *) CreatGkword(4);
 	if(  ! gkforms ) {
-		fprintf(stderr,"could not allocate memory for  gkforms in GenIrregForm\n");
+		morpheus_runtime_diagnostic("could not allocate memory for  gkforms in GenIrregForm\n");
 		FreeGkString(gstring);
 		gstring = NULL;
 		return(NULL);
@@ -287,7 +304,7 @@ GenIrregForm(gk_word *Gkword, char *keys, int mode)
 
 	if( mode & INDECL && preverb_of(Gkword)[0] ) {
 /*
-		fprintf(stderr,"Hey! preverb [%s] with indeclinable form [%s]!\n", preverb_of(Gkword),
+		morpheus_runtime_diagnostic("Hey! preverb [%s] with indeclinable form [%s]!\n", preverb_of(Gkword),
 			stem_of(Gkword) );
 */
 		preverb = NULL;
@@ -296,7 +313,7 @@ GenIrregForm(gk_word *Gkword, char *keys, int mode)
 	}
 
 	if( ! stemtype_of(gstring) ) {
-		printf("GenIrregForm: could not find a stemtype for [%s] with keys [%s]\n", 
+		morpheus_runtime_diagnostic("GenIrregForm: could not find a stemtype for [%s] with keys [%s]\n", 
 			workword_of(Gkword) , keys );
 		FreeGkString(gstring);
 		gstring = NULL;
@@ -421,7 +438,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 	
 	CurBuf = CreatGkword(MAX_FORM_VARIANTS+1);
 	if( ! CurBuf) {
-		fprintf(stderr,"no memory for CurBuf in AddWdEndings: raww [%s]\n", rawword_of(Gkword) );
+		morpheus_runtime_diagnostic("no memory for CurBuf in AddWdEndings: raww [%s]\n", rawword_of(Gkword) );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		return(0);
 	}
@@ -480,7 +497,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 
 		if((formvars=BuildAWord(Gkword,&CurEnd,CurBuf )) ) {
 			if(formvars < 0 || formvars > maxforms-j-1) {
-				fprintf(stderr,"too many generated forms for %s\n",
+				morpheus_runtime_diagnostic("too many generated forms for %s\n",
 					lemma_of(Gkword));
 				morpheus_runtime_error_record(
 					MORPHEUS_RUNTIME_ERROR_INTERNAL);
@@ -502,7 +519,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 	
 /*
 	for(k=0;workword_of(Forms+k)[0];k++) {
-		fprintf(stderr,"generated [%s] [%lo]\n", workword_of(Forms+k) ,forminfo_of(Forms+k));
+		morpheus_runtime_diagnostic("generated [%s] [%lo]\n", workword_of(Forms+k) ,forminfo_of(Forms+k));
 	}
 */
 

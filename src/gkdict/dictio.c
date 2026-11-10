@@ -360,7 +360,7 @@ FILE *
 		return(NULL);
 
 	if( (f=MorphFopen(WORDLIST,"r")) == NULL ) {
-		fprintf(stderr,"getlemmstart: could not open %s\n", WORDLIST);
+		morpheus_runtime_diagnostic("getlemmstart: could not open %s\n", WORDLIST);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(NULL);
 	}
