@@ -100,6 +100,10 @@ does not apply to them. `bench/release.sh` passes the variable through:
 MORPHEUS_PYTHON="$(command -v python3)" sh bench/release.sh benchmark.json
 ```
 
+The run stops at once if the interpreter is older than Python 3.11. On macOS,
+`python3` is often the Xcode interpreter (3.9); name a newer one, such as
+Homebrew's (`MORPHEUS_PYTHON="$(brew --prefix)/bin/python3.13"`).
+
 ## WebAssembly execution models
 
 Setting `MORPHEUS_WASM_MODULE` to a built `morpheus.mjs` (see
