@@ -132,6 +132,22 @@ class BindingTest(unittest.TestCase):
             for name in normalized.morph_flags:
                 self.assertTrue(has_morph_flag(record, name))
 
+    def test_direct_decoding_matches_normalized_raw_records(self) -> None:
+        # analyze() and generate() decode the record bytes directly; they must
+        # agree with normalizing the raw records field for field.
+        from libmorpheus._types import normalize_analysis, normalize_generation
+
+        with Library(self.library_path) as library:
+            with library.context("fixture-stemlib", Language.GREEK) as context:
+                analyses = context.analyze("bi/ou", Option.STRICT_CASE)
+                raw_analyses = context.analyze_raw("bi/ou", Option.STRICT_CASE)
+                generations = context.generate("lo/gos")
+                raw_generations = context.generate_raw("lo/gos")
+
+        self.assertTrue(analyses)
+        self.assertEqual(analyses, tuple(map(normalize_analysis, raw_analyses)))
+        self.assertEqual(generations, tuple(map(normalize_generation, raw_generations)))
+
     def test_generation_filters_limits_and_empty_results(self) -> None:
         with Library(self.library_path) as library:
             with library.context("fixture-stemlib", Language.GREEK) as context:
