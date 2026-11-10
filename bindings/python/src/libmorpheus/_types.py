@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag
+from functools import lru_cache
 from typing import Sequence, TypeAlias
 
 
@@ -430,23 +431,83 @@ def has_morph_flag(
     return index < len(analysis.morph_flags) and bool(analysis.morph_flags[index] & 1 << bit)
 
 
-def normalize_analysis(raw: RawAnalysis) -> Analysis:
-    voices = (
-        ("medio-passive",) if raw.voice == int(Voice.MEDIO_PASSIVE)
-        else ("deponent",) if raw.voice == int(Voice.DEPONENT)
-        else _mask(raw.voice, VOICE_NAMES)
+# The name tuples of normalized records are cached per code and shared
+# between the records that carry it: a paradigm of thousands of forms holds a
+# few dozen distinct values, and recomputing them for every form (the morph
+# flags by testing each of the 84 known flags) made normalization most of the
+# cost of generate() and analyze(). Tuples are immutable, so sharing them is
+# invisible to callers. lru_cache is thread-safe and bounds each cache.
+_NAME_CACHE_SIZE = 4096
+_MEDIO_PASSIVE = int(Voice.MEDIO_PASSIVE)
+_DEPONENT = int(Voice.DEPONENT)
+_WORKWORD = int(TruncatedField.WORKWORD)
+_LEMMA = int(TruncatedField.LEMMA)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _morph_flag_names(flags: bytes) -> tuple[str, ...]:
+    return tuple(
+        name for index, name in enumerate(MORPH_FLAG_NAMES)
+        if index >> 3 < len(flags) and flags[index >> 3] & 1 << (index & 7)
     )
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _voice_names(value: int) -> tuple[str, ...]:
+    if value == _MEDIO_PASSIVE:
+        return ("medio-passive",)
+    if value == _DEPONENT:
+        return ("deponent",)
+    return _mask(value, VOICE_NAMES)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _dialect_names(value: int) -> tuple[str, ...]:
+    return _dialects(value)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _region_names(value: int) -> tuple[str, ...]:
+    return _mask(value, REGION_NAMES)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _gender_names(value: int) -> tuple[str, ...]:
+    return _mask(value, GENDER_NAMES)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _case_names(value: int) -> tuple[str, ...]:
+    return _mask(value, CASE_NAMES)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _truncated_names(value: int) -> tuple[str, ...]:
+    return _mask(value, TRUNCATED_NAMES)
+
+
+@lru_cache(maxsize=_NAME_CACHE_SIZE)
+def _generation_truncated_names(value: int) -> tuple[str, ...]:
+    names = []
+    if value & _WORKWORD:
+        names.append("surface")
+    if value & _LEMMA:
+        names.append("lemma")
+    return tuple(names)
+
+
+def normalize_analysis(raw: RawAnalysis) -> Analysis:
     return Analysis(
         part_of_speech=_exact(raw.part_of_speech, PART_OF_SPEECH_NAMES) or "unknown",
-        dialects=_dialects(raw.dialect),
-        geographic_regions=_mask(raw.geographic_region, REGION_NAMES),
+        dialects=_dialect_names(raw.dialect),
+        geographic_regions=_region_names(raw.geographic_region),
         person=_exact(raw.person, PERSON_NAMES),
         grammatical_number=_exact(raw.number, NUMBER_NAMES),
-        genders=_mask(raw.gender, GENDER_NAMES),
-        grammatical_cases=_mask(raw.grammatical_case, CASE_NAMES),
+        genders=_gender_names(raw.gender),
+        grammatical_cases=_case_names(raw.grammatical_case),
         tense=_exact(raw.tense, TENSE_NAMES),
         mood=_exact(raw.mood, MOOD_NAMES),
-        voices=voices,
+        voices=_voice_names(raw.voice),
         degree=_exact(raw.degree, DEGREE_NAMES),
         raw=raw.raw,
         workword=raw.workword,
@@ -461,42 +522,26 @@ def normalize_analysis(raw: RawAnalysis) -> Analysis:
         english_form=raw.english_form,
         raw_preverb=raw.raw_preverb,
         domains=raw.domains,
-        morph_flags=tuple(
-            name for index, name in enumerate(MORPH_FLAG_NAMES)
-            if has_morph_flag(raw, index)
-        ),
-        truncated_fields=_mask(raw.truncated_fields, TRUNCATED_NAMES),
+        morph_flags=_morph_flag_names(raw.morph_flags),
+        truncated_fields=_truncated_names(raw.truncated_fields),
     )
 
 
 def normalize_generation(raw: RawGeneration) -> Generation:
-    voices = (
-        ("medio-passive",) if raw.voice == int(Voice.MEDIO_PASSIVE)
-        else ("deponent",) if raw.voice == int(Voice.DEPONENT)
-        else _mask(raw.voice, VOICE_NAMES)
-    )
-    truncated = []
-    if raw.truncated_fields & int(TruncatedField.WORKWORD):
-        truncated.append("surface")
-    if raw.truncated_fields & int(TruncatedField.LEMMA):
-        truncated.append("lemma")
     return Generation(
         part_of_speech=_exact(raw.part_of_speech, PART_OF_SPEECH_NAMES) or "unknown",
-        dialects=_dialects(raw.dialect),
-        geographic_regions=_mask(raw.geographic_region, REGION_NAMES),
+        dialects=_dialect_names(raw.dialect),
+        geographic_regions=_region_names(raw.geographic_region),
         person=_exact(raw.person, PERSON_NAMES),
         grammatical_number=_exact(raw.number, NUMBER_NAMES),
-        genders=_mask(raw.gender, GENDER_NAMES),
-        grammatical_cases=_mask(raw.grammatical_case, CASE_NAMES),
+        genders=_gender_names(raw.gender),
+        grammatical_cases=_case_names(raw.grammatical_case),
         tense=_exact(raw.tense, TENSE_NAMES),
         mood=_exact(raw.mood, MOOD_NAMES),
-        voices=voices,
+        voices=_voice_names(raw.voice),
         degree=_exact(raw.degree, DEGREE_NAMES),
         surface=raw.surface,
         lemma=raw.lemma,
-        morph_flags=tuple(
-            name for index, name in enumerate(MORPH_FLAG_NAMES)
-            if has_morph_flag(raw, index)
-        ),
-        truncated_fields=tuple(truncated),
+        morph_flags=_morph_flag_names(raw.morph_flags),
+        truncated_fields=_generation_truncated_names(raw.truncated_fields),
     )
