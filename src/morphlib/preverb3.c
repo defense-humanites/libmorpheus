@@ -20,7 +20,7 @@ static int ensure_preverb_table(void)
   context->raw_preverb_table =
     load_euph_tab(RAWPBLIST,&context->raw_preverb_count,NO);
   if (!context->raw_preverb_table) {
-    fprintf(stderr,"Could not create preverb table!\n");
+    morpheus_runtime_diagnostic("Could not create preverb table!\n");
     return(0);
   }
   context->raw_preverb_language = cur_lang();

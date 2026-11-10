@@ -125,6 +125,8 @@ morpheus_status morpheus_open(const morpheus_config *config, morpheus_context **
   if(!runtime->stemlib_path) { morpheus_runtime_context_destroy(runtime); return(MORPHEUS_NO_MEMORY); }
   memcpy(runtime->stemlib_path,config->stemlib_path,path_length+1);
   morpheus_runtime_context_set_language(runtime,language);
+  /* Public contexts report failures by status, never on standard error. */
+  morpheus_runtime_context_set_diagnostics(runtime,0);
   *context=runtime;
   return(MORPHEUS_OK);
 }

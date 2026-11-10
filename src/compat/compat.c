@@ -30,6 +30,19 @@ static morpheus_status compat_runtime_status(
   }
 }
 
+/*
+ * The compatibility surface reproduces the historical analyzer, cruncher
+ * included, so it keeps the inherited diagnostics that the public API
+ * silences on its contexts.
+ */
+static void restore_context(morpheus_context *context,
+                            morpheus_runtime_context *previous,
+                            int diagnostics)
+{
+  morpheus_runtime_context_set_diagnostics(context,diagnostics);
+  morpheus_runtime_context_activate(previous);
+}
+
 morpheus_status
 morpheus_compat_analyze(
     morpheus_context *context, const uint8_t *beta_code, size_t length,
@@ -37,6 +50,7 @@ morpheus_compat_analyze(
 {
   morpheus_runtime_context *previous;
   morpheus_status runtime_status;
+  int diagnostics;
   morpheus_compat_output *owned;
   gk_word *word;
   FILE *stream;
@@ -58,18 +72,20 @@ morpheus_compat_analyze(
   }
 
   previous=morpheus_runtime_context_activate(context);
+  diagnostics=morpheus_runtime_context_diagnostics(context);
+  morpheus_runtime_context_set_diagnostics(context,1);
   morpheus_runtime_context_clear_error(context);
   word=morpheus_check_word(input,(PrntFlags)flags);
   runtime_status=compat_runtime_status(context);
   if(runtime_status != MORPHEUS_OK) {
     if(word) FreeGkword(word);
-    morpheus_runtime_context_activate(previous);
+    restore_context(context,previous,diagnostics);
     fclose(stream);
     morpheus_compat_output_free(owned);
     return(runtime_status);
   }
   if(!word) {
-    morpheus_runtime_context_activate(previous);
+    restore_context(context,previous,diagnostics);
     fclose(stream);
     morpheus_compat_output_free(owned);
     return(MORPHEUS_INVALID_ARGUMENT);
@@ -82,7 +98,7 @@ morpheus_compat_analyze(
   }
   runtime_status=compat_runtime_status(context);
   FreeGkword(word);
-  morpheus_runtime_context_activate(previous);
+  restore_context(context,previous,diagnostics);
   if(runtime_status != MORPHEUS_OK) {
     fclose(stream);
     morpheus_compat_output_free(owned);

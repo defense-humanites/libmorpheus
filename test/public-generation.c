@@ -146,6 +146,45 @@ int main(int argc, char **argv)
   assert(morpheus_generate(context,(const uint8_t *)"missing",7,NULL,
                            &result)==MORPHEUS_OK);
   assert(result && !morpheus_generation_result_count(result));
+  assert(!morpheus_generation_result_skipped_records(result));
+  morpheus_generation_result_free(result);
+  result=NULL;
+  assert(!morpheus_generation_result_skipped_records(NULL));
+
+  /* A record the engine cannot generate is skipped and counted. */
+  assert(morpheus_generate(context,(const uint8_t *)"partial",7,NULL,
+                           &result)==MORPHEUS_OK);
+  assert(morpheus_generation_result_count(result)==18);
+  assert(morpheus_generation_result_skipped_records(result)==1);
+  morpheus_generation_result_free(result);
+  result=NULL;
+  options=default_options();
+  options.number=MORPHEUS_NUMBER_DUAL;
+  assert(morpheus_generate(context,(const uint8_t *)"partial",7,&options,
+                           &result)==MORPHEUS_OK);
+  assert(morpheus_generation_result_count(result)==3);
+  assert(morpheus_generation_result_skipped_records(result)==1);
+  morpheus_generation_result_free(result);
+  result=NULL;
+  assert(morpheus_generate(context,(const uint8_t *)"lo/gos",6,NULL,
+                           &result)==MORPHEUS_OK);
+  assert(!morpheus_generation_result_skipped_records(result));
+  morpheus_generation_result_free(result);
+  result=NULL;
+
+  /* The stem-boundary hyphen of a)nqr-wp does not reach the surfaces. */
+  assert(morpheus_generate(context,(const uint8_t *)"a)/nqrwpos",10,NULL,
+                           &result)==MORPHEUS_OK);
+  assert(morpheus_generation_result_count(result)==18);
+  {
+    int saw_nominative=0;
+    for(i=0;i!=18;i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      assert(!strchr(item.surface,'-'));
+      if(!strcmp(item.surface,"a)/nqrwpos")) saw_nominative=1;
+    }
+    assert(saw_nominative);
+  }
   morpheus_generation_result_free(result);
   result=NULL;
 

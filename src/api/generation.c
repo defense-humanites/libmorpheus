@@ -260,6 +260,8 @@ morpheus_status morpheus_generate(
     owned->truncated_fields[output]=item->truncated_fields;
     output++;
   }
+  owned->skipped_records=
+      morpheus_normalized_generation_result_skipped_records(normalized);
   morpheus_normalized_generation_result_free(normalized);
   *result=owned;
   return(MORPHEUS_OK);
@@ -269,6 +271,12 @@ size_t morpheus_generation_result_count(
     const morpheus_generation_result *result)
 {
   return(result ? result->count : 0);
+}
+
+size_t morpheus_generation_result_skipped_records(
+    const morpheus_generation_result *result)
+{
+  return(result ? result->skipped_records : 0);
 }
 
 morpheus_status morpheus_generation_result_copy(

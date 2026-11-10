@@ -42,3 +42,10 @@ if(NOT test_result EQUAL 0)
     "public generation test failed (${test_result}):\n"
     "${test_output}${test_error}")
 endif()
+# Public contexts report failures by status only: the skipped record above
+# must not print the inherited engine's diagnostics.
+if(NOT test_output STREQUAL "" OR NOT test_error STREQUAL "")
+  message(FATAL_ERROR
+    "public generation wrote to standard output or error:\n"
+    "${test_output}${test_error}")
+endif()

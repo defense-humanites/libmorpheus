@@ -25,7 +25,7 @@ printf("creat gstr %d\n", num * (sizeof * tmpgstring) );
 	count = (size_t)num;
 	tmpgstring = (gk_string *)calloc(count, sizeof * tmpgstring);
 	if( tmpgstring == NULL ) {
-		fprintf(stderr,"Out of memory for %zu bytes to create %d gstrings\n",
+		morpheus_runtime_diagnostic("Out of memory for %zu bytes to create %d gstrings\n",
 		count * sizeof * tmpgstring, num );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 	}
@@ -35,7 +35,7 @@ printf("creat gstr %d\n", num * (sizeof * tmpgstring) );
 void FreeGkString(gk_string *gstring)
 {
 	if( ! gstring ) {
-		fprintf(stderr,"hey! asked to free NULL gstring \n");
+		morpheus_runtime_diagnostic("hey! asked to free NULL gstring \n");
 		return;
 	}
 /*
@@ -133,7 +133,7 @@ CreatGkword(int num)
 printf("creat gword %d\n", num * (sizeof * tmpgword) );
 */
 	if( ! tmpgword ) {
-		fprintf(stderr,"Could not allocate %d gwords\n", num );
+		morpheus_runtime_diagnostic("Could not allocate %d gwords\n", num );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 		return((gk_word *)NULL);
 	}
@@ -158,7 +158,7 @@ void ClearGkstring(gk_string *gstr)
 void FreeGkword(gk_word *Gkword)
 {
 	if( ! Gkword ) {
-		fprintf(stderr,"hey! asked to free NULL gkword \n");
+		morpheus_runtime_diagnostic("hey! asked to free NULL gkword \n");
 		return;
 	}
 	ReleaseGkAnalStorage(Gkword);
@@ -711,7 +711,7 @@ Dialect
 			return(Dial1);
 	} else if( (!Dial1 && Dial2 ) ) {
 /*
-fprintf(stderr,"End dial [%o] stem [%o]\n", Dial1 , Dial2 );
+morpheus_runtime_diagnostic("End dial [%o] stem [%o]\n", Dial1 , Dial2 );
 */
 		return(Dial2);
 	} else if( Dial1 && ! Dial2 )

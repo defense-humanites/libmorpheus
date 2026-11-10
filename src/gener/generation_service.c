@@ -70,11 +70,15 @@ record_keys(const char *source)
 	return copy;
 }
 
+/*
+ * *unusable is set when the record failed before any of its forms reached the
+ * visitor, so the caller may skip it without exposing a partial record.
+ */
 static morpheus_generation_status
 generate_record(morpheus_generation_service *service, const char *lemma,
                 const morpheus_gener_record_view *record,
                 morpheus_generation_visitor visitor, void *state,
-                size_t *form_count)
+                size_t *form_count, int *unusable)
 {
 	gk_word input = { 0 };
 	gk_word *forms;
@@ -98,6 +102,7 @@ generate_record(morpheus_generation_service *service, const char *lemma,
 	if (!forms) {
 		morpheus_generation_status status = runtime_status(service->context);
 		release_input(&input);
+		*unusable = status == MORPHEUS_GENERATION_ENGINE_ERROR;
 		return status;
 	}
 	if (morpheus_runtime_context_error(service->context) !=
@@ -105,6 +110,7 @@ generate_record(morpheus_generation_service *service, const char *lemma,
 		morpheus_generation_status status = runtime_status(service->context);
 		release_forms(forms);
 		release_input(&input);
+		*unusable = status == MORPHEUS_GENERATION_ENGINE_ERROR;
 		return status;
 	}
 	for (form = 0; workword_of(forms + form)[0]; form++) {
@@ -161,6 +167,8 @@ morpheus_generation_service_create_at_path(
 		}
 		memcpy(created->context->stemlib_path,stemlib_path,path_length + 1);
 	}
+	/* Unusable records are counted by the caller, not reported on stderr. */
+	morpheus_runtime_context_set_diagnostics(created->context,0);
 	created->index = index;
 	*service = created;
 	return MORPHEUS_GENERATION_OK;
@@ -179,7 +187,8 @@ morpheus_generation_status
 morpheus_generation_service_generate(morpheus_generation_service *service,
                                      const char *canonical_lemma,
                                      morpheus_generation_visitor visitor,
-                                     void *state, size_t *form_count)
+                                     void *state, size_t *form_count,
+                                     size_t *skipped_records)
 {
 	morpheus_gener_lemma_view lemma;
 	morpheus_runtime_context *previous;
@@ -190,6 +199,8 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 	    !form_count)
 		return MORPHEUS_GENERATION_INVALID;
 	*form_count = 0;
+	if (skipped_records)
+		*skipped_records = 0;
 	switch (morpheus_gener_index_lookup(service->index,canonical_lemma,&lemma)) {
 	case MORPHEUS_GENER_INDEX_OK:
 		break;
@@ -215,6 +226,7 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 		     record_number != block.first_record + block.record_count;
 		     record_number++) {
 			morpheus_gener_record_view record;
+			int unusable = 0;
 
 			if (morpheus_gener_index_record(service->index,record_number,
 			                                &record) !=
@@ -223,7 +235,14 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 				break;
 			}
 			result = generate_record(service,canonical_lemma,&record,visitor,
-			                         state,form_count);
+			                         state,form_count,&unusable);
+			if (unusable && skipped_records) {
+				/* A record the engine cannot generate leaves the others usable. */
+				morpheus_runtime_context_clear_error(service->context);
+				(*skipped_records)++;
+				result = MORPHEUS_GENERATION_OK;
+				continue;
+			}
 			if (result != MORPHEUS_GENERATION_OK)
 				break;
 		}

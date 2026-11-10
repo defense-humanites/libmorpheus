@@ -149,7 +149,7 @@ printf("failed with curform [%s] and origword [%s]\n", curform , origword );
 printf("workword is [%s]\n", workword_of(gkforms+i));
 fprintf(stdout,"comparing [%s] and [%s]\n", curform , checks );
 fputc('\n',stdout);
-fprintf(stderr,"onwards\n");
+morpheus_runtime_diagnostic("onwards\n");
 */
 		if( !morphstrcmp( curform , checks )) {
 /*
@@ -212,12 +212,12 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 		return(0);
 
 	if (context->analysis_storage_error) {
-		fprintf(stderr,"something wrong with the analysis storage!\n");
+		morpheus_runtime_diagnostic("something wrong with the analysis storage!\n");
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(0);
 	}
 	if (!analysis_of(Gkword) && totanal_of(Gkword) != 0) {
-		fprintf(stderr,"hey! anal pointer NULL but totanal is %d\n",
+		morpheus_runtime_diagnostic("hey! anal pointer NULL but totanal is %d\n",
 		        totanal_of(Gkword));
 		context->analysis_storage_error++;
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
@@ -227,7 +227,7 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 
 	if( analysis_of(Gkword) == NULL ) {
 		if( ! ( analysis_of(Gkword) = CreatGkAnal(4) )) {
-			fprintf(stderr,"not enough memory for greek analysis\n");
+			morpheus_runtime_diagnostic("not enough memory for greek analysis\n");
 			context->analysis_storage_error++;
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_NO_MEMORY);
 			return(0);
@@ -291,7 +291,7 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 printf("tmphalf1 [%s] s [%s]\n", tmphalf1, s );
 */
 			if( strlen(s) >= MAXWORDSIZE - 1 ) {
-				fprintf(stderr,"compound lookup key is too long: [%s]\n",s);
+				morpheus_runtime_diagnostic("compound lookup key is too long: [%s]\n",s);
 				return(0);
 			}
 			chckcmpvb(s,cmplem);
@@ -326,7 +326,7 @@ printf("tmphalf1 [%s] tmplem[%s] s [%s]\n", tmphalf1 , tmplem, s);
 */
 		}
 		if( strlen(cmplem[0] ? cmplem : tmplem) >= sizeof lemma_of(curanal) ) {
-			fprintf(stderr,"compound lemma is too long: [%s]\n",
+			morpheus_runtime_diagnostic("compound lemma is too long: [%s]\n",
 			        cmplem[0] ? cmplem : tmplem);
 			return(0);
 		}

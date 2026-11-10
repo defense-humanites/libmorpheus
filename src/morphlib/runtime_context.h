@@ -25,4 +25,19 @@ morpheus_runtime_error morpheus_runtime_context_error(
     const morpheus_runtime_context *context);
 void morpheus_runtime_error_record(morpheus_runtime_error error);
 
+/*
+ * Diagnostics are the inherited front ends' messages on standard error. They
+ * stay enabled for those front ends (the thread default context and any new
+ * context); the public API silences them on its own contexts, which report
+ * failures through status codes instead.
+ */
+void morpheus_runtime_context_set_diagnostics(
+    morpheus_runtime_context *context, int enabled);
+int morpheus_runtime_context_diagnostics(
+    const morpheus_runtime_context *context);
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((format(printf,1,2)))
+#endif
+void morpheus_runtime_diagnostic(const char *format, ...);
+
 #endif

@@ -50,6 +50,9 @@ void morpheus_normalized_generation_result_free(
     morpheus_normalized_generation_result *result);
 size_t morpheus_normalized_generation_result_count(
     const morpheus_normalized_generation_result *result);
+/* Source records the engine could not generate and skipped. */
+size_t morpheus_normalized_generation_result_skipped_records(
+    const morpheus_normalized_generation_result *result);
 const morpheus_normalized_generation *morpheus_normalized_generation_result_at(
     const morpheus_normalized_generation_result *result, size_t index);
 

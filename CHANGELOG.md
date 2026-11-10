@@ -9,7 +9,33 @@ the corpus.
 
 ## [Unreleased]
 
+### Added
+
+- `morpheus_generation_result_skipped_records()` reports how many of a
+  lemma's source records generation skipped because the engine could not
+  generate them (#78). The function is an ABI 2 addition: existing callers
+  are unaffected.
+
 ### Changed
+
+- Experimental generation no longer fails a whole lemma on one bad record
+  (#78). Over the Alpheios index (106,422 lemmas), 275 lemmas failed with
+  `MORPHEUS_INTERNAL_ERROR` because of 346 records: stem classes without an
+  ending table (`as_a`, `gc_ggos`, `irreg_decl3`…) or forced endings that
+  match no cell. Those records are now skipped and counted, and the lemmas'
+  other records are generated: δίδωμι returns 3,889 forms with one record
+  skipped, ἵστημι 7,337, πόλις 166; 110 lemmas whose records all fail
+  return no forms and a nonzero count. The other 106,147 lemmas return the
+  same records as before, apart from the hyphen below. Allocation failures
+  still fail the request.
+- Generated surfaces no longer carry the stem-boundary hyphen of the stem
+  source (`a)nqr-w/pwn` becomes `a)nqrw/pwn`; 1,268,920 forms of 11,823
+  lemmas in the Alpheios index).
+- Contexts opened through the public API no longer print the inherited
+  engine's diagnostics (`Something wrong with stemkeys […]`, `MorphFopen:
+  could not open […]`…) on standard error or output; failures are reported
+  by status only. The compatibility API, and so `cruncher`, keeps them, as
+  do the historical tools.
 
 - Node.js binding 0.2.0 (`docs/release-node-0.2.0.md`) and Python binding
   0.2.2 (`docs/release-python-0.2.2.md`), both published, ship the decoding
@@ -78,6 +104,13 @@ the corpus.
   wide-parallel generation of large paradigms, a main-thread decoding cost
   of the binding. The WebAssembly README now says when to prefer
   `@libmorpheus/node`, and the two further comparison reports are retained.
+
+### Fixed
+
+- A generation record that failed after its keys were scanned (an ending
+  table that cannot be opened, a forced ending that matches no cell) leaked
+  the buffer holding its unknown keys. No test generated such a record; the
+  whole Alpheios index now generates under AddressSanitizer without leaks.
 
 ## [0.4.6] - 2026-11-09
 

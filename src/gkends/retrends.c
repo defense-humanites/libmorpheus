@@ -53,7 +53,7 @@ printf("WantEnd:"); PrntAGstr(&WantEnd,stdout); printf("\n");
 printf("AvoidEnd:"); PrntAGstr(&AvoidEnd,stdout); printf("\n");
 */
 	if( ! stemtype_of(&WantEnd) ) {
-		printf("could not find a stemtype for [%s] with restricts [%s]\n", 
+		morpheus_runtime_diagnostic("could not find a stemtype for [%s] with restricts [%s]\n", 
 			stemkeys, restricts );
 		return(NULL);
 	}
@@ -262,7 +262,7 @@ static gk_string *
 	sprintf(fname,"%s/out/%s.out", ENDTABLEDIR , NameOfStemtype(stemtype_of(wantgkend)) );
 
 	if( (f=MorphFopen(fname,"rb")) == NULL ) {
-		fprintf(stderr,"stemtype %o, could not open %s\n", stemtype_of(wantgkend), fname );
+		morpheus_runtime_diagnostic("stemtype %o, could not open %s\n", stemtype_of(wantgkend), fname );
 		return(NULL);
 	}
 	
@@ -273,7 +273,7 @@ static gk_string *
 	ListOfEnds = (gk_string *) CreatGkString( lno + 2 );
 
 	if( ! ListOfEnds ) {
-		fprintf(stderr,"Could not find space to store %d greek endings for stem %s\n", lno + 2 , 
+		morpheus_runtime_diagnostic("Could not find space to store %d greek endings for stem %s\n", lno + 2 , 
 		NameOfStemtype(stemtype_of(wantgkend)) );
 		return(NULL);
 	}

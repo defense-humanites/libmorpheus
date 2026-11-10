@@ -10,6 +10,7 @@
 struct morpheus_normalized_generation_result {
 	size_t count;
 	size_t capacity;
+	size_t skipped_records;
 	morpheus_normalized_generation *records;
 };
 
@@ -52,6 +53,29 @@ copy_text(char *destination, size_t capacity, const char *source)
 	return length >= capacity;
 }
 
+/*
+ * Generated surfaces keep the hyphen that marks the stem boundary in the stem
+ * source (a)nqr-w/pwn). It is not part of the form: drop it, as lemma keys
+ * already do.
+ */
+static int
+copy_surface(char *destination, size_t capacity, const char *source)
+{
+	size_t copied = 0;
+
+	for (; *source; source++) {
+		if (*source == '-')
+			continue;
+		if (copied == capacity - 1) {
+			destination[copied] = 0;
+			return 1;
+		}
+		destination[copied++] = *source;
+	}
+	destination[copied] = 0;
+	return 0;
+}
+
 static int
 grow_result(morpheus_normalized_generation_result *result, size_t limit)
 {
@@ -90,7 +114,7 @@ collect_form(const gk_word *form, void *state)
 	record = collect->result->records + collect->result->count;
 	memset(record,0,sizeof *record);
 	record->source_order = (uint64_t)collect->result->count;
-	if (copy_text(record->surface,sizeof record->surface,workword_of(form)))
+	if (copy_surface(record->surface,sizeof record->surface,workword_of(form)))
 		record->truncated_fields |= MORPHEUS_TRUNCATED_WORKWORD;
 	if (copy_text(record->lemma,sizeof record->lemma,lemma_of(form)))
 		record->truncated_fields |= MORPHEUS_TRUNCATED_LEMMA;
@@ -210,7 +234,8 @@ morpheus_generation_normalize(
 		return MORPHEUS_GENERATION_NORMALIZE_NO_MEMORY;
 	collect = (collector){ created, result_limit, 0, 0 };
 	generated = morpheus_generation_service_generate(
-	    service,canonical_lemma,collect_form,&collect,&generated_count);
+	    service,canonical_lemma,collect_form,&collect,&generated_count,
+	    &created->skipped_records);
 	if (collect.limit_exceeded) {
 		morpheus_normalized_generation_result_free(created);
 		return MORPHEUS_GENERATION_NORMALIZE_LIMIT;
@@ -251,6 +276,13 @@ morpheus_normalized_generation_result_count(
     const morpheus_normalized_generation_result *result)
 {
 	return result ? result->count : 0;
+}
+
+size_t
+morpheus_normalized_generation_result_skipped_records(
+    const morpheus_normalized_generation_result *result)
+{
+	return result ? result->skipped_records : 0;
 }
 
 const morpheus_normalized_generation *

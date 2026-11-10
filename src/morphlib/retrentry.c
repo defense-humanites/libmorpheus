@@ -32,13 +32,13 @@ init_preind(char *fname, int *maxkeys)
 	}
 	written = snprintf(tmp,sizeof tmp,"%s.%s",fname,LINDEXSUFFIX);
 	if (written < 0 || written >= (int)sizeof tmp) {
-		fprintf(stderr,"preindex path is too long: %s\n",fname);
+		morpheus_runtime_diagnostic("preindex path is too long: %s\n",fname);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(NULL);
 	}
 	
 	if( (f=MorphFopen(tmp,"rb"))==NULL) {
-		fprintf(stderr,"init_preind: could not open %s\n", tmp );
+		morpheus_runtime_diagnostic("init_preind: could not open %s\n", tmp );
 		return( NULL );
 	}
 	
@@ -46,7 +46,7 @@ init_preind(char *fname, int *maxkeys)
 	if (fseek(f,0L,SEEK_END) != 0 || (file_size = ftell(f)) < 0 ||
 	    (uintmax_t)file_size > (uintmax_t)SIZE_MAX ||
 	    fseek(f,0L,SEEK_SET) != 0 || (size_t)file_size % divisor != 0) {
-		fprintf(stderr,"invalid preindex size for %s\n",tmp);
+		morpheus_runtime_diagnostic("invalid preindex size for %s\n",tmp);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		fclose(f);
 		return(NULL);
@@ -54,7 +54,7 @@ init_preind(char *fname, int *maxkeys)
 	record_count = (size_t)file_size/divisor;
 	if (record_count > (size_t)INT_MAX ||
 	    record_count > SIZE_MAX/sizeof *etags-1) {
-		fprintf(stderr,"preindex is too large: %s\n",tmp);
+		morpheus_runtime_diagnostic("preindex is too large: %s\n",tmp);
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		fclose(f);
 		return(NULL);
@@ -87,7 +87,7 @@ init_preind(char *fname, int *maxkeys)
 		int nread = vax_fread(records+sofar,1,requested,f);
 
 		if (nread != requested) {
-			fprintf(stderr,"short read while loading %s\n",tmp);
+			morpheus_runtime_diagnostic("short read while loading %s\n",tmp);
 			morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 			free(records);
 			free(etags);
@@ -243,7 +243,7 @@ int firstline = 1;
 	}
 
 	if( (f=open_index_file(fname,&cached))==NULL) {
-		fprintf(stderr,"ChckFullIndex(): could not open:%s\n", fname );
+		morpheus_runtime_diagnostic("ChckFullIndex(): could not open:%s\n", fname );
 		morpheus_runtime_error_record(MORPHEUS_RUNTIME_ERROR_INTERNAL);
 		return(0);
 	}
@@ -274,7 +274,7 @@ printf("starting off at %ld\n", offset);
 
 /*
 if( firstline ) {
-fprintf(stderr,"starts comp [%d] s [%s] buf [%s]\n", comp , s , buf );
+morpheus_runtime_diagnostic("starts comp [%d] s [%s] buf [%s]\n", comp , s , buf );
 firstline = 0;
 }
 */
@@ -295,7 +295,7 @@ firstline = 0;
 		failed = 1;
 	}
 /*
-fprintf(stderr,"ends comp [%d] s [%s] buf [%s]\n", comp , s , buf );
+morpheus_runtime_diagnostic("ends comp [%d] s [%s] buf [%s]\n", comp , s , buf );
 getchar();
 */
 	release_index_file(f,cached,failed);
