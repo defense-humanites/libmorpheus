@@ -11,8 +11,8 @@ the corpus.
 
 ### Changed
 
-- Node.js binding 0.2.0 (prepared; `docs/release-node-0.2.0.md`) and Python
-  binding 0.2.2 (prepared; `docs/release-python-0.2.2.md`) ship the decoding
+- Node.js binding 0.2.0 (`docs/release-node-0.2.0.md`) and Python binding
+  0.2.2 (`docs/release-python-0.2.2.md`), both published, ship the decoding
   changes below; both still declare native 0.4.6. Node.js takes the minor
   version for its frozen shared name arrays. The controlled-host comparisons
   of both bindings are retained as

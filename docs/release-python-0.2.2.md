@@ -60,7 +60,22 @@ PyPI trusted publishing, creates the `python-v0.2.2` GitHub release from
 `docs/release-notes/python-v0.2.2.md` and the distributions PyPI serves,
 and the published PyPI smoke test runs.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must confirm the tagged Linux CI run on the
-candidate commit and explicitly authorize creation of `python-v0.2.2`.
+- Tag: `python-v0.2.2`, created by the maintainer on 2026-11-10 on
+  `875268ee423a27c4507cfc5bb436c7913a268efa`, the merge of this decision,
+  together with `node-v0.2.0`.
+- Tagged Linux CI: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42811403597).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42811403333);
+  `libmorpheus` 0.2.2 is on PyPI; the wheel
+  `libmorpheus-0.2.2-py3-none-any.whl` has SHA-256
+  `7b10e71ae683357773b33f8ea76ff9de04c27cc3fb4d579671374e1cea847642` and
+  the source distribution
+  `f3e5f330a733ed9322a6e629cfa79823a32413a98dfd9b514dc9a8b664a5bdc4`.
+- GitHub release: [`python-v0.2.2`](https://github.com/defense-humanites/libmorpheus/releases/tag/python-v0.2.2),
+  with the two distributions PyPI serves and `SHA256SUMS`.
+- Published PyPI smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42812316406):
+  the public wheel repeated the analysis and generation checks against a
+  runtime built from the tagged sources, and its published
+  `libmorpheus-setup` acquired the declared runtime 0.4.6 and the Perseids
+  data from the public endpoints.

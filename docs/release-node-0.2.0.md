@@ -58,8 +58,29 @@ creates the `node-v0.2.0` GitHub release from
 `docs/release-notes/node-v0.2.0.md` and the tarballs npm serves, and
 triggers the published npm smoke test.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must confirm the tagged Linux CI and
-platform runs on the candidate commit and explicitly authorize creation of
-`node-v0.2.0`.
+- Tag: `node-v0.2.0`, created by the maintainer on 2026-11-10 on
+  `875268ee423a27c4507cfc5bb436c7913a268efa`, the merge of this decision.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/42811402688)
+  and [platform](https://github.com/defense-humanites/libmorpheus/actions/runs/42811402629)
+  (Linux x86_64 and aarch64 glibc, macOS arm64, Alpine x86_64 and aarch64),
+  both passed at the first attempt.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/42811402610);
+  the four packages are on npm at 0.2.0 with `latest` moved, tarball
+  integrity `sha512-q4zfJ/UbstVJmC8JhZKl48+pVKo5uwSeTeomijh+AA1rjGo+ZgimdcKElz/X1ZOVaDonXjhrMmFmQiaRQAzCYA==`
+  (`@libmorpheus/node`),
+  `sha512-5WP4sRZOSt9vQDU7amsNUfKMMUvWNlSr+yCARhBFqdjJCQtpEbGHbdWCL4UZWREJiR4gVVq9yO57xM6wvv3Nvg==`
+  (`node-darwin-arm64`),
+  `sha512-0PyZD4r+io24CEwTv132FOIaz4c/x/UQXC+HK+PLAJjf5v8TGBjVcUtKWp1Mj7ORNd18Qt+gaEwT6weojqci0w==`
+  (`node-linux-arm64-gnu`),
+  `sha512-u/p+Zya6O0mRfN5SDwxkoreH9umakz73Jx90IoAgJ2HVQtbVgotl5UH06WCIpoqZmyCygCd14FWiIzjQxaTWrg==`
+  (`node-linux-x64-gnu`).
+- GitHub release: [`node-v0.2.0`](https://github.com/defense-humanites/libmorpheus/releases/tag/node-v0.2.0),
+  with the four tarballs npm serves and `SHA256SUMS`; the repository's
+  latest release stays `v0.4.6`.
+- Published npm smoke test: [passed](https://github.com/defense-humanites/libmorpheus/actions/runs/42813174432):
+  an empty application installed the published packages, acquired the
+  declared native runtime 0.4.6 and both datasets from the public endpoints,
+  and preserved Greek analysis, Latin multiple interpretations and Greek
+  dual generation.
