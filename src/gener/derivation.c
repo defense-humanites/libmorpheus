@@ -414,36 +414,6 @@ morpheus_gener_keys_confine(const char *keys, int *confined)
 }
 
 int
-morpheus_gener_record_traits(const char *record, int *part, int *restricted)
-{
-	static const Stemtype parts[] = {
-		PP_PR, PP_FU, PP_AO, PP_PF, PP_PP, PP_AP, PP_FP
-	};
-	gk_string constraints;
-	const char *keys;
-	Stemtype principal;
-	size_t index;
-
-	if (!record || !part || !restricted || strncmp(record,":vs:",4))
-		return 0;
-	keys = record + 4;
-	while (*keys && !isspace((unsigned char)*keys))
-		keys++;
-	if (!scan_keys(keys,&constraints))
-		return 0;
-	principal = stemtype_of(&constraints) & PPARTMASK;
-	*part = -1;
-	for (index = 0; index != sizeof parts / sizeof parts[0]; index++) {
-		if (principal == parts[index])
-			*part = (int)index;
-	}
-	*restricted = dialect_of(&constraints) ||
-	              tense_of(forminfo_of(&constraints)) ||
-	              mood_of(forminfo_of(&constraints));
-	return 1;
-}
-
-int
 morpheus_gener_expand_derivation(FILE *output, const char *stem,
                                  const char *derivation,
                                  const char *global_keys,

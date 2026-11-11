@@ -30,18 +30,6 @@ int morpheus_gener_expand_derivation(FILE *output, const char *stem,
                                      unsigned int flags);
 
 /*
- * Describe one prepared `:vs:` record for the default principal parts:
- * *part receives its principal part (0 present, 1 future, 2 aorist, 3
- * perfect, 4 perfect middle-passive, 5 aorist passive, 6 future perfect, or
- * -1 for none), and *restricted whether its keys fix a dialect, tense or
- * mood.
- *
- * Returns 1 on success and 0 on malformed input or allocation failure.
- */
-int morpheus_gener_record_traits(const char *record, int *part,
-                                 int *restricted);
-
-/*
  * Whether a derivation type is a regular derivation (`reg_deriv` in
  * rule_files/derivtypes.table: ew_denom, ow_denom, izw...), as opposed to a
  * primary conjugation (`prim_deriv`: reg_conj) or a verb stem class

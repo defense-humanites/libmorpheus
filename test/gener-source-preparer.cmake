@@ -68,8 +68,9 @@ if(NOT defaults_compare_result EQUAL 0)
   message(FATAL_ERROR "default principal parts differ from the expected records")
 endif()
 
-# The historical expansion keeps the stem alterations that the default one
-# corrects (docs/gener-derivations.md).
+# The historical preparation keeps the stem alterations that the default one
+# corrects, and the compound-only records that it drops
+# (docs/gener-derivations.md).
 set(historical_defaults "${MORPHEUS_GENER_SOURCE_WORK_DIR}/historical-defaults.txt")
 file(REMOVE "${historical_defaults}")
 execute_process(
@@ -86,10 +87,12 @@ if(NOT historical_defaults_result EQUAL 0)
 endif()
 file(READ "${historical_defaults}" historical_defaults_records)
 foreach(record IN ITEMS ":vs:a)kqesq  aor_pass e_stem dissimilation"
-                        ":vs:i)kquofor  ew_pr ew_denom dissimilation")
+                        ":vs:i)kquofor  ew_pr ew_denom dissimilation"
+                        ":vs:dhm  ew_pr ew_denom comp_only"
+                        ":aj:a)ndr os_on comp_only")
   string(FIND "${historical_defaults_records}" "${record}\n" record_at)
   if(record_at EQUAL -1)
-    message(FATAL_ERROR "historical expansion lost the record ${record}")
+    message(FATAL_ERROR "historical preparation lost the record ${record}")
   endif()
 endforeach()
 execute_process(
@@ -167,11 +170,11 @@ endforeach()
 string(SHA256 confined_sha256 ":de:a)rx euw pres")
 string(SHA256 middle_sha256 ":de:a)gwn izw mid")
 set(patch_cases
-    "applied|gener-derivation-defaults.txt\t29\t${confined_sha256}\t:de:a)rx euw"
-    "mismatch|gener-derivation-defaults.txt\t29\t0000000000000000000000000000000000000000000000000000000000000000\t:de:a)rx euw"
+    "applied|gener-derivation-defaults.txt\t31\t${confined_sha256}\t:de:a)rx euw"
+    "mismatch|gener-derivation-defaults.txt\t31\t0000000000000000000000000000000000000000000000000000000000000000\t:de:a)rx euw"
     "unmatched|gener-derivation-defaults.txt\t999\t${confined_sha256}\t:de:a)rx euw"
-    "spaced|gener-derivation-defaults.txt\t29\t${confined_sha256}\t:de:a)rx euw "
-    "unordered|gener-derivation-defaults.txt\t29\t${confined_sha256}\t:de:a)rx euw\ngener-derivation-defaults.txt\t2\t${middle_sha256}\t:de:a)gwn izw")
+    "spaced|gener-derivation-defaults.txt\t31\t${confined_sha256}\t:de:a)rx euw "
+    "unordered|gener-derivation-defaults.txt\t31\t${confined_sha256}\t:de:a)rx euw\ngener-derivation-defaults.txt\t2\t${middle_sha256}\t:de:a)gwn izw")
 # Each rejected case must fail for its own reason.
 set(expected_mismatch "patch source fingerprint mismatch")
 set(expected_unmatched "unmatched patch")

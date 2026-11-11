@@ -65,11 +65,11 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "ee399e9f3af34be6f9c3961041f54734e77042fdeffbde717942d04c1e72d016")
+   "62265bf666c8a640171e66a42536174df4f2b16ff08054bcf6b467414fcdf040")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "e04d4a7d6457cd4dd6044621197006400f425717541d9466e3e4e6cf0468fa2f")
+   "a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
 endif()
 
@@ -122,7 +122,7 @@ endif()
 
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
-          "${first_index}" 106428 108221 172766
+          "${first_index}" 106081 107837 177676
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output
   ERROR_VARIABLE reader_error
@@ -133,11 +133,12 @@ if(NOT reader_result EQUAL 0)
     "${reader_output}${reader_error}")
 endif()
 
-# Frequent verbs, primary and regular. The default principal parts must
-# leave the primary and suppletive stems as their sources give them, and add
-# to the regular derivations exactly the records listed here; e)/xw receives
-# the present its patched derivation restores (reviewed by hand; the
-# historical blocks come from the same sources, unpatched).
+# Frequent verbs, primary and regular. The default preparation must leave
+# the primary and suppletive stems as their sources give them, less the
+# records whose stem only occurs in compounds, and add to the regular
+# derivations exactly the records listed here, every part analysis accepts;
+# e)/xw receives the present its patched derivation restores (reviewed by
+# hand; the historical blocks come from the same sources, unpatched).
 function(collect_lemma_blocks content lemma result)
   set(blocks "")
   set(rest "${content}")
@@ -164,50 +165,89 @@ function(collect_lemma_blocks content lemma result)
   set(${result} "${blocks}" PARENT_SCOPE)
 endfunction()
 
+# The historical blocks without their compound-only records, which the
+# default preparation drops.
+function(strip_compound_only content result)
+  set(text "\n${content}")
+  foreach(guard RANGE 1000)
+    string(REGEX REPLACE
+           "\n:[a-z][a-z]:[^\n]*[ \t]comp_only([ \t][^\n]*)?\n" "\n"
+           stripped "${text}")
+    if(stripped STREQUAL text)
+      break()
+    endif()
+    set(text "${stripped}")
+  endforeach()
+  string(SUBSTRING "${text}" 1 -1 text)
+  set(${result} "${text}" PARENT_SCOPE)
+endfunction()
+
 file(READ "${first_source}" prepared)
 file(READ "${historical_source}" historical)
 set(prepared "\n${prepared}")
 set(historical "\n${historical}")
 foreach(verb IN ITEMS
-        "pa/sxw" "pi/ptw" "o(ra/w" "me/nw" "i(/sthmi" "bou/lomai"
-        "lu/w" "a)kou/w")
+        "pa/sxw" "pi/ptw" "o(ra/w" "me/nw" "bou/lomai" "lu/w" "a)kou/w")
   collect_lemma_blocks("${prepared}" "${verb}" current)
   collect_lemma_blocks("${historical}" "${verb}" earlier)
+  strip_compound_only("${earlier}" earlier)
   if(current STREQUAL "" OR NOT current STREQUAL earlier)
     message(FATAL_ERROR "default principal parts changed the blocks of ${verb}")
   endif()
 endforeach()
 
 # Each entry: the verb, then the records the defaults or patches add to it.
-set(regular_verbs "poie/w" "dhlo/w" "a)gge/llw" "a)gapa/w" "e)/xw")
+# a)gge/llw keeps its second aorists and gains h)/ggeila and h)gge/lqhn;
+# i(/sthmi's regular group (i(sta/w) receives its parts beside the primary
+# stems.
+set(regular_verbs "poie/w" "dhlo/w" "a)gge/llw" "a)gapa/w" "e)/xw" "i(/sthmi")
 set(regular_0
+    ":vs:pohs  reg_fut ew_denom poetic"
     ":vs:pohs  aor1 ew_denom poetic"
-    ":vs:poihs  aor1 ew_denom")
+    ":vs:pepohk  perf_act ew_denom poetic"
+    ":vs:pepoh  perfp_vow ew_denom poetic"
+    ":vs:pohq  aor_pass ew_denom poetic"
+    ":vs:pepohs  fut_perf ew_denom mp poetic"
+    ":vs:poihs  aor1 ew_denom"
+    ":vs:pepoihs  fut_perf ew_denom mp")
 set(regular_1
     ":vs:dhlws  aor1 ow_denom"
     ":vs:dedhlwk  perf_act ow_denom"
     ":vs:dedhlw  perfp_vow ow_denom"
-    ":vs:dhlwq  aor_pass ow_denom")
+    ":vs:dhlwq  aor_pass ow_denom"
+    ":vs:dedhlws  fut_perf ow_denom mp")
 set(regular_2
     ":vs:a)ggel  ew_fut ellw"
+    ":vs:a)ggeil  aor1 ellw"
     ":vs:h)ggelk  perf_act ellw"
-    ":vs:h)gge  perfp_l ellw")
+    ":vs:h)gge  perfp_l ellw"
+    ":vs:a)ggelq  aor_pass ellw")
 set(regular_3
     ":vs:a)gap  aw_pr aw_denom"
     ":vs:a)gaphs  reg_fut aw_denom attic ionic"
     ":vs:a)gaphs  aor1 aw_denom attic ionic"
     ":vs:h)gaphk  perf_act aw_denom attic ionic"
     ":vs:h)gaph  perfp_vow aw_denom attic ionic"
-    ":vs:a)gaphq  aor_pass aw_denom attic ionic")
+    ":vs:a)gaphq  aor_pass aw_denom attic ionic"
+    ":vs:h)gaphs  fut_perf aw_denom mp attic ionic")
 set(regular_4
     ":vs:e)x  w_stem reg_conj syll_augment"
     ":vs:e)x  w_stem reg_conj imperf syll_augment"
     ":vs:e)x  w_stem reg_conj imperf ind act epic syll_augment unaugmented"
     ":vs:e)x  w_stem reg_conj imperf ind act ionic syll_augment iterative unaugmented")
-foreach(position RANGE 4)
+set(regular_5
+    ":vs:i(st  aw_pr aw_denom"
+    ":vs:i(sths  reg_fut aw_denom attic ionic"
+    ":vs:i(sths  aor1 aw_denom attic ionic"
+    ":vs:i_(sthk  perf_act aw_denom attic ionic"
+    ":vs:i_(sth  perfp_vow aw_denom attic ionic"
+    ":vs:i(sthq  aor_pass aw_denom attic ionic"
+    ":vs:i_(sths  fut_perf aw_denom mp attic ionic")
+foreach(position RANGE 5)
   list(GET regular_verbs ${position} verb)
   collect_lemma_blocks("${prepared}" "${verb}" current)
   collect_lemma_blocks("${historical}" "${verb}" earlier)
+  strip_compound_only("${earlier}" earlier)
   string(REGEX MATCHALL "\n" current_lines "\n${current}")
   string(REGEX MATCHALL "\n" earlier_lines "\n${earlier}")
   list(LENGTH current_lines current_count)
