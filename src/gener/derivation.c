@@ -352,6 +352,17 @@ scan_keys(const char *keys, gk_string *constraints)
 }
 
 int
+morpheus_gener_derivation_is_regular(const char *type, int *regular)
+{
+	gk_string constraints;
+
+	if (!regular || !scan_keys(type,&constraints))
+		return 0;
+	*regular = (derivtype_of(&constraints) & REG_DERIV) != 0;
+	return 1;
+}
+
+int
 morpheus_gener_keys_voice(const char *keys, int *voice)
 {
 	gk_string constraints;

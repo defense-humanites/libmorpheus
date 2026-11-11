@@ -104,7 +104,7 @@ cat > "$temporary_directory/MORPHEUS-DATA.txt" <<EOF
 Prepared locally by libmorpheus tools/prepare-runtime-data.sh.
 Source dataset: alpheios-project/morpheus, pinned by this source checkout.
 Languages: Ancient Greek analysis and experimental Greek generation.
-Generation index SHA-256: f223ca3257b85298513cf9984bfc0c63a3aa28f900eef8cf000150a24bb68629
+Generation index SHA-256: eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf
 
 This directory contains upstream linguistic data and a derived index. Review
 the upstream licensing evidence before redistributing it. See:

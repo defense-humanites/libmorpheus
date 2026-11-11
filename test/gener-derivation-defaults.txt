@@ -1,38 +1,75 @@
 # SPDX-License-Identifier: MPL-2.0
 # Default principal parts added at lemma end (docs/gener-derivations.md).
 
-# No request: every part the table defines.
+# A regular derivation without requests: every part the table defines.
 :le:a)gaqopoie/w
 :de:a)gaqopoi ew_denom
 
-# A voice-restricted request covers its part (no active future), a stem-type
-# choice covers its part (perfp_s, not the first perfect middle rule), and an
-# explicit record covers its part (no regular perfect active).
-:le:a)kou/w
-:vs:a)khko perf_act,attic_redupl
-:de:a)kou reg_conj
+# Requests and explicit records cover their parts: a voice (`;fu mid`), a
+# suffix (`;ap,-hq`) and an explicit :vs: perfect each keep their part.
+:le:cover-requested
+:vs:pepoihk perf_act
+:de:poi ew_denom
 ;pr
 ;fu mid
-;ao
-;pp,perfp_s
+;ap,-hq
 
-# A dialect-restricted request does not cover its part: the regular future
-# is added beside the Ionic one.
+# A request limited to a dialect does not cover its part, an explicit
+# unrestricted record does: a)gge/llw gets the regular future, but keeps its
+# second aorists.
 :le:a)gge/llw
+:vs:a)ggel aor2
+:vs:a)ggel aor2_pass
 :de:a)gg ellw
 ;pr
 ;fu epic ionic end:e/w
 
-# A tense on the :de: line confines the group to its requests.
+# A tense, a mood or a present formation on the :de: line confines the group.
 :le:a)rxeu/w
 :de:a)rx euw pres
 
-# A present formation would reach every part: the group is confined too.
+:le:confined-mood
+:de:poi ew_denom part
+
 :le:pres-reduplicate
 :de:b azw pres_redupl
 ;pr
 
-# A middle group gets no aorist passive.
+# A voice on the :de: line keeps the parts that can carry it.
+:le:active-group
+:de:poi ew_denom act
+
 :le:a)gwni/zomai
 :de:a)gwn izw mid
 ;pr
+
+:le:passive-group
+:de:poi ew_denom pass
+
+# Only regular derivations receive defaults: a primary conjugation without
+# requests keeps its present, and a verb stem class keeps its requests.
+:le:primary-conjugation
+:de:lu reg_conj
+
+:le:verb-stem
+:de:sx e_stem
+;ao
+
+# Two groups of one lemma both receive the parts the lemma lacks, and a
+# record already present is not repeated.
+:le:two-groups
+:de:po ew_denom poetic
+:de:poi ew_denom
+:de:poi ew_denom
+
+# A :de: group followed directly by an explicit record still receives them.
+:le:record-after-group
+:de:poi ew_denom
+:vs:poih reg_fut ew_denom
+
+# Coverage is gathered over every block of a lemma key, in any order.
+:le:split-lemma
+:de:poi ew_denom
+
+:le:split-lemma
+:vs:poihs aor1 ew_denom

@@ -119,10 +119,10 @@ and repeated records within one block are preserved.
 
 The qualified corpus contains 108,655 non-empty blocks before this rule and
 108,220 afterward, so 435 redundant blocks are removed. The resulting index
-contains 106,427 canonical lemmas and 182,760 records. CI prepares and indexes
+contains 106,427 canonical lemmas and 172,741 records. CI prepares and indexes
 the 49 sources twice, requires byte-for-byte reproducibility, and freezes the
-SHA-256 of both the 292,464-line prepared corpus (`34583cc7…`) and the final
-index (`f223ca32…`).
+SHA-256 of both the 282,381-line prepared corpus (`20082e2d…`) and the final
+index (`eeef2145…`).
 
 These figures include the default principal parts described in
 [Greek generation derivations](gener-derivations.md#default-principal-parts).

@@ -5,29 +5,71 @@
 :vs:h)gaqopoihk  perf_act ew_denom
 :vs:h)gaqopoih  perfp_vow ew_denom
 :vs:a)gaqopoihq  aor_pass ew_denom
-:vs:h)gaqopoihs  fut_perf ew_denom mp
-:le:a)kou/w
-:vs:a)khko perf_act,attic_redupl
-:vs:a)kou  w_stem reg_conj
-:vs:a)kous  reg_fut reg_conj mid
-:vs:a)kous  aor1 reg_conj
-:vs:h)kou  perfp_s reg_conj
-:vs:a)kouq  aor_pass reg_conj
-:vs:h)kous  fut_perf reg_conj mp
+:le:cover-requested
+:vs:pepoihk perf_act
+:vs:poi  ew_pr ew_denom
+:vs:poihs  reg_fut ew_denom mid
+:vs:poihq  aor_pass ew_denom
+:vs:poihs  aor1 ew_denom
+:vs:pepoih  perfp_vow ew_denom
 :le:a)gge/llw
+:vs:a)ggel aor2
+:vs:a)ggel aor2_pass
 :vs:a)ggell  w_stem ellw
 :vs:a)ggel  ew_fut ellw epic ionic end:e/w
 :vs:a)ggel  ew_fut ellw
-:vs:a)ggeil  aor1 ellw
 :vs:h)ggelk  perf_act ellw
 :vs:h)gge  perfp_l ellw
-:vs:a)ggelq  aor_pass ellw
 :le:a)rxeu/w
 :vs:a)rxeu  w_stem euw pres
+:le:confined-mood
+:vs:poi  ew_pr ew_denom part
 :le:pres-reduplicate
 :vs:bibaz  w_stem azw pres_redupl
+:le:active-group
+:vs:poi  ew_pr ew_denom act
+:vs:poihs  reg_fut ew_denom act
+:vs:poihs  aor1 ew_denom act
+:vs:pepoihk  perf_act ew_denom act
 :le:a)gwni/zomai
 :vs:a)gwniz  w_stem izw mid
 :vs:a)gwni  ew_fut izw mid
 :vs:a)gwnis  aor1 izw mid
 :vs:h)gwni  perfp_d izw mid
+:le:passive-group
+:vs:poi  ew_pr ew_denom pass
+:vs:pepoih  perfp_vow ew_denom pass
+:vs:poihq  aor_pass ew_denom pass
+:le:primary-conjugation
+:vs:lu  w_stem reg_conj
+:le:verb-stem
+:vs:sxes  aor1 e_stem
+:le:two-groups
+:vs:po  ew_pr ew_denom poetic
+:vs:poi  ew_pr ew_denom
+:vs:poi  ew_pr ew_denom
+:vs:pohs  reg_fut ew_denom poetic
+:vs:pohs  aor1 ew_denom poetic
+:vs:pepohk  perf_act ew_denom poetic
+:vs:pepoh  perfp_vow ew_denom poetic
+:vs:pohq  aor_pass ew_denom poetic
+:vs:poihs  reg_fut ew_denom
+:vs:poihs  aor1 ew_denom
+:vs:pepoihk  perf_act ew_denom
+:vs:pepoih  perfp_vow ew_denom
+:vs:poihq  aor_pass ew_denom
+:le:record-after-group
+:vs:poih reg_fut ew_denom
+:vs:poi  ew_pr ew_denom
+:vs:poihs  aor1 ew_denom
+:vs:pepoihk  perf_act ew_denom
+:vs:pepoih  perfp_vow ew_denom
+:vs:poihq  aor_pass ew_denom
+:le:split-lemma
+:vs:poi  ew_pr ew_denom
+:vs:poihs  reg_fut ew_denom
+:vs:pepoihk  perf_act ew_denom
+:vs:pepoih  perfp_vow ew_denom
+:vs:poihq  aor_pass ew_denom
+:le:split-lemma
+:vs:poihs aor1 ew_denom

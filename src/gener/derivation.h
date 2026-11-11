@@ -29,6 +29,14 @@ int morpheus_gener_expand_derivation(FILE *output, const char *stem,
 int morpheus_gener_record_traits(const char *record, int *part,
                                  int *restricted);
 
+/*
+ * Whether a derivation type is a regular derivation (`reg_deriv` in
+ * rule_files/derivtypes.table: ew_denom, ow_denom, izw...), as opposed to a
+ * primary conjugation (`prim_deriv`: reg_conj) or a verb stem class
+ * (`verbstem`: e_suppl, skw, o_stem...).
+ */
+int morpheus_gener_derivation_is_regular(const char *type, int *regular);
+
 /* The voice bits (ACTIVE, MIDDLE, PASSIVE) fixed by ASCII keys, or zero. */
 int morpheus_gener_keys_voice(const char *keys, int *voice);
 
