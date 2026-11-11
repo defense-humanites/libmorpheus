@@ -46,13 +46,9 @@ the corpus.
   nothing. The Alpheios index grows from 129,097 to 172,750 records
   (106,427 lemmas, five of them new, such as ἀγαπάω); 8,786 lemmas gain
   forms, the others are unchanged, and no added record fails at
-  generation. Generated forms go from 12.5 to 22.1 million. The defaults
-  also extend two stem alterations inherited from the legacy expansion:
-  aspirate dissimilation, whose exception for aorist passives never
-  applies (1,541 added records, such as ἠλητεύθην for ἀληθεύω), and
-  euphony inside the stem (about 150 records, such as γλωσοχαριτήσω). The
+  generation. Generated forms go from 12.5 to 22.1 million. The
   preparer's
-  `--requested-parts-only` option still reproduces the historical index
+  `--historical` option still reproduces the historical index
   `5aa76d8c…`; the benchmark keeps using it so that generation rows stay
   comparable with the baselines. `tools/gener-default-parts-report.py`
   measures the change, and the corpus test checks the reviewed blocks of
@@ -72,12 +68,28 @@ the corpus.
   with a report ready for Alpheios. The preparer rejects a manifest out of
   source order and a replacement with surrounding whitespace, accepts its
   options in any order, and refuses `--patches` with
-  `--requested-parts-only`, which reproduces the unpatched historical
+  `--historical`, which reproduces the unpatched historical
   preparation. ἔχω regains its present system (ἔχω, εἶχον, ἔχεσκον); the
   patches add 16 records, βεβόλημαι and 3,365 forms, and nothing else.
   The data package embeds and applies the same manifest. With the default
-  principal parts, the index has 106,428 lemmas and 172,766 records; its
-  digest becomes `c1e7a37f…` (prepared source `3c8bf75e…`) in the tree's
+  principal parts, the index has 106,428 lemmas and 172,766 records.
+- The default expansion of the generation source preparer corrects two stem
+  alterations of the historical one, which the default principal parts had
+  extended to many more lemmas (`docs/gener-derivations.md`). Aspirate
+  dissimilation no longer applies to regular derivations, whose stems keep
+  the aspirates of their nouns (ἰχθυοφορέω, θεοφορέω, not ἰκθυοφορ-,
+  τεοφορ-), nor to an aorist passive stem ending in its aspirate, as the
+  1989 exception of `do_dissim` meant but never achieved (ἠληθεύθην,
+  ᾐσθήθην, not ἠλητεύθην, ᾐστήθην); primary roots still dissimilate
+  (τρέφω from θρεφ-). Consonant euphony applies only where the stem meets
+  its suffix, so that γλωσσοχαριτέω and παλινστατέω keep their σσ and νσ.
+  1,849 records in 1,249 lemmas change, 94 of them already in the
+  historical index; no lemma gains or loses a form. The preparer's
+  historical mode keeps the historical expansion and still reproduces
+  `5aa76d8c…`; since it now also excludes the defaults and the patches,
+  its option is named `--historical` (formerly `--requested-parts-only`,
+  never released). The index
+  digest becomes `e04d4a7d…` (prepared source `ee399e9f…`) in the tree's
   data package, Python manifest, runtime-data script and CI, so the next
   native, data and Python releases must ship together. The WebAssembly
   preparer of `@libmorpheus/data` is regenerated and produces the same

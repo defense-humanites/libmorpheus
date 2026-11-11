@@ -132,20 +132,20 @@ The other lemmas are unchanged, no form is removed, and no added record fails
 at generation: over the whole index, `morpheus_generate()` skips the same 346
 records as before. Generated forms grow from 12.5 to 22.1 million.
 
-Measured on the final index, with the data patches (`c1e7a37f…`), the 99th
-percentile of a `morpheus_generate()` request goes from 5.2 to 9.1 ms and the
-median from 0.12 to 0.13 ms; the first request of a context takes 35 ms with
-either index (2-vCPU Linux sandbox, indicative; an earlier run gave 31 and
-43 ms for that first request). The round trip depends heavily on the sample.
-On the 120 changed lemmas that seed 78 draws, 86.3 % of the added forms
-analyze back to their lemma with the same tense and mood, against 94.6 % of
-the forms these lemmas generated before. The 120 lemmas that the same seed
-drew before the data patches, when two fewer lemmas had changed, give 93.2 %
-and 95.1 % on the final index, as they did without the patches. The gap comes
-from lemmas none of whose added forms analyze back: compound-only verbs
-(`comp_only`: δημέω, μηλόω, κιδαρόω…), which analysis rejects as simple
-words, their historical forms included, and stems that the expansion alters
-(below).
+Measured on the final index (`e04d4a7d…`, with the data patches and the
+[corrected stem alterations](#corrected-stem-alterations)), the 99th
+percentile of a `morpheus_generate()` request is 9.1 to 9.6 ms across runs,
+against 5.2 ms with the historical index, and the median 0.13 to 0.14 ms,
+against 0.12 ms; the first request of a context takes 31 to 43 ms with either
+index (2-vCPU Linux sandbox, indicative). The round trip depends on the
+sample: 120 changed lemmas drawn with seed 78 gave from 86.3 % to 93.2 % of
+added forms recognized, depending on which lemmas the seed drew. On 400
+changed lemmas (seed 78), 97.3 % of the added forms analyze back to their
+lemma with the same tense and mood, against 98.1 % of the forms these lemmas
+generated before; without the stem corrections, the same lemmas give 93.6 %.
+The rest includes compound-only verbs (`comp_only`: δημέω, μηλόω,
+κιδαρόω…), which analysis rejects as simple words, their historical forms
+included.
 
 The rule follows the sources and does not correct them. ἀγγέλλω has
 explicit, unrestricted `:vs:a)ggel aor2` and `aor2_pass` records, so it
@@ -153,23 +153,13 @@ keeps ἤγγελον and ἠγγέλην as its only aorists and does not recei
 or ἠγγέλθην. ἔχω's present came from one of the seven invalid derivations
 above; the data patches now restore it.
 
-The expansion also inherits two stem alterations from the legacy derivation
-code, and the defaults extend them to many more lemmas:
-
-- **Aspirate dissimilation** (`do_dissim`). An aspirate followed by another
-  aspirate consonant loses its aspiration. Its 1989 exception for aorist
-  passives (`a)riqmh/qhn not a)ritmh/qhn`) never applies, because it compares
-  the principal part through the `VERBSTEM` bit instead of `PPARTMASK`. The
-  defaults add 1,541 records marked `dissimilation` in 1,194 lemmas (the
-  historical index has 90 in 86 lemmas), 1,253 of them aorist passives:
-  ἀληθεύω gets ἠλητεύθην, βακχιάζω ἐβακκιάσθην, ἰχθυοφορέω ἰκθυοφορήσω.
-  Analysis attributes none of these three forms to its lemma.
-- **Euphony inside the stem.** An interior σσ or νσ is simplified as if it
-  stood at the junction with the suffix, in about 150 added records of some
-  30 lemmas: γλωσσοχαριτέω gets γλωσοχαριτήσω, παλινστατέω παλιστατήσω.
-
-Correcting either also changes the expansion of explicit requests, and so the
-historical index, and is left to a separate decision.
+Nor does the rule give a voice to a deponent whose `:de:` line names none
+(`:de:a)sp azw` under ἀσπάζομαι, `:de:log izw` under λογίζομαι). Such a
+group already received an active present; it now also receives an active
+future, aorist and perfect: ἀσπάσω, ἐλόγισα, ἠγώνικα. Analysis accepts these
+forms, so the round trip does not see them. About 90 lemmas in -ομαι receive
+some 250 such records; issue #84 weighs a voice rule in the preparer against
+data patches.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
@@ -183,12 +173,68 @@ therefore checked in CI: the corpus test requires that πάσχω, πίπτω, �
 ποιέω, δηλόω, ἀγγέλλω and ἀγαπάω receive exactly their reviewed records, and
 that ἔχω receives exactly the four records of its patched present.
 
-`--requested-parts-only` keeps the historical behavior. It is an option of
+`--historical` reproduces the historical preparation: no default principal
+parts, the [stem alterations](#corrected-stem-alterations) of the historical
+expansion, and no [data patches](gener-data-patches.md). It is an option of
 the preparer, used by the oracle comparison and by the benchmark; the data
 package and `tools/prepare-runtime-data.sh` always prepare the default index.
 The corpus test checks that the option still reproduces the index of data
 0.1.0 and native 0.4.6 (`5aa76d8c…`). `test/gener-derivation-defaults.txt`
 and its expected records exercise each rule above.
+
+## Corrected stem alterations
+
+The historical expansion alters some stems in two ways, and the default
+principal parts would have extended both to many more lemmas. The default
+expansion corrects them, in explicit requests as in defaults; the historical
+one (`--historical`) keeps them, so that it still reproduces `5aa76d8c…`.
+
+- **Aspirate dissimilation** (`do_dissim`) turns an aspirate into the plain
+  stop when the next syllable begins with another aspirate. That is right
+  for a primary root such as θρεφ- (τρέφω, θρέψω), which the default
+  expansion still dissimilates. It is wrong in two cases, which the default
+  expansion leaves alone:
+  - a regular (`reg_deriv`) derivation, whose stem is the stem of a noun or
+    adjective with its aspirates: ἰχθυοφορέω, θεοφορέω, ψηφοφορέω, which the
+    historical expansion gave as ἰκθυοφορ-, τεοφορ-, ψηποφορ-;
+  - an aorist passive stem ending in its own aspirate. `do_dissim` has an
+    exception for it, added in 1989 (`a)riqmh/qhn not a)ritmh/qhn`), but the
+    exception compares the principal part through the `VERBSTEM` bit
+    instead of `PPARTMASK`, so it never applies: ἀληθεύω gave ἠλητεύθην,
+    αἰσθάνομαι ᾐστήθην, ἄχθομαι ἠκθέσθην.
+
+  1,627 records in 1,210 lemmas change, 86 of which were already in the
+  historical index. The Alpheios analysis index, built with the same code,
+  still holds the dissimilated presents (`i)kquofor`), beside the
+  derivation stems it analyzes the other tenses with.
+- **Consonant euphony** (`rule_files/conseuph.table`) takes the leftmost
+  pattern of the word, so a σσ or νσ inside a stem was simplified as if it
+  met the suffix: γλωσσοχαριτέω gave γλωσοχαριτήσω, παλινστατέω
+  παλιστατήσω. The default expansion applies only a pattern that reaches the
+  junction of the stem and its suffix. 222 records in 46 lemmas change, 8 of
+  which were in the historical index. Among them are the ἐκθ- and ἐκσ-
+  compounds (ἐκθαμβέω, not ἐχθαμβ-; ἐκσηπόω, not ἐξηπ-) and two lemmas
+  whose initial digamma the table dropped (ϝοιζάζω, ϝρητάομαι).
+
+The correction follows the derivation class, not the history of each root,
+which the tables do not record. A few regular verbs in `ptw` and `ss` have
+two aspirates in the root itself, whose perfect active the historical rule
+dissimilated as the root requires: θάπτω (θαφ-), θρύπτω (θρυφ-) and θράσσω
+(θραχ-) now get τέθαφα, τέθρυφα and τέθραχα instead of τέταφα, τέτρυφα and
+τέτραχα (Homer's τετρήχει, under ταράσσω). These perfects are added by
+default, and the Cambridge Greek Lexicon gives θάπτω none. The historical
+rule gave the wrong form wherever the table's aspirate is only that of the
+perfect, which the correction now gets right: φράσσω πέφραχα, φρύγω
+πέφρυχα, ἀφάσσω ἤφαχα, θώπτω τέθωφα, not πέπραχα, πέπρυχα, ἤπαχα, τέτωφα.
+
+Over the Alpheios index, 1,249 lemmas change forms. None gains or loses a
+form: the index keeps 106,428 lemmas and 172,766 records, and generation
+22.05 million forms with the same 346 skipped records. On 300 of the changed
+lemmas (seed 78), the share of added forms that analyze back to their lemma
+with the same tense and mood rises from 69.3 % to 96.2 %.
+`test/gener-derivation-defaults.txt` holds a case for each correction, and
+the preparer's test checks that the historical expansion keeps both
+alterations.
 
 ## Implementation boundary
 

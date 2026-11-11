@@ -25,7 +25,7 @@ file(REMOVE "${derivation}" "${derivation_index}")
 # The historical do_conj "full" oracle covers the requested parts only.
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           "${derivation}" "${MORPHEUS_GENER_DERIVATION_SOURCE}"
   RESULT_VARIABLE derivation_result
   OUTPUT_VARIABLE derivation_output
@@ -67,6 +67,31 @@ execute_process(
 if(NOT defaults_compare_result EQUAL 0)
   message(FATAL_ERROR "default principal parts differ from the expected records")
 endif()
+
+# The historical expansion keeps the stem alterations that the default one
+# corrects (docs/gener-derivations.md).
+set(historical_defaults "${MORPHEUS_GENER_SOURCE_WORK_DIR}/historical-defaults.txt")
+file(REMOVE "${historical_defaults}")
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+          --historical
+          "${historical_defaults}" "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
+  RESULT_VARIABLE historical_defaults_result
+  OUTPUT_QUIET
+  ERROR_VARIABLE historical_defaults_error
+)
+if(NOT historical_defaults_result EQUAL 0)
+  message(FATAL_ERROR
+    "historical expansion failed (${historical_defaults_result}):\n${historical_defaults_error}")
+endif()
+file(READ "${historical_defaults}" historical_defaults_records)
+foreach(record IN ITEMS ":vs:a)kqesq  aor_pass e_stem dissimilation"
+                        ":vs:i)kquofor  ew_pr ew_denom dissimilation")
+  string(FIND "${historical_defaults_records}" "${record}\n" record_at)
+  if(record_at EQUAL -1)
+    message(FATAL_ERROR "historical expansion lost the record ${record}")
+  endif()
+endforeach()
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
           "${derivation_index}" "${derivation}"
@@ -193,7 +218,7 @@ endforeach()
 # The historical expansion reads the sources unpatched.
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           --patches "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patches-applied.tsv"
           "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patched-historical.txt"
           "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
@@ -204,5 +229,5 @@ execute_process(
 if(historical_patch_result EQUAL 0 OR
    NOT historical_patch_error MATCHES "cannot be combined with --patches")
   message(FATAL_ERROR
-    "--requested-parts-only accepted --patches:\n${historical_patch_error}")
+    "--historical accepted --patches:\n${historical_patch_error}")
 endif()

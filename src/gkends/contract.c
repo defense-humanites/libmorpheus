@@ -99,15 +99,18 @@ printf("empty\n");
 }
 
 #define MAXEUPHS 5
-gk_string *
- do_euph(gk_string *gstr, Dialect skipdial)
+#define ANY_POSITION ((size_t)-1)
+
+static int substitute(gk_string *, Dialect, gk_string *, int, gk_string *,
+		      int, size_t);
+
+static gk_string *
+euphonize(gk_string *gstr, Dialect skipdial, size_t junction)
 {
 	gk_string * euphs;
 	gk_string *cons_euph;
 	int hits = 0;
 	int numeuphs;
-	char * orgstr;
-	char * curs;
 
 	euphs = (gk_string *) CreatGkString(MAXEUPHS);
 	if( ! euphs )
@@ -119,12 +122,45 @@ gk_string *
 		return(NULL);
 	}
 	
-	hits = sub_for_euph(gstr,skipdial,euphs,MAXEUPHS,cons_euph,numeuphs);
+	hits = substitute(gstr,skipdial,euphs,MAXEUPHS,cons_euph,numeuphs,
+			  junction);
 
 	if( hits )
 		return(euphs);
 	FreeGkString(euphs);
 	return(NULL);
+}
+
+gk_string *
+ do_euph(gk_string *gstr, Dialect skipdial)
+{
+	return(euphonize(gstr,skipdial,ANY_POSITION));
+}
+
+/*
+ * Like do_euph(), but only for a pattern that reaches the junction at
+ * offset `junction' of the string, typically between a stem and the suffix
+ * joined to it. do_euph() takes the leftmost pattern anywhere, so the "sso"
+ * or "ns" inside a stem such as glwssoxarit or palinstat would be simplified
+ * as if it stood at the junction. libmorpheus addition.
+ */
+gk_string *
+ do_euph_at_junction(gk_string *gstr, Dialect skipdial, size_t junction)
+{
+	return(euphonize(gstr,skipdial,junction));
+}
+
+/* Letters between offset and junction, diacritics aside. */
+static size_t
+letters_before(const char *string, size_t offset, size_t junction)
+{
+	size_t letters = 0;
+
+	for (; offset < junction && string[offset]; offset++) {
+		if (!strchr(")(/\\=+|^_",string[offset]))
+			letters++;
+	}
+	return(letters);
 }
 
 /*
@@ -155,6 +191,13 @@ gk_string *
  */
 int
  sub_for_euph(gk_string *gstr, Dialect skipdial, gk_string *poss_subs, int possno, gk_string *sub_table, int len)
+{
+	return(substitute(gstr,skipdial,poss_subs,possno,sub_table,len,
+			  ANY_POSITION));
+}
+
+static int
+ substitute(gk_string *gstr, Dialect skipdial, gk_string *poss_subs, int possno, gk_string *sub_table, int len, size_t junction)
 {
 
 	int i;
@@ -200,6 +243,12 @@ printf("raw [%s] cooked [%s]\n", raw , cooked );
 */
 				return(sofar);
 		}
+
+		/* A pattern that ends before the junction is left alone. */
+		if( junction != ANY_POSITION &&
+		    strlen(raw) < letters_before(gkstring_of(gstr),
+				(size_t)(curs - gkstring_of(gstr)),junction) )
+			continue;
 
 		*(poss_subs+sofar) =  *gstr;
 

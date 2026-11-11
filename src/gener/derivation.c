@@ -21,6 +21,8 @@ typedef struct {
 	char suffix[MAXWORDSIZE];
 	char odd_keys[LONGSTRING * 2];
 	char preverb[MAXWORDSIZE];
+	unsigned int flags;
+	int regular;
 } derivation_request;
 
 static int
@@ -128,7 +130,7 @@ suffix_matches(const char *rule_suffix, const char *requested_suffix)
 }
 
 static int
-conjoin_rule(gk_string *rule, char *word)
+conjoin_rule(gk_string *rule, char *word, unsigned int flags)
 {
 	gk_string *contracted;
 	size_t word_length = strlen(word);
@@ -138,13 +140,36 @@ conjoin_rule(gk_string *rule, char *word)
 		return 0;
 	memcpy(word + word_length,gkstring_of(rule),ending_length + 1);
 	set_gkstring(rule,word);
-	contracted = do_euph(rule,(Dialect)0);
+	if (flags & MORPHEUS_GENER_EXPAND_CORRECTED)
+		contracted = do_euph_at_junction(rule,(Dialect)0,word_length);
+	else
+		contracted = do_euph(rule,(Dialect)0);
 	if (!contracted)
 		return 1;
 	/* do_euph() returns an allocated array; keep its first form only. */
 	*rule = *contracted;
 	FreeGkString(contracted);
 	return copy_text(word,MAXWORDSIZE,gkstring_of(rule));
+}
+
+/*
+ * Whether the expansion may dissimilate the aspirates of word. do_dissim()
+ * means to spare an aorist passive stem ending in its aspirate ("a)riqmh/qhn
+ * not a)ritmh/qhn", 1989), but tests the principal part against VERBSTEM, so
+ * the exception never applies. A regular derivation builds on a noun or
+ * adjective stem, which keeps its aspirates (i)xquofore/w, qeofore/w).
+ */
+static int
+dissimilates(const derivation_request *request, const char *word,
+             Stemtype principal_part)
+{
+	size_t length = strlen(word);
+
+	if (!(request->flags & MORPHEUS_GENER_EXPAND_CORRECTED))
+		return 1;
+	if (request->regular)
+		return 0;
+	return !(principal_part == PP_AP && length && Is_asp(word[length - 1]));
 }
 
 static void
@@ -213,7 +238,7 @@ write_rule(FILE *output, derivation_request *request,
 				return -1;
 			addbreath(word,*stem);
 		} else {
-			if (!conjoin_rule(rule,word))
+			if (!conjoin_rule(rule,word,request->flags))
 				return -1;
 		}
 	}
@@ -232,7 +257,8 @@ write_rule(FILE *output, derivation_request *request,
 				make_passive_stem(word,rule);
 		}
 	}
-	if (do_dissim(word,principal_part))
+	if (dissimilates(request,word,principal_part) &&
+	    do_dissim(word,principal_part))
 		add_morphflag(morphflags_of(&request->constraints),DISSIMILATION);
 
 	if (dialect_of(&request->constraints)) {
@@ -421,7 +447,8 @@ int
 morpheus_gener_expand_derivation(FILE *output, const char *stem,
                                  const char *derivation,
                                  const char *global_keys,
-                                 const char *request_keys)
+                                 const char *request_keys,
+                                 unsigned int flags)
 {
 	char table_path[MAXPATHNAME];
 	char line[BUFSIZ];
@@ -440,6 +467,11 @@ morpheus_gener_expand_derivation(FILE *output, const char *stem,
 	if (!table)
 		return -1;
 	if (!parse_request(global_keys,request_keys,&request)) {
+		fclose(table);
+		return -1;
+	}
+	request.flags = flags;
+	if (!morpheus_gener_derivation_is_regular(derivation,&request.regular)) {
 		fclose(table);
 		return -1;
 	}

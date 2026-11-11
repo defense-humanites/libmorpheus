@@ -2,7 +2,7 @@
 """Measure what the default principal parts change in a generation index.
 
 Compares two generation indices prepared from the same sources (typically
-the historical one, prepared with ``--requested-parts-only``, and the
+the historical one, prepared with ``--historical``, and the
 default one) through the native library and the in-tree Python binding:
 
 - for each index: lemmas, generated forms, skipped records, failed requests,
