@@ -1,0 +1,18 @@
+libmorpheus marks
+
+Copyright (c) 2026 Antoine Boquet. All rights reserved.
+
+This notice covers the libmorpheus logos and the poppy-capsule illustrations
+they contain, including the files under docs/assets/ that name
+LicenseRef-libmorpheus-marks in their .license sidecar. These files are not
+licensed under the MPL-2.0 or the AGPL-3.0-or-later that cover the rest of
+the repository.
+
+You may reproduce these files without modification to refer to the
+libmorpheus project, for example in a README, a package page, an article or
+a presentation about it. Any other use, including modification, use as or in
+another mark, or any use suggesting endorsement, requires prior written
+permission.
+
+The name "libmorpheus" in the logos is set in Instrument Serif, licensed under
+the SIL Open Font License, Version 1.1.

@@ -1,5 +1,12 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.png">
+    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.png" alt="libmorpheus" width="420">
+  </picture>
+</p>
+
 # @libmorpheus/wasm
 
 WebAssembly build of the libmorpheus morphological analyzer, with a small
