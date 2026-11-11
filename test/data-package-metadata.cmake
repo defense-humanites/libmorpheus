@@ -11,7 +11,7 @@ if(NOT DEFINED MORPHEUS_SOURCE_DIR)
 endif()
 
 set(data_dir "${MORPHEUS_SOURCE_DIR}/bindings/js/data")
-set(expected_version "0.1.0")
+set(expected_version "0.2.0")
 
 # --- Identity -----------------------------------------------------------------
 
