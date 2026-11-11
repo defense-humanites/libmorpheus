@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Antoine Boquet
 
-export declare const MORPHEUS_NODE_VERSION = "0.3.0";
+export declare const MORPHEUS_NODE_VERSION = "0.2.0";
 
 export declare const MorpheusLanguage: {
   readonly Greek: 0; readonly Latin: 1; readonly Italian: 2;

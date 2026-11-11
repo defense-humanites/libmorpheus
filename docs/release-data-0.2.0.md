@@ -5,7 +5,8 @@
 `@libmorpheus/data` 0.2.0 supersedes 0.1.0 for the generation index that
 `--with-gener` prepares. The package still contains no linguistic data, and
 its datasets, commands and options are unchanged. This document records the
-intended contract and, in its last section, the publication.
+intended contract; it does not authorize or record creation of the
+`data-v0.2.0` tag.
 
 ## Release record
 
@@ -89,30 +90,3 @@ JSR, and attaches the tarball and its digest to a pre-release. The
 pre-release is created from `docs/release-notes/data-v0.2.0.md`. After
 publication, the maintainer prepares an index from the published package and
 records here that its digest is `a2f97677…`.
-
-## Publication record
-
-- Tag: `data-v0.2.0`, created by the maintainer on 2026-11-11 on
-  `667ca578fb514fe099fcc522a0f47167bf3805a9`, the commit of
-  [`v0.5.0`](release-0.5.0.md) and [`wasm-v0.2.0`](release-wasm-0.2.0.md).
-- Tagged Linux CI: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/43074397855).
-- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/43074397940):
-  tests under Node.js and Deno, both manifests dry-run, the Perseids Latin
-  runtime subset acquired with the command installed from the tarball,
-  npm (`latest` now `0.2.0`, tarball integrity
-  `sha512-3UTPJRxyDF95KncNNecokDog6PRHDttcu+1d0y4EOpTjg6NvdL51sCJn/MWBIo2tlsvWD5Q50jB8L4foIJpsKw==`)
-  and JSR both accepted the version, and the
-  [`data-v0.2.0` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/data-v0.2.0)
-  carries `libmorpheus-data-0.2.0.tgz` (SHA-256
-  `53373f03633d6d7ee219fdf23c7af222dcd18563a30d1186c45f85fbda24bf54`, the
-  same digest an `npm pack` of the tagged commit produced outside CI with
-  npm 10.9.4) and `SHA256SUMS`.
-- npm check: `npx @libmorpheus/data@0.2.0 --dataset alpheios --languages grc
-  --subset runtime --with-gener` prepared the index
-  `a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331`. npm
-  served the version about three minutes after the publication step; a
-  cached `npx` needed `--prefer-online` meanwhile.
-- JSR end-to-end check: to be done by the maintainer, with Deno from
-  `jsr:@libmorpheus/data@0.2.0`, and recorded here.
-- The Node.js binding depends on this version from 0.3.0, and the Python
-  binding verifies its index digest from 0.3.0.

@@ -88,13 +88,9 @@ instead of 385–403 µs: unchanged within noise.
 - SONAME major: **1**
 - Previous release tag: `v0.4.6`
 - Benchmark evidence: **accepted**
-- Pre-release Linux CI: [passed on `667ca57`](https://github.com/defense-humanites/libmorpheus/actions/runs/43068651909)
-- Pre-release platform qualification: [passed on `667ca57`](https://github.com/defense-humanites/libmorpheus/actions/runs/43068760334)
-  (manual dispatch with `package_artifacts`, first attempt)
-- Tagged platform run and release publication: [passed on `667ca57`](https://github.com/defense-humanites/libmorpheus/actions/runs/43070003936)
-  (second attempt)
-- Release: [`v0.5.0`](https://github.com/defense-humanites/libmorpheus/releases/tag/v0.5.0),
-  created on 2026-11-11 on `667ca578fb514fe099fcc522a0f47167bf3805a9`
+- Pre-release Linux CI: pending (the tagged commit's run)
+- Pre-release platform qualification: pending (manual dispatch with
+  `package_artifacts` on the exact candidate commit)
 
 ## Benchmark evidence
 
@@ -151,40 +147,17 @@ for the generation rows. The RSS growth of the four-context analysis row
 process does. This report replaces `benchmark-0.4.6.json` as the baseline
 of the next native release.
 
-## Publication record
+## Remaining authorization
 
-The tag was created by the maintainer on 2026-11-11 on `667ca57`, the merge
-of the accepted benchmark evidence, a descendant of the measured revision
-`fa7f0a6` that differs from it only by that evidence and these documents.
+Before publication, a maintainer must:
 
-The Linux CI of the merge commit on `main` passed at its first attempt,
-including the push-only sanitizer, ThreadSanitizer, byte-conversion,
-legacy-make and release jobs, and so did the manual `package_artifacts`
-dispatch, which produced the three archives.
-
-On the tag, Linux CI and WebAssembly passed at their first attempt. The
-platform run's first `apple-silicon` job waited fifteen minutes without a
-macOS runner and was cancelled before any step ran, as during the 0.4.4 and
-0.4.6 dispatches; the other qualification jobs had passed. The second
-attempt qualified Apple Silicon and published the release. The tag never
-moved.
-
-The release carries the three native archives and their digests, plus the
-accepted benchmark report and its sidecar:
-
-| Asset | SHA-256 |
-|---|---|
-| `libmorpheus-0.5.0-Linux-x86_64-glibc.tar.gz` | `8df4440d92630114444324fd2000c76ddb0065db647fb75953e58aef7af131eb` |
-| `libmorpheus-0.5.0-Linux-aarch64-glibc.tar.gz` | `73d83e743204e06327750c4cef15ecf758e30b7c006d6f81d2d7b93317a92766` |
-| `libmorpheus-0.5.0-macOS-arm64.tar.gz` | `3d8e46407ceff23972d84e01d0edf4e914a27580b45cbdfc98479894af1e8682` |
-| `benchmark-0.5.0.json` | `0319d6a02e9fe549a2368da7e501dc2c348ee499c3af97aeddce5d005cc9611d` |
-
-After publication, the Linux x86-64 archive was downloaded, checked against
-its sidecar and exercised through the Python binding of the tree: it exports
-`morpheus_generation_result_skipped_records`, and δίδωμι generates 3,636
-records (2,544 distinct surfaces) over the index of `@libmorpheus/data` 0.2.0
-with one record skipped.
-
-WebAssembly binding 0.2.0 and data package 0.2.0 were tagged on the same
-commit afterwards; see [`release-wasm-0.2.0.md`](release-wasm-0.2.0.md) and
-[`release-data-0.2.0.md`](release-data-0.2.0.md).
+1. run `bench/release.sh` on the candidate commit on the controlled host,
+   have the report reviewed against the baseline and committed with its
+   sidecar as `bench/release-evidence/benchmark-0.5.0.json`;
+2. dispatch the platform workflow with `package_artifacts` for the candidate
+   commit and inspect the three native archives;
+3. confirm the final tagged Linux CI and platform runs and record their links
+   above;
+4. explicitly authorize creation of `v0.5.0`, then of `wasm-v0.2.0` on the
+   same commit or a descendant with an unchanged runtime, and of
+   `data-v0.2.0`.

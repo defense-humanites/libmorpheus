@@ -115,9 +115,8 @@ contacting npm. It publishes the platform packages first and the facade last.
 
 The Python publication workflow runs only for `python-v*` tags or explicit
 recovery dispatches. It waits for Linux CI on the exact commit, where Python
-3.11, 3.14 and 3.15 exercise the ABI fixture and compiled runtime, then builds
-and checks one universal wheel plus one source distribution before contacting
-PyPI.
+3.11 and 3.14 exercise the ABI fixture and compiled runtime, then builds and
+checks one universal wheel plus one source distribution before contacting PyPI.
 
 Scheduled runs first compare the current default-branch SHA with the last
 completed weekly run. The architecture jobs are skipped when the SHA is
