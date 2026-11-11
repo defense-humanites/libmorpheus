@@ -1,19 +1,33 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 
-# @libmorpheus/wasm
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.svg">
+    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.svg" alt="libmorpheus" width="390">
+  </picture>
+</p>
 
-WebAssembly build of the libmorpheus morphological analyzer, with a small
-JavaScript facade. The same module runs in browsers, web workers, Node.js,
-Deno and Bun, so a client-side application can analyze Ancient Greek and Latin
-forms without a native toolchain or a server.
+# libmorpheus for WebAssembly
+
+`libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
+morphological analyzer for Ancient Greek and Latin. It turns the historical C
+programs into an installable C17 shared library with a stable, opaque ABI and a
+WebAssembly build of that library.
+
+This package ships the
+[`libmorpheus`](https://github.com/defense-humanites/libmorpheus) library
+compiled with Emscripten, behind a small JavaScript facade. The same module
+runs in browsers, web workers, Node.js, Deno and Bun, so an application can
+analyze forms without a native toolchain or a server. It exposes Greek and
+Latin analysis plus experimental Greek lemma generation.
 
 The package contains **no linguistic data**. Applications provide a compiled
 stem library at runtime, exactly as the native library does. See
 [Acquiring runtime data](https://github.com/defense-humanites/libmorpheus/blob/main/docs/runtime-data.md).
 
-## Status
+## Scope
 
-Experimental. The module exposes the complete stable C ABI (version 2) and the
+The module exposes the complete stable C ABI (version 2) and the
 historical `cruncher` text output. The facade returns the numeric codes of the
 C structures (`MorpheusRawAnalysis`, `MorpheusRawGeneration`) rather than the
 named decoding offered by the Node.js and Python bindings. The module is

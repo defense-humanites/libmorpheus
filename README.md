@@ -1,25 +1,34 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/libmorpheus-logo-sombre.svg">
+    <img src="docs/assets/libmorpheus-logo-clair.svg" alt="libmorpheus" width="484">
+  </picture>
+</p>
+
+<p align="center">
+  A modernization of the Morpheus morphological analyzer for Ancient Greek and Latin.
+</p>
+
+<p align="center">
+  <a href="docs/public-api.md">C API</a> ·
+  <a href="bindings/python/README.md">Python</a> ·
+  <a href="bindings/js/node/README.md">Node.js</a> ·
+  <a href="bindings/js/wasm/README.md">WebAssembly</a>
+</p>
+
 # libmorpheus
 
 `libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
 morphological analyzer for Ancient Greek and Latin. It turns the historical C
 programs into an installable C17 shared library with a stable, opaque ABI, and
-comes with JavaScript and Python bindings.
+comes with Python, Node.js and WebAssembly distributions.
 
-## Summary
-
-1. [Project status](#project-status)
-2. [Bindings](#bindings)
-3. [Build the native library](#build-the-native-library)
-   1. [Requirements](#requirements)
-   2. [Steps and options](#steps-and-options)
-4. [Install and consume from C](#install-and-consume-from-c)
-5. [Runtime data](#runtime-data)
-   1. [Rebuild and qualify the stemlibs](#rebuild-and-qualify-the-stemlibs)
-6. [Alpine container image](#alpine-container-image)
-7. [`cruncher`](#cruncher)
-8. [Releases and platform support](#releases-and-platform-support)
-9. [Architecture and provenance](#architecture-and-provenance)
-10. [License](#license)
+Unlike the original programs, which kept their state in global variables, the
+library is thread-safe: each context holds its own state, so an application
+can give each thread its own context and analyze or generate forms in
+parallel. The runtime also
+analyzes about three times faster than the first release of the library (see
+[Performance](#performance)).
 
 ## Project status
 
@@ -43,316 +52,133 @@ The public runtime includes:
 - `cruncher`, retained as a compatibility client of the public library;
 - CMake and `pkg-config` installation metadata.
 
-> [!NOTE]
-> Native archives and the distributed packages contain no linguistic data. Applications
-> must acquire a compatible stem library separately; see [Runtime data](#runtime-data).
+## Distributions
 
-## Bindings
-
-Bindings expose the native C API to other language ecosystems.
-
-| Binding | Description | Documentation |
+| Distribution | Install | Guide |
 | --- | --- | --- |
-| Node.js 20+ | ESM facade over an asynchronous Node-API addon | [Node.js binding guide](bindings/js/node/README.md) |
-| Python 3.11+ | Pure-Python `ctypes` facade over the stable C ABI | [Python binding guide](bindings/python/README.md) |
-| WebAssembly (experimental) | Emscripten build of the complete C ABI for browsers, workers and JavaScript runtimes; no native toolchain at run time | [WebAssembly guide](bindings/js/wasm/README.md), [build and qualification](docs/wasm.md) |
+| C | Release archives for Linux x86-64, Linux aarch64 and macOS arm64, or [build from source](docs/building.md) | [Public C API](docs/public-api.md) |
+| Python 3.11+ | `pip install libmorpheus` | [Python guide](bindings/python/README.md) |
+| Node.js 20+ | `npm install @libmorpheus/node` | [Node.js guide](bindings/js/node/README.md) |
+| WebAssembly | `npm install @libmorpheus/wasm` | [WebAssembly guide](bindings/js/wasm/README.md) |
 
-Native consumers should instead use the [public C API](docs/public-api.md).
-
-The Deno FFI binding, `@libmorpheus/deno`, is no longer maintained: version
-0.4.3, its final release, stays available on JSR, and its sources remain in
-the history up to the `deno-v0.4.3` tag. Deno applications can use the
-WebAssembly binding from JSR, which needs no FFI permission.
-
-## Build the native library
-
-### Requirements
-
-- CMake 3.25 or newer;
-- Ninja;
-- a C17 compiler.
-
-### Steps and options
-
-The `alpheios-project` reference stemlib is a pinned Git submodule, so clone recursively:
-
-```sh
-git clone --recurse-submodules \
-  https://github.com/defense-humanites/libmorpheus.git
-cd libmorpheus
-```
-
-For an existing clone:
-
-```sh
-git submodule update --init --recursive
-```
-
-Configure, build, and test the development preset:
-
-```sh
-cmake --preset dev
-cmake --build --preset dev
-ctest --preset dev
-```
-
-This produces `build/dev/libmorpheus.so` (or the platform equivalent) and, by
-default, `build/dev/cruncher`. The runtime build consumes compiled stemlibs and
-does not require Flex.
-
-To use another compiled stemlib for the Alpheios fixture suite:
-
-```sh
-cmake --preset dev -DMORPHEUS_STEMLIB_DIR=/absolute/path/to/stemlib
-```
-
-Sanitizer and optimized test configurations are available as separate presets:
-
-```sh
-cmake --preset sanitizers
-cmake --build --preset sanitizers
-ctest --preset sanitizers
-```
-
-```sh
-cmake --preset thread-sanitizer
-cmake --build --preset thread-sanitizer
-ctest --preset thread-sanitizer
-```
-
-```sh
-cmake --preset release -DBUILD_TESTING=ON
-cmake --build --preset release
-ctest --preset release
-```
-
-The Release tests also install into a clean prefix and verify the public package
-boundary.
-
-## Install and consume from C
-
-Install the development build into the prefix of your choice:
-
-```sh
-cmake --install build/dev --prefix /chosen/prefix
-```
-
-The installation contains the shared library, `morpheus/morpheus.h`, the
-`Morpheus::morpheus` CMake target, `libmorpheus.pc`, and `cruncher`. Runtime data
-is not installed with the library.
-
-With CMake:
-
-```cmake
-find_package(Morpheus 0.1 CONFIG REQUIRED)
-target_link_libraries(my_analyzer PRIVATE Morpheus::morpheus)
-```
-
-With `pkg-config`:
-
-```sh
-cc analyzer.c $(pkg-config --cflags --libs libmorpheus)
-```
-
-Minimal API use:
-
-```c
-#include <stdint.h>
-#include <morpheus/morpheus.h>
-
-int main(void) {
-  morpheus_config config = {
-    MORPHEUS_ABI_VERSION,
-    sizeof config,
-    "/path/to/stemlib",
-    MORPHEUS_LANGUAGE_GREEK
-  };
-  morpheus_context *context = NULL;
-  morpheus_result *result = NULL;
-
-  if (morpheus_open(&config, &context) == MORPHEUS_OK &&
-      morpheus_analyze(
-        context,
-        (const uint8_t *)"a)/nqrwpos",
-        sizeof "a)/nqrwpos" - 1,
-        MORPHEUS_OPTION_STRICT_CASE,
-        &result
-      ) == MORPHEUS_OK) {
-    for (size_t i = 0; i < morpheus_result_count(result); i++) {
-      morpheus_analysis analysis;
-      if (morpheus_result_get(result, i, &analysis) == MORPHEUS_OK) {
-        /* analysis.lemma, analysis.stem, morphology fields, ... */
-      }
-    }
-  }
-
-  morpheus_result_free(result);
-  morpheus_close(context);
-  return 0;
-}
-```
-
-Results preserve Morpheus ordering and duplicates. The caller owns every
-successful result until `morpheus_result_free()`. Distinct contexts may run
-concurrently; calls on one context must be serialized. The
-[public API reference](docs/public-api.md) documents the complete ABI, error
-statuses, ownership rules, and buffer contracts.
+No distribution contains linguistic data: applications acquire it separately,
+as described under [Runtime data](#runtime-data).
 
 ## Runtime data
 
-Morpheus reads compiled binary databases called **stemlibs**. Code and data are
-versioned and distributed separately.
+Morpheus reads compiled binary databases called stem libraries (stemlibs).
+Code and data are versioned and distributed separately: each guide explains
+how to acquire a stemlib and open a context on it, and
+[`@libmorpheus/data`](bindings/js/data/README.md) downloads and verifies the
+datasets for JavaScript applications.
 
 | Dataset | Analysis | Generation | Repository location |
 | --- | --- | --- | --- |
 | `perseids-tools` | Greek and Latin | No | `stemlib/` |
 | `alpheios-project` (pinned) | Greek | Requires a prepared `gener.index` | `vendor/alpheios-morpheus/dist/stemlib/` |
 
-From a recursive source checkout, prepare a standalone Alpheios directory with
-the validated experimental generation index using:
-
-```sh
-sh tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
-```
-
 The [runtime-data guide](docs/runtime-data.md) records exact pinned revisions,
 digests, acquisition permissions, and redistribution caveats. The
 [stem-library inventory](docs/stem-libraries.md) explains the origin and role of
-each dataset.
+each dataset. The [build guide](docs/building.md#prepare-the-runtime-data)
+explains how to prepare the data from a source checkout, and how to rebuild and
+qualify the stemlibs from their sources.
 
-### Rebuild and qualify the stemlibs
+## Example
 
-The source checkout can reconstruct complete Greek and Latin stemlibs through
-an explicit, opt-in production graph. Python 3 is required in addition to the
-native build requirements; Perl is not required. Configure the internal
-producers, then invoke the aggregate target:
+Every analysis that Morpheus accepts is returned. With the Perseids stem
+library, the Greek form λύομεν (`lu/omen`) is the first person plural of λύω,
+present or unaugmented imperfect, with a short or long stem vowel:
 
-```sh
-cmake --preset dev -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON
-cmake --build --preset dev --target morpheus_stemlib_production
+```python
+from libmorpheus import Language, Library, Option
+
+with Library("/usr/local/lib/libmorpheus.so") as library:
+    with library.context("/path/to/stemlib", Language.GREEK) as context:
+        for a in context.analyze("lu/omen", Option.STRICT_CASE):
+            print(a.lemma, a.stem, a.ending, a.tense, a.person,
+                  a.grammatical_number, a.dialects)
 ```
 
-The target recreates two isolated stages without modifying the source tree or
-the checked-in stemlibs:
+```text
+lu/w lu omen present first plural ('epic',)
+lu/w lu_ omen present first plural ()
+lu/w lu omen imperfect first plural ('epic',)
+lu/w lu_ omen imperfect first plural ('ionic', 'homeric')
+```
 
-| Language | Reconstructed stemlib root | Production receipt |
-| --- | --- | --- |
-| Greek | `build/dev/stemlib-production/greek/` | `build/dev/stemlib-production/greek/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json` |
-| Latin | `build/dev/stemlib-production/latin/` | `build/dev/stemlib-production/latin/MORPHEUS-STEMLIB-PRODUCTION-RECEIPT.json` |
+## Performance
 
-Each root contains its `Greek/` or `Latin/` runtime tree plus ordered input and
-output manifests, provenance, and baseline comparisons. The
-`morpheus_stemlib_production_greek` and
-`morpheus_stemlib_production_latin` targets can be run independently. Repeated
-invocations delete and recreate only the corresponding build-tree stage.
+The figures below come from the release benchmark
+([`bench/compare.mjs`](docs/benchmarks.md)), run on the same 12-core Apple
+Silicon host for every release with the pinned Alpheios stem library. Analysis
+times cover the 24 Greek words of the test corpus; generation produces the
+complete paradigm of ἵημι (`i(/hmi`). They give orders of magnitude, not
+guarantees: the reports are retained in
+[`bench/release-evidence/`](bench/release-evidence/).
 
-Portable developer builds record the local compiler and tool versions. The
-reference qualification is deliberately stricter and fails configuration
-unless it runs on Ubuntu 24.04 x86-64 with GCC 14 and Python 3.12:
+**Since the first release.** Analysis time per word, warm:
+
+| | 0.1.0 (August 2026) | 0.4.6 (November 2026) |
+| --- | ---: | ---: |
+| `cruncher`, one process | 668 µs | 202 µs |
+| Library, one context | 662 µs | 215 µs |
+| Library, four contexts in parallel | 284 µs | 88 µs |
+
+Four contexts thus analyze about 11,000 words per second, where a single
+`cruncher` process of the first release analyzed 1,500. Most of the gain comes
+from 0.4.6, which removed thread-local reads and repeated file opening from the
+search for candidate stems ([release notes](docs/release-0.4.6.md)).
+
+**C and its distributions.** Analysis throughput, in words per second, with
+native 0.4.6:
+
+| Distribution | 1 context | 2 contexts | 4 contexts |
+| --- | ---: | ---: | ---: |
+| C (`cruncher`, one process) | 4,415 | – | – |
+| Python | 4,675 | 7,606 | 10,988 |
+| Node.js | 4,183 | 7,064 | 10,636 |
+| WebAssembly (one worker per context) | 3,798 | 6,693 | 10,949 |
+
+The Python and Node.js bindings analyze at the speed of the C runtime. The
+WebAssembly module, measured in a separate run against Node.js, reaches 86 to
+93 % of the native throughput; it needs 12 to 24 ms to start a pool and about
+25 MiB per instance, against a few milliseconds and a few MiB for native
+contexts ([comparison](docs/wasm.md#third-run-native-046-and-module-014)).
+Generating the paradigm of ἵημι takes 3.7 ms through Node.js and 9.8 ms
+through Python at one context, and up to 933 paradigms per second through
+Node.js with four contexts ([benchmarks](docs/benchmarks.md)).
+
+## Build from source
+
+Building requires CMake 3.25 or newer, Ninja and a C17 compiler. Clone
+recursively, then configure, build and test the development preset:
 
 ```sh
-CC=gcc-14 cmake --preset dev \
-  -DMORPHEUS_BUILD_STEMLIB_TOOLS=ON \
-  -DMORPHEUS_STEMLIB_QUALIFICATION_PROFILE=github-ubuntu-24.04-gcc-14-python-3.12
-cmake --build --preset dev --target morpheus_stemlib_production
+git clone --recurse-submodules \
+  https://github.com/defense-humanites/libmorpheus.git
+cd libmorpheus
+cmake --preset dev
+cmake --build --preset dev
 ctest --preset dev
 ```
 
-CI performs two additional clean builds per language, compares their complete
-outputs and receipts, and checks every reviewed difference against the
-Perseids and pinned Alpheios baselines. The
-[production manifest](docs/stemlib-production-manifest.md) documents the 379
-source inputs and staging corrections; the
-[production audit](docs/stemlib-production-audit.md) records the restored
-producers, reproducibility proof, and accepted binary-format exceptions.
-
-This facility is internal production and qualification infrastructure. It is
-not installed, its outputs are not included in native or binding packages, and
-successful reconstruction does not grant permission to redistribute the
-linguistic datasets.
-
-For deployment-shape qualification, a second opt-in target filters each fresh
-stage down to the files read by the runtime and writes deterministic archives,
-SHA-256 sidecars, and schema-1 runtime receipts:
-
-```sh
-cmake --build --preset dev --target morpheus_stemlib_runtime_artifacts
-```
-
-The results are written below `build/dev/stemlib-runtime-artifacts/`. They are
-internal test artifacts: CI exercises the complete Greek and Latin fixture
-suite after extraction but retains only their receipts and checksums, not the
-archives. The target does not make the datasets release assets or establish a
-redistribution right. The
-[redistribution gate](docs/stemlib-redistribution.md) records the exact data
-trees and licensing evidence and keeps every payload publication channel
-closed pending an explicit review.
-
-## Alpine container image
-
-The Dockerfile supports `linux/amd64` and `linux/arm64` with BuildKit/QEMU. Its
-image is a local qualification and application-build target. The default
-Alpine multi-stage image builds and tests the C17 runtime on musl,
-then ships the installed library, `cruncher`, runtime dependencies, and the
-prepared `alpheios-project` stemlib:
-
-```sh
-docker build --target runtime -t morpheus .
-printf 'a)/nqrwpos\n' | docker run --rm -i morpheus -S
-```
-
-## `cruncher`
-
-The historical command-line interface remains available as a compatibility
-client of the library. It reads `MORPHLIB` as before:
-
-```sh
-printf 'a)/nqrwpos\n' | \
-  MORPHLIB="$PWD/vendor/alpheios-morpheus/dist/stemlib" \
-  build/dev/cruncher -S
-```
-
-Retained options include `-L` for Latin, `-S` for non-strict case, `-n` to
-ignore accents, `-d` for database format, `-e` for numeric feature indices,
-`-k` to retain Beta Code, `-l` for lemma-only output, and `-V` for verbs only.
+The [build guide](docs/building.md) covers the other presets, installation and
+use from C, the preparation and rebuilding of the stemlibs, the Alpine container
+image, the historical `cruncher` command-line client and the test suites.
 
 ## Releases and platform support
 
-Native `v<version>` release tags provide data-free archives and SHA-256 files
-for:
+Each distribution is versioned independently. Native `v<version>` tags provide
+data-free archives and SHA-256 files for the platforms listed under
+[Distributions](#distributions); the bindings and the data package use
+`python-v`, `node-v`, `wasm-v` and `data-v` tags, and each binding declares the
+native runtime release and ABI it supports. The checksum detects corruption; it
+is not a release signature.
 
-- Linux x86-64 glibc;
-- Linux aarch64 glibc;
-- macOS arm64.
-
-Each binding is versioned independently and declares the native runtime
-release and ABI it supports.
-
-The Node.js binding is versioned independently with `node-v<version>` tags. npm
-publishes the ESM facade as `@libmorpheus/node` and a matching optional Node-API
-addon for each supported native platform; the runtime and stem data remain
-separate, verified acquisitions.
-
-The Python binding is versioned independently with `python-v<version>` tags and
-publishes the pure-Python `libmorpheus` distribution to PyPI. It uses `ctypes`,
-so one universal wheel supports Python 3.11 and newer while applications provide
-the compatible native runtime and stem data separately.
-
-The checksum detects corruption; it is not a release signature. See
-[platform support](docs/portability.md) for the complete qualification matrix
-and [release qualification](docs/releasing.md) for the checks required before a
-tag. Release changes are recorded in the [changelog](CHANGELOG.md).
-
-Two separate fixture suites prevent stemlib differences from being mistaken for
-runtime regressions:
-
-- `legacy_fixtures` checks inherited Greek and Latin expectations against the
-  `perseids-tools` dataset;
-- `alpheios_greek_fixtures` checks Greek reference cases against the pinned
-  Alpheios dataset.
-
-Public ABI, installed-package, parallel-context, binding, ASan/UBSan, and TSan
-tests complement those fixtures.
+See [platform support](docs/portability.md) for the complete qualification
+matrix and [release qualification](docs/releasing.md) for the checks required
+before a tag. Release changes are recorded in the [changelog](CHANGELOG.md).
 
 ## Architecture and provenance
 
@@ -387,3 +213,7 @@ A file's SPDX identifier controls when present; otherwise the root MPL-2.0
 license applies. See the [licensing guide](docs/licensing.md) for the precise
 file-level boundary and the [license inventory](docs/license-inventory.md) for
 its rationale and provenance.
+
+The libmorpheus logos under `docs/assets/` are not covered by these licenses:
+all rights are reserved, as recorded in
+[`LicenseRef-libmorpheus-marks`](LICENSES/LicenseRef-libmorpheus-marks.txt).

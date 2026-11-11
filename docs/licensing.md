@@ -45,6 +45,14 @@ permissive license recorded in its `LICENSES/EMSCRIPTEN.txt`. The
 WebAssembly module neither changes the public API nor moves historical code
 across the MPL/AGPL boundary.
 
+## Project marks
+
+The libmorpheus logos under `docs/assets/` are neither MPL-2.0 nor
+AGPL-3.0-or-later. Each one names `LicenseRef-libmorpheus-marks` in an adjacent
+`.license` file, and `LICENSES/LicenseRef-libmorpheus-marks.txt` reserves all
+rights while allowing unmodified reproduction to refer to the project. The
+binding READMEs only link to these files; no package contains them.
+
 ## License texts and provenance
 
 Canonical texts are available in `LICENSES/MPL-2.0.txt` and

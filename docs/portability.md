@@ -57,7 +57,7 @@ multi-byte values explicitly, so pointer width and the host width of `long`
 do not enter the disk format.
 
 The supported native deployment targets are little-endian LP64 systems. The
-experimental WebAssembly build targets `wasm32`, a little-endian ILP32
+WebAssembly build targets `wasm32`, a little-endian ILP32
 environment: the disk format does not depend on the width of `long`, and the
 two in-memory sites that assign a 32-bit disk word to a `long` are explicit
 about it (`src/morphlib/morphkeys.c`, `src/morphlib/retrentry.c`), and the
