@@ -48,6 +48,26 @@ typedef struct {
 	size_t capacity;
 } prepared_buffer;
 
+/* The principal parts some block of a lemma covers, by lemma key. */
+typedef struct {
+	char *key;
+	unsigned covered;
+} lemma_coverage;
+
+typedef struct {
+	lemma_coverage *items;
+	size_t count;
+	size_t capacity;
+} coverage_map;
+
+/* A :de: group that may receive default principal parts at lemma end. */
+typedef struct {
+	char stem[MAXWORDSIZE];
+	char type[MAXWORDSIZE];
+	char keys[LONGSTRING];
+	int voice;
+} default_group;
+
 typedef struct {
 	prepared_buffer *output;
 	char *base_prefix;
@@ -60,6 +80,17 @@ typedef struct {
 	int have_derivation;
 	int have_explicit_request;
 	int skip_invalid_derivation;
+	/* Output offset of the current lemma's first record, and its key. */
+	size_t lemma_start;
+	char lemma_key[LINE_CAPACITY];
+	/* First pass: record each block's coverage, add no default. */
+	int collecting;
+	coverage_map *coverage;
+	default_group *groups;
+	size_t group_count;
+	size_t group_capacity;
+	/* Historical do_conj "full" semantics: no default principal parts. */
+	int requested_parts_only;
 } prepare_state;
 
 static int append_bytes(prepared_buffer *output, const char *data,
@@ -429,6 +460,328 @@ expand_request(prepare_state *state, const char *request, const char *path,
 	return 1;
 }
 
+/*
+ * The verbal principal parts, in the order their defaults are added. The
+ * future perfect is left out: it is rare and lexically restricted, and the
+ * sources request it where it exists (lu/w: `;fp mid`).
+ */
+static const char *const principal_parts[] = {
+	"pr", "fu", "ao", "pf", "pp", "ap"
+};
+#define PRINCIPAL_PART_COUNT \
+	(sizeof principal_parts / sizeof principal_parts[0])
+
+/* The index builder's lemma key: the first token without !, -, _, ^ or +. */
+static int
+canonical_lemma(char *destination, size_t capacity, const char *source)
+{
+	size_t length = strcspn(source," \t\r\n");
+	size_t input;
+	size_t output = 0;
+
+	if (length && source[0] == '!')
+		source++, length--;
+	for (input = 0; input != length; input++) {
+		if (strchr("-_^+",source[input]))
+			continue;
+		if (output == capacity - 1)
+			return 0;
+		destination[output++] = source[input];
+	}
+	destination[output] = 0;
+	return 1;
+}
+
+static int
+compare_coverage(const void *left, const void *right)
+{
+	return strcmp(((const lemma_coverage *)left)->key,
+	              ((const lemma_coverage *)right)->key);
+}
+
+/* Merge the first pass's per-block coverage into one entry per lemma key. */
+static void
+merge_coverage(coverage_map *map)
+{
+	size_t read;
+	size_t write = 0;
+
+	if (!map->count)
+		return;
+	qsort(map->items,map->count,sizeof *map->items,compare_coverage);
+	for (read = 1; read != map->count; read++) {
+		if (!strcmp(map->items[read].key,map->items[write].key)) {
+			map->items[write].covered |= map->items[read].covered;
+			free(map->items[read].key);
+		} else {
+			map->items[++write] = map->items[read];
+		}
+	}
+	map->count = write + 1;
+}
+
+static unsigned
+lemma_coverage_of(const coverage_map *map, const char *key)
+{
+	lemma_coverage probe;
+	const lemma_coverage *found;
+
+	probe.key = (char *)key;
+	found = bsearch(&probe,map->items,map->count,sizeof *map->items,
+	                compare_coverage);
+	return found ? found->covered : 0;
+}
+
+static void
+free_coverage(coverage_map *map)
+{
+	size_t index;
+
+	for (index = 0; index != map->count; index++)
+		free(map->items[index].key);
+	free(map->items);
+}
+
+/*
+ * Remember a :de: group that may receive default principal parts. Only
+ * regular derivations do (`reg_deriv` in derivtypes.table: ew_denom,
+ * ow_denom, izw, ellw...). A primary conjugation (reg_conj) or a verb stem
+ * class (e_suppl, skw, o_stem...) describes a stem whose parts its requests
+ * enumerate: completing them would build e)/xw's future stem e(k and aorist
+ * stem sx into presents, or give pa/sxw an aorist passive.
+ */
+static int
+remember_group(prepare_state *state, const char *keys, const char *path,
+               unsigned long long line_number)
+{
+	default_group *group;
+	int regular;
+	int confined;
+	int voice;
+
+	if (!morpheus_gener_derivation_is_regular(state->derivation_type,
+	                                         &regular) ||
+	    !morpheus_gener_keys_confine(keys,&confined) ||
+	    !morpheus_gener_keys_voice(keys,&voice)) {
+		fprintf(stderr,
+		        "morpheus-gener-prepare: %s:%llu: cannot read the derivation keys\n",
+		        path,line_number);
+		return 0;
+	}
+	/*
+	 * Keys on the :de: line that fix a tense or mood restrict the whole
+	 * group (a)rxeu/w: `:de:a)rx euw pres`, a verb attested in the present
+	 * only), and a present formation (`pres_redupl`, `n_infix`) would reach
+	 * every part the group builds: such a group keeps its requested parts.
+	 */
+	if (!regular || confined)
+		return 1;
+	if (state->group_count == state->group_capacity) {
+		size_t capacity = state->group_capacity ? state->group_capacity * 2 : 4;
+		default_group *grown = realloc(state->groups,capacity * sizeof *grown);
+
+		if (!grown) {
+			fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+			return 0;
+		}
+		state->groups = grown;
+		state->group_capacity = capacity;
+	}
+	group = state->groups + state->group_count;
+	if (!copy_text(group->stem,sizeof group->stem,state->derivation_stem) ||
+	    !copy_text(group->type,sizeof group->type,state->derivation_type) ||
+	    !copy_text(group->keys,sizeof group->keys,keys)) {
+		fprintf(stderr,
+		        "morpheus-gener-prepare: %s:%llu: derivation too long\n",
+		        path,line_number);
+		return 0;
+	}
+	group->voice = voice;
+	state->group_count++;
+	return 1;
+}
+
+/* Whether the current lemma's records already contain this record line. */
+static int
+lemma_has_record(const prepare_state *state, const char *record, size_t size)
+{
+	const char *cursor = state->output->data + state->lemma_start;
+	const char *end = state->output->data + state->output->size;
+
+	while ((size_t)(end - cursor) >= size) {
+		if (!memcmp(cursor,record,size))
+			return 1;
+		cursor = memchr(cursor,'\n',(size_t)(end - cursor));
+		if (!cursor)
+			break;
+		cursor++;
+	}
+	return 0;
+}
+
+/*
+ * The principal parts for which the current block has a record whose keys
+ * do not restrict it to a dialect, tense or mood. Its own records decide
+ * them: `;pp,perfp_s` (a)kou/w), an explicit `:vs:` perfect, or `;fu mid` (a
+ * future that exists in the middle only) all speak for their part. Flags
+ * such as `poetic`, `late` or `rare` are not dialects: a record carrying
+ * them covers its part too.
+ */
+static int
+block_covered_parts(const prepare_state *state, unsigned *covered)
+{
+	const char *cursor = state->output->data + state->lemma_start;
+	const char *end = state->output->data + state->output->size;
+	char line[LINE_CAPACITY];
+
+	*covered = 0;
+	while (cursor < end) {
+		const char *next = memchr(cursor,'\n',(size_t)(end - cursor));
+		size_t length = (size_t)((next ? next : end) - cursor);
+		int part;
+		int restricted;
+
+		if (length >= sizeof line)
+			return 0;
+		if (length > 4 && !strncmp(cursor,":vs:",4)) {
+			memcpy(line,cursor,length);
+			line[length] = 0;
+			if (!morpheus_gener_record_traits(line,&part,&restricted))
+				return 0;
+			if (part >= 0 && (size_t)part < PRINCIPAL_PART_COUNT &&
+			    !restricted)
+				*covered |= 1u << part;
+		}
+		cursor = next ? next + 1 : end;
+	}
+	return 1;
+}
+
+/*
+ * Whether a part can carry the voice that the :de: keys fix for the whole
+ * group. An active group has no perfect middle-passive or aorist passive, a
+ * middle one no aorist passive, and a passive one no future or aorist built
+ * on the active stems; their records could not be generated.
+ */
+static int
+part_takes_voice(size_t part, int voice)
+{
+	const char *name = principal_parts[part];
+
+	if (voice == ACTIVE)
+		return strcmp(name,"pp") && strcmp(name,"ap");
+	if (voice == MIDDLE)
+		return strcmp(name,"ap");
+	if (voice == PASSIVE)
+		return strcmp(name,"fu") && strcmp(name,"ao");
+	return 1;
+}
+
+/*
+ * End a lemma block. Analysis keeps a regular derivation as a whole (the
+ * analysis index stores the :de: itself), so it accepts every principal part
+ * the derivation type defines, whatever the `;` requests; the historical
+ * do_conj "full" generation only emitted the requested parts, or the present
+ * alone. For each part that no block of the lemma covers (see
+ * block_covered_parts(); the first pass gathers every block of a lemma key,
+ * whichever file holds it), each regular :de: group of the block now also
+ * receives the record a bare `;pr`, `;fu`... request would produce, after
+ * the block's other records. A part the table does not define for the
+ * group's keys yields nothing, and an identical record is not repeated.
+ *
+ * In the first pass, the block's coverage is only recorded.
+ */
+static int
+finish_lemma(prepare_state *state, const char *path)
+{
+	unsigned covered;
+	size_t group;
+	size_t part;
+
+	if (state->requested_parts_only || !state->have_lemma) {
+		state->group_count = 0;
+		return 1;
+	}
+	if (state->collecting) {
+		coverage_map *map = state->coverage;
+		lemma_coverage *entry;
+
+		state->group_count = 0;
+		if (!block_covered_parts(state,&covered)) {
+			fprintf(stderr,
+			        "morpheus-gener-prepare: %s: cannot classify a lemma's records\n",
+			        path);
+			return 0;
+		}
+		if (map->count == map->capacity) {
+			size_t capacity = map->capacity ? map->capacity * 2 : 4096;
+			lemma_coverage *grown = realloc(map->items,capacity * sizeof *grown);
+
+			if (!grown) {
+				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+				return 0;
+			}
+			map->items = grown;
+			map->capacity = capacity;
+		}
+		entry = map->items + map->count;
+		entry->key = strdup(state->lemma_key);
+		if (!entry->key) {
+			fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+			return 0;
+		}
+		entry->covered = covered;
+		map->count++;
+		return 1;
+	}
+	if (!state->group_count)
+		return 1;
+	covered = lemma_coverage_of(state->coverage,state->lemma_key);
+	for (group = 0; group != state->group_count; group++) {
+		const default_group *current = state->groups + group;
+
+		for (part = 0; part != PRINCIPAL_PART_COUNT; part++) {
+			FILE *stream;
+			char *record = NULL;
+			size_t size = 0;
+			int expanded;
+
+			if ((covered & (1u << part)) ||
+			    !part_takes_voice(part,current->voice))
+				continue;
+			stream = open_memstream(&record,&size);
+			if (!stream) {
+				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+				return 0;
+			}
+			expanded = morpheus_gener_expand_derivation(
+			    stream,current->stem,current->type,current->keys,
+			    principal_parts[part]);
+			if (fclose(stream)) {
+				free(record);
+				report_errno("cannot finalize derivation",path);
+				return 0;
+			}
+			if (expanded < 0) {
+				fprintf(stderr,
+				        "morpheus-gener-prepare: %s: derivation %s failed for part %s\n",
+				        path,current->type,principal_parts[part]);
+				free(record);
+				return 0;
+			}
+			if (expanded == 1 && !lemma_has_record(state,record,size) &&
+			    !append_bytes(state->output,record,size)) {
+				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+				free(record);
+				return 0;
+			}
+			free(record);
+		}
+	}
+	state->group_count = 0;
+	return 1;
+}
+
 static int
 flush_derivation(prepare_state *state, const char *path,
                  unsigned long long line_number)
@@ -554,6 +907,15 @@ apply_exception(prepare_state *state, source_exception *exception,
 	return 1;
 }
 
+static void
+reset_exceptions(exception_set *exceptions)
+{
+	size_t index;
+
+	for (index = 0; index != exceptions->count; index++)
+		exceptions->items[index].seen = 0;
+}
+
 static int
 all_exceptions_seen(const exception_set *exceptions)
 {
@@ -670,6 +1032,7 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 	state->have_derivation = 0;
 	state->have_explicit_request = 0;
 	state->skip_invalid_derivation = 0;
+	state->group_count = 0;
 
 	while (fgets(line,sizeof line,input)) {
 		char *content;
@@ -709,11 +1072,19 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 		if (!strncmp(content,":le:",4)) {
 			char *lemma = trim(content + 4);
 
-			if (!flush_derivation(state,path,line_number))
+			if (!flush_derivation(state,path,line_number) ||
+			    !finish_lemma(state,path))
 				goto finish;
 			if (!*lemma) {
 				fprintf(stderr,
 				        "morpheus-gener-prepare: %s:%llu: invalid lemma\n",
+				        path,line_number);
+				goto finish;
+			}
+			if (!canonical_lemma(state->lemma_key,sizeof state->lemma_key,
+			                     lemma)) {
+				fprintf(stderr,
+				        "morpheus-gener-prepare: %s:%llu: lemma too long\n",
 				        path,line_number);
 				goto finish;
 			}
@@ -725,6 +1096,7 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 			state->have_explicit_request = 0;
 			if (!write_line(state->output,content))
 				goto write_error;
+			state->lemma_start = state->output->size;
 			continue;
 		}
 
@@ -822,6 +1194,9 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 			state->have_explicit_request = 0;
 			state->base = BASE_DERIVATION;
 			state->have_derivation = 1;
+			if (!state->requested_parts_only &&
+			    !remember_group(state,global,path,line_number))
+				goto finish;
 			continue;
 		}
 
@@ -849,7 +1224,8 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 		report_errno("cannot read",path);
 		goto finish;
 	}
-	if (!flush_derivation(state,path,line_number + 1))
+	if (!flush_derivation(state,path,line_number + 1) ||
+	    !finish_lemma(state,path))
 		goto finish;
 	result = 1;
 	goto finish;
@@ -898,6 +1274,7 @@ main(int argc, char **argv)
 {
 	prepared_buffer prepared = { 0 };
 	prepare_state state = { 0 };
+	coverage_map coverage = { 0 };
 	exception_set exceptions = { 0 };
 	exception_set *active_exceptions = NULL;
 	const char *output_path;
@@ -913,21 +1290,46 @@ main(int argc, char **argv)
 	}
 #endif
 
-	if (argc >= 5 && !strcmp(argv[1],"--exceptions")) {
-		if (!load_exceptions(&exceptions,argv[2]))
+	input = 1;
+	if (argc > input && !strcmp(argv[input],"--requested-parts-only")) {
+		state.requested_parts_only = 1;
+		input++;
+	}
+	if (argc - input >= 4 && !strcmp(argv[input],"--exceptions")) {
+		if (!load_exceptions(&exceptions,argv[input + 1]))
 			goto finish;
 		active_exceptions = &exceptions;
-		output_path = argv[3];
-		input = 4;
-	} else if (argc >= 3) {
-		output_path = argv[1];
-		input = 2;
-	} else {
+		input += 2;
+	}
+	if (argc - input < 2) {
 		fprintf(stderr,
-		        "usage: morpheus_gener_source_preparer [--exceptions MANIFEST] OUTPUT INPUT...\n");
+		        "usage: morpheus_gener_source_preparer [--requested-parts-only] [--exceptions MANIFEST] OUTPUT INPUT...\n");
 		return EXIT_FAILURE;
 	}
+	output_path = argv[input++];
 	state.output = &prepared;
+	state.coverage = &coverage;
+	if (!state.requested_parts_only) {
+		/*
+		 * First pass: gather which parts each lemma key covers across all
+		 * its blocks, so that a part one block covers is not added to
+		 * another block of the same lemma (ὁράω, ἵστημι...).
+		 */
+		int pass;
+
+		state.collecting = 1;
+		for (pass = input; pass != argc; pass++) {
+			if (!prepare_file(&state,active_exceptions,argv[pass]))
+				goto finish;
+		}
+		if (active_exceptions && !all_exceptions_seen(active_exceptions))
+			goto finish;
+		merge_coverage(&coverage);
+		if (active_exceptions)
+			reset_exceptions(active_exceptions);
+		prepared.size = 0;
+		state.collecting = 0;
+	}
 	for (; input != argc; input++) {
 		if (!prepare_file(&state,active_exceptions,argv[input]))
 			goto finish;
@@ -940,6 +1342,8 @@ main(int argc, char **argv)
 
 finish:
 	free_exceptions(&exceptions);
+	free_coverage(&coverage);
+	free(state.groups);
 	free(state.base_prefix);
 	free(prepared.data);
 	return result;

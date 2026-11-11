@@ -69,6 +69,94 @@ silently split commas, substitute similarly named types, or reinterpret an
 unreferenced rule file. Any correction belongs in a separately reviewed data
 patch with its own provenance and differential evidence.
 
+## Default principal parts
+
+The `full` oracle emits only the principal parts that a `:de:` group requests
+with `;`, or the present alone when it requests none. Analysis does not read
+the sources that way: its index keeps a regular derivation as a whole
+(`steminds/vbind` stores `:dhlo/w:ow_denom` for δηλόω), so it accepts every
+principal part the derivation type defines, and the `;` requests only add
+variants. Generation therefore missed forms that analysis recognizes (#78):
+ποιέω had no active or middle aorist, δηλόω no aorist, perfect or aorist
+passive, ἀγγέλλω no regular future, and 3,423 of the 5,335 valid groups of
+`vbs.simp.ml` generated their present only.
+
+By default, the preparer now completes regular derivations. At the end of
+each lemma block, each of its regular `:de:` groups receives the record that
+a bare `;pr`, `;fu`, `;ao`, `;pf`, `;pp` or `;ap` request would produce, for
+every principal part that the lemma does not already cover:
+
+- Only regular derivations receive defaults: the `reg_deriv` class of
+  `rule_files/derivtypes.table` (`ew_denom`, `ow_denom`, `aw_denom`, `izw`,
+  `ellw`...). A primary conjugation (`reg_conj`, class `prim_deriv`) or a
+  verb stem class (`e_suppl`, `skw`, `o_stem`..., class `verbstem`) describes
+  a stem whose parts its requests enumerate. Completing it would build
+  ἔχω's future stem `e(k` and aorist stem `sx` into presents, or give πάσχω,
+  πίπτω and μένω an aorist passive. Such groups keep the historical
+  expansion: their requests, or the present alone.
+- A part is covered by any `:vs:` record of the lemma, explicit or derived,
+  whose keys fix no dialect, tense or mood. A voice, a suffix or a stem type
+  does not lift the coverage: `;fu mid` says that a future exists in the
+  middle only, `;ap,-hq` chooses a suffix, and an explicit `:vs:` perfect
+  supplies its perfect. Flags such as `poetic`, `late` or `rare` are not
+  dialects: a record carrying them covers its part too. A request limited to
+  a dialect (`;fu epic ionic` for ἀγγέλλω) or to a tense (`;ap fut`, a future
+  passive) does not cover its part, and the regular form is added beside it.
+- Coverage is gathered over every block of a lemma key, whichever source
+  file holds it: the preparer reads the sources twice, first to record
+  which parts each block covers, then to add the defaults. A part one block
+  covers is not added to another block of the same lemma. The parts covered
+  are those of the sources, before any default is added, so two groups of one
+  block (ποιέω: poetic `po-` and `poi-`) both receive them.
+- A group whose `:de:` keys fix a tense or mood is confined to its requests:
+  `:de:a)rx euw pres` records a verb attested in the present only. So is a
+  group with a present formation (`pres_redupl`, `n_infix`), which the
+  expansion would otherwise apply to every part it builds.
+- A voice on the `:de:` line keeps the parts that can carry it: an active
+  group gets no perfect middle-passive or aorist passive, a middle group no
+  aorist passive, and a passive group no future or aorist built on the
+  active stems.
+- The future perfect is not added: it is rare and lexically restricted, and
+  the sources request it where it exists (λύω: `;fp mid`).
+- A part the derivation table does not define for the group's keys yields
+  nothing, and a record identical to one of the block's is not repeated.
+
+Over the 49 corpus sources, the index grows from 129,097 to 172,741 records:
+8,786 lemmas gain forms, and five lemmas whose only request is a listed
+zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index. The other
+lemmas are unchanged, no form is removed, and no added record fails at
+generation: over the whole index, `morpheus_generate()` skips the same 346
+records as before. Generated forms grow from 12.5 to 22.0 million. On 120
+changed lemmas (seed 78), 93.2 % of the added forms analyze back to their
+lemma with the same tense and mood, against 95.1 % of the forms these lemmas
+generated before. Over the whole index, the first `morpheus_generate()` of a
+context goes from 31 to 43 ms and the 99th percentile of a request from 5.2
+to 9.4 ms; the median stays at 0.13 ms (2-vCPU Linux sandbox, indicative).
+
+The rule follows the sources and does not correct them. ἀγγέλλω has
+explicit, unrestricted `:vs:a)ggel aor2` and `aor2_pass` records, so it
+keeps ἤγγελον and ἠγγέλην as its only aorists and does not receive ἤγγειλα
+or ἠγγέλθην. The seven invalid derivations above, ἔχω's present among them,
+stay rejected until a reviewed data patch corrects them.
+
+`tools/gener-default-parts-report.py` measures the effect of the defaults
+on two indices built from the same sources: lemmas, forms, skipped records
+and latency of each index, lemmas that change, lose forms or gain skipped
+records, a round trip of a seeded sample of changed lemmas through analysis,
+and the forms added or removed for a list of frequent verbs. A round trip
+measures parity with analysis, which accepts more than a paradigm should
+show; it does not prove that an added form exists. The reviewed verbs are
+therefore checked in CI: the corpus test requires that ἔχω, πάσχω, πίπτω,
+ὁράω, μένω, ἵστημι, βούλομαι, λύω and ἀκούω keep their historical blocks, and
+that ποιέω, δηλόω, ἀγγέλλω and ἀγαπάω receive exactly their reviewed records.
+
+`--requested-parts-only` keeps the historical behavior. It is an option of
+the preparer, used by the oracle comparison and by the benchmark; the data
+package and `tools/prepare-runtime-data.sh` always prepare the default index.
+The corpus test checks that the option still reproduces the index of data
+0.1.0 and native 0.4.6 (`5aa76d8c…`). `test/gener-derivation-defaults.txt`
+and its expected records exercise each rule above.
+
 ## Implementation boundary
 
 The legacy `conjsys.c` and `combconj.c` front ends use file-scope mutable

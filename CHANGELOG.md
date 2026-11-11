@@ -27,6 +27,34 @@ the corpus.
 
 ### Changed
 
+- The generation source preparer completes regular derivations with the
+  principal parts the lemma's records do not cover (#78, item 3;
+  `docs/gener-derivations.md`). The historical `do_conj` expansion emitted
+  only the parts a `:de:` group requests with `;`, or the present alone,
+  whereas analysis keeps the derivation whole and accepts every part:
+  ποιέω had no active aorist, δηλόω no aorist, perfect or aorist passive,
+  ἀγγέλλω no Attic future. Only `reg_deriv` derivations (`ew_denom`,
+  `ow_denom`, `izw`, `ellw`...) receive the present, future, aorist,
+  perfect, perfect middle-passive and aorist passive they lack; primary
+  conjugations and verb stem classes (ἔχω, πάσχω, πίπτω, ὁράω...) keep
+  their requests. A part stays as the sources give it when a record of the
+  lemma, in any of its blocks, covers it without a dialect, tense or mood
+  restriction; a group whose keys fix a tense, a mood or a present
+  formation keeps its requests, and a voice on the `:de:` line keeps the
+  parts that can carry it. The future perfect is not added. The Alpheios
+  index grows from 129,097 to 172,741 records (106,427 lemmas, five of
+  them new, such as ἀγαπάω); 8,786 lemmas gain forms, the others are
+  unchanged, and no added record fails at generation. Generated forms go
+  from 12.5 to 22.0 million. The index digest becomes `eeef2145…`
+  (prepared source `20082e2d…`) in the tree's data package, Python
+  manifest, runtime-data script and CI, so the next native, data and
+  Python releases must ship together. The preparer's
+  `--requested-parts-only` option still reproduces the historical index
+  `5aa76d8c…`; the benchmark keeps using it so that generation rows stay
+  comparable with the baselines. `tools/gener-default-parts-report.py`
+  measures the change, and the corpus test checks the reviewed blocks of
+  thirteen frequent verbs. The WebAssembly preparer of `@libmorpheus/data`
+  is regenerated and produces the same index byte for byte.
 - Experimental generation no longer fails a whole lemma on one bad record
   (#78). Over the Alpheios index (106,422 lemmas), 275 lemmas failed with
   `MORPHEUS_INTERNAL_ERROR` because of 346 records: stem classes without an

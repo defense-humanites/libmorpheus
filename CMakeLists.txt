@@ -1147,6 +1147,8 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_SOURCE_ORPHAN=${PROJECT_SOURCE_DIR}/test/gener-source-orphan-continuation.txt
       -DMORPHEUS_GENER_DERIVATION_SOURCE=${PROJECT_SOURCE_DIR}/test/gener-derivation-source.txt
       -DMORPHEUS_GENER_DERIVATION_EXPECTED=${PROJECT_SOURCE_DIR}/test/gener-derivation-oracle.expected
+      -DMORPHEUS_GENER_DERIVATION_DEFAULTS=${PROJECT_SOURCE_DIR}/test/gener-derivation-defaults.txt
+      -DMORPHEUS_GENER_DERIVATION_DEFAULTS_EXPECTED=${PROJECT_SOURCE_DIR}/test/gener-derivation-defaults.expected
       -DMORPHEUS_GENER_DERIVATION_INVALID=${PROJECT_SOURCE_DIR}/test/gener-derivation-invalid.txt
       -DMORPHEUS_GENER_SOURCE_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-source-preparer
       "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"

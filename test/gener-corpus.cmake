@@ -63,12 +63,47 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "1c14949bb73649056d399b8d5d4f6fc1170ecba51ecc1416c036ec57ebbd4866")
+   "20082e2d0e37353acf0288a7a34b0932989ec3514c040a9db2edfc6ba8951bf5")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
+   "eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
+endif()
+
+# Without default principal parts, the preparer still reproduces the index of
+# data 0.1.0 and native 0.4.6, the historical do_conj "full" expansion.
+set(historical_source "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.txt")
+set(historical_index "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.mgi")
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+          --requested-parts-only
+          --exceptions "${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
+          "${historical_source}" ${inputs}
+  RESULT_VARIABLE historical_result
+  OUTPUT_VARIABLE historical_output
+  ERROR_VARIABLE historical_error
+)
+if(NOT historical_result EQUAL 0)
+  message(FATAL_ERROR
+    "historical generation-corpus preparation failed (${historical_result}):\n"
+    "${historical_output}${historical_error}")
+endif()
+execute_process(
+  COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_BUILDER}"
+          "${historical_index}" "${historical_source}"
+  RESULT_VARIABLE historical_index_result
+)
+file(SHA256 "${historical_source}" historical_source_sha256)
+file(SHA256 "${historical_index}" historical_index_sha256)
+if(NOT historical_index_result EQUAL 0 OR
+   NOT historical_source_sha256 STREQUAL
+   "1c14949bb73649056d399b8d5d4f6fc1170ecba51ecc1416c036ec57ebbd4866" OR
+   NOT historical_index_sha256 STREQUAL
+   "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
+  message(FATAL_ERROR
+    "requested-parts-only preparation no longer reproduces the historical index: "
+    "${historical_source_sha256} ${historical_index_sha256}")
 endif()
 execute_process(
   COMMAND "${CMAKE_COMMAND}" -E compare_files "${first_source}" "${second_source}"
@@ -84,7 +119,7 @@ endif()
 
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
-          "${first_index}" 106422 108215 129097
+          "${first_index}" 106427 108220 172741
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output
   ERROR_VARIABLE reader_error
@@ -94,3 +129,91 @@ if(NOT reader_result EQUAL 0)
     "complete generation-index reader failed (${reader_result}):\n"
     "${reader_output}${reader_error}")
 endif()
+
+# Frequent verbs, primary and regular. The default principal parts must
+# leave the primary and suppletive stems as their sources give them, and add
+# to the regular derivations exactly the records listed here (reviewed by
+# hand; the historical blocks come from the same sources).
+function(collect_lemma_blocks content lemma result)
+  set(blocks "")
+  set(rest "${content}")
+  foreach(guard RANGE 10000)
+    string(FIND "${rest}" "\n:le:${lemma}\n" start)
+    if(start EQUAL -1)
+      break()
+    endif()
+    math(EXPR start "${start} + 1")
+    string(SUBSTRING "${rest}" ${start} -1 rest)
+    string(SUBSTRING "${rest}" 1 -1 tail)
+    string(FIND "${tail}" "\n:le:" stop)
+    if(stop EQUAL -1)
+      set(block "${rest}")
+      set(rest "")
+    else()
+      math(EXPR stop "${stop} + 2")
+      string(SUBSTRING "${rest}" 0 ${stop} block)
+      string(SUBSTRING "${rest}" ${stop} -1 rest)
+      set(rest "\n${rest}")
+    endif()
+    string(APPEND blocks "${block}")
+  endforeach()
+  set(${result} "${blocks}" PARENT_SCOPE)
+endfunction()
+
+file(READ "${first_source}" prepared)
+file(READ "${historical_source}" historical)
+set(prepared "\n${prepared}")
+set(historical "\n${historical}")
+foreach(verb IN ITEMS
+        "e)/xw" "pa/sxw" "pi/ptw" "o(ra/w" "me/nw" "i(/sthmi" "bou/lomai"
+        "lu/w" "a)kou/w")
+  collect_lemma_blocks("${prepared}" "${verb}" current)
+  collect_lemma_blocks("${historical}" "${verb}" earlier)
+  if(current STREQUAL "" OR NOT current STREQUAL earlier)
+    message(FATAL_ERROR "default principal parts changed the blocks of ${verb}")
+  endif()
+endforeach()
+
+# Each entry: the verb, then the records the defaults add to its blocks.
+set(regular_verbs "poie/w" "dhlo/w" "a)gge/llw" "a)gapa/w")
+set(regular_0
+    ":vs:pohs  aor1 ew_denom poetic"
+    ":vs:poihs  aor1 ew_denom")
+set(regular_1
+    ":vs:dhlws  aor1 ow_denom"
+    ":vs:dedhlwk  perf_act ow_denom"
+    ":vs:dedhlw  perfp_vow ow_denom"
+    ":vs:dhlwq  aor_pass ow_denom")
+set(regular_2
+    ":vs:a)ggel  ew_fut ellw"
+    ":vs:h)ggelk  perf_act ellw"
+    ":vs:h)gge  perfp_l ellw")
+set(regular_3
+    ":vs:a)gap  aw_pr aw_denom"
+    ":vs:a)gaphs  reg_fut aw_denom attic ionic"
+    ":vs:a)gaphs  aor1 aw_denom attic ionic"
+    ":vs:h)gaphk  perf_act aw_denom attic ionic"
+    ":vs:h)gaph  perfp_vow aw_denom attic ionic"
+    ":vs:a)gaphq  aor_pass aw_denom attic ionic")
+foreach(position RANGE 3)
+  list(GET regular_verbs ${position} verb)
+  collect_lemma_blocks("${prepared}" "${verb}" current)
+  collect_lemma_blocks("${historical}" "${verb}" earlier)
+  string(REGEX MATCHALL "\n" current_lines "\n${current}")
+  string(REGEX MATCHALL "\n" earlier_lines "\n${earlier}")
+  list(LENGTH current_lines current_count)
+  list(LENGTH earlier_lines earlier_count)
+  list(LENGTH regular_${position} added_count)
+  math(EXPR expected_count "${earlier_count} + ${added_count}")
+  if(NOT current_count EQUAL expected_count)
+    message(FATAL_ERROR
+      "${verb}: ${current_count} prepared lines, expected ${expected_count}")
+  endif()
+  foreach(record IN LISTS regular_${position})
+    string(FIND "${current}" "${record}\n" in_current)
+    string(FIND "${earlier}" "${record}\n" in_earlier)
+    if(in_current EQUAL -1 OR NOT in_earlier EQUAL -1)
+      message(FATAL_ERROR "${verb}: expected the added record [${record}]")
+    endif()
+  endforeach()
+endforeach()
