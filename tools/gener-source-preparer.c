@@ -115,9 +115,20 @@ typedef struct {
 	default_group *groups;
 	size_t group_count;
 	size_t group_capacity;
-	/* Historical do_conj "full" semantics: no default principal parts. */
+	/*
+	 * Historical do_conj "full" semantics: no default principal parts, and
+	 * the expansion's inherited stem alterations kept.
+	 */
 	int requested_parts_only;
 } prepare_state;
+
+/* The historical expansion keeps its stem alterations; the default one
+ * corrects them (docs/gener-derivations.md). */
+static unsigned int
+expansion_flags(const prepare_state *state)
+{
+	return state->requested_parts_only ? 0 : MORPHEUS_GENER_EXPAND_CORRECTED;
+}
 
 static int append_bytes(prepared_buffer *output, const char *data,
                         size_t size);
@@ -464,7 +475,7 @@ expand_request(prepare_state *state, const char *request, const char *path,
 	}
 	expanded = morpheus_gener_expand_derivation(
 	    stream,state->derivation_stem,state->derivation_type,
-	    state->derivation_keys,request);
+	    state->derivation_keys,request,expansion_flags(state));
 	if (fclose(stream)) {
 		free(record);
 		report_errno("cannot finalize derivation",path);
@@ -789,7 +800,7 @@ finish_lemma(prepare_state *state, const char *path)
 			}
 			expanded = morpheus_gener_expand_derivation(
 			    stream,current->stem,current->type,current->keys,
-			    principal_parts[part]);
+			    principal_parts[part],expansion_flags(state));
 			if (fclose(stream)) {
 				free(record);
 				report_errno("cannot finalize derivation",path);

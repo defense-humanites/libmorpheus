@@ -80,3 +80,30 @@
 :de:poi ew_denom
 :de:po ew_denom poetic
 ;fu
+
+# The default expansion keeps the stem as the sources give it. A regular
+# derivation does not dissimilate its aspirates (i)xquofor-, not i)kquofor-),
+# an aorist passive stem keeps an aspirate before its own (a)riqmh/qhn), and
+# euphony applies only where the stem meets its suffix (not to the inner "sso"
+# or "ns"). The historical expansion keeps both alterations.
+:le:a)lhqeu/w
+:de:a)lhq euw
+
+:le:a)/xqomai
+:de:a)xq e_stem
+;ap,-esq
+
+:le:i)xquofore/w
+:de:i)xquofor ew_denom
+
+:le:glwssoxarite/w
+:de:glwssoxarit ew_denom
+
+:le:palinstate/w
+:de:palinstat ew_denom
+
+# A primary conjugation still dissimilates: qref- gives the present tref-.
+:le:tre/fw
+:de:qref reg_conj
+;pr
+;fu

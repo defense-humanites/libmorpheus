@@ -65,11 +65,11 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "3c8bf75e5f0735943bdbdb5bd272b23db643af433e17ba976c2c8f805eec20cb")
+   "ee399e9f3af34be6f9c3961041f54734e77042fdeffbde717942d04c1e72d016")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5")
+   "e04d4a7d6457cd4dd6044621197006400f425717541d9466e3e4e6cf0468fa2f")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
 endif()
 

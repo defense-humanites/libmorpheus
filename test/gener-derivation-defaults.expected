@@ -85,3 +85,36 @@
 :vs:pepohk  perf_act ew_denom poetic
 :vs:pepoh  perfp_vow ew_denom poetic
 :vs:pohq  aor_pass ew_denom poetic
+:le:a)lhqeu/w
+:vs:a)lhqeu  w_stem euw
+:vs:a)lhqeus  reg_fut euw
+:vs:a)lhqeus  aor1 euw
+:vs:h)lhqeuk  perf_act euw
+:vs:h)lhqeu  perfp_vow euw
+:vs:a)lhqeuq  aor_pass euw
+:le:a)/xqomai
+:vs:a)xqesq  aor_pass e_stem
+:le:i)xquofore/w
+:vs:i)xquofor  ew_pr ew_denom
+:vs:i)xquoforhs  reg_fut ew_denom
+:vs:i)xquoforhs  aor1 ew_denom
+:vs:i_)xquoforhk  perf_act ew_denom
+:vs:i_)xquoforh  perfp_vow ew_denom
+:vs:i)xquoforhq  aor_pass ew_denom
+:le:glwssoxarite/w
+:vs:glwssoxarit  ew_pr ew_denom
+:vs:glwssoxariths  reg_fut ew_denom
+:vs:glwssoxariths  aor1 ew_denom
+:vs:e)glwssoxarithk  perf_act ew_denom
+:vs:e)glwssoxarith  perfp_vow ew_denom
+:vs:glwssoxarithq  aor_pass ew_denom
+:le:palinstate/w
+:vs:palinstat  ew_pr ew_denom
+:vs:palinstaths  reg_fut ew_denom
+:vs:palinstaths  aor1 ew_denom
+:vs:pepalinstathk  perf_act ew_denom
+:vs:pepalinstath  perfp_vow ew_denom
+:vs:palinstathq  aor_pass ew_denom
+:le:tre/fw
+:vs:tref  w_stem reg_conj dissimilation
+:vs:qrey  reg_fut reg_conj

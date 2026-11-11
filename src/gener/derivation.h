@@ -6,8 +6,19 @@
 #include <stdio.h>
 
 /*
+ * Correct two stem alterations of the historical expansion
+ * (docs/gener-derivations.md): aspirate dissimilation applies neither to an
+ * aorist passive stem ending in its aspirate, as its 1989 exception meant,
+ * nor to a regular (`reg_deriv`) derivation, whose stem keeps the aspirates
+ * of its noun; consonant euphony applies only at the junction of the stem
+ * and the suffix. Without it, the expansion matches the historical `do_conj`.
+ */
+#define MORPHEUS_GENER_EXPAND_CORRECTED 1u
+
+/*
  * Expand one historical principal-part request into one explicit generation
  * record. The rule tables are resolved through the active MORPHLIB context.
+ * flags is 0 or MORPHEUS_GENER_EXPAND_CORRECTED.
  *
  * Returns 1 when a rule produced a record, 0 when no rule matched, and -1 on
  * malformed input, I/O failure, or allocation failure.
@@ -15,7 +26,8 @@
 int morpheus_gener_expand_derivation(FILE *output, const char *stem,
                                      const char *derivation,
                                      const char *global_keys,
-                                     const char *request_keys);
+                                     const char *request_keys,
+                                     unsigned int flags);
 
 /*
  * Describe one prepared `:vs:` record for the default principal parts:

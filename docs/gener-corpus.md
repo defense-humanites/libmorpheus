@@ -124,13 +124,15 @@ The qualified corpus contains 108,657 non-empty blocks before this rule and
 108,221 afterward, so 436 redundant blocks are removed. The resulting index
 contains 106,428 canonical lemmas and 172,766 records. CI prepares and indexes
 the 49 sources twice, requires byte-for-byte reproducibility, and freezes the
-SHA-256 of both the 282,407-line prepared corpus (`3c8bf75e…`) and the final
-index (`c1e7a37f…`).
+SHA-256 of both the 282,407-line prepared corpus (`ee399e9f…`) and the final
+index (`e04d4a7d…`).
 
 These figures include the default principal parts described in
 [Greek generation derivations](gener-derivations.md#default-principal-parts)
-and the seven [data patches](gener-data-patches.md). Prepared with
-`--requested-parts-only` and without patches, the corpus still gives the
+the seven [data patches](gener-data-patches.md) and the
+[corrected stem alterations](gener-derivations.md#corrected-stem-alterations).
+Prepared with `--requested-parts-only` and without patches, which keeps the
+historical expansion, the corpus still gives the
 historical 238,250-line source (`1c14949b…`) and the index of data 0.1.0 and
 native 0.4.6 (106,422 lemmas, 108,215 blocks, 129,097 records, `5aa76d8c…`);
 CI checks both.
