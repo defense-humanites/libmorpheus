@@ -73,6 +73,8 @@ MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_CORPUS_ROOT="$alpheios_stemlib/Greek" \
   -DMORPHEUS_GENER_CORPUS_MANIFEST="$source_directory/tools/gener-corpus-manifest.tsv" \
   -DMORPHEUS_GENER_CORPUS_EXCEPTIONS="$source_directory/tools/gener-corpus-exceptions.tsv" \
+  -DMORPHEUS_GENER_CORPUS_PATCHES="$source_directory/tools/gener-corpus-patches.tsv" \
+  -DMORPHEUS_GENER_DATA_MANIFEST="$source_directory/bindings/js/data/internal/gener-manifest.js" \
   -P "$source_directory/test/gener-corpus-manifest.cmake"
 MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_SOURCE_PREPARER="$build_directory/morpheus_gener_source_preparer" \
@@ -81,6 +83,7 @@ MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_CORPUS_ROOT="$alpheios_stemlib/Greek" \
   -DMORPHEUS_GENER_CORPUS_MANIFEST="$source_directory/tools/gener-corpus-manifest.tsv" \
   -DMORPHEUS_GENER_CORPUS_EXCEPTIONS="$source_directory/tools/gener-corpus-exceptions.tsv" \
+  -DMORPHEUS_GENER_CORPUS_PATCHES="$source_directory/tools/gener-corpus-patches.tsv" \
   -DMORPHEUS_GENER_CORPUS_WORK_DIR="$corpus_directory" \
   -P "$source_directory/test/gener-corpus.cmake"
 
