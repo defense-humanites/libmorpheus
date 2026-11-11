@@ -86,8 +86,9 @@ default or any file classification.
 ## Project marks: all rights reserved
 
 `docs/assets/libmorpheus-logo-clair.png` and
-`docs/assets/libmorpheus-logo-sombre.png` combine the project's poppy-capsule
-illustration with the name set in Instrument Serif (SIL Open Font License 1.1).
+`docs/assets/libmorpheus-logo-sombre.png` combine the stigmatic disc of the
+project's poppy-capsule illustration with the name set in Instrument Serif (SIL
+Open Font License 1.1).
 They are recorded by adjacent `.license` sidecars under
 `LicenseRef-libmorpheus-marks`, whose text is in
 `LICENSES/LicenseRef-libmorpheus-marks.txt`, and are excluded from both code

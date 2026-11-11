@@ -3,7 +3,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.png">
-    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.png" alt="libmorpheus" width="420">
+    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.png" alt="libmorpheus" width="395">
   </picture>
 </p>
 
