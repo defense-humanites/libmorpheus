@@ -57,6 +57,8 @@ The following remain MPL-2.0 even where the current path was created locally:
   checksums of derived corpus inputs;
 - `tools/gener-corpus-exceptions.tsv`, which records qualified anomalies in
   those inherited inputs;
+- `tools/gener-corpus-patches.tsv`, which records reviewed corrections of
+  seven of those inputs' lines and so holds the corrected lines themselves;
 - the stemlib binary and semantic exception manifests, which record inherited
   serialization differences and the remaining duplicate registry choice;
 - `tools/gener-derivation-manifest.tsv` and the generation-derivation fixtures,

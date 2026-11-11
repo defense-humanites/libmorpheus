@@ -73,6 +73,8 @@ MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_CORPUS_ROOT="$alpheios_stemlib/Greek" \
   -DMORPHEUS_GENER_CORPUS_MANIFEST="$source_directory/tools/gener-corpus-manifest.tsv" \
   -DMORPHEUS_GENER_CORPUS_EXCEPTIONS="$source_directory/tools/gener-corpus-exceptions.tsv" \
+  -DMORPHEUS_GENER_CORPUS_PATCHES="$source_directory/tools/gener-corpus-patches.tsv" \
+  -DMORPHEUS_GENER_DATA_MANIFEST="$source_directory/bindings/js/data/internal/gener-manifest.js" \
   -P "$source_directory/test/gener-corpus-manifest.cmake"
 MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_SOURCE_PREPARER="$build_directory/morpheus_gener_source_preparer" \
@@ -81,6 +83,7 @@ MORPHLIB=$source_directory/stemlib cmake \
   -DMORPHEUS_GENER_CORPUS_ROOT="$alpheios_stemlib/Greek" \
   -DMORPHEUS_GENER_CORPUS_MANIFEST="$source_directory/tools/gener-corpus-manifest.tsv" \
   -DMORPHEUS_GENER_CORPUS_EXCEPTIONS="$source_directory/tools/gener-corpus-exceptions.tsv" \
+  -DMORPHEUS_GENER_CORPUS_PATCHES="$source_directory/tools/gener-corpus-patches.tsv" \
   -DMORPHEUS_GENER_CORPUS_WORK_DIR="$corpus_directory" \
   -P "$source_directory/test/gener-corpus.cmake"
 
@@ -104,7 +107,7 @@ cat > "$temporary_directory/MORPHEUS-DATA.txt" <<EOF
 Prepared locally by libmorpheus tools/prepare-runtime-data.sh.
 Source dataset: alpheios-project/morpheus, pinned by this source checkout.
 Languages: Ancient Greek analysis and experimental Greek generation.
-Generation index SHA-256: eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf
+Generation index SHA-256: c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5
 
 This directory contains upstream linguistic data and a derived index. Review
 the upstream licensing evidence before redistributing it. See:

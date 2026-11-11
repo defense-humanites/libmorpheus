@@ -41,20 +41,47 @@ the corpus.
   lemma, in any of its blocks, covers it without a dialect, tense or mood
   restriction; a group whose keys fix a tense, a mood or a present
   formation keeps its requests, and a voice on the `:de:` line keeps the
-  parts that can carry it. The future perfect is not added. The Alpheios
-  index grows from 129,097 to 172,741 records (106,427 lemmas, five of
-  them new, such as ἀγαπάω); 8,786 lemmas gain forms, the others are
-  unchanged, and no added record fails at generation. Generated forms go
-  from 12.5 to 22.0 million. The index digest becomes `eeef2145…`
-  (prepared source `20082e2d…`) in the tree's data package, Python
-  manifest, runtime-data script and CI, so the next native, data and
-  Python releases must ship together. The preparer's
+  parts that can carry it. The future perfect is not added. A present that a
+  group receives because it requests nothing is a default too and covers
+  nothing. The Alpheios index grows from 129,097 to 172,750 records
+  (106,427 lemmas, five of them new, such as ἀγαπάω); 8,786 lemmas gain
+  forms, the others are unchanged, and no added record fails at
+  generation. Generated forms go from 12.5 to 22.1 million. The defaults
+  also extend two stem alterations inherited from the legacy expansion:
+  aspirate dissimilation, whose exception for aorist passives never
+  applies (1,541 added records, such as ἠλητεύθην for ἀληθεύω), and
+  euphony inside the stem (about 150 records, such as γλωσοχαριτήσω). The
+  preparer's
   `--requested-parts-only` option still reproduces the historical index
   `5aa76d8c…`; the benchmark keeps using it so that generation rows stay
   comparable with the baselines. `tools/gener-default-parts-report.py`
   measures the change, and the corpus test checks the reviewed blocks of
-  thirteen frequent verbs. The WebAssembly preparer of `@libmorpheus/data`
-  is regenerated and produces the same index byte for byte.
+  thirteen frequent verbs.
+- The generation source preparer applies reviewed data patches
+  (`--patches`, `tools/gener-corpus-patches.tsv`,
+  `docs/gener-data-patches.md`). Seven correct the `:de:` lines of the
+  Alpheios sources that no derivation type could read (#78, item 3): a
+  comma joining a key to the type (ἔχω's `reg_conj,syll_aug`, φράσσω,
+  βεβόλημαι), a truncated type (`ew`), a stray space, a stem type on a
+  `:de:` line, a noun declension on a `:de:` line. Each patch is checked
+  against the source line's fingerprint and supersedes its recorded
+  exception. The document gives each patch's evidence and marks three as
+  conjectural (δινεύω, μελιτόομαι, στείνω), because the Alpheios analysis
+  index does not know their stems under those lemmas; the manifest and the
+  document make the corrections available, as the sources' licence asks,
+  with a report ready for Alpheios. The preparer rejects a manifest out of
+  source order and a replacement with surrounding whitespace, accepts its
+  options in any order, and refuses `--patches` with
+  `--requested-parts-only`, which reproduces the unpatched historical
+  preparation. ἔχω regains its present system (ἔχω, εἶχον, ἔχεσκον); the
+  patches add 16 records, βεβόλημαι and 3,365 forms, and nothing else.
+  The data package embeds and applies the same manifest. With the default
+  principal parts, the index has 106,428 lemmas and 172,766 records; its
+  digest becomes `c1e7a37f…` (prepared source `3c8bf75e…`) in the tree's
+  data package, Python manifest, runtime-data script and CI, so the next
+  native, data and Python releases must ship together. The WebAssembly
+  preparer of `@libmorpheus/data` is regenerated and produces the same
+  index byte for byte.
 - Experimental generation no longer fails a whole lemma on one bad record
   (#78). Over the Alpheios index (106,422 lemmas), 275 lemmas failed with
   `MORPHEUS_INTERNAL_ERROR` because of 346 records: stem classes without an

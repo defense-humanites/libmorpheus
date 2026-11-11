@@ -73,3 +73,10 @@
 
 :le:split-lemma
 :vs:poihs aor1 ew_denom
+
+# The present a group receives because it requests nothing does not cover
+# the part: the other group still gets its own present.
+:le:implicit-present
+:de:poi ew_denom
+:de:po ew_denom poetic
+;fu

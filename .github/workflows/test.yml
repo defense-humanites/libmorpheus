@@ -144,7 +144,7 @@ jobs:
           test -d build/runtime-data-test/Greek
           test -f build/runtime-data-test/MORPHEUS-DATA.txt
           cmake -E sha256sum build/runtime-data-test/gener.index | \
-            grep -F 'eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf'
+            grep -F 'c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5'
 
   release:
     if: >-
@@ -403,7 +403,7 @@ jobs:
             --output ../../../build/node-data-gener-acquired
           cmake -E sha256sum \
             ../../../build/node-data-gener-acquired/gener.index | \
-            grep -F 'eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf'
+            grep -F 'c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5'
 
       - name: Test the data acquisition package
         working-directory: bindings/js/data
@@ -435,7 +435,7 @@ jobs:
             --output ../../../build/data-runtime-gener-acquired
           cmake -E sha256sum \
             ../../../build/data-runtime-gener-acquired/gener.index | \
-            grep -F 'eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf'
+            grep -F 'c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5'
           node --input-type=module -e '
             import { MorpheusLanguage, MorpheusLibrary } from "../node/index.js";
             const library = new MorpheusLibrary(process.env.MORPHEUS_LIBRARY);

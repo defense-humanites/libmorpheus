@@ -64,10 +64,11 @@ active derivation types under the historical parser:
 | `stemsrc/vbs.simp.ml` | 25,428 | `numi,poetic` | Comma is attached to the type token. |
 
 The historical program reports missing rule files for these records. The
-supported preparer must likewise reject them with source locations. It must not
+supported preparer likewise rejects them with source locations. It does not
 silently split commas, substitute similarly named types, or reinterpret an
-unreferenced rule file. Any correction belongs in a separately reviewed data
-patch with its own provenance and differential evidence.
+unreferenced rule file. All seven are now corrected by reviewed data patches,
+one line each, with their evidence and an upstream report:
+[gener-data-patches.md](gener-data-patches.md).
 
 ## Default principal parts
 
@@ -107,7 +108,10 @@ every principal part that the lemma does not already cover:
   which parts each block covers, then to add the defaults. A part one block
   covers is not added to another block of the same lemma. The parts covered
   are those of the sources, before any default is added, so two groups of one
-  block (ποιέω: poetic `po-` and `poi-`) both receive them.
+  block (ποιέω: poetic `po-` and `poi-`) both receive them. The present a
+  group receives because it requests nothing is such a default too: it covers
+  nothing, and another group of the lemma still gets its own present
+  (μελιτόομαι keeps `meli^t-` beside `melitt-`).
 - A group whose `:de:` keys fix a tense or mood is confined to its requests:
   `:de:a)rx euw pres` records a verb attested in the present only. So is a
   group with a present formation (`pres_redupl`, `n_infix`), which the
@@ -121,23 +125,51 @@ every principal part that the lemma does not already cover:
 - A part the derivation table does not define for the group's keys yields
   nothing, and a record identical to one of the block's is not repeated.
 
-Over the 49 corpus sources, the index grows from 129,097 to 172,741 records:
-8,786 lemmas gain forms, and five lemmas whose only request is a listed
-zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index. The other
-lemmas are unchanged, no form is removed, and no added record fails at
-generation: over the whole index, `morpheus_generate()` skips the same 346
-records as before. Generated forms grow from 12.5 to 22.0 million. On 120
-changed lemmas (seed 78), 93.2 % of the added forms analyze back to their
-lemma with the same tense and mood, against 95.1 % of the forms these lemmas
-generated before. Over the whole index, the first `morpheus_generate()` of a
-context goes from 31 to 43 ms and the 99th percentile of a request from 5.2
-to 9.4 ms; the median stays at 0.13 ms (2-vCPU Linux sandbox, indicative).
+Over the 49 corpus sources, the defaults grow the index from 129,097 to
+172,750 records: 8,786 lemmas gain forms, and five lemmas whose only request
+is a listed zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index.
+The other lemmas are unchanged, no form is removed, and no added record fails
+at generation: over the whole index, `morpheus_generate()` skips the same 346
+records as before. Generated forms grow from 12.5 to 22.1 million.
+
+Measured on the final index, with the data patches (`c1e7a37f…`), the 99th
+percentile of a `morpheus_generate()` request goes from 5.2 to 9.1 ms and the
+median from 0.12 to 0.13 ms; the first request of a context takes 35 ms with
+either index (2-vCPU Linux sandbox, indicative; an earlier run gave 31 and
+43 ms for that first request). The round trip depends heavily on the sample.
+On the 120 changed lemmas that seed 78 draws, 86.3 % of the added forms
+analyze back to their lemma with the same tense and mood, against 94.6 % of
+the forms these lemmas generated before. The 120 lemmas that the same seed
+drew before the data patches, when two fewer lemmas had changed, give 93.2 %
+and 95.1 % on the final index, as they did without the patches. The gap comes
+from lemmas none of whose added forms analyze back: compound-only verbs
+(`comp_only`: δημέω, μηλόω, κιδαρόω…), which analysis rejects as simple
+words, their historical forms included, and stems that the expansion alters
+(below).
 
 The rule follows the sources and does not correct them. ἀγγέλλω has
 explicit, unrestricted `:vs:a)ggel aor2` and `aor2_pass` records, so it
 keeps ἤγγελον and ἠγγέλην as its only aorists and does not receive ἤγγειλα
-or ἠγγέλθην. The seven invalid derivations above, ἔχω's present among them,
-stay rejected until a reviewed data patch corrects them.
+or ἠγγέλθην. ἔχω's present came from one of the seven invalid derivations
+above; the data patches now restore it.
+
+The expansion also inherits two stem alterations from the legacy derivation
+code, and the defaults extend them to many more lemmas:
+
+- **Aspirate dissimilation** (`do_dissim`). An aspirate followed by another
+  aspirate consonant loses its aspiration. Its 1989 exception for aorist
+  passives (`a)riqmh/qhn not a)ritmh/qhn`) never applies, because it compares
+  the principal part through the `VERBSTEM` bit instead of `PPARTMASK`. The
+  defaults add 1,541 records marked `dissimilation` in 1,194 lemmas (the
+  historical index has 90 in 86 lemmas), 1,253 of them aorist passives:
+  ἀληθεύω gets ἠλητεύθην, βακχιάζω ἐβακκιάσθην, ἰχθυοφορέω ἰκθυοφορήσω.
+  Analysis attributes none of these three forms to its lemma.
+- **Euphony inside the stem.** An interior σσ or νσ is simplified as if it
+  stood at the junction with the suffix, in about 150 added records of some
+  30 lemmas: γλωσσοχαριτέω gets γλωσοχαριτήσω, παλινστατέω παλιστατήσω.
+
+Correcting either also changes the expansion of explicit requests, and so the
+historical index, and is left to a separate decision.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
@@ -146,9 +178,10 @@ records, a round trip of a seeded sample of changed lemmas through analysis,
 and the forms added or removed for a list of frequent verbs. A round trip
 measures parity with analysis, which accepts more than a paradigm should
 show; it does not prove that an added form exists. The reviewed verbs are
-therefore checked in CI: the corpus test requires that ἔχω, πάσχω, πίπτω,
-ὁράω, μένω, ἵστημι, βούλομαι, λύω and ἀκούω keep their historical blocks, and
-that ποιέω, δηλόω, ἀγγέλλω and ἀγαπάω receive exactly their reviewed records.
+therefore checked in CI: the corpus test requires that πάσχω, πίπτω, ὁράω,
+μένω, ἵστημι, βούλομαι, λύω and ἀκούω keep their historical blocks, that
+ποιέω, δηλόω, ἀγγέλλω and ἀγαπάω receive exactly their reviewed records, and
+that ἔχω receives exactly the four records of its patched present.
 
 `--requested-parts-only` keeps the historical behavior. It is an option of
 the preparer, used by the oracle comparison and by the benchmark; the data

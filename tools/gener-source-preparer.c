@@ -2,6 +2,7 @@
 
 // SPDX-License-Identifier: MPL-2.0
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -41,6 +42,24 @@ typedef struct {
 	source_exception *items;
 	size_t count;
 } exception_set;
+
+/*
+ * A reviewed correction of one source line (docs/gener-data-patches.md): the
+ * line at path:line_number, whose trimmed text has the given SHA-256, is read
+ * as replacement instead. A patch supersedes an exception at the same place.
+ */
+typedef struct {
+	char *path;
+	unsigned long long line_number;
+	char sha256[65];
+	char *replacement;
+	int seen;
+} source_patch;
+
+typedef struct {
+	source_patch *items;
+	size_t count;
+} patch_set;
 
 typedef struct {
 	char *data;
@@ -83,6 +102,13 @@ typedef struct {
 	/* Output offset of the current lemma's first record, and its key. */
 	size_t lemma_start;
 	char lemma_key[LINE_CAPACITY];
+	/*
+	 * Output offsets of the block's records that a group without requests
+	 * received implicitly (the historical present): they do not cover parts.
+	 */
+	size_t *implicit_records;
+	size_t implicit_count;
+	size_t implicit_capacity;
 	/* First pass: record each block's coverage, add no default. */
 	int collecting;
 	coverage_map *coverage;
@@ -638,12 +664,19 @@ block_covered_parts(const prepare_state *state, unsigned *covered)
 	while (cursor < end) {
 		const char *next = memchr(cursor,'\n',(size_t)(end - cursor));
 		size_t length = (size_t)((next ? next : end) - cursor);
+		size_t offset = (size_t)(cursor - state->output->data);
+		size_t implicit;
 		int part;
 		int restricted;
 
 		if (length >= sizeof line)
 			return 0;
-		if (length > 4 && !strncmp(cursor,":vs:",4)) {
+		for (implicit = 0; implicit != state->implicit_count; implicit++) {
+			if (state->implicit_records[implicit] == offset)
+				break;
+		}
+		if (implicit == state->implicit_count && length > 4 &&
+		    !strncmp(cursor,":vs:",4)) {
 			memcpy(line,cursor,length);
 			line[length] = 0;
 			if (!morpheus_gener_record_traits(line,&part,&restricted))
@@ -786,10 +819,35 @@ static int
 flush_derivation(prepare_state *state, const char *path,
                  unsigned long long line_number)
 {
+	size_t start = state->output->size;
+
 	if (!state->have_derivation || state->have_explicit_request)
 		return 1;
 	state->have_explicit_request = 1;
-	return expand_request(state,"pr",path,line_number);
+	if (!expand_request(state,"pr",path,line_number))
+		return 0;
+	/*
+	 * The present a group receives because it requests nothing is a default
+	 * too, not an attestation: it must not keep another group of the lemma
+	 * (meli^t- beside melitt- in melito/omai) from its own present.
+	 */
+	if (state->output->size != start) {
+		if (state->implicit_count == state->implicit_capacity) {
+			size_t capacity = state->implicit_capacity ?
+			                  state->implicit_capacity * 2 : 8;
+			size_t *grown = realloc(state->implicit_records,
+			                        capacity * sizeof *grown);
+
+			if (!grown) {
+				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+				return 0;
+			}
+			state->implicit_records = grown;
+			state->implicit_capacity = capacity;
+		}
+		state->implicit_records[state->implicit_count++] = start;
+	}
+	return 1;
 }
 
 static void
@@ -908,6 +966,162 @@ apply_exception(prepare_state *state, source_exception *exception,
 }
 
 static void
+free_patches(patch_set *patches)
+{
+	size_t index;
+
+	for (index = 0; index != patches->count; index++) {
+		free(patches->items[index].path);
+		free(patches->items[index].replacement);
+	}
+	free(patches->items);
+	patches->items = NULL;
+	patches->count = 0;
+}
+
+/* path<TAB>line<TAB>SHA-256 of the trimmed source line<TAB>replacement */
+static int
+load_patches(patch_set *patches, const char *path)
+{
+	FILE *input = fopen(path,"r");
+	char line[LINE_CAPACITY];
+	unsigned long long manifest_line = 0;
+	int result = 0;
+
+	if (!input) {
+		report_errno("cannot open",path);
+		return 0;
+	}
+	while (fgets(line,sizeof line,input)) {
+		char *fields[4];
+		char *cursor;
+		char *end;
+		size_t replacement_length;
+		unsigned long long source_line;
+		source_patch *grown;
+		size_t field;
+
+		manifest_line++;
+		cursor = line;
+		if (!*cursor || *cursor == '\n' || *cursor == '\r' || *cursor == '#')
+			continue;
+		fields[0] = cursor;
+		for (field = 1; field != 4; field++) {
+			cursor = strchr(cursor,'\t');
+			if (!cursor)
+				break;
+			*cursor++ = 0;
+			fields[field] = cursor;
+		}
+		if (field != 4 || strchr(fields[3],'\t'))
+			goto invalid;
+		end = fields[3] + strlen(fields[3]);
+		while (end != fields[3] && (end[-1] == '\n' || end[-1] == '\r'))
+			*--end = 0;
+		replacement_length = (size_t)(end - fields[3]);
+		errno = 0;
+		source_line = strtoull(fields[1],&end,10);
+		/* The replacement is a trimmed line, as the preparer reads them. */
+		if (errno || !source_line || *end || !*fields[0] ||
+		    !valid_sha256(fields[2]) || !replacement_length ||
+		    isspace((unsigned char)fields[3][0]) ||
+		    isspace((unsigned char)fields[3][replacement_length - 1]))
+			goto invalid;
+		/* Entries follow the sources: by path, then by line, once each. */
+		if (patches->count) {
+			const source_patch *previous = patches->items + patches->count - 1;
+			int order = strcmp(fields[0],previous->path);
+
+			if (order < 0 || (!order && source_line <= previous->line_number)) {
+				fprintf(stderr,
+				        "morpheus-gener-prepare: %s:%llu: patches are not in source order\n",
+				        path,manifest_line);
+				goto finish;
+			}
+		}
+		grown = realloc(patches->items,(patches->count + 1) * sizeof *grown);
+		if (!grown) {
+			fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+			goto finish;
+		}
+		patches->items = grown;
+		grown += patches->count;
+		grown->path = strdup(fields[0]);
+		grown->replacement = strdup(fields[3]);
+		if (!grown->path || !grown->replacement) {
+			free(grown->path);
+			free(grown->replacement);
+			fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+			goto finish;
+		}
+		grown->line_number = source_line;
+		memcpy(grown->sha256,fields[2],sizeof grown->sha256);
+		grown->seen = 0;
+		patches->count++;
+		continue;
+
+invalid:
+		fprintf(stderr,
+		        "morpheus-gener-prepare: %s:%llu: invalid patch record\n",
+		        path,manifest_line);
+		goto finish;
+	}
+	if (ferror(input)) {
+		report_errno("cannot read",path);
+		goto finish;
+	}
+	result = 1;
+
+finish:
+	fclose(input);
+	return result;
+}
+
+static source_patch *
+find_patch(patch_set *patches, const char *path,
+           unsigned long long line_number)
+{
+	size_t index;
+
+	if (!patches)
+		return NULL;
+	for (index = 0; index != patches->count; index++) {
+		source_patch *patch = patches->items + index;
+
+		if (patch->line_number == line_number &&
+		    path_has_suffix(path,patch->path))
+			return patch;
+	}
+	return NULL;
+}
+
+static void
+reset_patches(patch_set *patches)
+{
+	size_t index;
+
+	for (index = 0; index != patches->count; index++)
+		patches->items[index].seen = 0;
+}
+
+static int
+all_patches_seen(const patch_set *patches)
+{
+	size_t index;
+
+	for (index = 0; index != patches->count; index++) {
+		if (!patches->items[index].seen) {
+			fprintf(stderr,
+			        "morpheus-gener-prepare: unmatched patch: %s:%llu\n",
+			        patches->items[index].path,
+			        patches->items[index].line_number);
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static void
 reset_exceptions(exception_set *exceptions)
 {
 	size_t index;
@@ -1014,7 +1228,8 @@ write_line(prepared_buffer *output, const char *line)
 }
 
 static int
-prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
+prepare_file(prepare_state *state, exception_set *exceptions,
+             patch_set *patches, const char *path)
 {
 	FILE *input = fopen(path,"r");
 	char line[LINE_CAPACITY];
@@ -1033,10 +1248,12 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 	state->have_explicit_request = 0;
 	state->skip_invalid_derivation = 0;
 	state->group_count = 0;
+	state->implicit_count = 0;
 
 	while (fgets(line,sizeof line,input)) {
 		char *content;
 		size_t length;
+		int patched;
 
 		line_number++;
 		length = strlen(line);
@@ -1047,13 +1264,47 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 			goto finish;
 		}
 		content = trim(line);
+		patched = 0;
+		{
+			source_patch *patch = find_patch(patches,path,line_number);
+
+			if (patch) {
+				char actual_sha256[65];
+				source_exception *superseded;
+
+				sha256_hex(content,actual_sha256);
+				if (strcmp(actual_sha256,patch->sha256) || patch->seen) {
+					fprintf(stderr,
+					        "morpheus-gener-prepare: %s:%llu: patch source fingerprint mismatch\n",
+					        path,line_number);
+					goto finish;
+				}
+				patch->seen = 1;
+				/* The patch replaces the observation of the defect. */
+				superseded = find_exception(exceptions,path,line_number);
+				if (superseded) {
+					if (superseded->seen ||
+					    strcmp(superseded->sha256,patch->sha256)) {
+						fprintf(stderr,
+						        "morpheus-gener-prepare: %s:%llu: patch and exception disagree\n",
+						        path,line_number);
+						goto finish;
+					}
+					superseded->seen = 1;
+				}
+				if (!copy_text(line,sizeof line,patch->replacement))
+					goto write_error;
+				content = line;
+				patched = 1;
+			}
+		}
 		if (!*content || *content == '#' || *content == '?')
 			continue;
 		if (state->skip_invalid_derivation &&
 		    (*content == ';' || *content == '@'))
 			continue;
 		state->skip_invalid_derivation = 0;
-		{
+		if (!patched) {
 			source_exception *exception =
 			    find_exception(exceptions,path,line_number);
 
@@ -1097,6 +1348,7 @@ prepare_file(prepare_state *state, exception_set *exceptions, const char *path)
 			if (!write_line(state->output,content))
 				goto write_error;
 			state->lemma_start = state->output->size;
+			state->implicit_count = 0;
 			continue;
 		}
 
@@ -1277,6 +1529,8 @@ main(int argc, char **argv)
 	coverage_map coverage = { 0 };
 	exception_set exceptions = { 0 };
 	exception_set *active_exceptions = NULL;
+	patch_set patches = { 0 };
+	patch_set *active_patches = NULL;
 	const char *output_path;
 	int input;
 	int result = EXIT_FAILURE;
@@ -1290,21 +1544,39 @@ main(int argc, char **argv)
 	}
 #endif
 
-	input = 1;
-	if (argc > input && !strcmp(argv[input],"--requested-parts-only")) {
-		state.requested_parts_only = 1;
-		input++;
+	/* Options precede the output path, in any order, each at most once. */
+	for (input = 1; input < argc && !strncmp(argv[input],"--",2); input++) {
+		if (!strcmp(argv[input],"--requested-parts-only") &&
+		    !state.requested_parts_only) {
+			state.requested_parts_only = 1;
+		} else if (!strcmp(argv[input],"--exceptions") && input + 1 < argc &&
+		           !active_exceptions) {
+			if (!load_exceptions(&exceptions,argv[++input]))
+				goto finish;
+			active_exceptions = &exceptions;
+		} else if (!strcmp(argv[input],"--patches") && input + 1 < argc &&
+		           !active_patches) {
+			if (!load_patches(&patches,argv[++input]))
+				goto finish;
+			active_patches = &patches;
+		} else {
+			goto usage;
+		}
 	}
-	if (argc - input >= 4 && !strcmp(argv[input],"--exceptions")) {
-		if (!load_exceptions(&exceptions,argv[input + 1]))
-			goto finish;
-		active_exceptions = &exceptions;
-		input += 2;
+	/*
+	 * --requested-parts-only reproduces the historical expansion, whose
+	 * index is pinned (5aa76d8c...): it reads the sources unpatched.
+	 */
+	if (state.requested_parts_only && active_patches) {
+		fprintf(stderr,
+		        "morpheus-gener-prepare: --requested-parts-only reads the sources unpatched; it cannot be combined with --patches\n");
+		goto finish;
 	}
 	if (argc - input < 2) {
+usage:
 		fprintf(stderr,
-		        "usage: morpheus_gener_source_preparer [--requested-parts-only] [--exceptions MANIFEST] OUTPUT INPUT...\n");
-		return EXIT_FAILURE;
+		        "usage: morpheus_gener_source_preparer [--requested-parts-only] [--exceptions MANIFEST] [--patches MANIFEST] OUTPUT INPUT...\n");
+		goto finish;
 	}
 	output_path = argv[input++];
 	state.output = &prepared;
@@ -1319,22 +1591,28 @@ main(int argc, char **argv)
 
 		state.collecting = 1;
 		for (pass = input; pass != argc; pass++) {
-			if (!prepare_file(&state,active_exceptions,argv[pass]))
+			if (!prepare_file(&state,active_exceptions,active_patches,
+			                  argv[pass]))
 				goto finish;
 		}
-		if (active_exceptions && !all_exceptions_seen(active_exceptions))
+		if ((active_exceptions && !all_exceptions_seen(active_exceptions)) ||
+		    (active_patches && !all_patches_seen(active_patches)))
 			goto finish;
 		merge_coverage(&coverage);
 		if (active_exceptions)
 			reset_exceptions(active_exceptions);
+		if (active_patches)
+			reset_patches(active_patches);
 		prepared.size = 0;
 		state.collecting = 0;
 	}
 	for (; input != argc; input++) {
-		if (!prepare_file(&state,active_exceptions,argv[input]))
+		if (!prepare_file(&state,active_exceptions,active_patches,
+		                  argv[input]))
 			goto finish;
 	}
-	if (active_exceptions && !all_exceptions_seen(active_exceptions))
+	if ((active_exceptions && !all_exceptions_seen(active_exceptions)) ||
+	    (active_patches && !all_patches_seen(active_patches)))
 		goto finish;
 	if (!write_output(&prepared,output_path))
 		goto finish;
@@ -1342,8 +1620,10 @@ main(int argc, char **argv)
 
 finish:
 	free_exceptions(&exceptions);
+	free_patches(&patches);
 	free_coverage(&coverage);
 	free(state.groups);
+	free(state.implicit_records);
 	free(state.base_prefix);
 	free(prepared.data);
 	return result;
