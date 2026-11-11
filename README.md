@@ -13,8 +13,7 @@
   <a href="docs/public-api.md">C API</a> ·
   <a href="bindings/python/README.md">Python</a> ·
   <a href="bindings/js/node/README.md">Node.js</a> ·
-  <a href="bindings/js/wasm/README.md">WebAssembly</a> ·
-  <a href="https://humanites.fr/projets/libmorpheus">humanites.fr</a>
+  <a href="bindings/js/wasm/README.md">WebAssembly</a>
 </p>
 
 # libmorpheus
@@ -22,7 +21,14 @@
 `libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
 morphological analyzer for Ancient Greek and Latin. It turns the historical C
 programs into an installable C17 shared library with a stable, opaque ABI, and
-comes with JavaScript and Python bindings.
+comes with Python, Node.js and WebAssembly distributions.
+
+Unlike the original programs, which kept their state in global variables, the
+library is thread-safe: each context holds its own state, so an application
+can give each thread its own context and analyze or generate forms in
+parallel. The runtime also
+analyzes about three times faster than the first release of the library (see
+[Performance](#performance)).
 
 ## Distributions
 
@@ -31,12 +37,13 @@ comes with JavaScript and Python bindings.
 | C | Release archives for Linux x86-64, Linux aarch64 and macOS arm64, or [build from source](docs/building.md) | [Public C API](docs/public-api.md) |
 | Python 3.11+ | `pip install libmorpheus` | [Python guide](bindings/python/README.md) |
 | Node.js 20+ | `npm install @libmorpheus/node` | [Node.js guide](bindings/js/node/README.md) |
-| WebAssembly (experimental) | `npm install @libmorpheus/wasm` | [WebAssembly guide](bindings/js/wasm/README.md) |
+| WebAssembly | `npm install @libmorpheus/wasm` | [WebAssembly guide](bindings/js/wasm/README.md) |
 
-No distribution contains linguistic data: each guide explains how to acquire a
-stem library, which [`@libmorpheus/data`](bindings/js/data/README.md) can
-download and verify. The Deno FFI binding is no longer maintained; Deno
-applications can use the WebAssembly binding from JSR.
+No distribution contains linguistic data. Morpheus reads compiled binary
+databases called stem libraries (stemlibs), which applications acquire
+separately: each guide explains how,
+[`@libmorpheus/data`](bindings/js/data/README.md) downloads and verifies them,
+and [Runtime data](#runtime-data) describes the available datasets.
 
 ## Example
 
@@ -83,9 +90,47 @@ The public runtime includes:
 - `cruncher`, retained as a compatibility client of the public library;
 - CMake and `pkg-config` installation metadata.
 
-> [!NOTE]
-> Native archives and the distributed packages contain no linguistic data. Applications
-> must acquire a compatible stem library separately; see [Runtime data](#runtime-data).
+## Performance
+
+The figures below come from the release benchmark
+([`bench/compare.mjs`](docs/benchmarks.md)), run on the same 12-core Apple
+Silicon host for every release with the pinned Alpheios stem library. Analysis
+times cover the 24 Greek words of the test corpus; generation produces the
+complete paradigm of ἵημι (`i(/hmi`). They give orders of magnitude, not
+guarantees: the reports are retained in
+[`bench/release-evidence/`](bench/release-evidence/).
+
+**Since the first release.** Analysis time per word, warm:
+
+| | 0.1.0 (August 2026) | 0.4.6 (November 2026) |
+| --- | ---: | ---: |
+| `cruncher`, one process | 668 µs | 202 µs |
+| Library, one context | 662 µs | 215 µs |
+| Library, four contexts in parallel | 284 µs | 88 µs |
+
+Four contexts thus analyze about 11,000 words per second, where a single
+`cruncher` process of the first release analyzed 1,500. Most of the gain comes
+from 0.4.6, which removed thread-local reads and repeated file opening from the
+search for candidate stems ([release notes](docs/release-0.4.6.md)).
+
+**C and its distributions.** Analysis throughput, in words per second, with
+native 0.4.6:
+
+| Distribution | 1 context | 2 contexts | 4 contexts |
+| --- | ---: | ---: | ---: |
+| C (`cruncher`, one process) | 4,415 | – | – |
+| Python | 4,675 | 7,606 | 10,988 |
+| Node.js | 4,183 | 7,064 | 10,636 |
+| WebAssembly (one worker per context) | 3,798 | 6,693 | 10,949 |
+
+The Python and Node.js bindings analyze at the speed of the C runtime. The
+WebAssembly module, measured in a separate run against Node.js, reaches 86 to
+93 % of the native throughput; it needs 12 to 24 ms to start a pool and about
+25 MiB per instance, against a few milliseconds and a few MiB for native
+contexts ([comparison](docs/wasm.md#third-run-native-046-and-module-014)).
+Generating the paradigm of ἵημι takes 3.7 ms through Node.js and 9.8 ms
+through Python at one context, and up to 933 paradigms per second through
+Node.js with four contexts ([benchmarks](docs/benchmarks.md)).
 
 ## Runtime data
 
