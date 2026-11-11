@@ -9,6 +9,24 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-11
+
+Target project version: **0.5.0**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release changes experimental generation: a lemma no longer fails
+because of one record the engine cannot generate, that record is skipped and
+counted through a new function (an ABI 2 addition), generated records carry
+the degree and flags analysis reports, and surfaces lose their stem
+hyphens. Contexts opened through the public API no longer print the engine's
+diagnostics. Analysis results are unchanged. It is the release WebAssembly
+binding 0.2.0 is compiled from and declares. `@libmorpheus/data` 0.2.0
+prepares a new generation index: generation is now defined as the inverse of
+analysis, every regular derivation is complete, seven source lines are
+patched and two inherited stem alterations are corrected. The binding
+releases published since 0.4.6 (Node.js 0.1.4 and 0.2.0, Python 0.2.1 and
+0.2.2) are listed below; the Node.js and Python bindings ship the skipped
+count and declare this release in their next versions.
+
 ### Added
 
 - `morpheus_generation_result_skipped_records()` reports how many of a

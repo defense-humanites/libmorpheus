@@ -38,7 +38,7 @@ tag for the native and Deno tracks.
 Each native release records its version and ABI decision in
 `release-<version>.md`; binding releases use a track-qualified name such as
 `release-node-0.2.0.md` or `release-wasm-0.1.4.md`. The most recent native
-release is recorded in `release-0.4.6.md`; the earlier decisions remain
+release is recorded in `release-0.5.0.md`; the earlier decisions remain
 historical evidence.
 
 ## 1. Version and compatibility decisions

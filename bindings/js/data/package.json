@@ -1,6 +1,6 @@
 {
   "name": "@libmorpheus/data",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Acquires pinned Morpheus stem datasets from their upstream repositories for libmorpheus: verifies them, writes the runtime subset and a manifest, builds the generation index. Contains no linguistic data.",
   "type": "module",
   "types": "./data.d.ts",
