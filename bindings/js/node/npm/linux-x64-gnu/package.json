@@ -1,6 +1,6 @@
 {
   "name": "@libmorpheus/node-linux-x64-gnu",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Linux x64 glibc Node-API addon for @libmorpheus/node",
   "license": "AGPL-3.0-or-later",
   "os": ["linux"],

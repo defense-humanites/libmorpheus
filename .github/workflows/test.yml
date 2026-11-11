@@ -470,7 +470,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11', '3.14']
+        python-version: ['3.11', '3.14', '3.15']
     steps:
       - name: Check out sources
         uses: actions/checkout@v5

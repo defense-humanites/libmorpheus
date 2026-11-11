@@ -9,6 +9,15 @@ the corpus.
 
 ## [Unreleased]
 
+### Changed
+
+- Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
+  0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
+  instead of 0.4.6 and ship the skipped generation-record count (see
+  0.5.0 below). Node.js pins `@libmorpheus/data` 0.2.0, and Python's
+  `--gener-index` verifies that package's index (`a2f97677…`). The Python
+  binding is qualified on Python 3.11, 3.14 and 3.15. C ABI 2 unchanged.
+
 ## [0.5.0] - 2026-11-11
 
 Target project version: **0.5.0**. C ABI: **2**. Shared-library SONAME: **1**.
