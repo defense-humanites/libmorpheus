@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/libmorpheus-logo-sombre.png">
-    <img src="docs/assets/libmorpheus-logo-clair.png" alt="libmorpheus" width="490">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/libmorpheus-logo-sombre.svg">
+    <img src="docs/assets/libmorpheus-logo-clair.svg" alt="libmorpheus" width="484">
   </picture>
 </p>
 

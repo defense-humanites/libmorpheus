@@ -2,8 +2,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.png">
-    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.png" alt="libmorpheus" width="395">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.svg">
+    <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.svg" alt="libmorpheus" width="390">
   </picture>
 </p>
 
