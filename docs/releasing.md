@@ -167,6 +167,23 @@ jobs again, re-run all jobs of each of the tag's runs, and check that every
 run lists all its jobs before reading its result. Nothing is published until
 the platform run's own qualification jobs pass, so the tag stays where it is.
 
+A tag created on a commit that does not declare the tag's version is a third
+case, and the only one where the tag moves. Each binding and data
+publication workflow compares the tag with the versions of the tagged tree
+in its first step, before it contacts a registry. The native track builds its
+archives under the tree's version, so its publication job finds no asset
+named for the tag after the qualification. A wrong commit stops the run
+there, and re-running it on the same commit cannot succeed. `node-v0.3.0`
+was first pushed on the merge that preceded the binding's version change:
+the publication run failed at its version check, and the tag's Linux CI
+and platform runs were cancelled. Before moving such a tag, confirm that
+nothing was published under that version: no version on npm (the facade
+and every platform package), JSR or PyPI, and no GitHub release for the
+tag. Then cancel the tag's remaining runs, delete the tag (`git push --delete
+origin <tag>`, then `git tag -d <tag>`), recreate it on the intended commit
+and push it again. Once anything is published under a version, its tag
+never moves, and a wrong publication is corrected by a new version.
+
 ## 4. ABI and consumer checks
 
 - `public_symbols` must contain exactly the functions in
