@@ -13,7 +13,7 @@ foreach(field IN ITEMS name version license type)
   endif()
 endforeach()
 if(NOT node_name STREQUAL "@libmorpheus/node" OR
-   NOT node_version STREQUAL "0.2.0" OR
+   NOT node_version STREQUAL "0.3.0" OR
    NOT node_license STREQUAL "AGPL-3.0-or-later" OR
    NOT node_type STREQUAL "module")
   message(FATAL_ERROR
