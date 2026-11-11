@@ -87,30 +87,65 @@ instead of 385–403 µs: unchanged within noise.
 - C ABI: **2**
 - SONAME major: **1**
 - Previous release tag: `v0.4.6`
-- Benchmark evidence: pending (maintainer's schema 3 report from the
-  controlled Apple Silicon host, on the candidate commit)
+- Benchmark evidence: **accepted**
 - Pre-release Linux CI: pending (the tagged commit's run)
 - Pre-release platform qualification: pending (manual dispatch with
   `package_artifacts` on the exact candidate commit)
 
-## Expected benchmark outcome
+## Benchmark evidence
 
-The release report is compared with
-[`benchmark-0.4.6.json`](../bench/release-evidence/benchmark-0.4.6.json),
-the accepted 0.4.6 report (`complete` scope):
+The schema 3 report from source revision
+`fa7f0a6ad7adae09e17cefa46df0119d1d080399` (the merge of the release
+preparation) uses the pinned Alpheios stemlib revision
+`4632415fe93c85e9fdca47a0c5a13f31385f0023` on the controlled Apple Silicon
+host, with the toolchain of the baseline (Apple Clang 21 build 2100.4.1.1,
+Node.js 26.13.0, libuv thread pool of four) and the tree's Node.js binding,
+0.2.0. It is retained as
+[`benchmark-0.5.0.json`](../bench/release-evidence/benchmark-0.5.0.json);
+its SHA-256 is
+`0319d6a02e9fe549a2368da7e501dc2c348ee499c3af97aeddce5d005cc9611d`. The
+release validator passes with the recorded source revision and compiler,
+and the comparison with
+[`benchmark-0.4.6.json`](../bench/release-evidence/benchmark-0.4.6.json)
+has `complete` scope. All thirteen result counts equal the baseline's.
 
-```sh
-sh bench/release.sh benchmark-0.5.0.json \
-  bench/release-evidence/benchmark-0.4.6.json
-```
+| Row | 0.4.6 (µs) | 0.5.0 (µs) | Change |
+| --- | --- | --- | --- |
+| `node`, 1 context | 215 | 213 | −0.7 % |
+| `node`, 2 contexts | 132 | 131 | −0.7 % |
+| `node`, 4 contexts | 87 | 86 | −1.4 % |
+| `cruncher-persistent` | 202 | 211 | +4.4 % |
+| `cruncher-cold` | 2,743 | 2,700 | −1.6 % |
+| maximal generation, warm, 1 / 2 / 4 contexts | 5,729 / 3,598 / 3,751 | 3,659 / 1,755 / 1,113 | −36.1 / −51.2 / −70.3 % |
+| small generation, warm, 1 / 2 / 4 contexts | 120 / 27 / 31 | 35 / 21 / 14 | −71.1 / −22.9 / −55.0 % |
+| maximal / small generation, cold | 21,077 / 14,820 | 19,036 / 14,708 | −9.7 / −0.8 % |
 
-All thirteen result counts must equal the baseline's: the benchmark
-generates from the historical index (`--historical`), whose benchmark lemmas
-have no unusable record, and hyphens or flags change no count. Analysis rows
-should stay within noise. Generation rows may move a little in either
-direction: each record now combines four flag sets and copies its surface
-without hyphens, which the sandbox measurement above does not show as a
-cost.
+Analysis is within noise. `cruncher-persistent` is 4.4 % slower than in the
+baseline but within the 202–227 µs that the retained reports since 0.4.6
+measured for the same runtime analysis; analysis code did not change.
+
+The generation gains are not this release's. The baseline was measured
+through Node.js binding 0.1.3. The tree's binding decodes named results
+directly since pull request #71, published in Node.js 0.2.0, and the gains
+come from that decoding. The reports that measured that binding on native
+0.4.6 isolate the runtime. Against
+[`benchmark-0.4.6-bindings-2.json`](../bench/release-evidence/benchmark-0.4.6-bindings-2.json),
+maximal warm generation moves by +0.1, −1.7 and +3.7 %, small warm
+generation by −13.1, +39.3 and +14.8 % (12 to 40 µs per operation), and
+cold generation by −5.7 and −10.8 %. Against
+[`benchmark-0.4.6-node-decoding.json`](../bench/release-evidence/benchmark-0.4.6-node-decoding.json),
+which measured maximal warm generation 3,170 µs at one context where
+`bindings-2` measured 3,656 µs, it moves by +15.4, +9.5 and +9.6 %. The
+spread between those two reports of the same code bounds the noise. The
+sandbox comparison above, without the binding, found native 0.5.0
+generation 6 % faster than 0.4.6's. No claim is made for generation in
+either direction.
+
+Peak RSS falls on every row (−9.8 to −56.4 %), from the binding's decoding
+for the generation rows. The RSS growth of the four-context analysis row
+(3.4 MiB against 0.6 MiB) moves as the order of allocations within one
+process does. This report replaces `benchmark-0.4.6.json` as the baseline
+of the next native release.
 
 ## Remaining authorization
 
