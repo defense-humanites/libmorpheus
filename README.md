@@ -30,6 +30,28 @@ parallel. The runtime also
 analyzes about three times faster than the first release of the library (see
 [Performance](#performance)).
 
+## Project status
+
+| Available operation | Ancient Greek | Latin | Status |
+| --- | :---: | :---: | --- |
+| Analyze an inflected form | Yes | Yes | Supported |
+| Generate forms from a lemma | Yes | No | Experimental |
+
+Generation is the inverse of analysis: it returns the forms that the analyzer
+accepts for a lemma. These include dialectal, poetic and late variants, and
+regular forms that no text may attest. Use it to search texts by lemma, to
+precompute a form-to-lemma table or to check the stem data; it does not give
+a reference paradigm. See
+[Greek lemma generation](docs/public-api.md#greek-lemma-generation).
+
+The public runtime includes:
+
+- structured, caller-owned analysis and generation results;
+- per-request analysis options and generation filters;
+- isolated contexts that can be used concurrently;
+- `cruncher`, retained as a compatibility client of the public library;
+- CMake and `pkg-config` installation metadata.
+
 ## Distributions
 
 | Distribution | Install | Guide |
@@ -39,11 +61,28 @@ analyzes about three times faster than the first release of the library (see
 | Node.js 20+ | `npm install @libmorpheus/node` | [Node.js guide](bindings/js/node/README.md) |
 | WebAssembly | `npm install @libmorpheus/wasm` | [WebAssembly guide](bindings/js/wasm/README.md) |
 
-No distribution contains linguistic data. Morpheus reads compiled binary
-databases called stem libraries (stemlibs), which applications acquire
-separately: each guide explains how,
-[`@libmorpheus/data`](bindings/js/data/README.md) downloads and verifies them,
-and [Runtime data](#runtime-data) describes the available datasets.
+No distribution contains linguistic data: applications acquire it separately,
+as described under [Runtime data](#runtime-data).
+
+## Runtime data
+
+Morpheus reads compiled binary databases called stem libraries (stemlibs).
+Code and data are versioned and distributed separately: each guide explains
+how to acquire a stemlib and open a context on it, and
+[`@libmorpheus/data`](bindings/js/data/README.md) downloads and verifies the
+datasets for JavaScript applications.
+
+| Dataset | Analysis | Generation | Repository location |
+| --- | --- | --- | --- |
+| `perseids-tools` | Greek and Latin | No | `stemlib/` |
+| `alpheios-project` (pinned) | Greek | Requires a prepared `gener.index` | `vendor/alpheios-morpheus/dist/stemlib/` |
+
+The [runtime-data guide](docs/runtime-data.md) records exact pinned revisions,
+digests, acquisition permissions, and redistribution caveats. The
+[stem-library inventory](docs/stem-libraries.md) explains the origin and role of
+each dataset. The [build guide](docs/building.md#prepare-the-runtime-data)
+explains how to prepare the data from a source checkout, and how to rebuild and
+qualify the stemlibs from their sources.
 
 ## Example
 
@@ -67,28 +106,6 @@ lu/w lu_ omen present first plural ()
 lu/w lu omen imperfect first plural ('epic',)
 lu/w lu_ omen imperfect first plural ('ionic', 'homeric')
 ```
-
-## Project status
-
-| Available operation | Ancient Greek | Latin | Status |
-| --- | :---: | :---: | --- |
-| Analyze an inflected form | Yes | Yes | Supported |
-| Generate forms from a lemma | Yes | No | Experimental |
-
-Generation is the inverse of analysis: it returns the forms that the analyzer
-accepts for a lemma. These include dialectal, poetic and late variants, and
-regular forms that no text may attest. Use it to search texts by lemma, to
-precompute a form-to-lemma table or to check the stem data; it does not give
-a reference paradigm. See
-[Greek lemma generation](docs/public-api.md#greek-lemma-generation).
-
-The public runtime includes:
-
-- structured, caller-owned analysis and generation results;
-- per-request analysis options and generation filters;
-- isolated contexts that can be used concurrently;
-- `cruncher`, retained as a compatibility client of the public library;
-- CMake and `pkg-config` installation metadata.
 
 ## Performance
 
@@ -132,31 +149,6 @@ Generating the paradigm of ἵημι takes 3.7 ms through Node.js and 9.8 ms
 through Python at one context, and up to 933 paradigms per second through
 Node.js with four contexts ([benchmarks](docs/benchmarks.md)).
 
-## Runtime data
-
-Morpheus reads compiled binary databases called **stemlibs**. Code and data are
-versioned and distributed separately.
-
-| Dataset | Analysis | Generation | Repository location |
-| --- | --- | --- | --- |
-| `perseids-tools` | Greek and Latin | No | `stemlib/` |
-| `alpheios-project` (pinned) | Greek | Requires a prepared `gener.index` | `vendor/alpheios-morpheus/dist/stemlib/` |
-
-From a recursive source checkout, prepare a standalone Alpheios directory with
-the validated experimental generation index using:
-
-```sh
-sh tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
-```
-
-The [runtime-data guide](docs/runtime-data.md) records exact pinned revisions,
-digests, acquisition permissions, and redistribution caveats. The
-[stem-library inventory](docs/stem-libraries.md) explains the origin and role of
-each dataset.
-
-The [build guide](docs/building.md#rebuild-and-qualify-the-stemlibs) explains
-how to rebuild and qualify the stemlibs from their sources.
-
 ## Build from source
 
 Building requires CMake 3.25 or newer, Ninja and a C17 compiler. Clone
@@ -172,35 +164,21 @@ ctest --preset dev
 ```
 
 The [build guide](docs/building.md) covers the other presets, installation and
-use from C, the Alpine container image, the historical `cruncher` command-line
-client and the test suites.
+use from C, the preparation and rebuilding of the stemlibs, the Alpine container
+image, the historical `cruncher` command-line client and the test suites.
 
 ## Releases and platform support
 
-Native `v<version>` release tags provide data-free archives and SHA-256 files
-for:
+Each distribution is versioned independently. Native `v<version>` tags provide
+data-free archives and SHA-256 files for the platforms listed under
+[Distributions](#distributions); the bindings and the data package use
+`python-v`, `node-v`, `wasm-v` and `data-v` tags, and each binding declares the
+native runtime release and ABI it supports. The checksum detects corruption; it
+is not a release signature.
 
-- Linux x86-64 glibc;
-- Linux aarch64 glibc;
-- macOS arm64.
-
-Each binding is versioned independently and declares the native runtime
-release and ABI it supports.
-
-The Node.js binding is versioned independently with `node-v<version>` tags. npm
-publishes the ESM facade as `@libmorpheus/node` and a matching optional Node-API
-addon for each supported native platform; the runtime and stem data remain
-separate, verified acquisitions.
-
-The Python binding is versioned independently with `python-v<version>` tags and
-publishes the pure-Python `libmorpheus` distribution to PyPI. It uses `ctypes`,
-so one universal wheel supports Python 3.11 and newer while applications provide
-the compatible native runtime and stem data separately.
-
-The checksum detects corruption; it is not a release signature. See
-[platform support](docs/portability.md) for the complete qualification matrix
-and [release qualification](docs/releasing.md) for the checks required before a
-tag. Release changes are recorded in the [changelog](CHANGELOG.md).
+See [platform support](docs/portability.md) for the complete qualification
+matrix and [release qualification](docs/releasing.md) for the checks required
+before a tag. Release changes are recorded in the [changelog](CHANGELOG.md).
 
 ## Architecture and provenance
 

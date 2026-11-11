@@ -141,6 +141,19 @@ concurrently; calls on one context must be serialized. The
 [public API reference](public-api.md) documents the complete ABI, error
 statuses, ownership rules, and buffer contracts.
 
+## Prepare the runtime data
+
+From a recursive source checkout, prepare a standalone Alpheios directory with
+the validated experimental generation index using:
+
+```sh
+sh tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
+```
+
+Use the resulting absolute path for both analysis and generation. The
+[runtime-data guide](runtime-data.md#prepare-greek-generation-data) gives the
+expected digest of its `gener.index` and a route that needs no C toolchain.
+
 ## Rebuild and qualify the stemlibs
 
 The source checkout can reconstruct complete Greek and Latin stemlibs through
