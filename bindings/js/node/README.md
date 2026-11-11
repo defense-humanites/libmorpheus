@@ -177,6 +177,12 @@ the promise rejects with `MorpheusStatus.StemlibError` before native analysis.
 > extensive, but sufficient real-world use is still required before this
 > qualification can be removed.
 
+Generation is the inverse of analysis: it returns the forms the analyzer
+accepts for a lemma, dialectal and late variants and unattested regular
+forms included, not a reference paradigm. See
+[Greek lemma generation](https://github.com/defense-humanites/libmorpheus/blob/main/docs/public-api.md#greek-lemma-generation)
+for its uses and limits.
+
 ```js
 import {
   MorpheusDialect,

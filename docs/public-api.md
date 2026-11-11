@@ -99,9 +99,37 @@ but an embedded NUL is invalid.
 
 > [!CAUTION]
 > The generation implementation and its public generation functions are
-> experimental. Their contracts are tested, but the qualification remains
-> until sufficient real-world use complements the automated differential,
-> isolation, failure, portability, and sanitizer coverage.
+> experimental. Their interfaces are tested (differential, isolation,
+> failure, portability, and sanitizer coverage); the qualification will be
+> lifted once generation meets both properties below and both are measured.
+
+Generation is the inverse of analysis. It returns the forms that the
+analyzer accepts for a lemma, built from the same stems and ending tables,
+and aims at two properties:
+
+- every generated form analyzes back to its lemma, with the same tense and
+  mood;
+- every form that analysis attributes to a lemma through its stems and
+  endings can be generated.
+
+These forms include dialectal, poetic and late variants, endings that a
+source forces, and regular principal parts that no text may attest. They
+carry the dialect and usage flags of the stem data, not attestations.
+Generation therefore serves to find the forms of a lemma in a text, to
+precompute a form-to-lemma table, and to check the stem data; it does not
+give a reference paradigm, which an application must select with other
+sources. A generated form may also belong to another lemma: Doric ἄγγελον,
+an aorist of ἀγγέλλω, is also the accusative of ἄγγελος. To search a text by
+lemma, generate the candidate forms, then confirm each match by analysis.
+Generated forms are isolated words with their own accent; running text needs
+the normalization that analysis applies (grave accents, enclitics, elision,
+crasis).
+
+On samples of the Alpheios data, more than 99.5 % of the generated forms
+meet the first property
+([gener-derivations.md](gener-derivations.md#measures)). The second is not
+yet met: compound verbs (`vbs.cmp.ml`) are not generated (#78), and it is not
+yet measured.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,

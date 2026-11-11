@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MPL-2.0
-# Default principal parts added at lemma end (docs/gener-derivations.md).
+# Default principal parts added at lemma end (docs/gener-derivations.md):
+# every part a regular derivation defines, as analysis accepts them.
 
 # A regular derivation without requests: every part the table defines.
 :le:a)gaqopoie/w
 :de:a)gaqopoi ew_denom
 
-# Requests and explicit records cover their parts: a voice (`;fu mid`), a
-# suffix (`;ap,-hq`) and an explicit :vs: perfect each keep their part.
+# Requests and explicit records do not replace the derivation's parts: the
+# group also receives the active future and the regular perfect, and a
+# record identical to one of the block's is not repeated.
 :le:cover-requested
 :vs:pepoihk perf_act
 :de:poi ew_denom
@@ -14,9 +16,9 @@
 ;fu mid
 ;ap,-hq
 
-# A request limited to a dialect does not cover its part, an explicit
-# unrestricted record does: a)gge/llw gets the regular future, but keeps its
-# second aorists.
+# Explicit records do not replace the derivation either: a)gge/llw keeps its
+# second aorists and also receives h)/ggeila and h)gge/lqhn, which analysis
+# accepts.
 :le:a)gge/llw
 :vs:a)ggel aor2
 :vs:a)ggel aor2_pass
@@ -55,8 +57,8 @@
 :de:sx e_stem
 ;ao
 
-# Two groups of one lemma both receive the parts the lemma lacks, and a
-# record already present is not repeated.
+# Two groups of one lemma both receive their parts, and a record already in
+# the block is not repeated.
 :le:two-groups
 :de:po ew_denom poetic
 :de:poi ew_denom
@@ -67,15 +69,15 @@
 :de:poi ew_denom
 :vs:poih reg_fut ew_denom
 
-# Coverage is gathered over every block of a lemma key, in any order.
+# Each block receives its groups' parts, whatever another block of the same
+# lemma key holds.
 :le:split-lemma
 :de:poi ew_denom
 
 :le:split-lemma
 :vs:poihs aor1 ew_denom
 
-# The present a group receives because it requests nothing does not cover
-# the part: the other group still gets its own present.
+# A group that requests nothing receives its present like the others.
 :le:implicit-present
 :de:poi ew_denom
 :de:po ew_denom poetic
@@ -107,3 +109,12 @@
 :de:qref reg_conj
 ;pr
 ;fu
+
+# A stem that only occurs in compounds is not generated for the simple lemma:
+# analysis accepts it only after a preverb. The lemma keeps its other records.
+:le:dhme/w
+:de:dhm ew_denom comp_only
+
+:le:a)nh/r
+:wd:a)nh/r irreg_decl3 masc nom sg
+:aj:a)ndr os_on comp_only

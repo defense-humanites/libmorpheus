@@ -67,18 +67,6 @@ typedef struct {
 	size_t capacity;
 } prepared_buffer;
 
-/* The principal parts some block of a lemma covers, by lemma key. */
-typedef struct {
-	char *key;
-	unsigned covered;
-} lemma_coverage;
-
-typedef struct {
-	lemma_coverage *items;
-	size_t count;
-	size_t capacity;
-} coverage_map;
-
 /* A :de: group that may receive default principal parts at lemma end. */
 typedef struct {
 	char stem[MAXWORDSIZE];
@@ -99,19 +87,8 @@ typedef struct {
 	int have_derivation;
 	int have_explicit_request;
 	int skip_invalid_derivation;
-	/* Output offset of the current lemma's first record, and its key. */
+	/* Output offset of the current lemma's first record. */
 	size_t lemma_start;
-	char lemma_key[LINE_CAPACITY];
-	/*
-	 * Output offsets of the block's records that a group without requests
-	 * received implicitly (the historical present): they do not cover parts.
-	 */
-	size_t *implicit_records;
-	size_t implicit_count;
-	size_t implicit_capacity;
-	/* First pass: record each block's coverage, add no default. */
-	int collecting;
-	coverage_map *coverage;
 	default_group *groups;
 	size_t group_count;
 	size_t group_capacity;
@@ -500,85 +477,14 @@ expand_request(prepare_state *state, const char *request, const char *path,
 
 /*
  * The verbal principal parts, in the order their defaults are added. The
- * future perfect is left out: it is rare and lexically restricted, and the
- * sources request it where it exists (lu/w: `;fp mid`).
+ * future perfect exists in the middle-passive only; analysis accepts it for
+ * every regular derivation (poie/w: pepoih/somai).
  */
 static const char *const principal_parts[] = {
-	"pr", "fu", "ao", "pf", "pp", "ap"
+	"pr", "fu", "ao", "pf", "pp", "ap", "fp mp"
 };
 #define PRINCIPAL_PART_COUNT \
 	(sizeof principal_parts / sizeof principal_parts[0])
-
-/* The index builder's lemma key: the first token without !, -, _, ^ or +. */
-static int
-canonical_lemma(char *destination, size_t capacity, const char *source)
-{
-	size_t length = strcspn(source," \t\r\n");
-	size_t input;
-	size_t output = 0;
-
-	if (length && source[0] == '!')
-		source++, length--;
-	for (input = 0; input != length; input++) {
-		if (strchr("-_^+",source[input]))
-			continue;
-		if (output == capacity - 1)
-			return 0;
-		destination[output++] = source[input];
-	}
-	destination[output] = 0;
-	return 1;
-}
-
-static int
-compare_coverage(const void *left, const void *right)
-{
-	return strcmp(((const lemma_coverage *)left)->key,
-	              ((const lemma_coverage *)right)->key);
-}
-
-/* Merge the first pass's per-block coverage into one entry per lemma key. */
-static void
-merge_coverage(coverage_map *map)
-{
-	size_t read;
-	size_t write = 0;
-
-	if (!map->count)
-		return;
-	qsort(map->items,map->count,sizeof *map->items,compare_coverage);
-	for (read = 1; read != map->count; read++) {
-		if (!strcmp(map->items[read].key,map->items[write].key)) {
-			map->items[write].covered |= map->items[read].covered;
-			free(map->items[read].key);
-		} else {
-			map->items[++write] = map->items[read];
-		}
-	}
-	map->count = write + 1;
-}
-
-static unsigned
-lemma_coverage_of(const coverage_map *map, const char *key)
-{
-	lemma_coverage probe;
-	const lemma_coverage *found;
-
-	probe.key = (char *)key;
-	found = bsearch(&probe,map->items,map->count,sizeof *map->items,
-	                compare_coverage);
-	return found ? found->covered : 0;
-}
-
-static void
-free_coverage(coverage_map *map)
-{
-	size_t index;
-
-	for (index = 0; index != map->count; index++)
-		free(map->items[index].key);
-	free(map->items);
-}
 
 /*
  * Remember a :de: group that may receive default principal parts. Only
@@ -658,55 +564,11 @@ lemma_has_record(const prepare_state *state, const char *record, size_t size)
 }
 
 /*
- * The principal parts for which the current block has a record whose keys
- * do not restrict it to a dialect, tense or mood. Its own records decide
- * them: `;pp,perfp_s` (a)kou/w), an explicit `:vs:` perfect, or `;fu mid` (a
- * future that exists in the middle only) all speak for their part. Flags
- * such as `poetic`, `late` or `rare` are not dialects: a record carrying
- * them covers its part too.
- */
-static int
-block_covered_parts(const prepare_state *state, unsigned *covered)
-{
-	const char *cursor = state->output->data + state->lemma_start;
-	const char *end = state->output->data + state->output->size;
-	char line[LINE_CAPACITY];
-
-	*covered = 0;
-	while (cursor < end) {
-		const char *next = memchr(cursor,'\n',(size_t)(end - cursor));
-		size_t length = (size_t)((next ? next : end) - cursor);
-		size_t offset = (size_t)(cursor - state->output->data);
-		size_t implicit;
-		int part;
-		int restricted;
-
-		if (length >= sizeof line)
-			return 0;
-		for (implicit = 0; implicit != state->implicit_count; implicit++) {
-			if (state->implicit_records[implicit] == offset)
-				break;
-		}
-		if (implicit == state->implicit_count && length > 4 &&
-		    !strncmp(cursor,":vs:",4)) {
-			memcpy(line,cursor,length);
-			line[length] = 0;
-			if (!morpheus_gener_record_traits(line,&part,&restricted))
-				return 0;
-			if (part >= 0 && (size_t)part < PRINCIPAL_PART_COUNT &&
-			    !restricted)
-				*covered |= 1u << part;
-		}
-		cursor = next ? next + 1 : end;
-	}
-	return 1;
-}
-
-/*
  * Whether a part can carry the voice that the :de: keys fix for the whole
- * group. An active group has no perfect middle-passive or aorist passive, a
- * middle one no aorist passive, and a passive one no future or aorist built
- * on the active stems; their records could not be generated.
+ * group. An active group has no perfect middle-passive, aorist passive or
+ * future perfect, a middle one no aorist passive, and a passive one no
+ * future or aorist built on the active stems; their records could not be
+ * generated.
  */
 static int
 part_takes_voice(size_t part, int voice)
@@ -714,7 +576,8 @@ part_takes_voice(size_t part, int voice)
 	const char *name = principal_parts[part];
 
 	if (voice == ACTIVE)
-		return strcmp(name,"pp") && strcmp(name,"ap");
+		return strcmp(name,"pp") && strcmp(name,"ap") &&
+		       strcmp(name,"fp mp");
 	if (voice == MIDDLE)
 		return strcmp(name,"ap");
 	if (voice == PASSIVE)
@@ -723,65 +586,29 @@ part_takes_voice(size_t part, int voice)
 }
 
 /*
- * End a lemma block. Analysis keeps a regular derivation as a whole (the
- * analysis index stores the :de: itself), so it accepts every principal part
- * the derivation type defines, whatever the `;` requests; the historical
- * do_conj "full" generation only emitted the requested parts, or the present
- * alone. For each part that no block of the lemma covers (see
- * block_covered_parts(); the first pass gathers every block of a lemma key,
- * whichever file holds it), each regular :de: group of the block now also
- * receives the record a bare `;pr`, `;fu`... request would produce, after
- * the block's other records. A part the table does not define for the
- * group's keys yields nothing, and an identical record is not repeated.
- *
- * In the first pass, the block's coverage is only recorded.
+ * End a lemma block. Analysis keeps a regular derivation as a whole: its
+ * index stores the :de: itself (a "3" entry of steminds/vbind, present for
+ * 9,518 of the corpus's 9,522 regular groups), so it accepts every principal
+ * part the derivation type defines, whatever the `;` requests and whatever
+ * other records the lemma has (a)gge/llw: h)/ggeila beside the explicit
+ * second aorist h)/ggelon). The historical do_conj "full" generation only
+ * emitted the requested parts, or the present alone. Each regular :de:
+ * group of the block now also receives the record a bare `;pr`, `;fu`...
+ * request produces, after the block's other records, so that generation
+ * returns what analysis accepts (docs/gener-derivations.md). A part the table
+ * does not define for the group's keys yields nothing, and a record
+ * identical to one of the block's is not repeated.
  */
 static int
 finish_lemma(prepare_state *state, const char *path)
 {
-	unsigned covered;
 	size_t group;
 	size_t part;
 
-	if (state->historical || !state->have_lemma) {
+	if (state->historical || !state->have_lemma || !state->group_count) {
 		state->group_count = 0;
 		return 1;
 	}
-	if (state->collecting) {
-		coverage_map *map = state->coverage;
-		lemma_coverage *entry;
-
-		state->group_count = 0;
-		if (!block_covered_parts(state,&covered)) {
-			fprintf(stderr,
-			        "morpheus-gener-prepare: %s: cannot classify a lemma's records\n",
-			        path);
-			return 0;
-		}
-		if (map->count == map->capacity) {
-			size_t capacity = map->capacity ? map->capacity * 2 : 4096;
-			lemma_coverage *grown = realloc(map->items,capacity * sizeof *grown);
-
-			if (!grown) {
-				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
-				return 0;
-			}
-			map->items = grown;
-			map->capacity = capacity;
-		}
-		entry = map->items + map->count;
-		entry->key = strdup(state->lemma_key);
-		if (!entry->key) {
-			fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
-			return 0;
-		}
-		entry->covered = covered;
-		map->count++;
-		return 1;
-	}
-	if (!state->group_count)
-		return 1;
-	covered = lemma_coverage_of(state->coverage,state->lemma_key);
 	for (group = 0; group != state->group_count; group++) {
 		const default_group *current = state->groups + group;
 
@@ -791,8 +618,7 @@ finish_lemma(prepare_state *state, const char *path)
 			size_t size = 0;
 			int expanded;
 
-			if ((covered & (1u << part)) ||
-			    !part_takes_voice(part,current->voice))
+			if (!part_takes_voice(part,current->voice))
 				continue;
 			stream = open_memstream(&record,&size);
 			if (!stream) {
@@ -831,35 +657,10 @@ static int
 flush_derivation(prepare_state *state, const char *path,
                  unsigned long long line_number)
 {
-	size_t start = state->output->size;
-
 	if (!state->have_derivation || state->have_explicit_request)
 		return 1;
 	state->have_explicit_request = 1;
-	if (!expand_request(state,"pr",path,line_number))
-		return 0;
-	/*
-	 * The present a group receives because it requests nothing is a default
-	 * too, not an attestation: it must not keep another group of the lemma
-	 * (meli^t- beside melitt- in melito/omai) from its own present.
-	 */
-	if (state->output->size != start) {
-		if (state->implicit_count == state->implicit_capacity) {
-			size_t capacity = state->implicit_capacity ?
-			                  state->implicit_capacity * 2 : 8;
-			size_t *grown = realloc(state->implicit_records,
-			                        capacity * sizeof *grown);
-
-			if (!grown) {
-				fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
-				return 0;
-			}
-			state->implicit_records = grown;
-			state->implicit_capacity = capacity;
-		}
-		state->implicit_records[state->implicit_count++] = start;
-	}
-	return 1;
+	return expand_request(state,"pr",path,line_number);
 }
 
 static void
@@ -1107,15 +908,6 @@ find_patch(patch_set *patches, const char *path,
 	return NULL;
 }
 
-static void
-reset_patches(patch_set *patches)
-{
-	size_t index;
-
-	for (index = 0; index != patches->count; index++)
-		patches->items[index].seen = 0;
-}
-
 static int
 all_patches_seen(const patch_set *patches)
 {
@@ -1131,15 +923,6 @@ all_patches_seen(const patch_set *patches)
 		}
 	}
 	return 1;
-}
-
-static void
-reset_exceptions(exception_set *exceptions)
-{
-	size_t index;
-
-	for (index = 0; index != exceptions->count; index++)
-		exceptions->items[index].seen = 0;
 }
 
 static int
@@ -1260,7 +1043,6 @@ prepare_file(prepare_state *state, exception_set *exceptions,
 	state->have_explicit_request = 0;
 	state->skip_invalid_derivation = 0;
 	state->group_count = 0;
-	state->implicit_count = 0;
 
 	while (fgets(line,sizeof line,input)) {
 		char *content;
@@ -1344,13 +1126,6 @@ prepare_file(prepare_state *state, exception_set *exceptions,
 				        path,line_number);
 				goto finish;
 			}
-			if (!canonical_lemma(state->lemma_key,sizeof state->lemma_key,
-			                     lemma)) {
-				fprintf(stderr,
-				        "morpheus-gener-prepare: %s:%llu: lemma too long\n",
-				        path,line_number);
-				goto finish;
-			}
 			free(state->base_prefix);
 			state->base_prefix = NULL;
 			state->base = BASE_NONE;
@@ -1360,7 +1135,6 @@ prepare_file(prepare_state *state, exception_set *exceptions,
 			if (!write_line(state->output,content))
 				goto write_error;
 			state->lemma_start = state->output->size;
-			state->implicit_count = 0;
 			continue;
 		}
 
@@ -1505,6 +1279,55 @@ finish:
 	return result;
 }
 
+/*
+ * Remove the records whose stem only occurs in compounds (`comp_only`):
+ * analysis accepts their forms only after a preverb (checkgenwds.c), so the
+ * simple lemma must not generate them (dhme/w, only in a)podhme/w,
+ * e)pidhme/w...; the compound adjective stem a)ndr under a)nh/r). A lemma
+ * left without records produces no block in the index.
+ */
+static void
+drop_compound_only_records(prepared_buffer *prepared)
+{
+	size_t read = 0;
+	size_t write = 0;
+
+	while (read < prepared->size) {
+		const char *line = prepared->data + read;
+		const char *end = memchr(line,'\n',prepared->size - read);
+		size_t length = end ? (size_t)(end - line) + 1 : prepared->size - read;
+		int keep = 1;
+
+		if (length > 4 && line[0] == ':' && strncmp(line,":le:",4)) {
+			const char *cursor = line + 4;
+			const char *limit = line + length;
+
+			/* The keys follow the stem; compare whole tokens only. */
+			while (cursor < limit) {
+				const char *token;
+
+				while (cursor < limit && strchr(" \t\r\n",*cursor))
+					cursor++;
+				token = cursor;
+				while (cursor < limit && !strchr(" \t\r\n",*cursor))
+					cursor++;
+				if (token != line + 4 && cursor - token == 9 &&
+				    !memcmp(token,"comp_only",9)) {
+					keep = 0;
+					break;
+				}
+			}
+		}
+		if (keep) {
+			if (write != read)
+				memmove(prepared->data + write,line,length);
+			write += length;
+		}
+		read += length;
+	}
+	prepared->size = write;
+}
+
 static int
 write_output(const prepared_buffer *prepared, const char *path)
 {
@@ -1538,7 +1361,6 @@ main(int argc, char **argv)
 {
 	prepared_buffer prepared = { 0 };
 	prepare_state state = { 0 };
-	coverage_map coverage = { 0 };
 	exception_set exceptions = { 0 };
 	exception_set *active_exceptions = NULL;
 	patch_set patches = { 0 };
@@ -1592,32 +1414,6 @@ usage:
 	}
 	output_path = argv[input++];
 	state.output = &prepared;
-	state.coverage = &coverage;
-	if (!state.historical) {
-		/*
-		 * First pass: gather which parts each lemma key covers across all
-		 * its blocks, so that a part one block covers is not added to
-		 * another block of the same lemma (ὁράω, ἵστημι...).
-		 */
-		int pass;
-
-		state.collecting = 1;
-		for (pass = input; pass != argc; pass++) {
-			if (!prepare_file(&state,active_exceptions,active_patches,
-			                  argv[pass]))
-				goto finish;
-		}
-		if ((active_exceptions && !all_exceptions_seen(active_exceptions)) ||
-		    (active_patches && !all_patches_seen(active_patches)))
-			goto finish;
-		merge_coverage(&coverage);
-		if (active_exceptions)
-			reset_exceptions(active_exceptions);
-		if (active_patches)
-			reset_patches(active_patches);
-		prepared.size = 0;
-		state.collecting = 0;
-	}
 	for (; input != argc; input++) {
 		if (!prepare_file(&state,active_exceptions,active_patches,
 		                  argv[input]))
@@ -1626,6 +1422,8 @@ usage:
 	if ((active_exceptions && !all_exceptions_seen(active_exceptions)) ||
 	    (active_patches && !all_patches_seen(active_patches)))
 		goto finish;
+	if (!state.historical)
+		drop_compound_only_records(&prepared);
 	if (!write_output(&prepared,output_path))
 		goto finish;
 	result = EXIT_SUCCESS;
@@ -1633,9 +1431,7 @@ usage:
 finish:
 	free_exceptions(&exceptions);
 	free_patches(&patches);
-	free_coverage(&coverage);
 	free(state.groups);
-	free(state.implicit_records);
 	free(state.base_prefix);
 	free(prepared.data);
 	return result;

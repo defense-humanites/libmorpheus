@@ -21,7 +21,12 @@ single-threaded; use one instance per worker for parallel work.
 
 `generate()` skips a lemma's source record that the engine cannot generate
 instead of failing, and the returned array carries the count as a read-only,
-non-enumerable `skippedRecords` property.
+non-enumerable `skippedRecords` property. Generation is the inverse of
+analysis: it returns the forms the analyzer accepts for a lemma, dialectal
+and late variants and unattested regular forms included, not a reference
+paradigm. See
+[Greek lemma generation](https://github.com/defense-humanites/libmorpheus/blob/main/docs/public-api.md#greek-lemma-generation)
+for its uses and limits.
 
 For a Node.js server on Linux x86-64 or aarch64 (glibc) or macOS arm64,
 [`@libmorpheus/node`](https://www.npmjs.com/package/@libmorpheus/node) is
