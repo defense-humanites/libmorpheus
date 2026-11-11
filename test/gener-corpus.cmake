@@ -8,6 +8,7 @@ foreach(required IN ITEMS MORPHEUS_GENER_SOURCE_PREPARER
                           MORPHEUS_GENER_CORPUS_ROOT
                           MORPHEUS_GENER_CORPUS_MANIFEST
                           MORPHEUS_GENER_CORPUS_EXCEPTIONS
+                          MORPHEUS_GENER_CORPUS_PATCHES
                           MORPHEUS_GENER_CORPUS_WORK_DIR)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
@@ -36,6 +37,7 @@ foreach(run IN ITEMS first second)
   execute_process(
     COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
             --exceptions "${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
+            --patches "${MORPHEUS_GENER_CORPUS_PATCHES}"
             "${${run}_source}" ${inputs}
     RESULT_VARIABLE prepare_result
     OUTPUT_VARIABLE prepare_output
@@ -63,16 +65,17 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "20082e2d0e37353acf0288a7a34b0932989ec3514c040a9db2edfc6ba8951bf5")
+   "3c8bf75e5f0735943bdbdb5bd272b23db643af433e17ba976c2c8f805eec20cb")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf")
+   "c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
 endif()
 
-# Without default principal parts, the preparer still reproduces the index of
-# data 0.1.0 and native 0.4.6, the historical do_conj "full" expansion.
+# Without default principal parts and data patches, the preparer still
+# reproduces the index of data 0.1.0 and native 0.4.6, the historical do_conj
+# "full" expansion.
 set(historical_source "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.txt")
 set(historical_index "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.mgi")
 execute_process(
@@ -119,7 +122,7 @@ endif()
 
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
-          "${first_index}" 106427 108220 172741
+          "${first_index}" 106428 108221 172766
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output
   ERROR_VARIABLE reader_error
@@ -132,8 +135,9 @@ endif()
 
 # Frequent verbs, primary and regular. The default principal parts must
 # leave the primary and suppletive stems as their sources give them, and add
-# to the regular derivations exactly the records listed here (reviewed by
-# hand; the historical blocks come from the same sources).
+# to the regular derivations exactly the records listed here; e)/xw receives
+# the present its patched derivation restores (reviewed by hand; the
+# historical blocks come from the same sources, unpatched).
 function(collect_lemma_blocks content lemma result)
   set(blocks "")
   set(rest "${content}")
@@ -165,7 +169,7 @@ file(READ "${historical_source}" historical)
 set(prepared "\n${prepared}")
 set(historical "\n${historical}")
 foreach(verb IN ITEMS
-        "e)/xw" "pa/sxw" "pi/ptw" "o(ra/w" "me/nw" "i(/sthmi" "bou/lomai"
+        "pa/sxw" "pi/ptw" "o(ra/w" "me/nw" "i(/sthmi" "bou/lomai"
         "lu/w" "a)kou/w")
   collect_lemma_blocks("${prepared}" "${verb}" current)
   collect_lemma_blocks("${historical}" "${verb}" earlier)
@@ -174,8 +178,8 @@ foreach(verb IN ITEMS
   endif()
 endforeach()
 
-# Each entry: the verb, then the records the defaults add to its blocks.
-set(regular_verbs "poie/w" "dhlo/w" "a)gge/llw" "a)gapa/w")
+# Each entry: the verb, then the records the defaults or patches add to it.
+set(regular_verbs "poie/w" "dhlo/w" "a)gge/llw" "a)gapa/w" "e)/xw")
 set(regular_0
     ":vs:pohs  aor1 ew_denom poetic"
     ":vs:poihs  aor1 ew_denom")
@@ -195,7 +199,12 @@ set(regular_3
     ":vs:h)gaphk  perf_act aw_denom attic ionic"
     ":vs:h)gaph  perfp_vow aw_denom attic ionic"
     ":vs:a)gaphq  aor_pass aw_denom attic ionic")
-foreach(position RANGE 3)
+set(regular_4
+    ":vs:e)x  w_stem reg_conj syll_augment"
+    ":vs:e)x  w_stem reg_conj imperf syll_augment"
+    ":vs:e)x  w_stem reg_conj imperf ind act epic syll_augment unaugmented"
+    ":vs:e)x  w_stem reg_conj imperf ind act ionic syll_augment iterative unaugmented")
+foreach(position RANGE 4)
   list(GET regular_verbs ${position} verb)
   collect_lemma_blocks("${prepared}" "${verb}" current)
   collect_lemma_blocks("${historical}" "${verb}" earlier)

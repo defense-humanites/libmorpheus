@@ -3,7 +3,7 @@
 import createGenerPreparer from "./gener-preparer.mjs";
 import process from "node:process";
 import { buildGenerIndex } from "./gener-index.js";
-import { GENER_CORPUS_EXCEPTIONS, GENER_CORPUS_FILES, GENER_INDEX_SHA256, GENER_PREPARED_SHA256 } from "./gener-manifest.js";
+import { GENER_CORPUS_EXCEPTIONS, GENER_CORPUS_FILES, GENER_CORPUS_PATCHES, GENER_INDEX_SHA256, GENER_PREPARED_SHA256 } from "./gener-manifest.js";
 function parentPath(path) {
     const separator = path.lastIndexOf("/");
     return separator <= 0 ? "/" : path.slice(0, separator);
@@ -39,12 +39,15 @@ export async function prepareGenerIndex(alpheiosFiles, perseidsFiles, digest) {
         inputs.push(input);
     }
     fileSystem.writeFile("/exceptions.tsv", GENER_CORPUS_EXCEPTIONS);
+    fileSystem.writeFile("/patches.tsv", GENER_CORPUS_PATCHES);
     const previousExitCode = process.exitCode;
     let status;
     try {
         status = module.callMain([
             "--exceptions",
             "/exceptions.tsv",
+            "--patches",
+            "/patches.tsv",
             "/prepared.txt",
             ...inputs
         ]);

@@ -1172,6 +1172,8 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_CORPUS_ROOT=${MORPHEUS_STEMLIB_DIR}/Greek
       -DMORPHEUS_GENER_CORPUS_MANIFEST=${PROJECT_SOURCE_DIR}/tools/gener-corpus-manifest.tsv
       -DMORPHEUS_GENER_CORPUS_EXCEPTIONS=${PROJECT_SOURCE_DIR}/tools/gener-corpus-exceptions.tsv
+      -DMORPHEUS_GENER_CORPUS_PATCHES=${PROJECT_SOURCE_DIR}/tools/gener-corpus-patches.tsv
+      -DMORPHEUS_GENER_DATA_MANIFEST=${PROJECT_SOURCE_DIR}/bindings/js/data/internal/gener-manifest.js
       -P "${PROJECT_SOURCE_DIR}/test/gener-corpus-manifest.cmake"
   )
   add_test(
@@ -1184,6 +1186,7 @@ if(BUILD_TESTING)
       -DMORPHEUS_GENER_CORPUS_ROOT=${MORPHEUS_STEMLIB_DIR}/Greek
       -DMORPHEUS_GENER_CORPUS_MANIFEST=${PROJECT_SOURCE_DIR}/tools/gener-corpus-manifest.tsv
       -DMORPHEUS_GENER_CORPUS_EXCEPTIONS=${PROJECT_SOURCE_DIR}/tools/gener-corpus-exceptions.tsv
+      -DMORPHEUS_GENER_CORPUS_PATCHES=${PROJECT_SOURCE_DIR}/tools/gener-corpus-patches.tsv
       -DMORPHEUS_GENER_CORPUS_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/test-gener-corpus
       "-DMORPHEUS_TEST_LAUNCHER=${CMAKE_CROSSCOMPILING_EMULATOR}"
       -P "${PROJECT_SOURCE_DIR}/test/gener-corpus.cmake"

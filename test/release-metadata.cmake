@@ -129,7 +129,7 @@ file(READ "${MORPHEUS_SOURCE_DIR}/Dockerfile" dockerfile)
 foreach(expected_container_value IN ITEMS
         "tools/prepare-runtime-data.sh /opt/morpheus-runtime-data"
         "/opt/morpheus-runtime-data"
-        "eeef2145c7d95c0f2e36b0efdd9ebfcdde7fbc51b8ba903b6dca723801a72adf")
+        "c1e7a37fa93a92c68c7817c892b327b09e024c2b70f7f76499e068d5119ef0f5")
   string(FIND "${dockerfile}${platform_workflow}"
               "${expected_container_value}" container_value_at)
   if(container_value_at EQUAL -1)

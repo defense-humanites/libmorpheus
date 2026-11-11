@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Reviewed corrections of generation-corpus source lines; see docs/gener-data-patches.md.
+# path relative to Greek stemlib root	line	SHA-256 of trimmed source line	replacement
+stemsrc/nom.proper	7941	501496a92c6fe8e8b8de771d89fa808c94d485ffa5b4e2af1ab87c60879f5591	:no:*)ammat as_a masc stem_acc
+stemsrc/vbs.simp.ml	3928	51b4a0147fbb8d487cd0473eadcccd54a56abcd188ad6b290822aada2ab404f3	:de:bol e_stem epic
+stemsrc/vbs.simp.ml	6272	dd06d2b7540f3cebad1b36c26516778830e18a99d448c748cb2aca4fb77dc916	:de:dein ew_denom late
+stemsrc/vbs.simp.ml	9214	2a3f754093eeef2412977d66f134f8591dbf890945e3aaf3fc3faab023038110	:de:e)x reg_conj syll_aug
+stemsrc/vbs.simp.ml	15142	cfe2bd26e2ed241becbce36ad57b4684acc51fa188715a6164f6b34c7554dc1d	:de:melitt ow_denom
+stemsrc/vbs.simp.ml	22130	5467ac03be30fdd505ebd6286131a81e04a5a2880db39b7adeca71c1b5165f74	:vs:sten w_stem mp
+stemsrc/vbs.simp.ml	25428	b73f10bebf7df4877a6da1a086ad4a653325e486cf9abdfc3bc1be5bb76fb939	:de:farg numi poetic

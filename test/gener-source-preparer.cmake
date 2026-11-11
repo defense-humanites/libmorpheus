@@ -134,3 +134,42 @@ foreach(rejected IN ITEMS "${MORPHEUS_GENER_SOURCE_ORPHAN}"
     message(FATAL_ERROR "invalid generation source was not rejected: ${rejected}")
   endif()
 endforeach()
+
+# Data patches: a patch replaces one source line after checking its
+# fingerprint; a wrong fingerprint or a patch that matches no line fails.
+string(SHA256 confined_sha256 ":de:a)rx euw pres")
+set(patch_cases
+    "applied|gener-derivation-defaults.txt\t29\t${confined_sha256}\t:de:a)rx euw"
+    "mismatch|gener-derivation-defaults.txt\t29\t0000000000000000000000000000000000000000000000000000000000000000\t:de:a)rx euw"
+    "unmatched|gener-derivation-defaults.txt\t999\t${confined_sha256}\t:de:a)rx euw")
+foreach(case IN LISTS patch_cases)
+  string(FIND "${case}" "|" bar)
+  string(SUBSTRING "${case}" 0 ${bar} name)
+  math(EXPR bar "${bar} + 1")
+  string(SUBSTRING "${case}" ${bar} -1 entry)
+  set(patches "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patches-${name}.tsv")
+  set(patched "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patched-${name}.txt")
+  file(WRITE "${patches}" "# path\tline\tSHA-256\treplacement\n${entry}\n")
+  file(REMOVE "${patched}")
+  execute_process(
+    COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
+            --patches "${patches}" "${patched}"
+            "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
+    RESULT_VARIABLE patch_result
+    OUTPUT_QUIET
+    ERROR_VARIABLE patch_error
+  )
+  if(name STREQUAL "applied")
+    if(NOT patch_result EQUAL 0)
+      message(FATAL_ERROR "data patch failed (${patch_result}):\n${patch_error}")
+    endif()
+    file(READ "${patched}" patched_records)
+    # Unconfined, the group receives its defaults.
+    if(NOT patched_records MATCHES "\n:vs:a\\)rxeus  aor1 euw\n" OR
+       patched_records MATCHES " euw pres\n")
+      message(FATAL_ERROR "data patch was not applied:\n${patched_records}")
+    endif()
+  elseif(patch_result EQUAL 0 OR EXISTS "${patched}")
+    message(FATAL_ERROR "data patch case ${name} was not rejected")
+  endif()
+endforeach()

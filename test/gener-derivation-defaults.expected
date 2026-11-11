@@ -73,3 +73,15 @@
 :vs:poihq  aor_pass ew_denom
 :le:split-lemma
 :vs:poihs aor1 ew_denom
+:le:implicit-present
+:vs:poi  ew_pr ew_denom
+:vs:pohs  reg_fut ew_denom poetic
+:vs:poihs  aor1 ew_denom
+:vs:pepoihk  perf_act ew_denom
+:vs:pepoih  perfp_vow ew_denom
+:vs:poihq  aor_pass ew_denom
+:vs:po  ew_pr ew_denom poetic
+:vs:pohs  aor1 ew_denom poetic
+:vs:pepohk  perf_act ew_denom poetic
+:vs:pepoh  perfp_vow ew_denom poetic
+:vs:pohq  aor_pass ew_denom poetic

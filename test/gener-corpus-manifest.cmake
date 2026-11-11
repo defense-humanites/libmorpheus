@@ -2,7 +2,9 @@
 
 foreach(required IN ITEMS MORPHEUS_GENER_CORPUS_ROOT
                           MORPHEUS_GENER_CORPUS_MANIFEST
-                          MORPHEUS_GENER_CORPUS_EXCEPTIONS)
+                          MORPHEUS_GENER_CORPUS_EXCEPTIONS
+                          MORPHEUS_GENER_CORPUS_PATCHES
+                          MORPHEUS_GENER_DATA_MANIFEST)
   if(NOT DEFINED ${required})
     message(FATAL_ERROR "${required} is required")
   endif()
@@ -167,3 +169,74 @@ if(NOT exception_count EQUAL 99 OR
     "${zero_continuation_count} zero-output continuations, "
     "${zero_request_count} zero-output requests")
 endif()
+
+# Reviewed data patches (docs/gener-data-patches.md): one corrected line per
+# entry, in source order, each at a selected path. The preparer checks every
+# fingerprint against the source.
+file(STRINGS "${MORPHEUS_GENER_CORPUS_PATCHES}" patch_lines)
+set(patch_locations)
+set(previous_patch_path "")
+set(previous_patch_line 0)
+foreach(line IN LISTS patch_lines)
+  if(line STREQUAL "" OR line MATCHES "^#")
+    continue()
+  endif()
+  string(REPLACE "\t" ";" fields "${line}")
+  list(LENGTH fields field_count)
+  if(NOT field_count EQUAL 4)
+    message(FATAL_ERROR "invalid generation-corpus patch line: ${line}")
+  endif()
+  list(GET fields 0 relative_path)
+  list(GET fields 1 source_line)
+  list(GET fields 2 source_sha256)
+  list(GET fields 3 replacement)
+  list(FIND manifest_paths "${relative_path}" manifest_at)
+  if(manifest_at EQUAL -1)
+    message(FATAL_ERROR
+      "generation-corpus patch references an unselected file: ${relative_path}")
+  endif()
+  if(NOT source_line MATCHES "^[1-9][0-9]*$" OR
+     NOT source_sha256 MATCHES "^[0-9a-f]+$" OR
+     replacement STREQUAL "" OR replacement MATCHES "^ | $")
+    message(FATAL_ERROR "invalid generation-corpus patch: ${line}")
+  endif()
+  string(LENGTH "${source_sha256}" sha256_length)
+  if(NOT sha256_length EQUAL 64)
+    message(FATAL_ERROR "invalid generation-corpus patch SHA-256: ${line}")
+  endif()
+  set(location "${relative_path}:${source_line}")
+  list(FIND patch_locations "${location}" duplicate_at)
+  if(NOT duplicate_at EQUAL -1 OR
+     relative_path STRLESS previous_patch_path OR
+     (relative_path STREQUAL previous_patch_path AND
+      source_line LESS_EQUAL previous_patch_line))
+    message(FATAL_ERROR
+      "generation-corpus patches are duplicated or not in source order: ${location}")
+  endif()
+  list(APPEND patch_locations "${location}")
+  set(previous_patch_path "${relative_path}")
+  set(previous_patch_line "${source_line}")
+endforeach()
+list(LENGTH patch_locations patch_count)
+if(NOT patch_count EQUAL 7)
+  message(FATAL_ERROR "unexpected generation-corpus patches: ${patch_count}")
+endif()
+
+# The data package prepares the index with the same two manifests, embedded
+# in internal/gener-manifest.js: they must match the files byte for byte.
+file(READ "${MORPHEUS_GENER_DATA_MANIFEST}" data_manifest)
+foreach(pair IN ITEMS "GENER_CORPUS_EXCEPTIONS|${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
+                      "GENER_CORPUS_PATCHES|${MORPHEUS_GENER_CORPUS_PATCHES}")
+  string(REPLACE "|" ";" pair "${pair}")
+  list(GET pair 0 constant)
+  list(GET pair 1 file)
+  if(NOT data_manifest MATCHES
+     "\nexport const ${constant} = (\"[^\n]*\");\n")
+    message(FATAL_ERROR "${MORPHEUS_GENER_DATA_MANIFEST} does not define ${constant}")
+  endif()
+  string(JSON embedded GET "[${CMAKE_MATCH_1}]" 0)
+  file(READ "${file}" expected)
+  if(NOT embedded STREQUAL expected)
+    message(FATAL_ERROR "${constant} differs from ${file}")
+  endif()
+endforeach()

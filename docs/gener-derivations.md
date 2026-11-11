@@ -64,10 +64,11 @@ active derivation types under the historical parser:
 | `stemsrc/vbs.simp.ml` | 25,428 | `numi,poetic` | Comma is attached to the type token. |
 
 The historical program reports missing rule files for these records. The
-supported preparer must likewise reject them with source locations. It must not
+supported preparer likewise rejects them with source locations. It does not
 silently split commas, substitute similarly named types, or reinterpret an
-unreferenced rule file. Any correction belongs in a separately reviewed data
-patch with its own provenance and differential evidence.
+unreferenced rule file. All seven are now corrected by reviewed data patches,
+one line each, with their evidence and an upstream report:
+[gener-data-patches.md](gener-data-patches.md).
 
 ## Default principal parts
 
@@ -107,7 +108,10 @@ every principal part that the lemma does not already cover:
   which parts each block covers, then to add the defaults. A part one block
   covers is not added to another block of the same lemma. The parts covered
   are those of the sources, before any default is added, so two groups of one
-  block (ποιέω: poetic `po-` and `poi-`) both receive them.
+  block (ποιέω: poetic `po-` and `poi-`) both receive them. The present a
+  group receives because it requests nothing is such a default too: it covers
+  nothing, and another group of the lemma still gets its own present
+  (μελιτόομαι keeps `meli^t-` beside `melitt-`).
 - A group whose `:de:` keys fix a tense or mood is confined to its requests:
   `:de:a)rx euw pres` records a verb attested in the present only. So is a
   group with a present formation (`pres_redupl`, `n_infix`), which the
@@ -121,12 +125,15 @@ every principal part that the lemma does not already cover:
 - A part the derivation table does not define for the group's keys yields
   nothing, and a record identical to one of the block's is not repeated.
 
-Over the 49 corpus sources, the index grows from 129,097 to 172,741 records:
-8,786 lemmas gain forms, and five lemmas whose only request is a listed
-zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index. The other
-lemmas are unchanged, no form is removed, and no added record fails at
-generation: over the whole index, `morpheus_generate()` skips the same 346
-records as before. Generated forms grow from 12.5 to 22.0 million. On 120
+Over the 49 corpus sources, the defaults grow the index from 129,097 to
+172,750 records: 8,786 lemmas gain forms, and five lemmas whose only request
+is a listed zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index.
+The other lemmas are unchanged, no form is removed, and no added record fails
+at generation: over the whole index, `morpheus_generate()` skips the same 346
+records as before. Generated forms grow from 12.5 to 22.1 million. The
+round trip and latency below were measured before implicit presents stopped
+covering the part, a change that adds 9 records and 5,276 forms to seven
+lemmas. On 120
 changed lemmas (seed 78), 93.2 % of the added forms analyze back to their
 lemma with the same tense and mood, against 95.1 % of the forms these lemmas
 generated before. Over the whole index, the first `morpheus_generate()` of a
@@ -136,8 +143,8 @@ to 9.4 ms; the median stays at 0.13 ms (2-vCPU Linux sandbox, indicative).
 The rule follows the sources and does not correct them. ἀγγέλλω has
 explicit, unrestricted `:vs:a)ggel aor2` and `aor2_pass` records, so it
 keeps ἤγγελον and ἠγγέλην as its only aorists and does not receive ἤγγειλα
-or ἠγγέλθην. The seven invalid derivations above, ἔχω's present among them,
-stay rejected until a reviewed data patch corrects them.
+or ἠγγέλθην. ἔχω's present came from one of the seven invalid derivations
+above; the data patches now restore it.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
