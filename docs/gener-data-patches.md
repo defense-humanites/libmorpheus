@@ -24,14 +24,15 @@ the path, the line number and the fingerprint. It fails on a fingerprint
 mismatch and on a patch that matches no line. While it loads the manifest, it
 also rejects a patch out of source order (by path in byte order, then by
 line), a second patch for the same line, and a replacement that is empty or
-starts or ends with whitespace. A patch supersedes an exception recorded at the same place, which
-must carry the same fingerprint. The exception stays in its manifest, because
-it describes the upstream source; the patch decides how this project reads it.
+starts or ends with whitespace. A patch supersedes an exception recorded at
+the same place, which must carry the same fingerprint. The exception stays in
+its manifest, because it describes the upstream source; the patch decides how
+this project reads it.
 
-The preparer's options (`--exceptions`, `--patches`, `--requested-parts-only`)
-may come in any order, each at most once. `--requested-parts-only` reproduces
-the historical preparation, which read the sources unpatched, so the preparer
-refuses to combine it with `--patches`.
+The preparer's options (`--exceptions`, `--patches`, `--historical`) may come
+in any order, each at most once. `--historical` reproduces the historical
+preparation, which read the sources unpatched, so the preparer refuses to
+combine it with `--patches`.
 
 Patches change what the generation index contains, and only that:
 
@@ -43,8 +44,8 @@ Patches change what the generation index contains, and only that:
 
 The data package embeds the same manifest (`internal/gener-manifest.js`,
 checked byte for byte by `gener_corpus_manifest`) and applies it when it
-prepares `gener.index`. `--requested-parts-only`, without patches, reproduces
-the historical index (`5aa76d8c…`).
+prepares `gener.index`. `--historical`, without patches, reproduces the
+historical index (`5aa76d8c…`).
 
 ## Current patches
 

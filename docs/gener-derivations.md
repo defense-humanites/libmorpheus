@@ -153,6 +153,14 @@ keeps ἤγγελον and ἠγγέλην as its only aorists and does not recei
 or ἠγγέλθην. ἔχω's present came from one of the seven invalid derivations
 above; the data patches now restore it.
 
+Nor does the rule give a voice to a deponent whose `:de:` line names none
+(`:de:a)sp azw` under ἀσπάζομαι, `:de:log izw` under λογίζομαι). Such a
+group already received an active present; it now also receives an active
+future, aorist and perfect: ἀσπάσω, ἐλόγισα, ἠγώνικα. Analysis accepts these
+forms, so the round trip does not see them. About 90 lemmas in -ομαι receive
+some 250 such records; issue #84 weighs a voice rule in the preparer against
+data patches.
+
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
 and latency of each index, lemmas that change, lose forms or gain skipped
@@ -165,7 +173,9 @@ therefore checked in CI: the corpus test requires that πάσχω, πίπτω, �
 ποιέω, δηλόω, ἀγγέλλω and ἀγαπάω receive exactly their reviewed records, and
 that ἔχω receives exactly the four records of its patched present.
 
-`--requested-parts-only` keeps the historical behavior. It is an option of
+`--historical` reproduces the historical preparation: no default principal
+parts, the [stem alterations](#corrected-stem-alterations) of the historical
+expansion, and no [data patches](gener-data-patches.md). It is an option of
 the preparer, used by the oracle comparison and by the benchmark; the data
 package and `tools/prepare-runtime-data.sh` always prepare the default index.
 The corpus test checks that the option still reproduces the index of data
@@ -177,8 +187,7 @@ and its expected records exercise each rule above.
 The historical expansion alters some stems in two ways, and the default
 principal parts would have extended both to many more lemmas. The default
 expansion corrects them, in explicit requests as in defaults; the historical
-one (`--requested-parts-only`) keeps them, so that it still reproduces
-`5aa76d8c…`.
+one (`--historical`) keeps them, so that it still reproduces `5aa76d8c…`.
 
 - **Aspirate dissimilation** (`do_dissim`) turns an aspirate into the plain
   stop when the next syllable begins with another aspirate. That is right
@@ -206,6 +215,17 @@ one (`--requested-parts-only`) keeps them, so that it still reproduces
   which were in the historical index. Among them are the ἐκθ- and ἐκσ-
   compounds (ἐκθαμβέω, not ἐχθαμβ-; ἐκσηπόω, not ἐξηπ-) and two lemmas
   whose initial digamma the table dropped (ϝοιζάζω, ϝρητάομαι).
+
+The correction follows the derivation class, not the history of each root,
+which the tables do not record. A few regular verbs in `ptw` and `ss` have
+two aspirates in the root itself, whose perfect active the historical rule
+dissimilated as the root requires: θάπτω (θαφ-), θρύπτω (θρυφ-) and θράσσω
+(θραχ-) now get τέθαφα, τέθρυφα and τέθραχα instead of τέταφα, τέτρυφα and
+τέτραχα (Homer's τετρήχει, under ταράσσω). These perfects are added by
+default, and the Cambridge Greek Lexicon gives θάπτω none. The historical
+rule gave the wrong form wherever the table's aspirate is only that of the
+perfect, which the correction now gets right: φράσσω πέφραχα, φρύγω
+πέφρυχα, ἀφάσσω ἤφαχα, θώπτω τέθωφα, not πέπραχα, πέπρυχα, ἤπαχα, τέτωφα.
 
 Over the Alpheios index, 1,249 lemmas change forms. None gains or loses a
 form: the index keeps 106,428 lemmas and 172,766 records, and generation

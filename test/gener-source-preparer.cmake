@@ -25,7 +25,7 @@ file(REMOVE "${derivation}" "${derivation_index}")
 # The historical do_conj "full" oracle covers the requested parts only.
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           "${derivation}" "${MORPHEUS_GENER_DERIVATION_SOURCE}"
   RESULT_VARIABLE derivation_result
   OUTPUT_VARIABLE derivation_output
@@ -74,7 +74,7 @@ set(historical_defaults "${MORPHEUS_GENER_SOURCE_WORK_DIR}/historical-defaults.t
 file(REMOVE "${historical_defaults}")
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           "${historical_defaults}" "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
   RESULT_VARIABLE historical_defaults_result
   OUTPUT_QUIET
@@ -218,7 +218,7 @@ endforeach()
 # The historical expansion reads the sources unpatched.
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           --patches "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patches-applied.tsv"
           "${MORPHEUS_GENER_SOURCE_WORK_DIR}/patched-historical.txt"
           "${MORPHEUS_GENER_DERIVATION_DEFAULTS}"
@@ -229,5 +229,5 @@ execute_process(
 if(historical_patch_result EQUAL 0 OR
    NOT historical_patch_error MATCHES "cannot be combined with --patches")
   message(FATAL_ERROR
-    "--requested-parts-only accepted --patches:\n${historical_patch_error}")
+    "--historical accepted --patches:\n${historical_patch_error}")
 endif()

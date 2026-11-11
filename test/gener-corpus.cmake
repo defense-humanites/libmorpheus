@@ -80,7 +80,7 @@ set(historical_source "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.txt")
 set(historical_index "${MORPHEUS_GENER_CORPUS_WORK_DIR}/historical.mgi")
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_SOURCE_PREPARER}"
-          --requested-parts-only
+          --historical
           --exceptions "${MORPHEUS_GENER_CORPUS_EXCEPTIONS}"
           "${historical_source}" ${inputs}
   RESULT_VARIABLE historical_result
@@ -105,7 +105,7 @@ if(NOT historical_index_result EQUAL 0 OR
    NOT historical_index_sha256 STREQUAL
    "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6")
   message(FATAL_ERROR
-    "requested-parts-only preparation no longer reproduces the historical index: "
+    "historical preparation no longer reproduces the historical index: "
     "${historical_source_sha256} ${historical_index_sha256}")
 endif()
 execute_process(

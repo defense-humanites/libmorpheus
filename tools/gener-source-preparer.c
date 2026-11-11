@@ -116,10 +116,11 @@ typedef struct {
 	size_t group_count;
 	size_t group_capacity;
 	/*
-	 * Historical do_conj "full" semantics: no default principal parts, and
-	 * the expansion's inherited stem alterations kept.
+	 * --historical: the do_conj "full" preparation of data 0.1.0, with no
+	 * default principal parts, the expansion's inherited stem alterations,
+	 * and no data patches.
 	 */
-	int requested_parts_only;
+	int historical;
 } prepare_state;
 
 /* The historical expansion keeps its stem alterations; the default one
@@ -127,7 +128,7 @@ typedef struct {
 static unsigned int
 expansion_flags(const prepare_state *state)
 {
-	return state->requested_parts_only ? 0 : MORPHEUS_GENER_EXPAND_CORRECTED;
+	return state->historical ? 0 : MORPHEUS_GENER_EXPAND_CORRECTED;
 }
 
 static int append_bytes(prepared_buffer *output, const char *data,
@@ -742,7 +743,7 @@ finish_lemma(prepare_state *state, const char *path)
 	size_t group;
 	size_t part;
 
-	if (state->requested_parts_only || !state->have_lemma) {
+	if (state->historical || !state->have_lemma) {
 		state->group_count = 0;
 		return 1;
 	}
@@ -1457,7 +1458,7 @@ prepare_file(prepare_state *state, exception_set *exceptions,
 			state->have_explicit_request = 0;
 			state->base = BASE_DERIVATION;
 			state->have_derivation = 1;
-			if (!state->requested_parts_only &&
+			if (!state->historical &&
 			    !remember_group(state,global,path,line_number))
 				goto finish;
 			continue;
@@ -1557,9 +1558,9 @@ main(int argc, char **argv)
 
 	/* Options precede the output path, in any order, each at most once. */
 	for (input = 1; input < argc && !strncmp(argv[input],"--",2); input++) {
-		if (!strcmp(argv[input],"--requested-parts-only") &&
-		    !state.requested_parts_only) {
-			state.requested_parts_only = 1;
+		if (!strcmp(argv[input],"--historical") &&
+		    !state.historical) {
+			state.historical = 1;
 		} else if (!strcmp(argv[input],"--exceptions") && input + 1 < argc &&
 		           !active_exceptions) {
 			if (!load_exceptions(&exceptions,argv[++input]))
@@ -1575,24 +1576,24 @@ main(int argc, char **argv)
 		}
 	}
 	/*
-	 * --requested-parts-only reproduces the historical expansion, whose
-	 * index is pinned (5aa76d8c...): it reads the sources unpatched.
+	 * --historical reproduces the historical preparation, whose index is
+	 * pinned (5aa76d8c...): it reads the sources unpatched.
 	 */
-	if (state.requested_parts_only && active_patches) {
+	if (state.historical && active_patches) {
 		fprintf(stderr,
-		        "morpheus-gener-prepare: --requested-parts-only reads the sources unpatched; it cannot be combined with --patches\n");
+		        "morpheus-gener-prepare: --historical reads the sources unpatched; it cannot be combined with --patches\n");
 		goto finish;
 	}
 	if (argc - input < 2) {
 usage:
 		fprintf(stderr,
-		        "usage: morpheus_gener_source_preparer [--requested-parts-only] [--exceptions MANIFEST] [--patches MANIFEST] OUTPUT INPUT...\n");
+		        "usage: morpheus_gener_source_preparer [--historical] [--exceptions MANIFEST] [--patches MANIFEST] OUTPUT INPUT...\n");
 		goto finish;
 	}
 	output_path = argv[input++];
 	state.output = &prepared;
 	state.coverage = &coverage;
-	if (!state.requested_parts_only) {
+	if (!state.historical) {
 		/*
 		 * First pass: gather which parts each lemma key covers across all
 		 * its blocks, so that a part one block covers is not added to

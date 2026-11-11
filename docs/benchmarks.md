@@ -72,9 +72,9 @@ CTest and exposes it through a temporary stemlib root. It never writes
 `gener.index` into the tracked stemlib or the pinned Alpheios submodule.
 
 That index is the historical one (`historical.mgi`, SHA-256 `5aa76d8c…`):
-the source prepared with `--requested-parts-only`, without the default
-principal parts that the preparer now adds by default (see
-[gener-derivations.md](gener-derivations.md)). Generation rows therefore keep
+the source prepared with `--historical`, without the default principal
+parts, data patches and stem corrections that the preparer now applies by
+default (see [gener-derivations.md](gener-derivations.md)). Generation rows therefore keep
 measuring the same records as the retained baselines, and a change of data
 does not pass for a change of speed. Adopting the complete index in the
 benchmark takes a new baseline.
