@@ -307,8 +307,8 @@ preparation. Compared with `benchmark-0.4.5-node-packed.json` (`complete`
 scope), the thirteen result counts are identical, analysis throughput
 triples (mean latency −67 to −69 % for `node` and `cruncher-persistent`),
 `cruncher-cold` falls by 16 % and generation stays within noise; the
-[0.4.6 release decision](release-0.4.6.md#benchmark-evidence) reads it.
-**This report is the baseline of the next native release.**
+[0.4.6 release decision](release-0.4.6.md#benchmark-evidence) reads it. It
+was the baseline of 0.5.0.
 
 The Node.js binding's direct decoding with shared frozen name arrays (pull
 request #71) was measured on the same host, toolchain and native runtime
@@ -332,6 +332,19 @@ runtime's speed; maximal warm generation reaches 274 / 560 / 933 operations
 per second through Node.js and 102 / 136 / 136 through Python at one, two
 and four contexts, against 68 / 69 / 42 for Python in the first run. The
 [Python 0.2.2 decision](release-python-0.2.2.md) reads them.
+
+The accepted 0.5.0 report is retained at
+[`bench/release-evidence/benchmark-0.5.0.json`](../bench/release-evidence/benchmark-0.5.0.json)
+with its companion SHA-256 file. It was produced on 2026-11-11 on the same
+host and toolchain, through the tree's Node.js binding 0.2.0, from
+`fa7f0a6ad7adae09e17cefa46df0119d1d080399`, the merge of the 0.5.0
+preparation. Compared with `benchmark-0.4.6.json` (`complete` scope), the
+thirteen result counts are identical and analysis is within noise. Warm
+generation falls by 23 to 71 %, but from the binding's direct decoding, which
+the baseline did not have. Against the bindings reports of the same decoding
+on native 0.4.6, generation is within their own spread. The
+[0.5.0 release decision](release-0.5.0.md#benchmark-evidence) reads it.
+**This report is the baseline of the next native release.**
 
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or
 displaced Alpheios submodule, and an existing output path. Its label, stemlib

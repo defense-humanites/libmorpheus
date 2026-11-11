@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-11-11T17:19:44.639Z",
+  "label": "release-candidate",
+  "platform": {
+    "os": "darwin",
+    "arch": "arm64",
+    "release": "27.2.0"
+  },
+  "runtime": {
+    "node": "26.13.0",
+    "v8": "14.6.202.34-node.40",
+    "uv": "1.53.0",
+    "uvThreadpoolSize": 4
+  },
+  "binding": {
+    "package": "@libmorpheus/node",
+    "version": "0.2.0"
+  },
+  "hardwareConcurrency": 12,
+  "sourceRevision": "fa7f0a6ad7adae09e17cefa46df0119d1d080399",
+  "stemlibRevision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "corpus": "test/fixture.json",
+  "corpusSha256": "cc6f0eb3a2e52b0c6d6c3784d95d01ab3e7c1c824df7e38b6b9b96adcd1539c2",
+  "uniqueWords": 24,
+  "iterations": 20,
+  "warmupIterations": 2,
+  "generationSmallLemma": "lo/gos",
+  "generationMaximalLemma": "i(/hmi",
+  "generationIndexSha256": "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6",
+  "wasmModule": null,
+  "wasmModuleSha256": null,
+  "wasmRuntimeBytes": null,
+  "wasmResultDelivery": null,
+  "python": null,
+  "measurements": [
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 102.420917,
+      "operationsPerSecond": 4686.542691274673,
+      "meanMicroseconds": 213.37691041666668,
+      "startupMs": 3.3850000000000193,
+      "results": 740,
+      "peakRssBytes": 24431520,
+      "rssGrowthBytes": 6799768
+    },
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 2,
+      "operations": 480,
+      "durationMs": 62.93991700000004,
+      "operationsPerSecond": 7626.320829117072,
+      "meanMicroseconds": 131.1248270833334,
+      "startupMs": 0.7023340000000076,
+      "results": 740,
+      "peakRssBytes": 26528672,
+      "rssGrowthBytes": 2080768
+    },
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 4,
+      "operations": 480,
+      "durationMs": 41.4015,
+      "operationsPerSecond": 11593.782833955293,
+      "meanMicroseconds": 86.253125,
+      "startupMs": 0.7695830000000115,
+      "results": 740,
+      "peakRssBytes": 29969360,
+      "rssGrowthBytes": 3440688
+    },
+    {
+      "engine": "cruncher-persistent",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 101.18258300000008,
+      "operationsPerSecond": 4743.899451548886,
+      "meanMicroseconds": 210.79704791666686,
+      "startupMs": null,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 26.99670900000001,
+      "operationsPerSecond": 370.41551990651885,
+      "meanMicroseconds": 2699.670900000001,
+      "startupMs": 2.699670900000001,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 0.6956670000000713,
+      "operationsPerSecond": 28749.387278680675,
+      "meanMicroseconds": 34.783350000003566,
+      "startupMs": 0.26308400000004895,
+      "results": 360,
+      "peakRssBytes": 42191824,
+      "rssGrowthBytes": 11812864
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 73.17183399999999,
+      "operationsPerSecond": 273.3292157198083,
+      "meanMicroseconds": 3658.5916999999995,
+      "startupMs": 0.3120000000000118,
+      "results": 58360,
+      "peakRssBytes": 60789728,
+      "rssGrowthBytes": 18597904
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 0.8283330000000433,
+      "operationsPerSecond": 48289.75786307911,
+      "meanMicroseconds": 20.708325000001082,
+      "startupMs": 0.6316669999999931,
+      "results": 720,
+      "peakRssBytes": 72618976,
+      "rssGrowthBytes": 11829248
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 70.18795799999998,
+      "operationsPerSecond": 569.8983292832086,
+      "meanMicroseconds": 1754.6989499999995,
+      "startupMs": 0.45062499999994543,
+      "results": 116720,
+      "peakRssBytes": 75633752,
+      "rssGrowthBytes": 3014776
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 1.1284580000000233,
+      "operationsPerSecond": 70893.20116477384,
+      "meanMicroseconds": 14.105725000000291,
+      "startupMs": 0.8516250000000127,
+      "results": 1440,
+      "peakRssBytes": 99472496,
+      "rssGrowthBytes": 23838744
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 89.00487499999997,
+      "operationsPerSecond": 898.8271709836122,
+      "meanMicroseconds": 1112.5609374999997,
+      "startupMs": 0.7793330000000651,
+      "results": 233440,
+      "peakRssBytes": 126345160,
+      "rssGrowthBytes": 26872664
+    },
+    {
+      "engine": "generation-small-cold",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 147.08491700000002,
+      "operationsPerSecond": 67.98793651969086,
+      "meanMicroseconds": 14708.491700000002,
+      "startupMs": 14.708491700000002,
+      "results": 180,
+      "peakRssBytes": 126361544,
+      "rssGrowthBytes": 0
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 190.36400000000003,
+      "operationsPerSecond": 52.53094072408648,
+      "meanMicroseconds": 19036.4,
+      "startupMs": 19.036400000000004,
+      "results": 29180,
+      "peakRssBytes": 126476232,
+      "rssGrowthBytes": 114688
+    }
+  ],
+  "comparisonBaselineSchemaVersion": 3,
+  "comparisonScope": "complete",
+  "comparison": [
+    {
+      "engine": "node",
+      "contexts": 1,
+      "throughputChangePercent": 0.6971632562125629,
+      "meanLatencyChangePercent": -0.6923365402446646,
+      "peakRssChangePercent": -15.474667226858664,
+      "rssGrowthChangePercent": -40.113998654280415
+    },
+    {
+      "engine": "node",
+      "contexts": 2,
+      "throughputChangePercent": 0.7429688857072181,
+      "meanLatencyChangePercent": -0.737489567683991,
+      "peakRssChangePercent": -18.72325208560509,
+      "rssGrowthChangePercent": -44.29824561403509
+    },
+    {
+      "engine": "node",
+      "contexts": 4,
+      "throughputChangePercent": 1.4486190113885522,
+      "meanLatencyChangePercent": -1.427933692449701,
+      "peakRssChangePercent": -9.767175674565731,
+      "rssGrowthChangePercent": 500.0083705357143
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "throughputChangePercent": -4.2005747174887915,
+      "meanLatencyChangePercent": 4.384759830344853,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "throughputChangePercent": 1.596179741760051,
+      "meanLatencyChangePercent": -1.5711021278725812,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 1,
+      "throughputChangePercent": 245.4957616215462,
+      "meanLatencyChangePercent": -71.0560848762193,
+      "peakRssChangePercent": -9.170901156207245,
+      "rssGrowthChangePercent": -8.27142961861348
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 1,
+      "throughputChangePercent": 56.582791132445976,
+      "meanLatencyChangePercent": -36.136021540569715,
+      "peakRssChangePercent": -50.109187422344306,
+      "rssGrowthChangePercent": -75.3322693357648
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 2,
+      "throughputChangePercent": 29.743593458177852,
+      "meanLatencyChangePercent": -22.92490339244806,
+      "peakRssChangePercent": -45.71480924474136,
+      "rssGrowthChangePercent": -0.8241758241758212
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 2,
+      "throughputChangePercent": 105.04217689307902,
+      "meanLatencyChangePercent": -51.22954627420589,
+      "peakRssChangePercent": -56.40927030790369,
+      "rssGrowthChangePercent": -92.41293071582561
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 4,
+      "throughputChangePercent": 122.31664802765474,
+      "meanLatencyChangePercent": -55.01911310413394,
+      "peakRssChangePercent": -49.58689966533475,
+      "rssGrowthChangePercent": 0.13764611037161423
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 4,
+      "throughputChangePercent": 237.18438568673923,
+      "meanLatencyChangePercent": -70.34263618217929,
+      "peakRssChangePercent": -56.409457965018525,
+      "rssGrowthChangePercent": -70.95807120016198
+    },
+    {
+      "engine": "generation-small-cold",
+      "contexts": 0,
+      "throughputChangePercent": 0.7574134878832739,
+      "meanLatencyChangePercent": -0.7517198602704944,
+      "peakRssChangePercent": -56.403805295452855,
+      "rssGrowthChangePercent": 0
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "contexts": 0,
+      "throughputChangePercent": 10.718456746023364,
+      "meanLatencyChangePercent": -9.680822024651581,
+      "peakRssChangePercent": -56.364236608493215,
+      "rssGrowthChangePercent": null
+    }
+  ]
+}
