@@ -27,32 +27,33 @@ the corpus.
 
 ### Changed
 
-- The generation source preparer completes regular derivations with the
-  principal parts the lemma's records do not cover (#78, item 3;
+- The generation source preparer completes regular derivations with every
+  principal part they define, as analysis does (#78, item 3;
   `docs/gener-derivations.md`). The historical `do_conj` expansion emitted
   only the parts a `:de:` group requests with `;`, or the present alone,
   whereas analysis keeps the derivation whole and accepts every part:
   ποιέω had no active aorist, δηλόω no aorist, perfect or aorist passive,
-  ἀγγέλλω no Attic future. Only `reg_deriv` derivations (`ew_denom`,
-  `ow_denom`, `izw`, `ellw`...) receive the present, future, aorist,
-  perfect, perfect middle-passive and aorist passive they lack; primary
-  conjugations and verb stem classes (ἔχω, πάσχω, πίπτω, ὁράω...) keep
-  their requests. A part stays as the sources give it when a record of the
-  lemma, in any of its blocks, covers it without a dialect, tense or mood
-  restriction; a group whose keys fix a tense, a mood or a present
-  formation keeps its requests, and a voice on the `:de:` line keeps the
-  parts that can carry it. The future perfect is not added. A present that a
-  group receives because it requests nothing is a default too and covers
-  nothing. The Alpheios index grows from 129,097 to 172,750 records
-  (106,427 lemmas, five of them new, such as ἀγαπάω); 8,786 lemmas gain
-  forms, the others are unchanged, and no added record fails at
-  generation. Generated forms go from 12.5 to 22.1 million. The
-  preparer's
-  `--historical` option still reproduces the historical index
-  `5aa76d8c…`; the benchmark keeps using it so that generation rows stay
-  comparable with the baselines. `tools/gener-default-parts-report.py`
-  measures the change, and the corpus test checks the reviewed blocks of
-  thirteen frequent verbs.
+  ἀγγέλλω neither ἤγγειλα nor ἠγγέλθην. Each `reg_deriv` group (`ew_denom`,
+  `ow_denom`, `izw`, `ellw`...) now receives the present, future, aorist,
+  perfect, perfect middle-passive, aorist passive and future perfect,
+  whatever other records its lemma has; primary conjugations and verb stem
+  classes (ἔχω, πάσχω, πίπτω, ὁράω...) keep their requests. A group whose
+  keys fix a tense, a mood or a present formation keeps its requests, and a
+  voice on the `:de:` line keeps the parts that can carry it. The preparer
+  also drops the records whose stem only occurs in compounds (`comp_only`),
+  since analysis accepts their forms only after a preverb: 347 lemmas such
+  as δημέω leave the index. 8,511 lemmas gain forms, no added record fails
+  at generation, and generated forms go from 12.5 to 22.1 million. The
+  index has 106,081 lemmas and 177,676 records; its digest becomes
+  `a2f97677…` (prepared source `62265bf6…`) in the tree's data package,
+  Python manifest, runtime-data script and CI, so the next native, data and
+  Python releases must ship together. The WebAssembly preparer of
+  `@libmorpheus/data` is regenerated and produces the same index byte for
+  byte. The preparer's `--historical` option still reproduces the
+  historical index `5aa76d8c…`; the benchmark keeps using it so that
+  generation rows stay comparable with the baselines.
+  `tools/gener-default-parts-report.py` measures the change, and the corpus
+  test checks the reviewed blocks of thirteen frequent verbs.
 - The generation source preparer applies reviewed data patches
   (`--patches`, `tools/gener-corpus-patches.tsv`,
   `docs/gener-data-patches.md`). Seven correct the `:de:` lines of the
@@ -71,8 +72,7 @@ the corpus.
   `--historical`, which reproduces the unpatched historical
   preparation. ἔχω regains its present system (ἔχω, εἶχον, ἔχεσκον); the
   patches add 16 records, βεβόλημαι and 3,365 forms, and nothing else.
-  The data package embeds and applies the same manifest. With the default
-  principal parts, the index has 106,428 lemmas and 172,766 records.
+  The data package embeds and applies the same manifest.
 - The default expansion of the generation source preparer corrects two stem
   alterations of the historical one, which the default principal parts had
   extended to many more lemmas (`docs/gener-derivations.md`). Aspirate
@@ -88,12 +88,13 @@ the corpus.
   historical mode keeps the historical expansion and still reproduces
   `5aa76d8c…`; since it now also excludes the defaults and the patches,
   its option is named `--historical` (formerly `--requested-parts-only`,
-  never released). The index
-  digest becomes `e04d4a7d…` (prepared source `ee399e9f…`) in the tree's
-  data package, Python manifest, runtime-data script and CI, so the next
-  native, data and Python releases must ship together. The WebAssembly
-  preparer of `@libmorpheus/data` is regenerated and produces the same
-  index byte for byte.
+  never released).
+- The documentation defines generation as the inverse of analysis (README,
+  `docs/public-api.md`, binding guides): it returns the forms that analysis
+  accepts for a lemma, variants and unattested regular forms included, to
+  find them in texts, precompute form-to-lemma tables or check the data, not
+  a reference paradigm. The experimental qualification will be lifted once
+  generation and analysis agree in both directions and both are measured.
 - Experimental generation no longer fails a whole lemma on one bad record
   (#78). Over the Alpheios index (106,422 lemmas), 275 lemmas failed with
   `MORPHEUS_INTERNAL_ERROR` because of 346 records: stem classes without an

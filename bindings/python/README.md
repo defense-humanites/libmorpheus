@@ -146,6 +146,12 @@ analysis.
 > extensive, but sufficient real-world use is still required before this
 > qualification can be removed.
 
+Generation is the inverse of analysis: it returns the forms the analyzer
+accepts for a lemma, dialectal and late variants and unattested regular
+forms included, not a reference paradigm. See
+[Greek lemma generation](https://github.com/defense-humanites/libmorpheus/blob/main/docs/public-api.md#greek-lemma-generation)
+for its uses and limits.
+
 Generation needs Alpheios data **and** a prepared generation index,
 `gener.index`, at the root of the stemlib directory; analysis needs neither.
 The Python package does not prepare the index yet: prepare it once with the
