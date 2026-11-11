@@ -126,7 +126,12 @@ Over the 49 corpus sources, the index grows from 129,097 to 172,741 records:
 zero request (ἀγαπάω: `;ao epic unaugmented`) enter the index. The other
 lemmas are unchanged, no form is removed, and no added record fails at
 generation: over the whole index, `morpheus_generate()` skips the same 346
-records as before. Generated forms grow from 12.5 to 22.0 million.
+records as before. Generated forms grow from 12.5 to 22.0 million. On 120
+changed lemmas (seed 78), 93.2 % of the added forms analyze back to their
+lemma with the same tense and mood, against 95.1 % of the forms these lemmas
+generated before. Over the whole index, the first `morpheus_generate()` of a
+context goes from 31 to 43 ms and the 99th percentile of a request from 5.2
+to 9.4 ms; the median stays at 0.13 ms (2-vCPU Linux sandbox, indicative).
 
 The rule follows the sources and does not correct them. ἀγγέλλω has
 explicit, unrestricted `:vs:a)ggel aor2` and `aor2_pass` records, so it
