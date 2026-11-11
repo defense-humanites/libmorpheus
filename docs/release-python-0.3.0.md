@@ -40,6 +40,13 @@ distribution declares it. Before this decision, the unit tests (25), the
 runtime smoke test, generation over the Alpheios index from four threads
 and `uv build` passed under CPython 3.15.2.
 
+The first CI run of the matrix found that `build` 1.3.0, which the
+workflows pinned, fails under 3.15 before building anything: its help
+formatter rejects the `color` argument that 3.15's `argparse` passes. Both
+the Linux CI and the publication workflow now pin `build` 1.6.1, which
+supports 3.15. Under 3.11 the two versions build the same wheel and the
+same sdist file list.
+
 ## Distribution, behavioral and licensing contracts
 
 Unchanged from [0.2.2](release-python-0.2.2.md), except for the skipped
