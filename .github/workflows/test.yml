@@ -325,6 +325,12 @@ jobs:
             --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
             --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
           node bench/validate.mjs \
+            bench/release-evidence/benchmark-0.5.0.json \
+            --label release-candidate \
+            --revision fa7f0a6ad7adae09e17cefa46df0119d1d080399 \
+            --stemlib-revision 4632415fe93c85e9fdca47a0c5a13f31385f0023 \
+            --compiler 'Apple clang version 21.0.0 (clang-2100.4.1.1)'
+          node bench/validate.mjs \
             bench/release-evidence/benchmark-0.4.6-node-decoding.json \
             --label node-decoding \
             --revision 4b12528696cf9420401d5dcce76ee32f1c69828a \
@@ -377,7 +383,7 @@ jobs:
             node bench/compare.mjs --iterations 1 --warmup 0 --contexts 1 \
             --cold-samples 1 --generation-small 'lo/gos' \
             --generation-maximal 'i(/hmi' --json \
-            --baseline bench/release-evidence/benchmark-0.4.6.json \
+            --baseline bench/release-evidence/benchmark-0.5.0.json \
             > build/benchmark-smoke.json
           node -e '
             const report = JSON.parse(require("node:fs").readFileSync("build/benchmark-smoke.json", "utf8"));
