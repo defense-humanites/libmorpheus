@@ -46,7 +46,12 @@ the corpus.
   nothing. The Alpheios index grows from 129,097 to 172,750 records
   (106,427 lemmas, five of them new, such as ἀγαπάω); 8,786 lemmas gain
   forms, the others are unchanged, and no added record fails at
-  generation. Generated forms go from 12.5 to 22.1 million. The preparer's
+  generation. Generated forms go from 12.5 to 22.1 million. The defaults
+  also extend two stem alterations inherited from the legacy expansion:
+  aspirate dissimilation, whose exception for aorist passives never
+  applies (1,541 added records, such as ἠλητεύθην for ἀληθεύω), and
+  euphony inside the stem (about 150 records, such as γλωσοχαριτήσω). The
+  preparer's
   `--requested-parts-only` option still reproduces the historical index
   `5aa76d8c…`; the benchmark keeps using it so that generation rows stay
   comparable with the baselines. `tools/gener-default-parts-report.py`
@@ -60,8 +65,15 @@ the corpus.
   βεβόλημαι), a truncated type (`ew`), a stray space, a stem type on a
   `:de:` line, a noun declension on a `:de:` line. Each patch is checked
   against the source line's fingerprint and supersedes its recorded
-  exception; the document holds the evidence and a report ready to offer
-  upstream. ἔχω regains its present system (ἔχω, εἶχον, ἔχεσκον); the
+  exception. The document gives each patch's evidence and marks three as
+  conjectural (δινεύω, μελιτόομαι, στείνω), because the Alpheios analysis
+  index does not know their stems under those lemmas; the manifest and the
+  document make the corrections available, as the sources' licence asks,
+  with a report ready for Alpheios. The preparer rejects a manifest out of
+  source order and a replacement with surrounding whitespace, accepts its
+  options in any order, and refuses `--patches` with
+  `--requested-parts-only`, which reproduces the unpatched historical
+  preparation. ἔχω regains its present system (ἔχω, εἶχον, ἔχεσκον); the
   patches add 16 records, βεβόλημαι and 3,365 forms, and nothing else.
   The data package embeds and applies the same manifest. With the default
   principal parts, the index has 106,428 lemmas and 172,766 records; its

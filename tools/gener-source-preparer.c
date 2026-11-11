@@ -2,6 +2,7 @@
 
 // SPDX-License-Identifier: MPL-2.0
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -995,10 +996,10 @@ load_patches(patch_set *patches, const char *path)
 		char *fields[4];
 		char *cursor;
 		char *end;
+		size_t replacement_length;
 		unsigned long long source_line;
 		source_patch *grown;
 		size_t field;
-		size_t index;
 
 		manifest_line++;
 		cursor = line;
@@ -1017,16 +1018,26 @@ load_patches(patch_set *patches, const char *path)
 		end = fields[3] + strlen(fields[3]);
 		while (end != fields[3] && (end[-1] == '\n' || end[-1] == '\r'))
 			*--end = 0;
+		replacement_length = (size_t)(end - fields[3]);
 		errno = 0;
 		source_line = strtoull(fields[1],&end,10);
+		/* The replacement is a trimmed line, as the preparer reads them. */
 		if (errno || !source_line || *end || !*fields[0] ||
-		    !valid_sha256(fields[2]) || !*fields[3] ||
-		    fields[3][0] == ' ' || end[-1] == ' ')
+		    !valid_sha256(fields[2]) || !replacement_length ||
+		    isspace((unsigned char)fields[3][0]) ||
+		    isspace((unsigned char)fields[3][replacement_length - 1]))
 			goto invalid;
-		for (index = 0; index != patches->count; index++) {
-			if (patches->items[index].line_number == source_line &&
-			    !strcmp(patches->items[index].path,fields[0]))
-				goto invalid;
+		/* Entries follow the sources: by path, then by line, once each. */
+		if (patches->count) {
+			const source_patch *previous = patches->items + patches->count - 1;
+			int order = strcmp(fields[0],previous->path);
+
+			if (order < 0 || (!order && source_line <= previous->line_number)) {
+				fprintf(stderr,
+				        "morpheus-gener-prepare: %s:%llu: patches are not in source order\n",
+				        path,manifest_line);
+				goto finish;
+			}
 		}
 		grown = realloc(patches->items,(patches->count + 1) * sizeof *grown);
 		if (!grown) {
@@ -1533,24 +1544,36 @@ main(int argc, char **argv)
 	}
 #endif
 
-	input = 1;
-	if (argc > input && !strcmp(argv[input],"--requested-parts-only")) {
-		state.requested_parts_only = 1;
-		input++;
+	/* Options precede the output path, in any order, each at most once. */
+	for (input = 1; input < argc && !strncmp(argv[input],"--",2); input++) {
+		if (!strcmp(argv[input],"--requested-parts-only") &&
+		    !state.requested_parts_only) {
+			state.requested_parts_only = 1;
+		} else if (!strcmp(argv[input],"--exceptions") && input + 1 < argc &&
+		           !active_exceptions) {
+			if (!load_exceptions(&exceptions,argv[++input]))
+				goto finish;
+			active_exceptions = &exceptions;
+		} else if (!strcmp(argv[input],"--patches") && input + 1 < argc &&
+		           !active_patches) {
+			if (!load_patches(&patches,argv[++input]))
+				goto finish;
+			active_patches = &patches;
+		} else {
+			goto usage;
+		}
 	}
-	if (argc - input >= 4 && !strcmp(argv[input],"--exceptions")) {
-		if (!load_exceptions(&exceptions,argv[input + 1]))
-			goto finish;
-		active_exceptions = &exceptions;
-		input += 2;
-	}
-	if (argc - input >= 4 && !strcmp(argv[input],"--patches")) {
-		if (!load_patches(&patches,argv[input + 1]))
-			goto finish;
-		active_patches = &patches;
-		input += 2;
+	/*
+	 * --requested-parts-only reproduces the historical expansion, whose
+	 * index is pinned (5aa76d8c...): it reads the sources unpatched.
+	 */
+	if (state.requested_parts_only && active_patches) {
+		fprintf(stderr,
+		        "morpheus-gener-prepare: --requested-parts-only reads the sources unpatched; it cannot be combined with --patches\n");
+		goto finish;
 	}
 	if (argc - input < 2) {
+usage:
 		fprintf(stderr,
 		        "usage: morpheus_gener_source_preparer [--requested-parts-only] [--exceptions MANIFEST] [--patches MANIFEST] OUTPUT INPUT...\n");
 		goto finish;
