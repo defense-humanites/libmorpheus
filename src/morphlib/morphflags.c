@@ -237,9 +237,10 @@ static const int preverb_morphflags[] = {
 	DOUBLED_CONS,
 	/*
 	 * The shapes of the preverb itself (e)s for ei)s, cun for su/n...),
-	 * which rstprevb() applies from the preverb's flags.
+	 * which rstprevb() applies from the preverb's flags. Not IOTA_INTENS,
+	 * which also marks the deictic iota of a word (e)keinosi/) and must stay
+	 * in the stem keys the stemlib build writes.
 	 */
-	IOTA_INTENS,
 	SIG_TO_CI,
 	SHORT_EIS,
 	PROS_TO_POTI,

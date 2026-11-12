@@ -507,12 +507,16 @@ morpheus_compound_names_lemma(morpheus_compound_table **table,
 	return status;
 }
 
-/* The flags of a table line that make a variant of its preverb. */
+/*
+ * The flags of a table line that make a variant of its preverb. iota_intens
+ * is not one: the engine leaves it on the stem, and en_to_eni spells the same
+ * e)ni-.
+ */
 static int
 is_variant_flag(const char *flag, size_t length)
 {
 	static const char *const flags[] = {
-		"apocope", "short_eis", "en_to_eni", "iota_intens",
+		"apocope", "short_eis", "en_to_eni",
 		"prevb_augment", "sig_to_ci", "pros_to_proti", "pros_to_poti",
 		"meta_to_peda", "upo_to_upai", "uper_to_upeir", "para_to_parai",
 		"dissimilation", "elide_preverb", "raw_preverb"

@@ -52,10 +52,11 @@ the corpus.
 - Analysis names compounds through a function it now shares with
   generation; its results are unchanged (42,052 words compared).
 - The flags that change a preverb's shape (`short_eis`, `sig_to_ci`,
-  `iota_intens`, `en_to_eni`, `pros_to_proti`…) belong to the preverb rather
-  than the stem, so the generator applies them to regular stems too, not
-  only to irregular forms. Analysis results are unchanged (42,052 words
-  compared).
+  `en_to_eni`, `pros_to_proti`…) belong to the preverb rather than the
+  stem, so the generator applies them to regular stems too, not only to
+  irregular forms. `iota_intens` stays on the stem, where it also marks the
+  deictic iota (ἐκεινοσί). Analysis results (42,052 words compared) and the
+  stemlib build output are unchanged.
 - Generated surfaces no longer write the engine's hiatus mark after πρό,
   περί and προτί (`pro+e/hke`): it becomes the diaeresis of a following
   iota or upsilon that would otherwise form a diphthong (`proi/+sxw`) and
