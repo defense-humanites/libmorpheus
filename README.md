@@ -5,6 +5,8 @@
   </picture>
 </p>
 
+<br>
+
 <p align="center">
   A modernization of the Morpheus morphological analyzer for Ancient Greek and Latin.
 </p>
@@ -16,7 +18,7 @@
   <a href="bindings/js/wasm/README.md">WebAssembly</a>
 </p>
 
-# libmorpheus
+<br>
 
 `libmorpheus` modernizes the [Morpheus](https://github.com/PerseusDL/morpheus)
 morphological analyzer for Ancient Greek and Latin. It turns the historical C
