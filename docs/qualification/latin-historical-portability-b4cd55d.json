@@ -1,0 +1,32 @@
+{
+  "qualified_commit": "b4cd55df347d978adad7315629a7be0ece903859",
+  "workflow_run": 37909422275,
+  "workflow_job": 113750704211,
+  "qualification": {
+    "definition_multisets": {
+      "added_rows": 2,
+      "after_rows": 10399,
+      "before_rows": 10398,
+      "changed_lemma_multisets": 1,
+      "removed_rows": 1,
+      "retained_rows": 10397,
+      "unchanged_lemma_multisets": 6987,
+      "union_lemmas": 6988
+    },
+    "diagnostic_lexer_sha256": "654be9aa0e2bb47ac27f9bb6f4dfe7183a522b6f657083aab99f884e806a3189",
+    "input_sha256": {
+      "input": "91a7502f92f060b579f878e11c06e52f17cde1c1b66e9c0c202c467cf226ab37",
+      "lexer": "27765fb0e13ba200f432c98218e1bb53126acedb391bf1d8c5cabe1fe30dd231",
+      "reference": "22196e561a802c607249597b767652b3c0f9ad797b3155a22ec11c61875c8479"
+    },
+    "instrumentation": "address,undefined; no recovery",
+    "original_inputs_unchanged": true,
+    "output_sha256": "8f234062ffeaf58e15ceabe3c8a8f5ff2ea37ef0c62d90659ea5db581a5c85de",
+    "platform": "linux",
+    "private_delta_sha256": "258e211210c33e223fe3055c7c21e3a9c834f51d5e27e1ff4332d900dd2d4622",
+    "raw_output_equal": false,
+    "sanitizer_process_exit": 0,
+    "schema": 1,
+    "scope": "diagnostic lexer copy only; no candidate or production substitution"
+  }
+}

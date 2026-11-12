@@ -24,7 +24,10 @@ have no counterpart at the same path in either audited upstream tree:
 `CMakePresets.json` cannot contain comments, so its license is recorded in the
 adjacent `CMakePresets.json.license` file.
 The same sidecar convention applies to the machine-readable
-`tools/stemlib-redistribution-policy.json` contract.
+`tools/stemlib-redistribution-policy.json` contract, to the lexical research
+reference `tools/latin-final-present-reference.json`, and to the qualification
+receipts under `docs/qualification/` (JSON aggregates of counts, categories
+and SHA-256 fingerprints, each with an adjacent `.license` file).
 
 The classification is based on the preserved Git history: the imported Perseids
 baseline is commit `ab6898ffed335fc6169fa02c9940657a9b5a78e0`, and the

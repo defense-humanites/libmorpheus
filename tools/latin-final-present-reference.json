@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "scope": "aggregate reference receipts for the qualified final present trial; no lexical records",
+  "code_revision": "e42866dcfe92b311b3492a25d457fe51ec7de77c",
+  "qualification_run_id": 37426884736,
+  "source_sha256": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee",
+  "headers_sha256": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+  "listall_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+  "candidate_sha256": {
+    "all": "c130bad78f1b7d34542057393d2c79669aa4378325b4540b53ba6a25986678a4",
+    "letters-only": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9"
+  },
+  "indexes_sha256": {
+    "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+    "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+    "vbind": "d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4",
+    "vbind.lindex": "486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954"
+  },
+  "final_recognized_forms": 847750,
+  "final_analysis_rows": 2100530,
+  "baseline_recognized_forms": 837990,
+  "baseline_analysis_rows": 2048328
+}

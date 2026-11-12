@@ -1,0 +1,367 @@
+{
+ "latin_itype_tag_leak": {
+  "changed_definition_loss_cases": [],
+  "distinct_defective_forms": 65,
+  "distinct_family_forms": 0,
+  "family_comparison": {
+   "analysis_rows": {
+    "curated": 224,
+    "rebuilt": 0
+   },
+   "changed_analysis_counts": 65,
+   "changed_grammatical_multisets": 65,
+   "changed_multisets_at_equal_counts": 0,
+   "counts": {
+    "distinct_forms": 65,
+    "input_lines": 65,
+    "recognized_curated__absent_rebuilt": 65
+   },
+   "delta_rows_by_pos_tense_provenance": {
+    "added": [],
+    "removed": [
+     {
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 26,
+      "tense": 0
+     },
+     {
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 6,
+      "tense": 0
+     },
+     {
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 78,
+      "tense": 3
+     },
+     {
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 18,
+      "tense": 3
+     },
+     {
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 78,
+      "tense": 5
+     },
+     {
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 18,
+      "tense": 5
+     }
+    ]
+   },
+   "global_eleven_field_multisets": {
+    "added_rows": 0,
+    "removed_rows": 224,
+    "retained_rows": 0
+   },
+   "identical_root_control": false,
+   "input_sha256": "2626e700b5dcfe12badcef14b89f21b3853e49b04fbd63f987cc5147087befa2",
+   "lost_forms_diagnostic": {
+    "distinct_lemmas_by_pos": {
+     "2": 16
+    },
+    "forms": 65,
+    "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+    "rows_by_pos_tense_provenance_source_membership": [
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 26,
+      "tense": 0
+     },
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 6,
+      "tense": 0
+     },
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 78,
+      "tense": 3
+     },
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 18,
+      "tense": 3
+     },
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "direct",
+      "rows": 78,
+      "tense": 5
+     },
+     {
+      "lemma_membership": "not_applicable",
+      "part_of_speech": 2,
+      "provenance": "native_preverb",
+      "rows": 18,
+      "tense": 5
+     }
+    ]
+   },
+   "mode": "literal ASCII forms; native options 0",
+   "private_difference_sha256": "fefff9782a8a58fa0ec7037ff5366db67fd50d48490c54fd5fb7bf4203458071",
+   "schema": 1,
+   "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+   "signature_fields": [
+    "workword",
+    "lemma",
+    "part_of_speech",
+    "person",
+    "number",
+    "gender",
+    "grammatical_case",
+    "tense",
+    "mood",
+    "voice",
+    "degree"
+   ],
+   "status_pairs": {
+    "0,0": 65
+   }
+  },
+  "family_sixteen_field_multisets": {
+   "added_rows": 0,
+   "changed_forms": 65,
+   "removed_rows": 224,
+   "retained_rows": 0
+  },
+  "global_listall": {
+   "comparison": {
+    "analysis_rows": {
+     "curated": 2100530,
+     "rebuilt": 2100530
+    },
+    "changed_analysis_counts": 0,
+    "changed_grammatical_multisets": 0,
+    "changed_multisets_at_equal_counts": 0,
+    "counts": {
+     "absent_curated__absent_rebuilt": 185829,
+     "distinct_forms": 1033579,
+     "input_lines": 1033579,
+     "recognized_curated__recognized_rebuilt": 847750
+    },
+    "delta_rows_by_pos_tense_provenance": {
+     "added": [],
+     "removed": []
+    },
+    "global_eleven_field_multisets": {
+     "added_rows": 0,
+     "removed_rows": 0,
+     "retained_rows": 2100530
+    },
+    "identical_root_control": false,
+    "input_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+    "lost_forms_diagnostic": {
+     "distinct_lemmas_by_pos": {},
+     "forms": 0,
+     "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+     "rows_by_pos_tense_provenance_source_membership": []
+    },
+    "mode": "literal ASCII forms; native options 0",
+    "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema": 1,
+    "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+    "signature_fields": [
+     "workword",
+     "lemma",
+     "part_of_speech",
+     "person",
+     "number",
+     "gender",
+     "grammatical_case",
+     "tense",
+     "mood",
+     "voice",
+     "degree"
+    ],
+    "status_pairs": {
+     "0,0": 1033579
+    }
+   },
+   "control": {
+    "analysis_rows": {
+     "curated": 2100530,
+     "rebuilt": 2100530
+    },
+    "changed_analysis_counts": 0,
+    "changed_grammatical_multisets": 0,
+    "changed_multisets_at_equal_counts": 0,
+    "counts": {
+     "absent_curated__absent_rebuilt": 185829,
+     "distinct_forms": 1033579,
+     "input_lines": 1033579,
+     "recognized_curated__recognized_rebuilt": 847750
+    },
+    "delta_rows_by_pos_tense_provenance": {
+     "added": [],
+     "removed": []
+    },
+    "global_eleven_field_multisets": {
+     "added_rows": 0,
+     "removed_rows": 0,
+     "retained_rows": 2100530
+    },
+    "identical_root_control": true,
+    "input_sha256": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+    "lost_forms_diagnostic": {
+     "distinct_lemmas_by_pos": {},
+     "forms": 0,
+     "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+     "rows_by_pos_tense_provenance_source_membership": []
+    },
+    "mode": "literal ASCII forms; native options 0",
+    "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema": 1,
+    "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+    "signature_fields": [
+     "workword",
+     "lemma",
+     "part_of_speech",
+     "person",
+     "number",
+     "gender",
+     "grammatical_case",
+     "tense",
+     "mood",
+     "voice",
+     "degree"
+    ],
+    "status_pairs": {
+     "0,0": 1033579
+    }
+   },
+   "removed_reading_displacement": {
+    "counts": {},
+    "reproduced_by_enclitic": {},
+    "scope": "removed eleven-field readings on forms recognized before and after; enclitic retry displaced by a new direct analysis; no lexical value published"
+   }
+  },
+  "historical_defect": "latvb conj3 trim removes only the final u of a qu/gu radical before appending the written xi/ctum suffix",
+  "historical_restoration_on_family_forms": {
+   "additions_beyond_historical_baseline": 0,
+   "forms_newly_recognized": 0,
+   "forms_no_longer_recognized": 65,
+   "historical_sixteen_field_readings_restored": 0
+  },
+  "identical_root_control": {
+   "analysis_rows": {
+    "curated": 0,
+    "rebuilt": 0
+   },
+   "changed_analysis_counts": 0,
+   "changed_grammatical_multisets": 0,
+   "changed_multisets_at_equal_counts": 0,
+   "counts": {
+    "absent_curated__absent_rebuilt": 65,
+    "distinct_forms": 65,
+    "input_lines": 65
+   },
+   "delta_rows_by_pos_tense_provenance": {
+    "added": [],
+    "removed": []
+   },
+   "global_eleven_field_multisets": {
+    "added_rows": 0,
+    "removed_rows": 0,
+    "retained_rows": 0
+   },
+   "identical_root_control": true,
+   "input_sha256": "2626e700b5dcfe12badcef14b89f21b3853e49b04fbd63f987cc5147087befa2",
+   "lost_forms_diagnostic": {
+    "distinct_lemmas_by_pos": {},
+    "forms": 0,
+    "membership_scope": "exact lemma bytes in the substituted verbal input only; excludes retained verbal inputs; no source approval",
+    "rows_by_pos_tense_provenance_source_membership": []
+   },
+   "mode": "literal ASCII forms; native options 0",
+   "private_difference_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "schema": 1,
+   "scope": "all eleven-field multisets, including equal-count forms; aggregate diagnostic, not equivalence approval",
+   "signature_fields": [
+    "workword",
+    "lemma",
+    "part_of_speech",
+    "person",
+    "number",
+    "gender",
+    "grammatical_case",
+    "tense",
+    "mood",
+    "voice",
+    "degree"
+   ],
+   "status_pairs": {
+    "0,0": 65
+   }
+  },
+  "input_sha256": {
+   "candidate": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+   "forms": "1df0800fb1443b2cfd64d787c257319aa72b69f453c3c37ec60c359c70cebd93",
+   "headers": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+   "report": "6e11f1d278e2113b2c379da55667f5f32f403f8dec3f8bfa6596d0543e5d8ac1",
+   "tei": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+  },
+  "leaked_stem_cells_after": {
+   "expected_cells": 78
+  },
+  "leaked_stem_cells_before": {
+   "covered_cells": 78,
+   "expected_cells": 78
+  },
+  "native_scope": "engine-generated perfect and supine cells of each repaired record under its exact lemma, plus the cells of the removed defective stems; historical restoration measured against the controlled rebuilt baseline on those forms only",
+  "original_indexes_sha256": {
+   "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+   "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+   "vbind": "d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4",
+   "vbind.lindex": "486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954"
+  },
+  "original_inputs_unchanged": true,
+  "private_family_evidence_sha256": "fb69ecbdb6bc7c3ae7403ffdcd6970762c69ae9994e38e2bfa7fc6c71513988c",
+  "recovery": {
+   "counts": {
+    "bare_perfect_headers": 1800,
+    "bare_perfect_headers_without_leak": 1787,
+    "removed_records": 13,
+    "repaired_lemma_blocks": 13
+   },
+   "input_sha256": {
+    "Latin.headers.jsonl": "85658956fa68024d032f944f7920d38fa8b424318be6454eebdb6bd74c76cc34",
+    "candidate.stems": "6caf089d03e62d745aebc94d1b1cc5cf06938626db4af8c794a2326ca7a94cd9",
+    "lat.ls.perseus-eng1.xml": "ccbd2f79db1006edc607fe51227babab6872fbdaa4e925f4c1999a3b978041ee"
+   },
+   "output_sha256": "d14b080c315514bf9688e4c8a3003dc6d9e3ca8fd488a106eef5ac5293d84b32",
+   "schema": 1,
+   "scope": "pp4 records whose stem ends in the leaked /ityp tag, under headers whose only inflection field is a bare one-token perfect in -i; deletion only",
+   "source_revision": "56061ca127f4a2844980baffc5f2b6d1332897b3"
+  },
+  "removed_record_classes": {
+   "pp4": 13
+  },
+  "schema": 1,
+  "scope": "tag-leak -quo/-guo headwords with literal xi, ctum, 3 parts; exact defective perfstem/pp4 records replaced in a separate trial; family cells and optional LISTALL diagnostic; no production promotion",
+  "trial_indexes_sha256": {
+   "nomind": "106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1bd54",
+   "nomind.lindex": "e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210",
+   "vbind": "11e05bb9605357f53a93cf0ee927ffc5b8e23a60905d3f541c25cf69776f3538",
+   "vbind.lindex": "38480a04563bfe6de028ff10ad849c58262af152b188c393dc0f800846853db5"
+  },
+  "trial_source_sha256": "d14b080c315514bf9688e4c8a3003dc6d9e3ca8fd488a106eef5ac5293d84b32"
+ }
+}
