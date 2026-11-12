@@ -1,11 +1,15 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 
+<br>
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-sombre.svg">
     <img src="https://raw.githubusercontent.com/defense-humanites/libmorpheus/main/docs/assets/libmorpheus-logo-clair.svg" alt="libmorpheus" width="390">
   </picture>
 </p>
+
+<br>
 
 # @libmorpheus/data
 
