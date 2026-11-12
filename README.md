@@ -5,6 +5,8 @@
   </picture>
 </p>
 
+<br>
+
 <p align="center">
   A modernization of the Morpheus morphological analyzer for Ancient Greek and Latin.
 </p>
