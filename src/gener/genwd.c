@@ -244,6 +244,18 @@ printf("maxforms %d stem %s\n", maxforms, NameOfStemtype(stemtype_of(gstring)) )
 	
 	FreeGkString(gstring);
 	gstring = NULL;
+	/*
+	 * The forms copy the unknown keys the scan allocated: release them, even
+	 * when no ending applied, and clear the copies, which nothing reads.
+	 */
+	if (oddkeys_of(&tmpGkword) != oddkeys_of(Gkword)) {
+		int form;
+
+		for (form = 0; form < maxforms && workword_of(gkforms + form)[0]; form++)
+			if (oddkeys_of(gkforms + form) == oddkeys_of(&tmpGkword))
+				oddkeys_of(gkforms + form) = NULL;
+		discard_scanned_keys(&tmpGkword,Gkword);
+	}
 	return(gkforms);
 }
 
@@ -503,6 +515,7 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 					MORPHEUS_RUNTIME_ERROR_INTERNAL);
 				*Gkword = SaveGkWord;
 				DetachGkAnalStorage(CurBuf);
+				oddkeys_of(CurBuf) = NULL;
 				FreeGkword(CurBuf);
 				return(0);
 			}
@@ -524,6 +537,8 @@ AddWdEndings(gk_word *Gkword, gk_string *Endings, gk_word *Forms, int maxforms)
 */
 
 	DetachGkAnalStorage(CurBuf);
+	/* The buffer copies the word's unknown keys, which are the caller's. */
+	oddkeys_of(CurBuf) = NULL;
 	FreeGkword(CurBuf);
 	CurBuf = NULL;
 	return(1);

@@ -52,23 +52,28 @@ release_forms(gk_word *forms)
 
 /*
  * The record's keys, with " pb:<preverbs>" appended when the record is
- * generated for a compound.
+ * generated for a compound, and the keys of a preverb variant after them.
  */
 static char *
-record_keys(const char *source, const char *preverbs)
+record_keys(const char *source, const char *preverbs, const char *variant)
 {
 	char *copy;
 	char *cursor;
 	size_t length = strlen(source);
 	size_t added = preverbs ? strlen(" pb:") + strlen(preverbs) : 0;
+	size_t variant_length = variant ? 1 + strlen(variant) : 0;
 
-	copy = malloc(length + added + 1);
+	copy = malloc(length + added + variant_length + 1);
 	if (!copy)
 		return NULL;
 	memcpy(copy,source,length + 1);
 	if (preverbs) {
 		memcpy(copy + length," pb:",4);
 		memcpy(copy + length + 4,preverbs,strlen(preverbs) + 1);
+	}
+	if (variant) {
+		copy[length + added] = ' ';
+		memcpy(copy + length + added + 1,variant,strlen(variant) + 1);
 	}
 	cursor = copy;
 	while (isspace((unsigned char)*cursor))
@@ -82,15 +87,182 @@ record_keys(const char *source, const char *preverbs)
 }
 
 /*
+ * The raw forms a request has returned, so that a preverb variant returns
+ * only the forms that its flags change (an apocope pass on a)na/ also
+ * yields the forms where nothing is cut).
+ */
+typedef struct {
+	char **slots;
+	size_t capacity;
+	size_t count;
+} surface_set;
+
+static size_t
+surface_hash(const char *text)
+{
+	size_t hash = 2166136261u;
+
+	for (; *text; text++)
+		hash = (hash ^ (unsigned char)*text) * 16777619u;
+	return hash;
+}
+
+static void
+surface_set_free(surface_set *set)
+{
+	size_t slot;
+
+	for (slot = 0; slot != set->capacity; slot++)
+		free(set->slots[slot]);
+	free(set->slots);
+	set->slots = NULL;
+	set->capacity = set->count = 0;
+}
+
+static int
+surface_set_has(const surface_set *set, const char *text)
+{
+	size_t slot;
+
+	if (!set->capacity)
+		return 0;
+	for (slot = surface_hash(text) & (set->capacity - 1); set->slots[slot];
+	     slot = (slot + 1) & (set->capacity - 1))
+		if (!strcmp(set->slots[slot],text))
+			return 1;
+	return 0;
+}
+
+/* Returns 0 when out of memory. */
+static int
+surface_set_add(surface_set *set, const char *text)
+{
+	size_t slot;
+	size_t length;
+
+	if ((set->count + 1) * 2 > set->capacity) {
+		surface_set grown = { 0 };
+		size_t old;
+
+		grown.capacity = set->capacity ? set->capacity * 2 : 1024;
+		grown.slots = calloc(grown.capacity,sizeof *grown.slots);
+		if (!grown.slots)
+			return 0;
+		for (old = 0; old != set->capacity; old++) {
+			char *moved = set->slots[old];
+
+			if (!moved)
+				continue;
+			for (slot = surface_hash(moved) & (grown.capacity - 1);
+			     grown.slots[slot]; slot = (slot + 1) & (grown.capacity - 1))
+				;
+			grown.slots[slot] = moved;
+		}
+		grown.count = set->count;
+		free(set->slots);
+		*set = grown;
+	}
+	for (slot = surface_hash(text) & (set->capacity - 1); set->slots[slot];
+	     slot = (slot + 1) & (set->capacity - 1))
+		if (!strcmp(set->slots[slot],text))
+			return 1;
+	length = strlen(text);
+	set->slots[slot] = malloc(length + 1);
+	if (!set->slots[slot])
+		return 0;
+	memcpy(set->slots[slot],text,length + 1);
+	set->count++;
+	return 1;
+}
+
+/* One pass of generation for a requested lemma. */
+typedef struct {
+	morpheus_generation_service *service;
+	const char *lemma;
+	/* The compound's preverbs, NULL for the lemma's own records. */
+	const char *preverbs;
+	/* A preverb variant, or NULL. */
+	const morpheus_preverb_variant *variant;
+	/* Forms returned so far, when variants are to follow. */
+	surface_set *seen;
+	morpheus_generation_visitor visitor;
+	void *state;
+	size_t *form_count;
+	size_t *skipped_records;
+	int *found;
+} generation_pass;
+
+/*
+ * Whether a form of a preverb variant is one analysis accepts. The form must
+ * begin as one of the table's spellings of the variant does (the augment
+ * before a)po/ is h)f-, before a rough breathing: not h)pw/llun), letters
+ * compared without breathings, accents or quantities. And analysis accepts
+ * an augment before the preverb (prevb_augment) only where the verb takes
+ * one: the indicative imperfect, aorist and pluperfect, unless the form is
+ * unaugmented or iterative (genwd.c checks this for regular stems, not for
+ * irregular forms).
+ */
+static int
+variant_form(const morpheus_preverb_variant *variant, gk_word *form)
+{
+	word_form info = forminfo_of(form);
+	gk_string *parts[3];
+	size_t part;
+
+	if (variant->prefixes) {
+		const char *prefix = variant->prefixes;
+		const char *surface = workword_of(form);
+		int matched = 0;
+
+		for (; *prefix && !matched; prefix += strlen(prefix) + 1) {
+			const char *letter = prefix;
+			const char *cursor = surface;
+
+			while (*letter && *cursor) {
+				if (*cursor < 'a' || *cursor > 'z') {
+					cursor++;
+					continue;
+				}
+				if (*cursor != *letter)
+					break;
+				cursor++;
+				letter++;
+			}
+			matched = !*letter;
+		}
+		if (!matched)
+			return 0;
+	}
+	if (!strstr(variant->keys,"prevb_augment"))
+		return 1;
+	if (mood_of(info) != INDICATIVE ||
+	    (tense_of(info) != IMPERF && tense_of(info) != AORIST &&
+	     tense_of(info) != PLUPERF))
+		return 0;
+	parts[0] = stem_gstr_of(form);
+	parts[1] = ends_gstr_of(form);
+	parts[2] = prvb_gstr_of(form);
+	if (has_morphflag(morphflags_of(form),ITERATIVE) ||
+	    has_morphflag(morphflags_of(form),UNAUGMENTED))
+		return 0;
+	for (part = 0; part != 3; part++)
+		if (has_morphflag(morphflags_of(parts[part]),ITERATIVE) ||
+		    has_morphflag(morphflags_of(parts[part]),UNAUGMENTED))
+			return 0;
+	return 1;
+}
+
+/*
  * *unusable is set when the record failed before any of its forms reached the
  * visitor, so the caller may skip it without exposing a partial record.
  */
 static morpheus_generation_status
-generate_record(morpheus_generation_service *service, const char *lemma,
-                const morpheus_gener_record_view *record, const char *preverbs,
-                morpheus_generation_visitor visitor, void *state,
-                size_t *form_count, int *unusable)
+generate_record(const generation_pass *pass,
+                const morpheus_gener_record_view *record, int *unusable)
 {
+	morpheus_generation_service *service = pass->service;
+	const char *preverbs = pass->preverbs;
+	size_t *form_count = pass->form_count;
 	gk_word input = { 0 };
 	gk_word *forms;
 	char *keys;
@@ -98,9 +270,10 @@ generate_record(morpheus_generation_service *service, const char *lemma,
 	int irregular;
 	int mode;
 
-	set_lemma(&input,lemma);
+	set_lemma(&input,pass->lemma);
 	set_stem(&input,record->stem);
-	keys = record_keys(record->keys,preverbs);
+	keys = record_keys(record->keys,preverbs,
+	                   pass->variant ? pass->variant->keys : NULL);
 	if (!keys)
 		return MORPHEUS_GENERATION_NO_MEMORY;
 	irregular = record->kind == MORPHEUS_GENER_RECORD_INDECLINABLE ||
@@ -132,13 +305,25 @@ generate_record(morpheus_generation_service *service, const char *lemma,
 		 */
 		if (preverbs && !(stemtype_of(forms + form) & PPARTMASK))
 			continue;
+		if (pass->variant && !variant_form(pass->variant,forms + form))
+			continue;
+		if (pass->seen) {
+			if (pass->variant &&
+			    surface_set_has(pass->seen,workword_of(forms + form)))
+				continue;
+			if (!surface_set_add(pass->seen,workword_of(forms + form))) {
+				release_forms(forms);
+				release_input(&input);
+				return MORPHEUS_GENERATION_NO_MEMORY;
+			}
+		}
 		if (*form_count == SIZE_MAX) {
 			release_forms(forms);
 			release_input(&input);
 			return MORPHEUS_GENERATION_ENGINE_ERROR;
 		}
 		(*form_count)++;
-		if (!visitor(forms + form,state)) {
+		if (!pass->visitor(forms + form,pass->state)) {
 			release_forms(forms);
 			release_input(&input);
 			return MORPHEUS_GENERATION_STOPPED;
@@ -282,11 +467,10 @@ record_belongs(morpheus_generation_service *service, const char *lemma,
  * lemmas of their own. *found is set when the key is in the index.
  */
 static morpheus_generation_status
-generate_key(morpheus_generation_service *service, const char *key,
-             const char *lemma, const char *preverbs,
-             morpheus_generation_visitor visitor, void *state,
-             size_t *form_count, size_t *skipped_records, int *found)
+generate_key(const generation_pass *pass, const char *key)
 {
+	morpheus_generation_service *service = pass->service;
+	const char *preverbs = pass->preverbs;
 	morpheus_gener_lemma_view entry;
 	morpheus_generation_status result = MORPHEUS_GENERATION_OK;
 	uint64_t block_number;
@@ -301,7 +485,7 @@ generate_key(morpheus_generation_service *service, const char *key,
 	default:
 		return MORPHEUS_GENERATION_INVALID;
 	}
-	*found = 1;
+	*pass->found = 1;
 	for (block_number = entry.first_block;
 	     block_number != entry.first_block + entry.block_count; block_number++) {
 		morpheus_gener_block_view block;
@@ -335,12 +519,13 @@ generate_key(morpheus_generation_service *service, const char *key,
 				if (!belongs)
 					continue;
 			}
-			result = generate_record(service,lemma,&record,preverbs,visitor,
-			                         state,form_count,&unusable);
-			if (unusable && skipped_records) {
+			result = generate_record(pass,&record,&unusable);
+			if (unusable && pass->skipped_records) {
 				/* A record the engine cannot generate leaves the others usable. */
 				morpheus_runtime_context_clear_error(service->context);
-				(*skipped_records)++;
+				/* A variant pass reads records the plain pass counted. */
+				if (!pass->variant)
+					(*pass->skipped_records)++;
 				result = MORPHEUS_GENERATION_OK;
 				continue;
 			}
@@ -358,44 +543,61 @@ generate_key(morpheus_generation_service *service, const char *key,
  * preparer reserves for them and no request can name.
  */
 static morpheus_generation_status
-generate_compounds(morpheus_generation_service *service, const char *lemma,
-                   morpheus_generation_visitor visitor, void *state,
-                   size_t *form_count, size_t *skipped_records, int *found)
+generate_decomposition(generation_pass *pass,
+                       const morpheus_compound_decomposition *decomposition)
 {
-	morpheus_compound_decomposition *decompositions = NULL;
+	char reserved[MAXWORDSIZE + 1];
+	morpheus_generation_status result;
+
+	pass->preverbs = decomposition->preverbs;
+	result = generate_key(pass,decomposition->lemma);
+	if (result != MORPHEUS_GENERATION_OK)
+		return result;
+	reserved[0] = '-';
+	memcpy(reserved + 1,decomposition->lemma,strlen(decomposition->lemma) + 1);
+	return generate_key(pass,reserved);
+}
+
+/*
+ * A compound listed as its own decomposition (a)mfi/-a)mfisbhte/w) adds
+ * nothing to the lemma's own records but duplicates.
+ */
+static int
+composes(const morpheus_compound_decomposition *decomposition,
+         const char *lemma)
+{
+	return strcmp(decomposition->lemma,lemma) != 0;
+}
+
+/*
+ * The variants of a single preverb that analysis accepts (apocope, ἐς for
+ * εἰς, the augment before the preverb, psilosis...) are generated after the
+ * plain forms, from the same records with the variant's flags; a variant
+ * returns only the forms its flags change. A compound of several preverbs
+ * has none: the engine applies the flags at either end of the chain, while
+ * analysis may find a variant at any preverb.
+ */
+static morpheus_generation_status
+generate_variants(generation_pass *pass,
+                  const morpheus_compound_decomposition *decomposition)
+{
+	const morpheus_preverb_variant *variants = NULL;
 	morpheus_generation_status result = MORPHEUS_GENERATION_OK;
 	size_t count = 0;
-	size_t item;
+	size_t variant;
 
-	switch (morpheus_compound_decompositions(&service->compounds,lemma,
-	                                         &decompositions,&count)) {
-	case MORPHEUS_COMPOUND_OK:
-		break;
-	default:
+	if (strchr(decomposition->preverbs,','))
+		return MORPHEUS_GENERATION_OK;
+	if (morpheus_compound_preverb_variants(&pass->service->compounds,
+	                                       decomposition->preverbs,&variants,
+	                                       &count) != MORPHEUS_COMPOUND_OK)
 		return MORPHEUS_GENERATION_NO_MEMORY;
+	for (variant = 0; variant != count && result == MORPHEUS_GENERATION_OK;
+	     variant++) {
+		pass->variant = variants + variant;
+		result = generate_decomposition(pass,decomposition);
 	}
-	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++) {
-		char reserved[MAXWORDSIZE + 1];
-
-		/*
-		 * A compound listed as its own decomposition (a)mfi/-a)mfisbhte/w)
-		 * adds nothing to the lemma's own records but duplicates.
-		 */
-		if (!strcmp(decompositions[item].lemma,lemma))
-			continue;
-		result = generate_key(service,decompositions[item].lemma,lemma,
-		                      decompositions[item].preverbs,visitor,state,
-		                      form_count,skipped_records,found);
-		if (result != MORPHEUS_GENERATION_OK)
-			break;
-		reserved[0] = '-';
-		memcpy(reserved + 1,decompositions[item].lemma,
-		       strlen(decompositions[item].lemma) + 1);
-		result = generate_key(service,reserved,lemma,
-		                      decompositions[item].preverbs,visitor,state,
-		                      form_count,skipped_records,found);
-	}
-	free(decompositions);
+	pass->variant = NULL;
 	return result;
 }
 
@@ -407,8 +609,14 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
                                      size_t *skipped_records)
 {
 	morpheus_runtime_context *previous;
-	morpheus_generation_status result;
+	morpheus_generation_status result = MORPHEUS_GENERATION_OK;
+	morpheus_compound_decomposition *decompositions = NULL;
+	size_t count = 0;
+	size_t item;
+	surface_set seen = { 0 };
+	generation_pass pass = { 0 };
 	int found = 0;
+	int variants = 0;
 
 	if (!service || !canonical_lemma || !*canonical_lemma || !visitor ||
 	    !form_count)
@@ -422,12 +630,33 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 	previous = morpheus_runtime_context_activate(service->context);
 	morpheus_runtime_context_set_language(service->context,GREEK);
 	morpheus_runtime_context_clear_error(service->context);
-	result = generate_key(service,canonical_lemma,canonical_lemma,NULL,visitor,
-	                      state,form_count,skipped_records,&found);
+	if (morpheus_compound_decompositions(&service->compounds,canonical_lemma,
+	                                     &decompositions,&count) !=
+	    MORPHEUS_COMPOUND_OK)
+		result = MORPHEUS_GENERATION_NO_MEMORY;
+	for (item = 0; item != count; item++)
+		if (composes(decompositions + item,canonical_lemma) &&
+		    !strchr(decompositions[item].preverbs,','))
+			variants = 1;
+	pass.service = service;
+	pass.lemma = canonical_lemma;
+	pass.seen = variants ? &seen : NULL;
+	pass.visitor = visitor;
+	pass.state = state;
+	pass.form_count = form_count;
+	pass.skipped_records = skipped_records;
+	pass.found = &found;
 	if (result == MORPHEUS_GENERATION_OK)
-		result = generate_compounds(service,canonical_lemma,visitor,state,
-		                            form_count,skipped_records,&found);
+		result = generate_key(&pass,canonical_lemma);
+	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
+		if (composes(decompositions + item,canonical_lemma))
+			result = generate_decomposition(&pass,decompositions + item);
+	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
+		if (composes(decompositions + item,canonical_lemma))
+			result = generate_variants(&pass,decompositions + item);
 	morpheus_runtime_context_activate(previous);
+	free(decompositions);
+	surface_set_free(&seen);
 	if (result == MORPHEUS_GENERATION_OK && !found)
 		return MORPHEUS_GENERATION_NOT_FOUND;
 	return result;

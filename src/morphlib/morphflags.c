@@ -234,7 +234,21 @@ static const int preverb_morphflags[] = {
 	RAW_PREVERB,
 	UNASP_PREVERB,
 	APOCOPE,
-	DOUBLED_CONS
+	DOUBLED_CONS,
+	/*
+	 * The shapes of the preverb itself (e)s for ei)s, cun for su/n...),
+	 * which rstprevb() applies from the preverb's flags.
+	 */
+	IOTA_INTENS,
+	SIG_TO_CI,
+	SHORT_EIS,
+	PROS_TO_POTI,
+	META_TO_PEDA,
+	PROS_TO_PROTI,
+	UPO_TO_UPAI,
+	PARA_TO_PARAI,
+	UPER_TO_UPEIR,
+	EN_TO_ENI
 };
 
 void * zogalloc(size_t, size_t);

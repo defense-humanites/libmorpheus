@@ -20,6 +20,13 @@ the corpus.
   verb's verb records with the preverbs, and from the stems that occur only
   in compounds. A name analysis never reports returns no record. The C ABI
   is unchanged. See `docs/public-api.md#compound-verbs`.
+- A compound of one preverb also returns the preverb variants analysis
+  accepts, with their flags, as `rule_files/raw_preverbs.table` lists them:
+  apocope (κάββαλε), ἐς for εἰς, ξυν- for συν-, ἐνι-, ποτι-, προτι-, πεδα-,
+  παραι-, ὑπαι-, ὑπειρ-, the augment before the preverb (ἠφίει) and the
+  unaspirated preverb (ἀπίκετο). A variant adds only the forms its flags
+  change. The dissimilated and elided variants and compounds of several
+  preverbs are left out.
 
 ### Changed
 
@@ -44,10 +51,24 @@ the corpus.
   the `pb:e)pi/` stems filed under μελέομαι under ἐπιμελέομαι.
 - Analysis names compounds through a function it now shares with
   generation; its results are unchanged (42,052 words compared).
+- The flags that change a preverb's shape (`short_eis`, `sig_to_ci`,
+  `iota_intens`, `en_to_eni`, `pros_to_proti`…) belong to the preverb rather
+  than the stem, so the generator applies them to regular stems too, not
+  only to irregular forms. Analysis results are unchanged (42,052 words
+  compared).
 - Generated surfaces no longer write the engine's hiatus mark after πρό,
   περί and προτί (`pro+e/hke`): it becomes the diaeresis of a following
   iota or upsilon that would otherwise form a diphthong (`proi/+sxw`) and
   is dropped elsewhere (`proe/hke`, `perie/xw`), as texts write these forms.
+
+### Fixed
+
+- The stem expansion that generation and analysis share leaked the buffer
+  holding a record's unknown keys (`Ntest`, `laconian`) when none of the
+  record's endings applied; the variant passes reach this case, since an
+  augmented preverb leaves a participle record no ending. It also freed that
+  buffer twice when a stem produced too many forms. Analysis results are
+  unchanged.
 
 ## [0.5.0] - 2026-11-11
 

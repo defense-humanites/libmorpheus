@@ -18,6 +18,9 @@
 :le:i)/sxw
 :vs:i)sx w_stem
 
+:le:i(/zw
+:vs:i(z w_stem
+
 :le:korba=n
 :wd:korba=n indecl
 

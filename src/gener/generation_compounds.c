@@ -5,14 +5,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libfiles.h>
+#include <stdio.h>
+
 #include "../morphlib/runtime_context_internal.h"
 
+FILE *MorphFopen(char *, char *);
 int compound_verb_lemma(const char *preverbs, const char *lemma, char *name,
                         size_t size);
 int compound_verb_lines(char ***lines, int *count);
 int preverb_lemmas(const char **lemmas, int capacity);
 
 #define MAX_PREVERB_LEMMAS 64
+#define MAX_PREVERB_VARIANTS 16
+#define UNASPIRATED_VARIANT "unasp_preverb"
 
 typedef struct {
 	char *name;          /* canonical compound name */
@@ -24,6 +30,12 @@ typedef struct {
 	char *source;        /* the lemma as the list spells it */
 } simple_entry;
 
+typedef struct {
+	/* The variants, then UNASPIRATED_VARIANT. */
+	morpheus_preverb_variant items[MAX_PREVERB_VARIANTS + 1];
+	size_t count;
+} preverb_variants;
+
 struct morpheus_compound_table {
 	compound_entry *entries;
 	size_t entry_count;
@@ -31,6 +43,11 @@ struct morpheus_compound_table {
 	size_t simple_count;
 	const char *preverbs[MAX_PREVERB_LEMMAS];
 	int preverb_count;
+	/* Variants of preverbs[i], read on first use. */
+	preverb_variants variants[MAX_PREVERB_LEMMAS];
+	char *variant_text[MAX_PREVERB_LEMMAS][MAX_PREVERB_VARIANTS];
+	char *variant_prefixes[MAX_PREVERB_LEMMAS][MAX_PREVERB_VARIANTS];
+	int variants_read;
 };
 
 typedef struct {
@@ -122,6 +139,16 @@ morpheus_compound_table_destroy(morpheus_compound_table *table)
 	}
 	free(table->entries);
 	free(table->simples);
+	{
+		int preverb;
+		int variant;
+
+		for (preverb = 0; preverb < MAX_PREVERB_LEMMAS; preverb++)
+			for (variant = 0; variant < MAX_PREVERB_VARIANTS; variant++) {
+				free(table->variant_text[preverb][variant]);
+				free(table->variant_prefixes[preverb][variant]);
+			}
+	}
 	free(table);
 }
 
@@ -478,4 +505,195 @@ morpheus_compound_names_lemma(morpheus_compound_table **table,
 	*same = list.count != 0;
 	free(list.items);
 	return status;
+}
+
+/* The flags of a table line that make a variant of its preverb. */
+static int
+is_variant_flag(const char *flag, size_t length)
+{
+	static const char *const flags[] = {
+		"apocope", "short_eis", "en_to_eni", "iota_intens",
+		"prevb_augment", "sig_to_ci", "pros_to_proti", "pros_to_poti",
+		"meta_to_peda", "upo_to_upai", "uper_to_upeir", "para_to_parai",
+		"dissimilation", "elide_preverb", "raw_preverb"
+	};
+	size_t index;
+
+	for (index = 0; index != sizeof flags / sizeof *flags; index++)
+		if (strlen(flags[index]) == length &&
+		    !memcmp(flags[index],flag,length))
+			return 1;
+	return 0;
+}
+
+/*
+ * Appends letters to a list of NUL-terminated prefixes ended by an empty
+ * one, unless it is there already. Returns 0 when out of memory.
+ */
+static int
+add_prefix(char **list, const char *letters, size_t length)
+{
+	size_t used = 0;
+	char *grown;
+
+	if (*list) {
+		const char *cursor = *list;
+
+		while (*cursor) {
+			if (strlen(cursor) == length && !memcmp(cursor,letters,length))
+				return 1;
+			cursor += strlen(cursor) + 1;
+		}
+		used = (size_t)(cursor - *list);
+	}
+	grown = realloc(*list,used + length + 2);
+	if (!grown)
+		return 0;
+	memcpy(grown + used,letters,length);
+	grown[used + length] = 0;
+	grown[used + length + 1] = 0;
+	*list = grown;
+	return 1;
+}
+
+/*
+ * Reads rule_files/raw_preverbs.table: "raw preverb flags...". A missing
+ * table leaves only the unaspirated variant, as a missing compound list
+ * leaves no compound.
+ */
+static morpheus_compound_status
+read_variants(morpheus_compound_table *table)
+{
+	FILE *file;
+	char line[512];
+	int preverb;
+
+	table->variants_read = 1;
+	file = MorphFopen((char *)RAWPBLIST,(char *)"r");
+	while (file && fgets(line,sizeof line,file)) {
+		char flags[256];
+		size_t flags_length = 0;
+		const char *fields[2];
+		size_t field_lengths[2];
+		const char *cursor = line;
+		int field = 0;
+		int variant = 0;
+
+		if (line[strspn(line," \t")] == '#')
+			continue;
+		/* Tokens by hand: the reading may run in several threads. */
+		for (;;) {
+			size_t length;
+
+			cursor += strspn(cursor," \t\r\n");
+			length = strcspn(cursor," \t\r\n");
+			if (!length)
+				break;
+			if (field < 2) {
+				fields[field] = cursor;
+				field_lengths[field++] = length;
+			} else if (flags_length + length + 2 <= sizeof flags) {
+				if (flags_length)
+					flags[flags_length++] = ' ';
+				memcpy(flags + flags_length,cursor,length);
+				flags_length += length;
+				variant |= is_variant_flag(cursor,length);
+			}
+			cursor += length;
+		}
+		flags[flags_length] = 0;
+		if (field < 2)
+			continue;
+		/*
+		 * Dissimilation (a)mp-) and the elided forms of a)mfi/, a)nti/,
+		 * peri/ and pro/s depend on the sounds that follow, which analysis
+		 * checks and the engine does not: before a consonant they give forms
+		 * analysis rejects (a)/mfballe, a)mpi/balle).
+		 */
+		if (!variant || strstr(flags,"dissimilation") ||
+		    strstr(flags,"elide_preverb"))
+			continue;
+		for (preverb = 0; preverb < table->preverb_count; preverb++) {
+			preverb_variants *list = table->variants + preverb;
+			size_t known;
+			char letters[64];
+			size_t letter_count = 0;
+			size_t index;
+
+			if (strlen(table->preverbs[preverb]) != field_lengths[1] ||
+			    memcmp(table->preverbs[preverb],fields[1],field_lengths[1]))
+				continue;
+			for (known = 0; known != list->count; known++)
+				if (!strcmp(list->items[known].keys,flags))
+					break;
+			if (known == list->count) {
+				if (list->count == MAX_PREVERB_VARIANTS)
+					break;
+				table->variant_text[preverb][known] =
+				    copy_text(flags,flags_length);
+				if (!table->variant_text[preverb][known]) {
+					fclose(file);
+					return MORPHEUS_COMPOUND_NO_MEMORY;
+				}
+				list->items[known].keys = table->variant_text[preverb][known];
+				list->count++;
+			}
+			/* The raw form's letters, without breathings or accents. */
+			for (index = 0; index != field_lengths[0]; index++)
+				if (fields[0][index] >= 'a' && fields[0][index] <= 'z' &&
+				    letter_count + 1 < sizeof letters)
+					letters[letter_count++] = fields[0][index];
+			if (letter_count &&
+			    !add_prefix(&table->variant_prefixes[preverb][known],letters,
+			                letter_count)) {
+				fclose(file);
+				return MORPHEUS_COMPOUND_NO_MEMORY;
+			}
+			list->items[known].prefixes =
+			    table->variant_prefixes[preverb][known];
+			break;
+		}
+	}
+	if (file)
+		fclose(file);
+	else
+		morpheus_runtime_context_clear_error(morpheus_runtime_context_current());
+	for (preverb = 0; preverb < table->preverb_count; preverb++) {
+		preverb_variants *list = table->variants + preverb;
+
+		list->items[list->count].keys = UNASPIRATED_VARIANT;
+		list->items[list->count++].prefixes = NULL;
+	}
+	return MORPHEUS_COMPOUND_OK;
+}
+
+morpheus_compound_status
+morpheus_compound_preverb_variants(morpheus_compound_table **table,
+                                   const char *preverb,
+                                   const morpheus_preverb_variant **variants,
+                                   size_t *count)
+{
+	morpheus_compound_status status;
+	int index;
+
+	*variants = NULL;
+	*count = 0;
+	if (!*table) {
+		status = build_table(table);
+		if (status != MORPHEUS_COMPOUND_OK)
+			return status;
+	}
+	if (!(*table)->variants_read) {
+		status = read_variants(*table);
+		if (status != MORPHEUS_COMPOUND_OK)
+			return status;
+	}
+	for (index = 0; index < (*table)->preverb_count; index++) {
+		if (!strcmp((*table)->preverbs[index],preverb)) {
+			*variants = (*table)->variants[index].items;
+			*count = (*table)->variants[index].count;
+			break;
+		}
+	}
+	return MORPHEUS_COMPOUND_OK;
 }

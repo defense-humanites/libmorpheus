@@ -52,16 +52,19 @@ static void generated_surfaces(morpheus_context *context, const char *lemma,
 
 /*
  * Generates lemma and checks that every record carries canonical as its
- * lemma and a surface beginning with prefix. Returns the record count.
+ * lemma and is a verb form. Returns the record count, and whether a record
+ * has surface (when surface is not NULL).
  */
 static size_t generate_compound(morpheus_context *context, const char *lemma,
-                                const char *canonical, const char *prefix)
+                                const char *canonical, const char *surface,
+                                int *has_surface)
 {
   morpheus_generation_result *result=NULL;
   morpheus_generation item;
   size_t count;
   size_t i;
 
+  if(has_surface) *has_surface=0;
   assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
                            &result)==MORPHEUS_OK);
   assert(result);
@@ -70,10 +73,35 @@ static size_t generate_compound(morpheus_context *context, const char *lemma,
     assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
     assert(!strcmp(item.lemma,canonical));
     assert(item.part_of_speech==MORPHEUS_PART_OF_SPEECH_VERB);
-    assert(!strncmp(item.surface,prefix,strlen(prefix)));
+    if(surface && !strcmp(item.surface,surface)) *has_surface=1;
   }
   morpheus_generation_result_free(result);
   return(count);
+}
+
+/*
+ * Whether lemma generates records with flag, and whether all of them begin
+ * with prefix.
+ */
+static void flagged_surfaces(morpheus_context *context, const char *lemma,
+                             unsigned int flag, const char *prefix,
+                             size_t *flagged, int *all_prefixed)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t i;
+
+  *flagged=0;
+  *all_prefixed=1;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  for(i=0;i!=morpheus_generation_result_count(result);i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    if(!(item.morph_flags[flag/8u] & (1u<<(flag%8u)))) continue;
+    (*flagged)++;
+    if(strncmp(item.surface,prefix,strlen(prefix))) *all_prefixed=0;
+  }
+  morpheus_generation_result_free(result);
 }
 
 int main(int argc, char **argv)
@@ -282,14 +310,47 @@ int main(int argc, char **argv)
     assert(simple);
     morpheus_generation_result_free(result);
     result=NULL;
-    listed=generate_compound(context,"a)polu/w","a)polu/w","a)p");
-    assert(listed==simple);
-    assert(generate_compound(context,"a)mfi/-lu/w","a)mfi/lu/w","a)mf")==
-           simple);
-    assert(generate_compound(context,"a)po/-lu/w","a)polu/w","")==0);
-    assert(generate_compound(context,"e)pidhme/w","e)pidhme/w","e)p"));
-    assert(generate_compound(context,"dhme/w","dhme/w","")==0);
-    assert(generate_compound(context,"-dhme/w","dhme/w","")==0);
+    int found;
+
+    listed=generate_compound(context,"a)polu/w","a)polu/w","a)polu/w",&found);
+    assert(listed>=simple && found);
+    assert(generate_compound(context,"a)mfi/-lu/w","a)mfi/lu/w","a)mfilu/w",
+                             &found)>=simple && found);
+    assert(generate_compound(context,"a)po/-lu/w","a)polu/w",NULL,NULL)==0);
+    assert(generate_compound(context,"e)pidhme/w","e)pidhme/w",NULL,NULL));
+    assert(generate_compound(context,"dhme/w","dhme/w",NULL,NULL)==0);
+    assert(generate_compound(context,"-dhme/w","dhme/w",NULL,NULL)==0);
+  }
+
+  /*
+   * The variants of a single preverb that analysis accepts come with their
+   * flags, each spelled as the preverb table spells it: apocope (a)l-lu/w,
+   * ka/l-lu), ἐς for εἰς, ξυν- for συν-, ἐνι- for ἐν-, and the unaspirated
+   * preverb before a rough breathing (kati/zw).
+   */
+  {
+    size_t flagged;
+    int prefixed;
+
+    flagged_surfaces(context,"a)nalu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"a)",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"katalu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"ka",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"ei)se/xw",MORPHEUS_MORPH_FLAG_SHORT_EIS,"e)",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"sullu/w",MORPHEUS_MORPH_FLAG_SIGMA_TO_CI,"cu",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"kaqi/zw",MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,
+                     "ka",&flagged,&prefixed);
+    assert(flagged && prefixed);
+    /* The plain compound carries none of them. */
+    flagged_surfaces(context,"a)polu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"",
+                     &flagged,&prefixed);
+    assert(!flagged);
   }
 
   /*

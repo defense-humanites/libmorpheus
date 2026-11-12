@@ -202,7 +202,11 @@ for the index's own lemmas (median 0.11 ms, 99th percentile 10 to 12 ms on
 5,000 lemmas), but adds 10 to 25 ms to the first request of a context, which
 loads the compound list. A listed compound takes 12 ms at the median and 52
 to 64 ms at the 99th percentile (1,000 compounds, seed 78): it is a whole
-verb paradigm.
+verb paradigm. Its preverb variants bring the listed compounds to 55.4
+million forms, a compound to 20 ms at the median and 109 to 113 ms at the
+99th percentile; the first compound of a context also reads
+`rule_files/raw_preverbs.table`. The skipped records are unchanged, since
+the variants reuse the records of the plain forms.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records

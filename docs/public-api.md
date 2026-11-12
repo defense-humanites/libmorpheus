@@ -190,6 +190,17 @@ are not composed, since analysis attributes ἀπόδοτος to a lemma of its 
 and neither are records that carry another preverb of their own. Records
 carry the requested lemma, canonicalised.
 
+A compound of one preverb also returns the variants of that preverb that
+analysis accepts, each with its flags, as `rule_files/raw_preverbs.table`
+lists them: apocope (ἄμβαλε, κάββαλε, ὕββαλε: `apocope`, `poetic`), ἐς for
+εἰς (`short-eis`), ξυν- for συν- (`sigma-to-ci`), ἐνι- for ἐν-, ποτι- and
+προτι- for προσ-, πεδα- for μετα-, παραι-, ὑπαι-, ὑπειρ-, the augment before
+the preverb in the augmented indicative (ἠνάβληντο, ἠφίει:
+`preverb-augment`), and the Ionic and Aeolic unaspirated preverb before a
+rough breathing (ἀπίκετο, κατίστη: `unaspirated-preverb`). A variant
+returns only the forms its flags change, and only those that begin as the
+table spells the variant.
+
 A name that analysis never reports returns no record: `a)po/-di/dwmi`,
 because analysis names that compound `a)podi/dwmi`, or a listed name that
 analysis cannot reach (see the limits below). A record of a simple verb that
@@ -197,14 +208,17 @@ carries a preverb of its own (`pb:`) is generated under the lemma that
 analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
 
 Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
-the Alpheios data. On 300 of them (seed 78), 99.90 % of the 508,733 generated
-surfaces analyze back to the compound with the same tense and mood; every
-other surface also fails for the simple verb, from which the compound
-inherits it. The remaining limits mirror the data or are left for later:
+the Alpheios data. On 300 of them (seed 78), 99.91 % of the 687,543 generated
+surfaces, preverb variants included, analyze back to the compound with the
+same tense and mood; every other surface is a form, or the variant of a form,
+that also fails for the simple verb, from which the compound inherits it. The remaining limits mirror the data or are left for later:
 
-- **Preverb variants.** Analysis also accepts Ionic unaspirated preverbs
-  (ἀπίκετο), ἐς for εἰς, apocope (ἀμ-, κατ-), ἐνί, and an augment before the
-  preverb; generation does not produce them yet.
+- **Preverb variants.** Two kinds that depend on the following sounds are
+  not generated: the dissimilated ἀμπ- (ἀμπέχω) and the elided forms that
+  the table lists for ἀμφί, ἀντί, περί and πρός (ἀμφ-, ἀντ-, περ-, προτ-),
+  which the engine would also produce before a consonant. Compounds of
+  several preverbs have no variant: the engine applies the flags at one
+  end of the chain, while analysis finds a variant at any preverb.
 - **Stems derived with their own preverb.** Analysis ignores the preverb of
   a stem derived from a `:de:` line (`:de:mel ew_denom mp pb:e)pi/` under
   μελέομαι): it reads μελεῖται under μελέομαι and μεταμελεῖται under

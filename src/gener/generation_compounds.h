@@ -58,6 +58,32 @@ morpheus_compound_status morpheus_compound_names_lemma(
     morpheus_compound_table **table, const char *preverbs,
     const char *canonical_lemma, int *same);
 
+typedef struct {
+	/* The flags the engine needs: "apocope poetic", "short_eis"... */
+	const char *keys;
+	/*
+	 * The letters that begin the variant's forms, as the table spells the
+	 * variant (ka, kab, kad... for the apocope of kata/; hf for the augment
+	 * before a)po/), each followed by a NUL, the list by another; NULL when
+	 * any form will do.
+	 */
+	const char *prefixes;
+} morpheus_preverb_variant;
+
+/*
+ * The variants of a canonical preverb that analysis accepts: one per set of
+ * flags that lines of rule_files/raw_preverbs.table give the preverb with a
+ * variant flag ("apocope poetic" for a)na/ and kata/, "short_eis" for ei)s,
+ * "prevb_augment" for a)na/, a)po/, meta/...), except those that depend on
+ * the following sounds (dissimilation, elision), then "unasp_preverb", the
+ * Ionic and Aeolic psilosis that analysis applies without a table line
+ * (a)pi/keto). *variants stays valid until the table is destroyed. Same
+ * conditions as above.
+ */
+morpheus_compound_status morpheus_compound_preverb_variants(
+    morpheus_compound_table **table, const char *preverb,
+    const morpheus_preverb_variant **variants, size_t *count);
+
 void morpheus_compound_table_destroy(morpheus_compound_table *table);
 
 #endif
