@@ -135,26 +135,56 @@ patches restore it.
 
 ### Compound-only records
 
-The default preparation drops the records whose keys include `comp_only`.
-Their stem occurs only after a preverb, and analysis accepts their forms only
-then (`checkgenwds.c`, `retrends.c`): it rejects δημήσω, but analyzes
-ἀποδημήσω under ἀποδημέω. 2,594 records in 507 lemmas go, among them
-compound stems listed under a simple lemma: `:aj:a)ndr os_on comp_only`
-under ἀνήρ, for -ανδρος, or `:aj:trem hs_es` under τρέμω, for -τρεμής, which
-generation declined as forms of the verb. 347 lemmas keep no record and leave
-the index, such as δημέω and ἀγγίζω. Generating compounds (#78, item 2) will
-give these stems back their preverbs.
+The default preparation moves the records whose keys include `comp_only` to
+a block of their own, under the lemma prefixed with a hyphen: `-dhme/w`
+holds the stems of δημέω. Their stem occurs only after a preverb, and
+analysis accepts their forms only then (`checkgenwds.c`, `retrends.c`): it
+rejects δημήσω, but analyzes ἀποδημήσω under ἀποδημέω. The simple lemma does
+not generate them, and no request can name the reserved key, since requests
+are canonicalised without hyphens. The runtime reads it only to compose a
+[compound verb](public-api.md#compound-verbs): ἀποδημέω and ἐπιδημέω from
+`-dhme/w`.
+
+2,883 records move, in 509 lemmas (2,849 in the index, where identical
+blocks merge). A type token may join the key with a comma
+(`:vs:di^k aor2,comp_only` under δικεῖν), which the preparation of data
+0.2.0 missed. Among them are compound stems listed under a simple lemma:
+`:aj:a)ndr os_on comp_only` under ἀνήρ, for -ανδρος, or
+`:aj:trem hs_es` under τρέμω, for -τρεμής. Generation declined them as forms
+of the verb; compounds take only verb records, so they stay unused. 349
+lemmas keep no other record, such as δημέω and ἀγγίζω: generating them
+returns nothing, as analysis attributes nothing to them.
 
 ### Measures
 
-Over the 49 corpus sources, the default preparation gives 177,676 records in
-106,081 lemmas, against 129,097 records in 106,422 lemmas for the historical
-one. 8,511 lemmas gain forms; six enter the index, five whose only request is
-a listed zero request (ἀγαπάω: `;ao epic unaugmented`) and βεβόλημαι,
-restored by a data patch; 347 compound-only lemmas leave it, and 105 lemmas
-lose their compound-only forms. No added record fails at generation: over the
-whole index, `morpheus_generate()` skips 339 records, the historical 346 less
-seven compound-only ones. Generated forms grow from 12.5 to 22.1 million.
+Over the 49 corpus sources, the default preparation gives 177,672 records in
+106,080 lemmas, against 129,097 records in 106,422 lemmas for the historical
+one, and keeps 2,849 compound-only records under 509 reserved keys: 349 of
+these lemmas have no other record, 160 keep their others.
+
+The index of data 0.2.0 (`a2f97677…`), which dropped the compound-only
+records, already differed from the historical one as follows. 8,511 lemmas
+gained forms; six entered the index, five whose only request is a listed
+zero request (ἀγαπάω: `;ao epic unaugmented`) and βεβόλημαι, restored by a
+data patch; 347 compound-only lemmas left it, and 105 lemmas lost their
+compound-only forms. No added record failed at generation: over the whole
+index, `morpheus_generate()` skipped 339 records, the historical 346 less
+seven compound-only ones. Generated forms grew from 12.5 to 22.1 million.
+
+Generating compounds then changes 326 lemmas of that index. 311 compounds
+that have an entry of their own also receive their simple verb's records,
+0.77 million forms (ἀφίημι, ἀναβάλλω, ἀνέχω), and 15 of them inherit 19
+skipped records. 13 lemmas lose records that carry a preverb of their own,
+which analysis attributes to a compound: ἀμπέσχον leaves ἔχω for ἀμπέχω, and
+the `pb:e)pi/` stems of μελέομαι, θηδεύω and κουρέω go to ἐπιμελέομαι,
+ἐπιτηδεύω and ἐπικουρέω. δικεῖν and κιάθω each lose two compound-only
+records whose key a comma joins to the stem type (`aor2,comp_only`);
+κιάθω, left with none, leaves the index. Over the whole index,
+`morpheus_generate()` now skips 358 records in 285 lemmas and returns 22.8
+million forms; the 19,130 listed compounds that generate return 43.7 million
+more. On the 326 changed lemmas, 99.85 % of the 659,984 generated surfaces
+analyze back to their lemma with the same tense and mood, against 95.38 % of
+their 126,133 surfaces before.
 
 The round trip measures the first property of the generation contract. On
 400 lemmas that changed since the historical index (seed 78), 99.99 % of the
@@ -167,7 +197,12 @@ of compound-only lemmas and the stem alterations corrected below. The 99th
 percentile of a `morpheus_generate()` request is 9 to 10 ms, against 5.2 ms
 with the historical index, and the median 0.13 ms, against 0.12 ms; the
 first request of a context takes 31 to 44 ms with either index (2-vCPU Linux
-sandbox, indicative).
+sandbox, indicative). Generating compounds leaves these figures within noise
+for the index's own lemmas (median 0.11 ms, 99th percentile 10 to 12 ms on
+5,000 lemmas), but adds 10 to 25 ms to the first request of a context, which
+loads the compound list. A listed compound takes 12 ms at the median and 52
+to 64 ms at the 99th percentile (1,000 compounds, seed 78): it is a whole
+verb paradigm.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records

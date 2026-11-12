@@ -126,10 +126,13 @@ the normalization that analysis applies (grave accents, enclitics, elision,
 crasis).
 
 On samples of the Alpheios data, more than 99.5 % of the generated forms
-meet the first property
-([gener-derivations.md](gener-derivations.md#measures)). The second is not
-yet met: compound verbs (`vbs.cmp.ml`) are not generated (#78), and it is not
-yet measured.
+meet the first property, compounds included
+([gener-derivations.md](gener-derivations.md#measures),
+[compound verbs](#compound-verbs)). The second is not yet met. On the verbs
+of the Perseus treebank (AGDT 2.1), 87.6 % of the tokens that analysis reads
+as a verb have every such reading generated (66.6 % before compound verbs);
+91.4 % of the readings as a simple verb are, 86.2 % of those as a listed
+compound and 49.9 % of those as a hyphenated one.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
@@ -158,6 +161,59 @@ all failed, not an absent one. Allocation failures still fail the request.
 
 Generated surfaces omit the hyphen that marks the stem boundary in the stem
 source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`.
+
+### Compound verbs
+
+Analysis does not store compound verbs: it removes a preverb from the word,
+analyzes the simple verb, then names the compound after
+`stemsrc/vbs.cmp.ml`. Generation composes them the same way.
+`morpheus_generate()` accepts the compound lemmas that analysis reports:
+
+- a compound the list names: `a)podi/dwmi` for ἀπέδωκε;
+- preverbs and a verb the list does not join, which analysis names with a
+  hyphen: `a)mfi/-lu/w` for ἀμφέλυσε, canonically `a)mfi/lu/w`;
+- outer preverbs before a listed compound: `a)nti/-paradi/dwmi`.
+
+The compound's records are the simple verb's verb records with the preverbs,
+as analysis applies them; the engine places the augment between preverb and
+stem, elides, assimilates and aspirates (ἀπέδωκα, ἐξέβαλον, κατέστησα,
+συνέβη, πάρεστι, σύνθες). Stems that occur only in compounds take part too
+([gener-derivations.md](gener-derivations.md#compound-only-records)):
+ἐπιδημέω generates ἐπεδήμησε though δημέω generates nothing. A compound that
+has records of its own in the index returns them as well. Verbal adjectives
+are not composed, since analysis attributes ἀπόδοτος to a lemma of its own,
+and neither are records that carry another preverb of their own. Records
+carry the requested lemma, canonicalised.
+
+A name that analysis never reports returns no record: `a)po/-di/dwmi`,
+because analysis names that compound `a)podi/dwmi`, or a listed name that
+analysis cannot reach (see the limits below). A record of a simple verb that
+carries a preverb of its own (`pb:`) is generated under the lemma that
+analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
+
+Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
+the Alpheios data. On 300 of them (seed 78), 99.90 % of the 508,733 generated
+surfaces analyze back to the compound with the same tense and mood; every
+other surface also fails for the simple verb, from which the compound
+inherits it. The remaining limits mirror the data or are left for later:
+
+- **Preverb variants.** Analysis also accepts Ionic unaspirated preverbs
+  (ἀπίκετο), ἐς for εἰς, apocope (ἀμ-, κατ-), ἐνί, and an augment before the
+  preverb; generation does not produce them yet. It writes πρό before a
+  vowel with a diaeresis (`pro+e/hke`) where texts write προέηκε.
+- **Stems derived with their own preverb.** Analysis ignores the preverb of
+  a stem derived from a `:de:` line (`:de:mel ew_denom mp pb:e)pi/` under
+  μελέομαι): it reads μελεῖται under μελέομαι and μεταμελεῖται under
+  μεταμέλομαι. Generation keeps these stems for the compound their preverb
+  names (ἐπιμελέομαι) and does not produce the other readings; 11 listed
+  names generate nothing for this reason.
+- **The compound list.** `vbs.cmp.ml` is not in byte order, and analysis
+  searches it by bisection: it never finds 38 of its entries and reports
+  their forms with a hyphenated name (`e)k-de/rw` for ἐκδέρω). Generation
+  follows; 27 of these listed names generate nothing, while their
+  hyphenated names do. 11 names are hidden by another name for the same
+  preverbs and verb, and 110 name a simple verb absent from the stem index;
+  analysis reports none of them.
 
 Generation is currently Greek-only. The context loads and validates
 `<stemlib_path>/gener.index` on its first generation call and retains it for

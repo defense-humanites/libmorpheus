@@ -12,17 +12,6 @@ valid_analysis_argument(const void *argument)
 	return(0);
 }
 
-static int append_text(char *dest, size_t capacity, const char *source)
-{
-	size_t used = strlen(dest);
-	size_t added = strlen(source);
-
-	if( used >= capacity || added >= capacity - used )
-		return(0);
-	memcpy(dest + used,source,added + 1);
-	return(1);
-}
-
 /*
  * ok, check an array of gk_string's against a single printword to figure
  * out which ones really do match. this is where we distinguish between
@@ -203,7 +192,6 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 	gk_analysis * curanal;
 	int i;
 	int newlem = 1;
-	char tmplem[LONGSTRING];
 	char cmplem[LONGSTRING];
 	morpheus_runtime_context *context = morpheus_runtime_context_current();
 
@@ -267,70 +255,11 @@ int AddAnalysis(gk_word *Gkword, gk_word *gkform)
 			return(0);
 	}
 
-	 cmplem[0] = 0;
 	if( preverb_of(gkform)[0] ) {
-		char * s = tmplem;
-		char * t;
-		char tmphalf1[LONGSTRING];
-		tmphalf1[0] = tmplem[0] = cmplem[0] = 0;
-		
-		if( snprintf(tmplem,sizeof tmplem,"%s-%s",
-		             preverb_of(gkform),lemma_of(gkform)) >= (int)sizeof tmplem )
+		if( ! compound_verb_lemma(preverb_of(gkform),lemma_of(gkform),
+		                          cmplem,sizeof lemma_of(curanal)) )
 			return(0);
-		for(;;) {
-			/*
-			 * grc 6/12/94
-			 *
-			 * if you have an entry for u(poba/llw
-			 * but you are looking at a)nti/,u(po/-ba/llw
-			 * send the user to a)nti,-u(poba/llw
-			 * not a)nti/,u(po/-ba/llw
-			 *
-			 */
-/*
-printf("tmphalf1 [%s] s [%s]\n", tmphalf1, s );
-*/
-			if( strlen(s) >= MAXWORDSIZE - 1 ) {
-				morpheus_runtime_diagnostic("compound lookup key is too long: [%s]\n",s);
-				return(0);
-			}
-			chckcmpvb(s,cmplem);
-			if( cmplem[0] ) {
-				if( tmphalf1[0] ) {
-					if( ! append_text(tmphalf1,sizeof tmphalf1,"-") ||
-					    ! append_text(tmphalf1,sizeof tmphalf1,cmplem) )
-						return(0);
-					Xstrcpy(cmplem,tmphalf1);
-				}
-				break;
-			}
-			
-			t = s;
-			s = strchr(s,',');
-/*
-printf("s [%s] tmplem [%s] tmphalf1 [%s] t [%s] cmplem[%s]\n", s , tmplem , tmphalf1 ,t, cmplem);
-*/
-			if(!s ) {
-				if( (tmphalf1[0] && ! append_text(tmphalf1,sizeof tmphalf1,",")) ||
-				    ! append_text(tmphalf1,sizeof tmphalf1,t) )
-					return(0);
-				Xstrcpy(tmplem,tmphalf1);
-				 break;
-			}
-			*s++ = 0;
-			if( (tmphalf1[0] && ! append_text(tmphalf1,sizeof tmphalf1,",")) ||
-			    ! append_text(tmphalf1,sizeof tmphalf1,t) )
-				return(0);
-/*
-printf("tmphalf1 [%s] tmplem[%s] s [%s]\n", tmphalf1 , tmplem, s);
-*/
-		}
-		if( strlen(cmplem[0] ? cmplem : tmplem) >= sizeof lemma_of(curanal) ) {
-			morpheus_runtime_diagnostic("compound lemma is too long: [%s]\n",
-			        cmplem[0] ? cmplem : tmplem);
-			return(0);
-		}
-		set_lemma(curanal,cmplem[0] ? cmplem : tmplem);
+		set_lemma(curanal,cmplem);
 	}  else
 		set_lemma(curanal,lemma_of(gkform));
 

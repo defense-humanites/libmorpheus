@@ -141,3 +141,16 @@
 :le:dhme/w
 :le:a)nh/r
 :wd:a)nh/r irreg_decl3 masc nom sg
+:le:dikei=n
+:le:-dhme/w
+:vs:dhm  ew_pr ew_denom comp_only
+:vs:dhmhs  reg_fut ew_denom comp_only
+:vs:dhmhs  aor1 ew_denom comp_only
+:vs:dedhmhk  perf_act ew_denom comp_only
+:vs:dedhmh  perfp_vow ew_denom comp_only
+:vs:dhmhq  aor_pass ew_denom comp_only
+:vs:dedhmhs  fut_perf ew_denom mp comp_only
+:le:-a)nh/r
+:aj:a)ndr os_on comp_only
+:le:-dikei=n
+:vs:di^k aor2,comp_only

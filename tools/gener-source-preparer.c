@@ -1280,17 +1280,25 @@ finish:
 }
 
 /*
- * Remove the records whose stem only occurs in compounds (`comp_only`):
- * analysis accepts their forms only after a preverb (checkgenwds.c), so the
- * simple lemma must not generate them (dhme/w, only in a)podhme/w,
- * e)pidhme/w...; the compound adjective stem a)ndr under a)nh/r). A lemma
- * left without records produces no block in the index.
+ * Move the records whose stem only occurs in compounds (`comp_only`) to a
+ * block of their own, under the lemma prefixed with '-' (-dhme/w): analysis
+ * accepts their forms only after a preverb (checkgenwds.c), so the simple
+ * lemma must not generate them (dhme/w, only in a)podhme/w, e)pidhme/w...;
+ * the compound adjective stem a)ndr under a)nh/r), while its compounds do.
+ * The generation index keeps that key, which no canonical request can name;
+ * the runtime reads it only to compose a compound. A lemma left without
+ * records produces no block in the index.
  */
-static void
-drop_compound_only_records(prepared_buffer *prepared)
+static int
+move_compound_only_records(prepared_buffer *prepared)
 {
+	prepared_buffer moved = { 0 };
 	size_t read = 0;
 	size_t write = 0;
+	const char *lemma = NULL;
+	size_t lemma_length = 0;
+	int lemma_moved = 0;
+	int result = 0;
 
 	while (read < prepared->size) {
 		const char *line = prepared->data + read;
@@ -1298,25 +1306,49 @@ drop_compound_only_records(prepared_buffer *prepared)
 		size_t length = end ? (size_t)(end - line) + 1 : prepared->size - read;
 		int keep = 1;
 
-		if (length > 4 && line[0] == ':' && strncmp(line,":le:",4)) {
+		if (length > 4 && !strncmp(line,":le:",4)) {
+			lemma = line + 4;
+			lemma_length = length - 4;
+			while (lemma_length &&
+			       strchr(" \t\r\n",lemma[lemma_length - 1]))
+				lemma_length--;
+			while (lemma_length && strchr(" \t",*lemma))
+				lemma++, lemma_length--;
+			lemma_moved = 0;
+		} else if (length > 4 && line[0] == ':') {
 			const char *cursor = line + 4;
 			const char *limit = line + length;
 
-			/* The keys follow the stem; compare whole tokens only. */
+			/*
+			 * The keys follow the stem; compare whole keys only. A type
+			 * token may join several keys with commas (aor2,comp_only).
+			 */
+			while (cursor < limit && !strchr(" \t\r\n",*cursor))
+				cursor++;
 			while (cursor < limit) {
 				const char *token;
 
-				while (cursor < limit && strchr(" \t\r\n",*cursor))
+				while (cursor < limit && strchr(" \t\r\n,",*cursor))
 					cursor++;
 				token = cursor;
-				while (cursor < limit && !strchr(" \t\r\n",*cursor))
+				while (cursor < limit && !strchr(" \t\r\n,",*cursor))
 					cursor++;
-				if (token != line + 4 && cursor - token == 9 &&
-				    !memcmp(token,"comp_only",9)) {
+				if (cursor - token == 9 && !memcmp(token,"comp_only",9)) {
 					keep = 0;
 					break;
 				}
 			}
+		}
+		if (!keep && lemma && lemma_length) {
+			if (!lemma_moved &&
+			    (!append_bytes(&moved,":le:-",5) ||
+			     !append_bytes(&moved,lemma,lemma_length) ||
+			     !append_bytes(&moved,"\n",1)))
+				goto finish;
+			lemma_moved = 1;
+			if (!append_bytes(&moved,line,length) ||
+			    (line[length - 1] != '\n' && !append_bytes(&moved,"\n",1)))
+				goto finish;
 		}
 		if (keep) {
 			if (write != read)
@@ -1326,6 +1358,19 @@ drop_compound_only_records(prepared_buffer *prepared)
 		read += length;
 	}
 	prepared->size = write;
+	if (moved.size && prepared->size &&
+	    prepared->data[prepared->size - 1] != '\n' &&
+	    !append_bytes(prepared,"\n",1))
+		goto finish;
+	if (moved.size && !append_bytes(prepared,moved.data,moved.size))
+		goto finish;
+	result = 1;
+
+finish:
+	free(moved.data);
+	if (!result)
+		fprintf(stderr,"morpheus-gener-prepare: out of memory\n");
+	return result;
 }
 
 static int
@@ -1422,8 +1467,8 @@ usage:
 	if ((active_exceptions && !all_exceptions_seen(active_exceptions)) ||
 	    (active_patches && !all_patches_seen(active_patches)))
 		goto finish;
-	if (!state.historical)
-		drop_compound_only_records(&prepared);
+	if (!state.historical && !move_compound_only_records(&prepared))
+		goto finish;
 	if (!write_output(&prepared,output_path))
 		goto finish;
 	result = EXIT_SUCCESS;

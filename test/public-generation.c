@@ -25,6 +25,32 @@ static morpheus_generation_options default_options(void)
   return(options);
 }
 
+/*
+ * Generates lemma and checks that every record carries canonical as its
+ * lemma and a surface beginning with prefix. Returns the record count.
+ */
+static size_t generate_compound(morpheus_context *context, const char *lemma,
+                                const char *canonical, const char *prefix)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t count;
+  size_t i;
+
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  assert(result);
+  count=morpheus_generation_result_count(result);
+  for(i=0;i!=count;i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    assert(!strcmp(item.lemma,canonical));
+    assert(item.part_of_speech==MORPHEUS_PART_OF_SPEECH_VERB);
+    assert(!strncmp(item.surface,prefix,strlen(prefix)));
+  }
+  morpheus_generation_result_free(result);
+  return(count);
+}
+
 int main(int argc, char **argv)
 {
   static const uint8_t canonicalized[]="!lo_-+^/gos";
@@ -213,6 +239,33 @@ int main(int argc, char **argv)
   }
   morpheus_generation_result_free(result);
   result=NULL;
+
+  /*
+   * Compounds are composed from the simple verb's records, under the names
+   * analysis reports: the listed compound (a)po/-lu/w is listed as
+   * a)polu/w), a hyphenated name when the list has none (a)mfi/-lu/w,
+   * canonically a)mfi/lu/w), and stems that occur only in compounds
+   * (-dhme/w), which the simple lemma never generates.
+   */
+  {
+    size_t simple;
+    size_t listed;
+
+    assert(morpheus_generate(context,(const uint8_t *)"lu/w",4,NULL,
+                             &result)==MORPHEUS_OK);
+    simple=morpheus_generation_result_count(result);
+    assert(simple);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    listed=generate_compound(context,"a)polu/w","a)polu/w","a)p");
+    assert(listed==simple);
+    assert(generate_compound(context,"a)mfi/-lu/w","a)mfi/lu/w","a)mf")==
+           simple);
+    assert(generate_compound(context,"a)po/-lu/w","a)polu/w","")==0);
+    assert(generate_compound(context,"e)pidhme/w","e)pidhme/w","e)p"));
+    assert(generate_compound(context,"dhme/w","dhme/w","")==0);
+    assert(generate_compound(context,"-dhme/w","dhme/w","")==0);
+  }
 
   assert(morpheus_generate(context,NULL,0,NULL,&result)==
          MORPHEUS_INVALID_ARGUMENT);

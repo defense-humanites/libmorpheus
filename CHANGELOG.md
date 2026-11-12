@@ -9,6 +9,18 @@ the corpus.
 
 ## [Unreleased]
 
+### Added
+
+- Experimental generation composes compound verbs as analysis finds them
+  (#78, item 2). `morpheus_generate()` accepts the compound lemmas analysis
+  reports: the names `stemsrc/vbs.cmp.ml` lists (`a)podi/dwmi`), the
+  hyphenated names analysis gives preverbs and a verb the list does not join
+  (`a)mfi/-lu/w`, canonically `a)mfi/lu/w`), and outer preverbs before a
+  listed compound (`a)nti/-paradi/dwmi`). It generates them from the simple
+  verb's verb records with the preverbs, and from the stems that occur only
+  in compounds. A name analysis never reports returns no record. The C ABI
+  is unchanged. See `docs/public-api.md#compound-verbs`.
+
 ### Changed
 
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
@@ -17,6 +29,21 @@ the corpus.
   0.5.0 below). Node.js pins `@libmorpheus/data` 0.2.0, and Python's
   `--gener-index` verifies that package's index (`a2f97677…`). The Python
   binding is qualified on Python 3.11, 3.14 and 3.15. C ABI 2 unchanged.
+- The generation preparer moves the records whose stem occurs only in
+  compounds (`comp_only`) to a reserved key, the lemma prefixed with a hyphen
+  (`-dhme/w`), instead of dropping them, and recognises the key joined to a
+  stem type by a comma (`aor2,comp_only`). The native and JavaScript index
+  builders keep that leading hyphen; requests, canonicalised without
+  hyphens, never reach it. The default index becomes `8ba328ca…` (prepared
+  source `a618d41c…`); the data package's manifest and the Python
+  binding's `--gener-index` pin it. With an earlier runtime the reserved keys are
+  inert; with an earlier index, compounds are generated without the
+  compound-only stems.
+- A record that carries its own preverb (`pb:`) is generated under the lemma
+  analysis names after that preverb: ἀμπέσχον under ἀμπέχω instead of ἔχω,
+  the `pb:e)pi/` stems filed under μελέομαι under ἐπιμελέομαι.
+- Analysis names compounds through a function it now shares with
+  generation; its results are unchanged (42,052 words compared).
 
 ## [0.5.0] - 2026-11-11
 

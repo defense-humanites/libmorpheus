@@ -377,7 +377,7 @@ jobs:
           output="$(printf 'a)/nqrwpos\n' | docker run --rm -i morpheus:ci -S)"
           test -n "$output"
           docker run --rm --entrypoint sh morpheus:ci -c \
-            'echo "a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331  /opt/morpheus/share/morpheus/stemlib/gener.index" | sha256sum -c -'
+            'echo "8ba328ca8429c657aeb53a47a92045ac4bd64cdeab726af01e8afbcfd67d8fc2  /opt/morpheus/share/morpheus/stemlib/gener.index" | sha256sum -c -'
 
   apple-silicon:
     needs: activity

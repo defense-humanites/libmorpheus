@@ -99,6 +99,112 @@ chckcmpvb(char *endstr, char *keys)
 	return( checkendind(CmpVbtags,tmpendstr,keys,strncmp));
 }
 
+static int
+append_compound_text(char *dest, size_t capacity, const char *source)
+{
+	size_t used = strlen(dest);
+	size_t added = strlen(source);
+
+	if( used >= capacity || added >= capacity - used )
+		return(0);
+	memcpy(dest + used,source,added + 1);
+	return(1);
+}
+
+/*
+ * Name the verb that analysis finds as preverb(s) + lemma, as it reports it:
+ * the compound vbs.cmp.ml lists for "preverbs-lemma"; failing that, the
+ * remaining outer preverbs, a hyphen and the compound listed for the
+ * shortest suffix that has one ("a)nti/-paradi/dwmi"); failing that,
+ * "preverbs-lemma" itself. Analysis and generation share this function so
+ * that generation accepts exactly the compound lemmas analysis reports.
+ * Returns 0 when a key or the name does not fit.
+ */
+int
+compound_verb_lemma(const char *preverbs, const char *lemma, char *name,
+                    size_t size)
+{
+	char tmplem[LONGSTRING];
+	char cmplem[LONGSTRING];
+	char tmphalf1[LONGSTRING];
+	char * s = tmplem;
+	char * t;
+	const char *chosen;
+
+	if (!preverbs || !lemma || !name || !size)
+		return(0);
+	tmphalf1[0] = tmplem[0] = cmplem[0] = 0;
+	if( snprintf(tmplem,sizeof tmplem,"%s-%s",preverbs,lemma) >=
+	    (int)sizeof tmplem )
+		return(0);
+	for(;;) {
+		/*
+		 * grc 6/12/94
+		 *
+		 * if you have an entry for u(poba/llw
+		 * but you are looking at a)nti/,u(po/-ba/llw
+		 * send the user to a)nti,-u(poba/llw
+		 * not a)nti/,u(po/-ba/llw
+		 *
+		 */
+		if( strlen(s) >= MAXWORDSIZE - 1 ) {
+			morpheus_runtime_diagnostic("compound lookup key is too long: [%s]\n",s);
+			return(0);
+		}
+		chckcmpvb(s,cmplem);
+		if( cmplem[0] ) {
+			if( tmphalf1[0] ) {
+				if( ! append_compound_text(tmphalf1,sizeof tmphalf1,"-") ||
+				    ! append_compound_text(tmphalf1,sizeof tmphalf1,cmplem) )
+					return(0);
+				Xstrcpy(cmplem,tmphalf1);
+			}
+			break;
+		}
+
+		t = s;
+		s = strchr(s,',');
+		if(!s ) {
+			if( (tmphalf1[0] && ! append_compound_text(tmphalf1,sizeof tmphalf1,",")) ||
+			    ! append_compound_text(tmphalf1,sizeof tmphalf1,t) )
+				return(0);
+			Xstrcpy(tmplem,tmphalf1);
+			 break;
+		}
+		*s++ = 0;
+		if( (tmphalf1[0] && ! append_compound_text(tmphalf1,sizeof tmphalf1,",")) ||
+		    ! append_compound_text(tmphalf1,sizeof tmphalf1,t) )
+			return(0);
+	}
+	chosen = cmplem[0] ? cmplem : tmplem;
+	if( strlen(chosen) >= size ) {
+		morpheus_runtime_diagnostic("compound lemma is too long: [%s]\n",chosen);
+		return(0);
+	}
+	memcpy(name,chosen,strlen(chosen) + 1);
+	return(1);
+}
+
+/*
+ * The lines of vbs.cmp.ml ("preverbs-lemma compound"), loaded as analysis
+ * loads them. Returns 0 when the list cannot be loaded.
+ */
+int
+compound_verb_lines(char ***lines, int *count)
+{
+	morpheus_runtime_context *context = morpheus_runtime_context_current();
+	endind *CmpVbtags;
+
+	if (!lines || !count)
+		return(0);
+	CmpVbtags = load_end_index(&context->compound_verb_index,CMPVBLIST,
+		"compound verb index");
+	if (!CmpVbtags) return(0);
+	*lines = endeptr_of(CmpVbtags);
+	*count = endlen_of(CmpVbtags);
+	return(1);
+}
+
 int
 chckend(char *endstring) 
 {

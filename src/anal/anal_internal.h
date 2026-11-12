@@ -63,6 +63,8 @@ int chckindecl(char *indeclinable, char *lemmas);
 int chckirrverb(char *irregular, char *lemmas);
 int chckstem(char *stem, char *stem_keys, int is_noun);
 int chckcmpvb(char *ending, char *keys);
+int compound_verb_lemma(const char *preverbs, const char *lemma,
+                        char *name, size_t size);
 int chckend(char *ending);
 int chcknend(char *ending, char *keys);
 int chckvend(char *ending, char *keys);

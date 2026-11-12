@@ -37,6 +37,14 @@ follows the historical `gener` canonicalization by removing an initial `!`,
 hyphens, hard quantity markers (`_` and `^`), and diaeresis markers (`+`).
 Accents, breathings, case, and homonym digits are otherwise preserved.
 
+A leading hyphen is kept: it marks a reserved key, the lemma's stems that
+occur only in compounds (`-dhme/w` holds the `comp_only` records of
+δημέω). The preparer writes these blocks
+([gener-derivations.md](gener-derivations.md#compound-only-records)). Public
+requests are canonicalised without hyphens and so never name a reserved key;
+the runtime reads it only to compose a compound verb. Readers since version 1
+accept such keys: they are ordinary keys that sort before letters.
+
 Empty lemma blocks are omitted. After canonicalisation, blocks with identical
 ordered records are deduplicated while retaining their first command-line
 occurrence. All distinct blocks with the same canonical key remain separate

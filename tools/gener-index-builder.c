@@ -177,6 +177,15 @@ canonical_lemma(const char *source)
 
 	if (!lemma)
 		return NULL;
+	/*
+	 * A leading '-' marks the compound-only stems of a lemma (-dhme/w), which
+	 * the preparer keeps apart; requests are canonicalised without hyphens
+	 * and so never name them.
+	 */
+	if (length && source[0] == '-') {
+		lemma[output++] = '-';
+		source++, length--;
+	}
 	if (length && source[0] == '!')
 		source++, length--;
 	for (input = 0; input != length; input++) {

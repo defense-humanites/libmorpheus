@@ -111,10 +111,16 @@
 ;fu
 
 # A stem that only occurs in compounds is not generated for the simple lemma:
-# analysis accepts it only after a preverb. The lemma keeps its other records.
+# analysis accepts it only after a preverb. Its records move to a block of
+# their own, -dhme/w, which the runtime reads only to compose a compound
+# (e)pidhme/w). The lemma keeps its other records.
 :le:dhme/w
 :de:dhm ew_denom comp_only
 
 :le:a)nh/r
 :wd:a)nh/r irreg_decl3 masc nom sg
 :aj:a)ndr os_on comp_only
+
+# A comma may join comp_only to the stem type.
+:le:dikei=n
+:vs:di^k aor2,comp_only

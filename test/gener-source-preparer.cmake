@@ -69,8 +69,8 @@ if(NOT defaults_compare_result EQUAL 0)
 endif()
 
 # The historical preparation keeps the stem alterations that the default one
-# corrects, and the compound-only records that it drops
-# (docs/gener-derivations.md).
+# corrects, and the compound-only records under their lemma, which the default
+# one moves to a block of their own (docs/gener-derivations.md).
 set(historical_defaults "${MORPHEUS_GENER_SOURCE_WORK_DIR}/historical-defaults.txt")
 file(REMOVE "${historical_defaults}")
 execute_process(

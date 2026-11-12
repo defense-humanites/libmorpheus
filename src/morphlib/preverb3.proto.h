@@ -3,3 +3,4 @@
 int nextpreverb(char *, char *, char *, gk_string *);
 int has_rawpreverb(char *, gk_string *);
 int is_rawpreverb(char *);
+int preverb_lemmas(const char **, int);
