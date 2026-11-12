@@ -44,6 +44,10 @@ the corpus.
   the `pb:e)pi/` stems filed under μελέομαι under ἐπιμελέομαι.
 - Analysis names compounds through a function it now shares with
   generation; its results are unchanged (42,052 words compared).
+- Generated surfaces no longer write the engine's hiatus mark after πρό,
+  περί and προτί (`pro+e/hke`): it becomes the diaeresis of a following
+  iota or upsilon that would otherwise form a diphthong (`proi/+sxw`) and
+  is dropped elsewhere (`proe/hke`, `perie/xw`), as texts write these forms.
 
 ## [0.5.0] - 2026-11-11
 

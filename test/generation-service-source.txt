@@ -12,6 +12,12 @@
 :le:-dhme/w
 :vs:dhm ew_pr ew_denom comp_only
 
+:le:e)/xw
+:vs:e)x w_stem
+
+:le:i)/sxw
+:vs:i)sx w_stem
+
 :le:korba=n
 :wd:korba=n indecl
 

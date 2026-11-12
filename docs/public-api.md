@@ -160,7 +160,12 @@ result with no records and a nonzero skipped count is a lemma whose records
 all failed, not an absent one. Allocation failures still fail the request.
 
 Generated surfaces omit the hyphen that marks the stem boundary in the stem
-source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`.
+source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`. Where πρό, περί or προτί
+meets a vowel without elision, the engine marks the hiatus with `+` after
+the preverb (`pro+e/hke`). Surfaces keep it only as the diaeresis of an iota
+or upsilon that would otherwise form a diphthong with the preverb's ο, placed
+after that letter's own marks as the engine writes diaereses: προέηκε is
+returned as `proe/hke`, περιέχω as `perie/xw`, προΐσχω as `proi/+sxw`.
 
 ### Compound verbs
 
@@ -199,8 +204,7 @@ inherits it. The remaining limits mirror the data or are left for later:
 
 - **Preverb variants.** Analysis also accepts Ionic unaspirated preverbs
   (ἀπίκετο), ἐς for εἰς, apocope (ἀμ-, κατ-), ἐνί, and an augment before the
-  preverb; generation does not produce them yet. It writes πρό before a
-  vowel with a diaeresis (`pro+e/hke`) where texts write προέηκε.
+  preverb; generation does not produce them yet.
 - **Stems derived with their own preverb.** Analysis ignores the preverb of
   a stem derived from a `:de:` line (`:de:mel ew_denom mp pb:e)pi/` under
   μελέομαι): it reads μελεῖται under μελέομαι and μεταμελεῖται under

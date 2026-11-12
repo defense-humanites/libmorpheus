@@ -26,6 +26,31 @@ static morpheus_generation_options default_options(void)
 }
 
 /*
+ * Whether lemma generates surface, and whether any of its surfaces contains
+ * fragment.
+ */
+static void generated_surfaces(morpheus_context *context, const char *lemma,
+                               const char *surface, const char *fragment,
+                               int *has_surface, int *has_fragment)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t i;
+
+  *has_surface=0;
+  *has_fragment=0;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  for(i=0;i!=morpheus_generation_result_count(result);i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    if(!strcmp(item.surface,surface)) *has_surface=1;
+    if(strstr(item.surface,fragment)) *has_fragment=1;
+  }
+  assert(morpheus_generation_result_count(result));
+  morpheus_generation_result_free(result);
+}
+
+/*
  * Generates lemma and checks that every record carries canonical as its
  * lemma and a surface beginning with prefix. Returns the record count.
  */
@@ -265,6 +290,27 @@ int main(int argc, char **argv)
     assert(generate_compound(context,"e)pidhme/w","e)pidhme/w","e)p"));
     assert(generate_compound(context,"dhme/w","dhme/w","")==0);
     assert(generate_compound(context,"-dhme/w","dhme/w","")==0);
+  }
+
+  /*
+   * pro and peri do not elide before a vowel; the engine marks the hiatus
+   * with '+', which surfaces keep only as the diaeresis of an iota or
+   * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but
+   * proi/+sxw (προΐσχω).
+   */
+  {
+    int has_surface;
+    int has_mark;
+
+    generated_surfaces(context,"proe/xw","proe/xw","pro+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
+    generated_surfaces(context,"perie/xw","perie/xw","peri+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
+    generated_surfaces(context,"proi/sxw","proi/+sxw","pro+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
   }
 
   assert(morpheus_generate(context,NULL,0,NULL,&result)==

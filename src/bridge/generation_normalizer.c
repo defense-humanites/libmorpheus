@@ -53,24 +53,108 @@ copy_text(char *destination, size_t capacity, const char *source)
 	return length >= capacity;
 }
 
+static int
+is_vowel_letter(char letter)
+{
+	return letter && strchr("aehiouw",letter) != NULL;
+}
+
+static int
+is_accent_mark(char mark)
+{
+	return mark == '/' || mark == '\\' || mark == '=';
+}
+
+/*
+ * The length of the preverb that ends at end when it is one of those the
+ * engine joins to a vowel without elision (pro, peri, proti), marking the
+ * hiatus with '+' (pro+e/hke, peri/+exe); zero otherwise. An accent may
+ * follow the preverb (pro/+exe).
+ */
+static size_t
+hiatus_preverb(const char *start, const char *end)
+{
+	static const char *const preverbs[] = { "proti", "peri", "pro" };
+	size_t index;
+
+	if (end > start && is_accent_mark(end[-1]))
+		end--;
+	for (index = 0; index != sizeof preverbs / sizeof *preverbs; index++) {
+		size_t length = strlen(preverbs[index]);
+
+		if ((size_t)(end - start) >= length &&
+		    !memcmp(end - length,preverbs[index],length))
+			return length;
+	}
+	return 0;
+}
+
+static int
+append_surface(char *destination, size_t capacity, size_t *copied,
+               char letter)
+{
+	if (*copied == capacity - 1)
+		return 0;
+	destination[(*copied)++] = letter;
+	return 1;
+}
+
 /*
  * Generated surfaces keep the hyphen that marks the stem boundary in the stem
  * source (a)nqr-w/pwn). It is not part of the form: drop it, as lemma keys
  * already do.
+ *
+ * Where the engine joins pro, peri or proti to a vowel, it marks the hiatus
+ * with '+' after the preverb (pro+e/hke). Written Greek marks a diaeresis
+ * only on the iota or upsilon that would otherwise form a diphthong with
+ * the preceding vowel: proi+/hmi (proΐημι), prou+pa/rxw, but proe/hke,
+ * perie/xw. The mark moves to that letter, after its own marks, as the
+ * engine writes stem diaereses (a)glai/+zw), or is dropped.
  */
 static int
 copy_surface(char *destination, size_t capacity, const char *source)
 {
+	const char *start = source;
 	size_t copied = 0;
 
 	for (; *source; source++) {
 		if (*source == '-')
 			continue;
-		if (copied == capacity - 1) {
+		if (*source == '+' && is_vowel_letter(source[1])) {
+			size_t preverb = hiatus_preverb(start,source);
+
+			if (preverb) {
+				const char *letter = source + 1;
+				const char *marks = letter + 1;
+				int diphthong = (source[-1] == 'o' ||
+				                 (is_accent_mark(source[-1]) &&
+				                  source[-2] == 'o')) &&
+				                (*letter == 'i' || *letter == 'u');
+
+				if (!diphthong)
+					continue;
+				while (*marks == '_' || *marks == '^' ||
+				       is_accent_mark(*marks))
+					marks++;
+				for (; letter != marks; letter++) {
+					if (!append_surface(destination,capacity,&copied,
+					                    *letter)) {
+						destination[copied] = 0;
+						return 1;
+					}
+				}
+				if (!append_surface(destination,capacity,&copied,'+')) {
+					destination[copied] = 0;
+					return 1;
+				}
+				source = marks - 1;
+				continue;
+			}
+		}
+		if (!append_surface(destination,capacity,&copied,*source)) {
 			destination[copied] = 0;
 			return 1;
 		}
-		destination[copied++] = *source;
 	}
 	destination[copied] = 0;
 	return 0;
