@@ -321,6 +321,55 @@ int main(int argc, char **argv)
   morpheus_generation_result_free(result);
   result=NULL;
 
+  /*
+   * A form has the dialects that its preverb, augment, stem and ending all
+   * allow. After r, an ending in -h is Ionic and epic, not Attic (xw/rhn,
+   * as analysis reads it), and a form whose parts share no dialect is left
+   * out: the Doric stem a(_duter takes -a_n (Doric) but not -hn.
+   */
+  {
+    size_t eta=0;
+    int doric=0;
+
+    assert(morpheus_generate(context,(const uint8_t *)"xw/ra",5,NULL,
+                             &result)==MORPHEUS_OK);
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      if(strcmp(item.surface,"xw/rhn") && strcmp(item.surface,"xw/rhs") &&
+         strcmp(item.surface,"xw/rh|")) continue;
+      assert(item.dialect==(MORPHEUS_DIALECT_IONIC|MORPHEUS_DIALECT_EPIC));
+      eta++;
+    }
+    assert(eta==3);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    assert(morpheus_generate(context,(const uint8_t *)"h(du/s",6,NULL,
+                             &result)==MORPHEUS_OK);
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      assert(strcmp(item.surface,"a(_dute/rhn"));
+      if(!strcmp(item.surface,"a(_dute/ra_n")) {
+        assert(item.dialect==MORPHEUS_DIALECT_DORIC);
+        doric=1;
+      }
+    }
+    assert(doric);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    /*
+     * A record that forces its ending states the form's dialects: the
+     * Aeolic stem takes the ending the table calls epic.
+     */
+    assert(morpheus_generate(context,(const uint8_t *)"eu)tri/aina",11,NULL,
+                             &result)==MORPHEUS_OK);
+    assert(morpheus_generation_result_count(result)==1);
+    assert(morpheus_generation_result_get(result,0,&item)==MORPHEUS_OK);
+    assert(!strcmp(item.surface,"eu)tri/aina"));
+    assert(item.dialect==(MORPHEUS_DIALECT_AEOLIC|MORPHEUS_DIALECT_EPIC));
+    morpheus_generation_result_free(result);
+    result=NULL;
+  }
+
   /* The stem-boundary hyphen of a)nqr-wp does not reach the surfaces. */
   assert(morpheus_generate(context,(const uint8_t *)"a)/nqrwpos",10,NULL,
                            &result)==MORPHEUS_OK);

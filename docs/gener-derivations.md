@@ -212,6 +212,16 @@ ms at the 99th percentile, against 8 ms and 33 to 40 ms with
 `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`. The first compound of a
 context also reads `rule_files/raw_preverbs.table`.
 
+A form takes the dialects that its preverb, augment, stem and ending all
+allow, and a form whose parts share none is left out unless its record
+forces the ending ([public-api.md](public-api.md#greek-lemma-generation)).
+This takes the whole index from 23.1 to 22.3 million forms (−3.4 %, 4,550
+lemmas changed, none emptied). On the treebank, 0.24 % of the noun,
+adjective, pronoun and verb tokens lose a reading, nearly all misreadings
+of analysis; on 2,787 lemmas (the 800 most frequent in the treebank and
+2,000 drawn with seed 78), the forms labelled with a dialect that analysis
+does not give them fall from 1.5 % to 1.0 %.
+
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
 and latency of each index, lemmas that change, lose forms or gain skipped

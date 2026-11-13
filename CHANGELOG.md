@@ -80,6 +80,18 @@ the corpus.
   augmented preverb leaves a participle record no ending. It also freed that
   buffer twice when a stem produced too many forms. Analysis results are
   unchanged.
+- Generated dialects (#78, item 4). A form now has the dialects that its
+  preverb, augment, stem and ending all allow, and a form whose parts share
+  no dialect is left out (τιμήσωντι: an Attic-Ionic stem in -η- with a Doric
+  ending), unless its record forces the ending (εὐτρίαινα keeps Aeolic and
+  epic). Such forms used to take the union of the dialects, as analysis
+  labels them; an augment, preverb or request that excluded every dialect
+  left the form dialect-neutral.
+- After ρ, ε or ι, a first-declension ending in -η is Ionic and epic, not
+  Attic: χώρην, χώρης and χώρῃ were labelled Attic, χώρη was not. The
+  ending check cleared the stem's flag for this rule after the first ending
+  in -η, so that the stem's later endings missed it. Analysis results are
+  unchanged.
 
 ## [0.5.0] - 2026-11-11
 

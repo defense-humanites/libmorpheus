@@ -114,7 +114,18 @@ and aims at two properties:
 
 These forms include dialectal, poetic and late variants, endings that a
 source forces, and regular principal parts that no text may attest. They
-carry the dialect and usage flags of the stem data, not attestations.
+carry the dialect and usage flags of the stem data, not attestations. A
+form's dialects are those that its preverb, augment, stem and ending all
+allow, the parts that name no dialect aside; a form whose parts name none is
+dialect-neutral. A form whose parts name dialects with nothing in common is
+left out: τιμήσωντι, an Attic-Ionic aorist stem in -η- with a Doric ending,
+or ἁδυτέρην, a Doric stem with an Ionic and epic ending. Analysis accepts
+such forms, labelled with the union of the dialects; the readings it gives
+that way are 0.2 % of the treebank tokens below, almost all misreadings
+(σοῦ as θέω, κτῆσιν as κτάομαι, παροῦσιν as πηρόω). A record that forces
+its ending states the form's dialects itself and keeps their union: the
+Aeolic stem of εὐτρίαινα takes the nominative in -α that the ending table
+calls epic.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
@@ -129,10 +140,11 @@ On samples of the Alpheios data, more than 99.5 % of the generated forms
 meet the first property, compounds included
 ([gener-derivations.md](gener-derivations.md#measures),
 [compound verbs](#compound-verbs)). The second is not yet met. On the verbs
-of the Perseus treebank (AGDT 2.1), 89.3 % of the tokens that analysis reads
+of the Perseus treebank (AGDT 2.1), 89.0 % of the tokens that analysis reads
 as a verb have every such reading generated (66.6 % before compound verbs);
-91.4 % of the readings as a simple verb are, 92.2 % of those as a listed
-compound and 57.4 % of those as a hyphenated one.
+91.2 % of the readings as a simple verb are, 92.0 % of those as a listed
+compound and 56.7 % of those as a hyphenated one. Over nouns, adjectives,
+pronouns and verbs, 90.0 % of the tokens' readings are generated.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
