@@ -46,6 +46,11 @@ typedef struct morpheus_normalized_generation_result
 morpheus_generation_normalize_status morpheus_generation_normalize(
     morpheus_generation_service *service, const char *canonical_lemma,
     size_t result_limit, morpheus_normalized_generation_result **result);
+/* As above, with MORPHEUS_GENERATION_SERVICE_* flags. */
+morpheus_generation_normalize_status morpheus_generation_normalize_flags(
+    morpheus_generation_service *service, const char *canonical_lemma,
+    unsigned flags, size_t result_limit,
+    morpheus_normalized_generation_result **result);
 void morpheus_normalized_generation_result_free(
     morpheus_normalized_generation_result *result);
 size_t morpheus_normalized_generation_result_count(

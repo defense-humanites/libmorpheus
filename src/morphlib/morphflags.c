@@ -234,7 +234,22 @@ static const int preverb_morphflags[] = {
 	RAW_PREVERB,
 	UNASP_PREVERB,
 	APOCOPE,
-	DOUBLED_CONS
+	DOUBLED_CONS,
+	/*
+	 * The shapes of the preverb itself (e)s for ei)s, cun for su/n...),
+	 * which rstprevb() applies from the preverb's flags. Not IOTA_INTENS,
+	 * which also marks the deictic iota of a word (e)keinosi/) and must stay
+	 * in the stem keys the stemlib build writes.
+	 */
+	SIG_TO_CI,
+	SHORT_EIS,
+	PROS_TO_POTI,
+	META_TO_PEDA,
+	PROS_TO_PROTI,
+	UPO_TO_UPAI,
+	PARA_TO_PARAI,
+	UPER_TO_UPEIR,
+	EN_TO_ENI
 };
 
 void * zogalloc(size_t, size_t);
@@ -264,8 +279,8 @@ int init_prvb_tab(void)
 
 /*
  * Move the preverb flags of a word to its preverb. Called for every
- * candidate key, so it tests the eight preverb flags directly rather than
- * every flag number against the context's table.
+ * candidate key, so it tests the preverb flags of preverb_morphflags[]
+ * directly rather than every flag number against the context's table.
  */
 void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 {

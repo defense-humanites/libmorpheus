@@ -1225,12 +1225,13 @@ target_compile_options(
 
 add_library(
   morpheus_generation_service STATIC
+  src/gener/generation_compounds.c
   src/gener/generation_service.c
 )
 target_link_libraries(
   morpheus_generation_service
   PUBLIC morpheus_build_options
-  PRIVATE morpheus_gener_index morpheus_gener morpheus_morphlib
+  PRIVATE morpheus_gener_index morpheus_gener morpheus_gkends morpheus_morphlib
 )
 target_compile_options(
   morpheus_generation_service

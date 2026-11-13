@@ -216,9 +216,12 @@ except MorpheusError as error:
 `generate()` accepts typed filters for part of speech, dialect, region, person,
 number, gender, case, tense, mood, voice, and degree. It preserves dialect
 masks, duals, duplicate surfaces, and multiple indexed interpretations unless
-filters remove them. Set `exclude_duals=True` when dual forms are unwanted.
-`result_limit=0` uses the native default of 4,096; a nonzero value is a hard
-safety ceiling, not a truncation request. The explicit maximum is 65,536.
+filters remove them. Set `exclude_duals=True` when dual forms are unwanted,
+and `exclude_preverb_variants=True` to keep a compound verb's plain forms
+without its preverb variants (apocope, psilosis…; libmorpheus 0.6.0 or later).
+`result_limit=0` uses the native default, 65,536 from libmorpheus 0.6.0 and
+4,096 before; a nonzero value is a hard safety ceiling, not a truncation
+request. The explicit maximum is 65,536.
 
 A lemma's source record that the engine cannot generate (for example, one
 whose stem class has no ending table) is skipped rather than failing the

@@ -120,20 +120,22 @@ their canonical lemma and complete ordered sequences of structured records are
 identical. The first occurrence is retained; distinct blocks for the same key
 and repeated records within one block are preserved.
 
-The qualified corpus contains 108,268 non-empty blocks before this rule and
-107,837 afterward, so 431 redundant blocks are removed. The resulting index
-contains 106,081 canonical lemmas and 177,676 records. CI prepares and indexes
-the 49 sources twice, requires byte-for-byte reproducibility, and freezes the
-SHA-256 of both the 287,343-line prepared corpus (`62265bf6…`) and the final
-index (`a2f97677…`).
+The qualified corpus contains 108,785 non-empty blocks before this rule and
+108,349 afterward, so 436 redundant blocks are removed. The resulting index
+contains 106,589 canonical keys and 180,521 records: 106,080 lemmas with
+177,672 records, and 509 reserved keys with the 2,849 records whose stems
+occur only in compounds. CI prepares and indexes the 49 sources twice,
+requires byte-for-byte reproducibility, and freezes the SHA-256 of both the
+290,741-line prepared corpus (`a618d41c…`) and the final index
+(`8ba328ca…`).
 
 These figures include the default principal parts described in
 [Greek generation derivations](gener-derivations.md#default-principal-parts),
-without the [compound-only records](gener-derivations.md#compound-only-records),
-the seven [data patches](gener-data-patches.md) and the
+the [compound-only records](gener-derivations.md#compound-only-records) under
+their reserved keys, the seven [data patches](gener-data-patches.md) and the
 [corrected stem alterations](gener-derivations.md#corrected-stem-alterations).
 Prepared with `--historical`, which adds no default, keeps the compound-only
-records, applies no patch and keeps the historical expansion, the corpus
+records under their lemma, applies no patch and keeps the historical expansion, the corpus
 still gives the historical 238,250-line source (`1c14949b…`) and the index of
 data 0.1.0 and native 0.4.6 (106,422 lemmas, 108,215 blocks, 129,097 records,
 `5aa76d8c…`); CI checks both.

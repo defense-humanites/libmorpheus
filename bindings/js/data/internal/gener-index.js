@@ -28,10 +28,15 @@ const recordKinds = new Map([
         5
     ]
 ]);
+// A leading "-" marks the compound-only stems of a lemma (-dhme/w), which the
+// preparer keeps apart; requests are canonicalised without hyphens and so
+// never name them.
 function canonicalLemma(source) {
     const first = source.trim().split(/[ \t\r\n]/, 1)[0];
-    const content = first.startsWith("!") ? first.slice(1) : first;
-    return content.replaceAll(/[-_^+]/g, "");
+    const reserved = first.startsWith("-") ? "-" : "";
+    const rest = first.slice(reserved.length);
+    const content = rest.startsWith("!") ? rest.slice(1) : rest;
+    return reserved + content.replaceAll(/[-_^+]/g, "");
 }
 function sameBlock(left, right) {
     return left.lemma === right.lemma && left.records.length === right.records.length && left.records.every((record, index)=>{

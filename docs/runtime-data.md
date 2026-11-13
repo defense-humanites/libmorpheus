@@ -106,14 +106,19 @@ sh libmorpheus-data/tools/prepare-runtime-data.sh "$PWD/morpheus-greek-data"
 Use the resulting absolute `morpheus-greek-data` path for both analysis and
 experimental generation. The expected SHA-256 of its `gener.index` from this
 source tree, which adds the default principal parts of
-[gener-derivations.md](gener-derivations.md#default-principal-parts), is:
+[gener-derivations.md](gener-derivations.md#default-principal-parts) and keeps
+the [compound-only stems](gener-derivations.md#compound-only-records) apart,
+is:
 
 ```text
-a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331
+8ba328ca8429c657aeb53a47a92045ac4bd64cdeab726af01e8afbcfd67d8fc2
 ```
 
-Native releases up to 0.4.6 and `@libmorpheus/data` 0.1.0 prepare the
-historical index, `5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6`.
+Native 0.5.0 and `@libmorpheus/data` 0.2.0 prepare
+`a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331`, which
+drops the compound-only stems. Native releases up to 0.4.6 and
+`@libmorpheus/data` 0.1.0 prepare the historical index,
+`5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6`.
 
 The native preparer and index builder remain internal build-time programs. The
 data package exposes only the acquisition operation; its WebAssembly preparer

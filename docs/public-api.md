@@ -126,10 +126,13 @@ the normalization that analysis applies (grave accents, enclitics, elision,
 crasis).
 
 On samples of the Alpheios data, more than 99.5 % of the generated forms
-meet the first property
-([gener-derivations.md](gener-derivations.md#measures)). The second is not
-yet met: compound verbs (`vbs.cmp.ml`) are not generated (#78), and it is not
-yet measured.
+meet the first property, compounds included
+([gener-derivations.md](gener-derivations.md#measures),
+[compound verbs](#compound-verbs)). The second is not yet met. On the verbs
+of the Perseus treebank (AGDT 2.1), 89.3 % of the tokens that analysis reads
+as a verb have every such reading generated (66.6 % before compound verbs);
+91.4 % of the readings as a simple verb are, 92.2 % of those as a listed
+compound and 57.4 % of those as a hyphenated one.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
@@ -138,7 +141,8 @@ morphological interpretations and dual forms by default, and returns records
 in a deterministic total order. Results own all text and remain valid after
 their context is closed.
 
-Pass `NULL` options for defaults, including a 4,096-record limit. A non-NULL
+Pass `NULL` options for defaults, including a 65,536-record limit (4,096 before
+0.6.0, which many compound verbs exceed). A non-NULL
 `morpheus_generation_options` must set
 `MORPHEUS_GENERATION_OPTIONS_VERSION`, its complete `struct_size`, and may set
 a limit up to `MORPHEUS_GENERATION_MAX_LIMIT` (65,536). Zero trait fields mean
@@ -146,6 +150,9 @@ no filter. Equality-valued traits select one value; dialect, region, gender,
 case, and voice fields accept their documented masks. Dialect-neutral forms
 match any requested dialect. `MORPHEUS_GENERATION_EXCLUDE_DUALS` removes dual
 records and conflicts with an explicit dual-number filter.
+`MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS` returns a compound verb's
+plain forms without its [preverb variants](#compound-verbs); versions before
+0.6.0 reject it.
 
 A lemma has one or more source records in the index. A record that the
 engine cannot generate — for example, one whose stem class has no ending table
@@ -157,7 +164,85 @@ result with no records and a nonzero skipped count is a lemma whose records
 all failed, not an absent one. Allocation failures still fail the request.
 
 Generated surfaces omit the hyphen that marks the stem boundary in the stem
-source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`.
+source: `a)nqr-w/pwn` is returned as `a)nqrw/pwn`. Where πρό, περί or προτί
+meets a vowel without elision, the engine marks the hiatus with `+` after
+the preverb (`pro+e/hke`). Surfaces keep it only as the diaeresis of an iota
+or upsilon that would otherwise form a diphthong with the preverb's ο, placed
+after that letter's own marks as the engine writes diaereses: προέηκε is
+returned as `proe/hke`, περιέχω as `perie/xw`, προΐσχω as `proi/+sxw`.
+
+### Compound verbs
+
+Analysis does not store compound verbs: it removes a preverb from the word,
+analyzes the simple verb, then names the compound after
+`stemsrc/vbs.cmp.ml`. Generation composes them the same way.
+`morpheus_generate()` accepts the compound lemmas that analysis reports:
+
+- a compound the list names: `a)podi/dwmi` for ἀπέδωκε;
+- preverbs and a verb the list does not join, which analysis names with a
+  hyphen: `a)mfi/-lu/w` for ἀμφέλυσε, canonically `a)mfi/lu/w`;
+- outer preverbs before a listed compound: `a)nti/-paradi/dwmi`.
+
+The compound's records are the simple verb's verb records with the preverbs,
+as analysis applies them; the engine places the augment between preverb and
+stem, elides, assimilates and aspirates (ἀπέδωκα, ἐξέβαλον, κατέστησα,
+συνέβη, πάρεστι, σύνθες). Stems that occur only in compounds take part too
+([gener-derivations.md](gener-derivations.md#compound-only-records)):
+ἐπιδημέω generates ἐπεδήμησε though δημέω generates nothing. A compound that
+has records of its own in the index returns them as well. Verbal adjectives
+are not composed, since analysis attributes ἀπόδοτος to a lemma of its own,
+and neither are records that carry another preverb of their own. Records
+carry the requested lemma, canonicalised.
+
+A compound of one preverb also returns the variants of that preverb that
+analysis accepts, each with its flags, as `rule_files/raw_preverbs.table`
+lists them: apocope (ἄμβαλε, κάββαλε, ὕββαλε: `apocope`, `poetic`), ἐς for
+εἰς (`short-eis`), ξυν- for συν- (`sigma-to-ci`), ἐνι- for ἐν-, ποτι- and
+προτι- for προσ-, πεδα- for μετα-, παραι-, ὑπαι-, ὑπειρ-, the augment before
+the preverb in the augmented indicative (ἠνάβληντο, ἠφίει:
+`preverb-augment`), and the unaspirated preverb before a rough breathing
+(ἀπίκετο, κατίστη: `unaspirated-preverb`), which analysis reads as Ionic.
+Those forms are Ionic, and a form whose stem, ending or augment names only
+other dialects is left out: analysis accepts it with every dialect, through
+a defect of its dialect check, and the readings it gives that way are
+mostly misreadings (ἔπεσον as ἐφέζομαι, ἀπιοῦσα as ἀφίημι). A variant
+returns only the forms its flags change, with every reading of each
+(ξυνέβαλλον, first singular and third plural), and only those that begin as
+the table spells the variant. `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`
+leaves the variants out.
+
+A name that analysis never reports returns no record: `a)po/-di/dwmi`,
+because analysis names that compound `a)podi/dwmi`, or a listed name that
+analysis cannot reach (see the limits below). A record of a simple verb that
+carries a preverb of its own (`pb:`) is generated under the lemma that
+analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
+
+Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
+the Alpheios data. On 300 of them (seed 78), 99.91 % of the 684,910 generated
+surfaces analyze back to the compound with the same tense and mood: 99.90 %
+of the 508,733 plain surfaces and 99.95 % of the 176,177 that the preverb
+variants add. The surfaces that fail are forms, or variants of forms, that
+also fail for the simple verb, from which the compound inherits them. The remaining limits mirror the data or are left for later:
+
+- **Preverb variants.** Two kinds that depend on the following sounds are
+  not generated: the dissimilated ἀμπ- (ἀμπέχω) and the elided forms that
+  the table lists for ἀμφί, ἀντί, περί and πρός (ἀμφ-, ἀντ-, περ-, προτ-),
+  which the engine would also produce before a consonant. Compounds of
+  several preverbs have no variant: the engine applies the flags at one
+  end of the chain, while analysis finds a variant at any preverb.
+- **Stems derived with their own preverb.** Analysis ignores the preverb of
+  a stem derived from a `:de:` line (`:de:mel ew_denom mp pb:e)pi/` under
+  μελέομαι): it reads μελεῖται under μελέομαι and μεταμελεῖται under
+  μεταμέλομαι. Generation keeps these stems for the compound their preverb
+  names (ἐπιμελέομαι) and does not produce the other readings; 11 listed
+  names generate nothing for this reason.
+- **The compound list.** `vbs.cmp.ml` is not in byte order, and analysis
+  searches it by bisection: it never finds 38 of its entries and reports
+  their forms with a hyphenated name (`e)k-de/rw` for ἐκδέρω). Generation
+  follows; 27 of these listed names generate nothing, while their
+  hyphenated names do. 11 names are hidden by another name for the same
+  preverbs and verb, and 110 name a simple verb absent from the stem index;
+  analysis reports none of them.
 
 Generation is currently Greek-only. The context loads and validates
 `<stemlib_path>/gener.index` on its first generation call and retains it for

@@ -25,6 +25,129 @@ static morpheus_generation_options default_options(void)
   return(options);
 }
 
+/*
+ * Whether lemma generates surface, and whether any of its surfaces contains
+ * fragment.
+ */
+static void generated_surfaces(morpheus_context *context, const char *lemma,
+                               const char *surface, const char *fragment,
+                               int *has_surface, int *has_fragment)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t i;
+
+  *has_surface=0;
+  *has_fragment=0;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  for(i=0;i!=morpheus_generation_result_count(result);i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    if(!strcmp(item.surface,surface)) *has_surface=1;
+    if(strstr(item.surface,fragment)) *has_fragment=1;
+  }
+  assert(morpheus_generation_result_count(result));
+  morpheus_generation_result_free(result);
+}
+
+/*
+ * Generates lemma and checks that every record carries canonical as its
+ * lemma and is a verb form. Returns the record count, and whether a record
+ * has surface (when surface is not NULL).
+ */
+static size_t generate_compound(morpheus_context *context, const char *lemma,
+                                const char *canonical, const char *surface,
+                                int *has_surface)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t count;
+  size_t i;
+
+  if(has_surface) *has_surface=0;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  assert(result);
+  count=morpheus_generation_result_count(result);
+  for(i=0;i!=count;i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    assert(!strcmp(item.lemma,canonical));
+    assert(item.part_of_speech==MORPHEUS_PART_OF_SPEECH_VERB);
+    if(surface && !strcmp(item.surface,surface)) *has_surface=1;
+  }
+  morpheus_generation_result_free(result);
+  return(count);
+}
+
+/*
+ * Whether lemma generates records with flag, and whether all of them begin
+ * with prefix.
+ */
+/*
+ * Counts the records of lemma that carry flag and tells whether they all
+ * begin with prefix and all have the dialect *dialect (when not NULL, *dialect
+ * becomes 0 when they differ). Returns the number of records.
+ */
+static size_t flagged_records(morpheus_context *context, const char *lemma,
+                              morpheus_generation_flags request_flags,
+                              unsigned int flag, const char *prefix,
+                              size_t *flagged, int *all_prefixed,
+                              morpheus_dialect *dialect)
+{
+  morpheus_generation_options options=default_options();
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t count;
+  size_t i;
+
+  *flagged=0;
+  *all_prefixed=1;
+  options.flags=request_flags;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),
+                           &options,&result)==MORPHEUS_OK);
+  count=morpheus_generation_result_count(result);
+  for(i=0;i!=count;i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    if(!(item.morph_flags[flag/8u] & (1u<<(flag%8u)))) continue;
+    (*flagged)++;
+    if(strncmp(item.surface,prefix,strlen(prefix))) *all_prefixed=0;
+    if(dialect && item.dialect!=*dialect) *dialect=0;
+  }
+  morpheus_generation_result_free(result);
+  return(count);
+}
+
+static void flagged_surfaces(morpheus_context *context, const char *lemma,
+                             unsigned int flag, const char *prefix,
+                             size_t *flagged, int *all_prefixed)
+{
+  (void)flagged_records(context,lemma,0,flag,prefix,flagged,all_prefixed,NULL);
+}
+
+/* Whether surface is generated as a first singular and as a third plural. */
+static void homograph_readings(morpheus_context *context, const char *lemma,
+                               const char *surface, int *first_singular,
+                               int *third_plural)
+{
+  morpheus_generation_result *result=NULL;
+  morpheus_generation item;
+  size_t i;
+
+  *first_singular=0;
+  *third_plural=0;
+  assert(morpheus_generate(context,(const uint8_t *)lemma,strlen(lemma),NULL,
+                           &result)==MORPHEUS_OK);
+  for(i=0;i!=morpheus_generation_result_count(result);i++) {
+    assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+    if(strcmp(item.surface,surface)) continue;
+    if(item.person==MORPHEUS_PERSON_FIRST &&
+       item.number==MORPHEUS_NUMBER_SINGULAR) *first_singular=1;
+    if(item.person==MORPHEUS_PERSON_THIRD &&
+       item.number==MORPHEUS_NUMBER_PLURAL) *third_plural=1;
+  }
+  morpheus_generation_result_free(result);
+}
+
 int main(int argc, char **argv)
 {
   static const uint8_t canonicalized[]="!lo_-+^/gos";
@@ -214,6 +337,127 @@ int main(int argc, char **argv)
   morpheus_generation_result_free(result);
   result=NULL;
 
+  /*
+   * Compounds are composed from the simple verb's records, under the names
+   * analysis reports: the listed compound (a)po/-lu/w is listed as
+   * a)polu/w), a hyphenated name when the list has none (a)mfi/-lu/w,
+   * canonically a)mfi/lu/w), and stems that occur only in compounds
+   * (-dhme/w), which the simple lemma never generates.
+   */
+  {
+    size_t simple;
+    size_t listed;
+
+    assert(morpheus_generate(context,(const uint8_t *)"lu/w",4,NULL,
+                             &result)==MORPHEUS_OK);
+    simple=morpheus_generation_result_count(result);
+    assert(simple);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    int found;
+
+    listed=generate_compound(context,"a)polu/w","a)polu/w","a)polu/w",&found);
+    assert(listed>=simple && found);
+    assert(generate_compound(context,"a)mfi/-lu/w","a)mfi/lu/w","a)mfilu/w",
+                             &found)>=simple && found);
+    assert(generate_compound(context,"a)po/-lu/w","a)polu/w",NULL,NULL)==0);
+    assert(generate_compound(context,"e)pidhme/w","e)pidhme/w",NULL,NULL));
+    assert(generate_compound(context,"dhme/w","dhme/w",NULL,NULL)==0);
+    assert(generate_compound(context,"-dhme/w","dhme/w",NULL,NULL)==0);
+  }
+
+  /*
+   * The variants of a single preverb that analysis accepts come with their
+   * flags, each spelled as the preverb table spells it: apocope (a)l-lu/w,
+   * ka/l-lu), ἐς for εἰς, ξυν- for συν-, ἐνι- for ἐν-, and the unaspirated
+   * preverb before a rough breathing (kati/zw).
+   */
+  {
+    size_t flagged;
+    int prefixed;
+
+    flagged_surfaces(context,"a)nalu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"a)",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"katalu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"ka",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"ei)se/xw",MORPHEUS_MORPH_FLAG_SHORT_EIS,"e)",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"sullu/w",MORPHEUS_MORPH_FLAG_SIGMA_TO_CI,"cu",
+                     &flagged,&prefixed);
+    assert(flagged && prefixed);
+    flagged_surfaces(context,"kaqi/zw",MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,
+                     "ka",&flagged,&prefixed);
+    assert(flagged && prefixed);
+    /* The plain compound carries none of them. */
+    flagged_surfaces(context,"a)polu/w",MORPHEUS_MORPH_FLAG_APOCOPE,"",
+                     &flagged,&prefixed);
+    assert(!flagged);
+  }
+
+  /*
+   * A variant keeps every reading of a surface: cune/luon, like sune/luon,
+   * is a first singular and a third plural. Analysis reads the unaspirated
+   * preverb as Ionic, and so does generation.
+   * MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS leaves the variants out.
+   */
+  {
+    size_t flagged;
+    size_t all;
+    size_t plain;
+    int prefixed;
+    int first_singular;
+    int third_plural;
+    morpheus_dialect dialect=MORPHEUS_DIALECT_IONIC;
+
+    homograph_readings(context,"sullu/w","sune/luon",&first_singular,
+                       &third_plural);
+    assert(first_singular && third_plural);
+    homograph_readings(context,"sullu/w","cune/luon",&first_singular,
+                       &third_plural);
+    assert(first_singular && third_plural);
+    flagged_records(context,"kaqi/zw",0,
+                    MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"ka",&flagged,
+                    &prefixed,&dialect);
+    assert(flagged && prefixed && dialect==MORPHEUS_DIALECT_IONIC);
+    all=flagged_records(context,"katalu/w",0,MORPHEUS_MORPH_FLAG_APOCOPE,
+                        "ka",&flagged,&prefixed,NULL);
+    assert(flagged);
+    plain=flagged_records(context,"katalu/w",
+                          MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS,
+                          MORPHEUS_MORPH_FLAG_APOCOPE,"ka",&flagged,
+                          &prefixed,NULL);
+    assert(!flagged && plain && plain<all);
+    flagged_records(context,"kaqi/zw",
+                    MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS,
+                    MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"ka",&flagged,
+                    &prefixed,NULL);
+    assert(!flagged);
+  }
+
+  /*
+   * pro and peri do not elide before a vowel; the engine marks the hiatus
+   * with '+', which surfaces keep only as the diaeresis of an iota or
+   * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but
+   * proi/+sxw (προΐσχω).
+   */
+  {
+    int has_surface;
+    int has_mark;
+
+    generated_surfaces(context,"proe/xw","proe/xw","pro+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
+    generated_surfaces(context,"perie/xw","perie/xw","peri+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
+    generated_surfaces(context,"proi/sxw","proi/+sxw","pro+",&has_surface,
+                       &has_mark);
+    assert(has_surface && !has_mark);
+  }
+
   assert(morpheus_generate(context,NULL,0,NULL,&result)==
          MORPHEUS_INVALID_ARGUMENT);
   assert(morpheus_generate(context,embedded_nul,sizeof embedded_nul,NULL,
@@ -236,6 +480,12 @@ int main(int argc, char **argv)
   options.dialect=UINT32_C(1)<<31;
   assert(morpheus_generate(context,(const uint8_t *)"lo/gos",6,&options,
                            &result)==MORPHEUS_INVALID_ARGUMENT);
+  options=default_options();
+  options.flags=MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS<<1;
+  assert(morpheus_generate(context,(const uint8_t *)"lo/gos",6,&options,
+                           &result)==MORPHEUS_INVALID_ARGUMENT);
+  /* Every paradigm fits the default limit. */
+  assert(MORPHEUS_GENERATION_DEFAULT_LIMIT==MORPHEUS_GENERATION_MAX_LIMIT);
   options=default_options();
   options.result_limit=MORPHEUS_GENERATION_MAX_LIMIT+1;
   assert(morpheus_generate(context,(const uint8_t *)"lo/gos",6,&options,

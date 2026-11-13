@@ -38,8 +38,8 @@ analyzes about three times faster than the first release of the library (see
 | Generate forms from a lemma | Yes | No | Experimental |
 
 Generation is the inverse of analysis: it returns the forms that the analyzer
-accepts for a lemma. These include dialectal, poetic and late variants, and
-regular forms that no text may attest. Use it to search texts by lemma, to
+accepts for a lemma, compound verbs included. These include dialectal, poetic
+and late variants, and regular forms that no text may attest. Use it to search texts by lemma, to
 precompute a form-to-lemma table or to check the stem data; it does not give
 a reference paradigm. See
 [Greek lemma generation](docs/public-api.md#greek-lemma-generation).

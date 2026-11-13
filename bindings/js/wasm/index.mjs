@@ -258,7 +258,11 @@ function encodeGenerationOptions(options) {
   view.setUint32(0, GENERATION_OPTIONS_VERSION, true);
   view.setUint32(4, GENERATION_OPTIONS_SIZE, true);
   view.setBigUint64(8, BigInt(resultLimit), true);
-  view.setUint32(16, options.excludeDuals ? 1 : 0, true);
+  view.setUint32(
+    16,
+    (options.excludeDuals ? 1 : 0) | (options.excludePreverbVariants ? 2 : 0),
+    true,
+  );
   view.setUint32(20, options.partOfSpeech ?? 0, true);
   view.setUint32(24, options.dialect ?? 0, true);
   view.setUint32(28, options.geographicRegion ?? 0, true);

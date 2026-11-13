@@ -258,7 +258,8 @@ def _generation_options(options: GenerationOptions) -> NativeGenerationOptions:
         version=GENERATION_OPTIONS_VERSION,
         struct_size=ctypes.sizeof(NativeGenerationOptions),
         result_limit=options.result_limit,
-        flags=1 if options.exclude_duals else 0,
+        flags=(1 if options.exclude_duals else 0)
+        | (2 if options.exclude_preverb_variants else 0),
         part_of_speech=int(options.part_of_speech),
         dialect=int(options.dialect),
         geographic_region=int(options.geographic_region),

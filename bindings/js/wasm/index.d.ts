@@ -154,6 +154,8 @@ export interface MorpheusRawGeneration {
 export interface MorpheusGenerationOptions {
   resultLimit?: number;
   excludeDuals?: boolean;
+  /** Leaves out a compound verb's preverb variants (apocope, psilosis...). */
+  excludePreverbVariants?: boolean;
   partOfSpeech?: number;
   dialect?: number;
   geographicRegion?: number;

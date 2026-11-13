@@ -9,14 +9,77 @@ the corpus.
 
 ## [Unreleased]
 
+### Added
+
+- Experimental generation composes compound verbs as analysis finds them
+  (#78, item 2). `morpheus_generate()` accepts the compound lemmas analysis
+  reports: the names `stemsrc/vbs.cmp.ml` lists (`a)podi/dwmi`), the
+  hyphenated names analysis gives preverbs and a verb the list does not join
+  (`a)mfi/-lu/w`, canonically `a)mfi/lu/w`), and outer preverbs before a
+  listed compound (`a)nti/-paradi/dwmi`). It generates them from the simple
+  verb's verb records with the preverbs, and from the stems that occur only
+  in compounds. A name analysis never reports returns no record. The C ABI
+  is unchanged. See `docs/public-api.md#compound-verbs`.
+- A compound of one preverb also returns the preverb variants analysis
+  accepts, with their flags, as `rule_files/raw_preverbs.table` lists them:
+  apocope (κάββαλε), ἐς for εἰς, ξυν- for συν-, ἐνι-, ποτι-, προτι-, πεδα-,
+  παραι-, ὑπαι-, ὑπειρ-, the augment before the preverb (ἠφίει) and the
+  unaspirated preverb, Ionic as analysis reads it (ἀπίκετο). A variant adds
+  only the forms its flags change, with every reading of each. The
+  dissimilated and elided variants and compounds of several preverbs are
+  left out.
+- `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS` leaves those variants out
+  and returns a compound's plain forms; earlier versions reject the flag.
+  The Python (`exclude_preverb_variants`), Node.js and WebAssembly
+  (`excludePreverbVariants`) bindings pass it. C ABI 2 unchanged.
+
 ### Changed
 
+- The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
+  with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
+  records, instead of 4,096. 3,593 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,632) and failed by default; the largest, ὑποβοηθέω, returns
+  31,526.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
   instead of 0.4.6 and ship the skipped generation-record count (see
   0.5.0 below). Node.js pins `@libmorpheus/data` 0.2.0, and Python's
   `--gener-index` verifies that package's index (`a2f97677…`). The Python
   binding is qualified on Python 3.11, 3.14 and 3.15. C ABI 2 unchanged.
+- The generation preparer moves the records whose stem occurs only in
+  compounds (`comp_only`) to a reserved key, the lemma prefixed with a hyphen
+  (`-dhme/w`), instead of dropping them, and recognises the key joined to a
+  stem type by a comma (`aor2,comp_only`). The native and JavaScript index
+  builders keep that leading hyphen; requests, canonicalised without
+  hyphens, never reach it. The default index becomes `8ba328ca…` (prepared
+  source `a618d41c…`); the data package's manifest and the Python
+  binding's `--gener-index` pin it. With an earlier runtime the reserved keys are
+  inert; with an earlier index, compounds are generated without the
+  compound-only stems.
+- A record that carries its own preverb (`pb:`) is generated under the lemma
+  analysis names after that preverb: ἀμπέσχον under ἀμπέχω instead of ἔχω,
+  the `pb:e)pi/` stems filed under μελέομαι under ἐπιμελέομαι.
+- Analysis names compounds through a function it now shares with
+  generation; its results are unchanged (42,052 words compared).
+- The flags that change a preverb's shape (`short_eis`, `sig_to_ci`,
+  `en_to_eni`, `pros_to_proti`…) belong to the preverb rather than the
+  stem, so the generator applies them to regular stems too, not only to
+  irregular forms. `iota_intens` stays on the stem, where it also marks the
+  deictic iota (ἐκεινοσί). Analysis results (42,052 words compared) and the
+  stemlib build output are unchanged.
+- Generated surfaces no longer write the engine's hiatus mark after πρό,
+  περί and προτί (`pro+e/hke`): it becomes the diaeresis of a following
+  iota or upsilon that would otherwise form a diphthong (`proi/+sxw`) and
+  is dropped elsewhere (`proe/hke`, `perie/xw`), as texts write these forms.
+
+### Fixed
+
+- The stem expansion that generation and analysis share leaked the buffer
+  holding a record's unknown keys (`Ntest`, `laconian`) when none of the
+  record's endings applied; the variant passes reach this case, since an
+  augmented preverb leaves a participle record no ending. It also freed that
+  buffer twice when a stem produced too many forms. Analysis results are
+  unchanged.
 
 ## [0.5.0] - 2026-11-11
 

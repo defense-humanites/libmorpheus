@@ -592,6 +592,7 @@ function nativeGenerationOptions(options) {
   return {
     resultLimit,
     excludeDuals: options.excludeDuals ? 1 : 0,
+    excludePreverbVariants: options.excludePreverbVariants ? 1 : 0,
     partOfSpeech: options.partOfSpeech ?? 0,
     dialect: options.dialect ?? 0,
     geographicRegion: options.geographicRegion ?? 0,

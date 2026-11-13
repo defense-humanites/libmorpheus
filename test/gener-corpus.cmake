@@ -65,11 +65,11 @@ endforeach()
 file(SHA256 "${first_source}" source_sha256)
 file(SHA256 "${first_index}" index_sha256)
 if(NOT source_sha256 STREQUAL
-   "62265bf666c8a640171e66a42536174df4f2b16ff08054bcf6b467414fcdf040")
+   "a618d41c1deec1d6ea14d767a268819ebc5e5ec9667fdfe8770f1d2479f87075")
   message(FATAL_ERROR "complete prepared corpus changed: ${source_sha256}")
 endif()
 if(NOT index_sha256 STREQUAL
-   "a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331")
+   "8ba328ca8429c657aeb53a47a92045ac4bd64cdeab726af01e8afbcfd67d8fc2")
   message(FATAL_ERROR "complete generation index changed: ${index_sha256}")
 endif()
 
@@ -122,7 +122,7 @@ endif()
 
 execute_process(
   COMMAND ${MORPHEUS_TEST_LAUNCHER} "${MORPHEUS_GENER_INDEX_READER_TEST}"
-          "${first_index}" 106081 107837 177676
+          "${first_index}" 106589 108349 180521
   RESULT_VARIABLE reader_result
   OUTPUT_VARIABLE reader_output
   ERROR_VARIABLE reader_error
@@ -135,7 +135,8 @@ endif()
 
 # Frequent verbs, primary and regular. The default preparation must leave
 # the primary and suppletive stems as their sources give them, less the
-# records whose stem only occurs in compounds, and add to the regular
+# records whose stem only occurs in compounds (moved to the lemma's -lemma
+# block, checked below), and add to the regular
 # derivations exactly the records listed here, every part analysis accepts;
 # e)/xw receives the present its patched derivation restores (reviewed by
 # hand; the historical blocks come from the same sources, unpatched).
@@ -166,7 +167,7 @@ function(collect_lemma_blocks content lemma result)
 endfunction()
 
 # The historical blocks without their compound-only records, which the
-# default preparation drops.
+# default preparation moves to a block of their own.
 function(strip_compound_only content result)
   set(text "\n${content}")
   foreach(guard RANGE 1000)
@@ -263,6 +264,31 @@ foreach(position RANGE 5)
     string(FIND "${earlier}" "${record}\n" in_earlier)
     if(in_current EQUAL -1 OR NOT in_earlier EQUAL -1)
       message(FATAL_ERROR "${verb}: expected the added record [${record}]")
+    endif()
+  endforeach()
+endforeach()
+
+# The records whose stem only occurs in compounds leave the simple lemma for
+# a block under the lemma prefixed with '-', which the runtime reads only to
+# compose a compound (e)pidhme/w from -dhme/w). dhme/w has no other record;
+# gra/fw keeps its others.
+foreach(verb IN ITEMS "dhme/w" "gra/fw")
+  collect_lemma_blocks("${historical}" "${verb}" earlier)
+  collect_lemma_blocks("${prepared}" "${verb}" current)
+  collect_lemma_blocks("${prepared}" "-${verb}" moved)
+  string(REGEX MATCHALL "\n:[a-z][a-z]:[^\n]*comp_only[^\n]*" earlier_moved
+         "\n${earlier}")
+  if(earlier_moved STREQUAL "" OR moved STREQUAL "")
+    message(FATAL_ERROR "${verb}: no compound-only block")
+  endif()
+  if(current MATCHES "comp_only")
+    message(FATAL_ERROR "${verb}: compound-only records left under the lemma")
+  endif()
+  foreach(record IN LISTS earlier_moved)
+    string(SUBSTRING "${record}" 1 -1 record)
+    string(FIND "${moved}" "${record}\n" in_moved)
+    if(in_moved EQUAL -1)
+      message(FATAL_ERROR "${verb}: [${record}] did not move to -${verb}")
     endif()
   endforeach()
 endforeach()

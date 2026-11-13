@@ -149,6 +149,8 @@ foreach(mpl_file IN ITEMS
         src/gener/derivation.c
         src/gener/derivation.h
         src/gener/gener_internal.h
+        src/gener/generation_compounds.c
+        src/gener/generation_compounds.h
         src/gener/generation_service.c
         src/gener/generation_service.h
         src/gener/genwd.proto.h

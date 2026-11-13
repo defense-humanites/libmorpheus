@@ -140,3 +140,32 @@ int is_rawpreverb(char *s)
 	}
 	return(0);
 }
+
+/*
+ * The preverbs that analysis reports (the second column of the raw preverb
+ * table: a)po/, su/n, e)k...), each once, in table order. Stores at most
+ * capacity pointers into the table and returns how many there are, or -1
+ * when the table cannot be loaded.
+ */
+int preverb_lemmas(const char **lemmas, int capacity)
+{
+	morpheus_runtime_context *context = morpheus_runtime_context_current();
+	int count = 0;
+	int i;
+	int j;
+
+	if (!valid_preverb_argument(lemmas)) return(-1);
+	if (!ensure_preverb_table()) return(-1);
+	for ( i = 0; i < context->raw_preverb_count; i++) {
+		const char *lemma =
+		    gkstring_of(context->raw_preverb_table+i)+MAXSUBSTRING;
+
+		if (!*lemma) continue;
+		for (j = 0; j < count; j++)
+			if (!strcmp(lemmas[j],lemma)) break;
+		if (j < count) continue;
+		if (count == capacity) return(-1);
+		lemmas[count++] = lemma;
+	}
+	return(count);
+}
