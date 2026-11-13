@@ -33,6 +33,13 @@ the corpus.
   The Python (`exclude_preverb_variants`), Node.js and WebAssembly
   (`excludePreverbVariants`) bindings pass it. C ABI 2 unchanged.
 
+- Unaugmented indicatives (#78, the gap in property (b)): analysis reads an
+  imperfect, aorist or pluperfect without its augment as Homeric or Ionic,
+  for every verb, and generation now returns these forms, flagged
+  `unaugmented` and labelled Ionic or epic (ἄγον, ἀγορήσατο, ἀπόλυον,
+  λύεσκε). A pass after the others keeps only the forms and readings it
+  adds: λῦον is an imperfect as well as a participle.
+
 ### Changed
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used

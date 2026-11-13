@@ -53,6 +53,8 @@ int morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect);
 
 /* Leaves out the preverb variants of a compound (apocope, psilosis...). */
 #define MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS 1u
+/* Leaves out the unaugmented indicatives (Homeric and Ionic a)/gon). */
+#define MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED 2u
 
 /* As above, with MORPHEUS_GENERATION_SERVICE_* flags. */
 morpheus_generation_status morpheus_generation_service_generate_flags(

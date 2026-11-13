@@ -111,8 +111,13 @@ generate_and_check(const morpheus_gener_index *index, const char *lemma,
 
 	assert(morpheus_generation_service_create(index,&service) ==
 	       MORPHEUS_GENERATION_OK);
-	assert(morpheus_generation_service_generate(service,lemma,summarize,&summary,
-	                                            &count,&skipped) ==
+	/*
+	 * The fixtures record the engine's forms of each record; the
+	 * unaugmented pass adds forms of its own (public-generation.c).
+	 */
+	assert(morpheus_generation_service_generate_flags(
+	           service,lemma,MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED,
+	           summarize,&summary,&count,&skipped) ==
 	       MORPHEUS_GENERATION_OK);
 	assert(skipped == 0);
 	assert(count == expected_count);

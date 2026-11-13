@@ -370,6 +370,49 @@ int main(int argc, char **argv)
     result=NULL;
   }
 
+  /*
+   * Analysis reads an indicative without its augment as Homeric or Ionic,
+   * and generation returns these forms too: lu/on is an imperfect as well
+   * as a participle, a)po/luon an imperfect of the compound. Their readings
+   * are indicative and their dialects Ionic or epic, so that an Attic
+   * filter leaves them out.
+   */
+  {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_UNAUGMENTED;
+    int first_singular=0;
+    int third_plural=0;
+    int participle=0;
+    size_t unaugmented=0;
+
+    assert(morpheus_generate(context,(const uint8_t *)"lu/w",4,NULL,
+                             &result)==MORPHEUS_OK);
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      if(item.morph_flags[flag/8u] & (1u<<(flag%8u))) {
+        unaugmented++;
+        assert(item.mood==MORPHEUS_MOOD_INDICATIVE);
+        assert(item.dialect &&
+               !(item.dialect & ~(MORPHEUS_DIALECT_IONIC|MORPHEUS_DIALECT_EPIC)));
+      }
+      if(strcmp(item.surface,"lu/on")) continue;
+      if(item.mood==MORPHEUS_MOOD_PARTICIPLE) participle=1;
+      if(item.tense==MORPHEUS_TENSE_IMPERFECT &&
+         item.person==MORPHEUS_PERSON_FIRST) first_singular=1;
+      if(item.tense==MORPHEUS_TENSE_IMPERFECT &&
+         item.person==MORPHEUS_PERSON_THIRD) third_plural=1;
+    }
+    assert(unaugmented && participle && first_singular && third_plural);
+    morpheus_generation_result_free(result);
+    result=NULL;
+    {
+      size_t flagged;
+      int prefixed;
+
+      flagged_surfaces(context,"a)polu/w",flag,"a)po/lu",&flagged,&prefixed);
+      assert(flagged);
+    }
+  }
+
   /* The stem-boundary hyphen of a)nqr-wp does not reach the surfaces. */
   assert(morpheus_generate(context,(const uint8_t *)"a)/nqrwpos",10,NULL,
                            &result)==MORPHEUS_OK);

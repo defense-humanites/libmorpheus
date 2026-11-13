@@ -126,6 +126,13 @@ that way are 0.2 % of the treebank tokens below, almost all misreadings
 its ending states the form's dialects itself and keeps their union: the
 Aeolic stem of εὐτρίαινα takes the nominative in -α that the ending table
 calls epic.
+
+Analysis also reads an indicative imperfect, aorist or pluperfect without
+its augment, as Homeric or Ionic, for every verb. Generation returns these
+forms after the others, flagged `unaugmented` and labelled Ionic or epic
+(ἄγον, ἀγορήσατο, ἀπόλυον, and the iteratives λύεσκε), with every reading
+of each: λῦον is an imperfect as well as a participle. An Attic or common
+dialect filter leaves them out.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
@@ -140,11 +147,15 @@ On samples of the Alpheios data, more than 99.5 % of the generated forms
 meet the first property, compounds included
 ([gener-derivations.md](gener-derivations.md#measures),
 [compound verbs](#compound-verbs)). The second is not yet met. On the verbs
-of the Perseus treebank (AGDT 2.1), 89.0 % of the tokens that analysis reads
+of the Perseus treebank (AGDT 2.1), 92.7 % of the tokens that analysis reads
 as a verb have every such reading generated (66.6 % before compound verbs);
-91.2 % of the readings as a simple verb are, 92.0 % of those as a listed
-compound and 56.7 % of those as a hyphenated one. Over nouns, adjectives,
-pronouns and verbs, 90.0 % of the tokens' readings are generated.
+94.4 % of the readings as a simple verb are, 93.8 % of those as a listed
+compound and 68.9 % of those as a hyphenated one. Over nouns, adjectives,
+pronouns and verbs, 93.0 % of the tokens' readings are generated, comparing
+forms without capitals and without the acute that an enclitic adds; most of
+the rest belong to running text (enclitic pronouns and articles with an
+accent, crasis) or are forms that analysis reads but the index does not
+hold.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,

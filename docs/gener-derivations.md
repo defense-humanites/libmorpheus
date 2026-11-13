@@ -222,6 +222,17 @@ of analysis; on 2,787 lemmas (the 800 most frequent in the treebank and
 2,000 drawn with seed 78), the forms labelled with a dialect that analysis
 does not give them fall from 1.5 % to 1.0 %.
 
+The unaugmented indicatives that analysis accepts for every verb
+([public-api.md](public-api.md#greek-lemma-generation)) come from a last
+pass over the verb stems, alone and with each preverb variant. They take
+the whole index from 22.3 to 23.1 million forms. On 246 frequent verbs,
+99.52 % of the 13,902 surfaces they add analyze back with the same tense and
+mood, and 99.89 % of the 22,118 they add to the 300 compounds of the round
+trip above. The pass generates each verb stem again: measured in one
+session, the 99th percentile of an index lemma goes from 9.5 to 19 ms, and
+a compound takes 39 ms at the median and 218 ms at the 99th percentile,
+against 23 ms and 124 ms before.
+
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
 and latency of each index, lemmas that change, lose forms or gain skipped
