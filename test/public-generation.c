@@ -402,6 +402,15 @@ int main(int argc, char **argv)
          item.person==MORPHEUS_PERSON_THIRD) third_plural=1;
     }
     assert(unaugmented && participle && first_singular && third_plural);
+    /*
+     * Analysis reads the verbal adjective in -to/s as a lemma of its own
+     * (luto/s), never as a form of the verb, so lut os_on reg_conj adds
+     * nothing to lu/w; the adjective a)bol os_on keeps its forms.
+     */
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      assert(item.part_of_speech!=MORPHEUS_PART_OF_SPEECH_ADJECTIVE);
+    }
     morpheus_generation_result_free(result);
     result=NULL;
     {

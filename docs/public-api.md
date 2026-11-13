@@ -127,6 +127,11 @@ its ending states the form's dialects itself and keeps their union: the
 Aeolic stem of εὐτρίαινα takes the nominative in -α that the ending table
 calls epic.
 
+A verb's own records may list its verbal adjective in -τός (`:aj:fert os_on
+reg_conj` under φέρω). Analysis reads φερτός as a lemma of its own, never
+as a form of the verb, so generation returns it under that lemma only; the
+verbal adjective in -τέος stays with the verb, as analysis reads it.
+
 Analysis also reads an indicative imperfect, aorist or pluperfect without
 its augment, as Homeric or Ionic, for every verb. Generation returns these
 forms after the others, flagged `unaugmented` and labelled Ionic or epic

@@ -8,6 +8,7 @@
 
 :le:lu/w
 :vs:lu w_stem
+:aj:lut os_on reg_conj
 
 :le:-dhme/w
 :vs:dhm ew_pr ew_denom comp_only
