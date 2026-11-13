@@ -395,11 +395,18 @@ typedef struct {
 
 /** Current version of morpheus_generation_options. */
 #define MORPHEUS_GENERATION_OPTIONS_VERSION 1u
-#define MORPHEUS_GENERATION_DEFAULT_LIMIT UINT64_C(4096)
+/** The default result_limit; 4096 before 0.6.0, below many compound verbs. */
+#define MORPHEUS_GENERATION_DEFAULT_LIMIT UINT64_C(65536)
 #define MORPHEUS_GENERATION_MAX_LIMIT UINT64_C(65536)
 
 typedef uint32_t morpheus_generation_flags;
 #define MORPHEUS_GENERATION_EXCLUDE_DUALS (UINT32_C(1) << 0)
+/**
+ * Leave out the preverb variants of a compound verb (apocope, the augment
+ * before the preverb, psilosis...), keeping its plain forms. Since 0.6.0;
+ * earlier versions reject the flag.
+ */
+#define MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS (UINT32_C(1) << 1)
 
 /** Per-request filters for morpheus_generate(). Zero traits match all. */
 typedef struct {

@@ -175,6 +175,18 @@ surface_set_add(surface_set *set, const char *text)
 	return 1;
 }
 
+/* Adds the forms of another set. Returns 0 when out of memory. */
+static int
+surface_set_merge(surface_set *set, const surface_set *from)
+{
+	size_t slot;
+
+	for (slot = 0; slot != from->capacity; slot++)
+		if (from->slots[slot] && !surface_set_add(set,from->slots[slot]))
+			return 0;
+	return 1;
+}
+
 /* One pass of generation for a requested lemma. */
 typedef struct {
 	morpheus_generation_service *service;
@@ -185,6 +197,12 @@ typedef struct {
 	const morpheus_preverb_variant *variant;
 	/* Forms returned so far, when variants are to follow. */
 	surface_set *seen;
+	/*
+	 * The forms of the current variant pass, which join seen when the pass
+	 * ends: a variant may give one surface several readings (cune/ballon,
+	 * first singular and third plural), and each must reach the visitor.
+	 */
+	surface_set *added;
 	morpheus_generation_visitor visitor;
 	void *state;
 	size_t *form_count;
@@ -193,14 +211,41 @@ typedef struct {
 } generation_pass;
 
 /*
+ * Analysis reads an unaspirated preverb before a rough breathing (a)pi/keto)
+ * as Ionic (checkgenwds.c): it rejects the reading when the preverb names
+ * dialects without Ionic, and labels the others Ionic alone. A form whose
+ * preverb, augment, stem and ending name dialects without Ionic is dropped,
+ * which is what analysis means: it keeps such a reading with every dialect,
+ * as AndDialect() returns -1 there. The others are labelled Ionic.
+ */
+static int
+ionic_form(gk_word *form)
+{
+	Dialect named = (Dialect)(dialect_of(prvb_gstr_of(form)) |
+	                          dialect_of(aug1_gstr_of(form)) |
+	                          dialect_of(stem_gstr_of(form)) |
+	                          dialect_of(ends_gstr_of(form)));
+
+	if (named && !(named & IONIC))
+		return 0;
+	set_dialect(stem_gstr_of(form),IONIC);
+	set_dialect(ends_gstr_of(form),IONIC);
+	if (dialect_of(aug1_gstr_of(form)))
+		set_dialect(aug1_gstr_of(form),IONIC);
+	set_dialect(form,IONIC);
+	return 1;
+}
+
+/*
  * Whether a form of a preverb variant is one analysis accepts. The form must
  * begin as one of the table's spellings of the variant does (the augment
  * before a)po/ is h)f-, before a rough breathing: not h)pw/llun), letters
- * compared without breathings, accents or quantities. And analysis accepts
- * an augment before the preverb (prevb_augment) only where the verb takes
- * one: the indicative imperfect, aorist and pluperfect, unless the form is
- * unaugmented or iterative (genwd.c checks this for regular stems, not for
- * irregular forms).
+ * compared without breathings, accents or quantities. Analysis accepts an
+ * unaspirated preverb in Ionic only (ionic_form), and an augment before the
+ * preverb (prevb_augment) only where the verb takes one: the indicative
+ * imperfect, aorist and pluperfect, unless the form is unaugmented or
+ * iterative (genwd.c checks this for regular stems, not for irregular
+ * forms).
  */
 static int
 variant_form(const morpheus_preverb_variant *variant, gk_word *form)
@@ -233,6 +278,8 @@ variant_form(const morpheus_preverb_variant *variant, gk_word *form)
 		if (!matched)
 			return 0;
 	}
+	if (strstr(variant->keys,"unasp_preverb"))
+		return ionic_form(form);
 	if (!strstr(variant->keys,"prevb_augment"))
 		return 1;
 	if (mood_of(info) != INDICATIVE ||
@@ -311,7 +358,8 @@ generate_record(const generation_pass *pass,
 			if (pass->variant &&
 			    surface_set_has(pass->seen,workword_of(forms + form)))
 				continue;
-			if (!surface_set_add(pass->seen,workword_of(forms + form))) {
+			if (!surface_set_add(pass->variant ? pass->added : pass->seen,
+			                     workword_of(forms + form))) {
 				release_forms(forms);
 				release_input(&input);
 				return MORPHEUS_GENERATION_NO_MEMORY;
@@ -594,10 +642,18 @@ generate_variants(generation_pass *pass,
 		return MORPHEUS_GENERATION_NO_MEMORY;
 	for (variant = 0; variant != count && result == MORPHEUS_GENERATION_OK;
 	     variant++) {
+		surface_set added = { 0 };
+
 		pass->variant = variants + variant;
+		pass->added = &added;
 		result = generate_decomposition(pass,decomposition);
+		if (result == MORPHEUS_GENERATION_OK &&
+		    !surface_set_merge(pass->seen,&added))
+			result = MORPHEUS_GENERATION_NO_MEMORY;
+		surface_set_free(&added);
 	}
 	pass->variant = NULL;
+	pass->added = NULL;
 	return result;
 }
 
@@ -607,6 +663,16 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
                                      morpheus_generation_visitor visitor,
                                      void *state, size_t *form_count,
                                      size_t *skipped_records)
+{
+	return morpheus_generation_service_generate_flags(
+	    service,canonical_lemma,0,visitor,state,form_count,skipped_records);
+}
+
+morpheus_generation_status
+morpheus_generation_service_generate_flags(
+    morpheus_generation_service *service, const char *canonical_lemma,
+    unsigned flags, morpheus_generation_visitor visitor, void *state,
+    size_t *form_count, size_t *skipped_records)
 {
 	morpheus_runtime_context *previous;
 	morpheus_generation_status result = MORPHEUS_GENERATION_OK;
@@ -619,7 +685,7 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 	int variants = 0;
 
 	if (!service || !canonical_lemma || !*canonical_lemma || !visitor ||
-	    !form_count)
+	    !form_count || (flags & ~MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS))
 		return MORPHEUS_GENERATION_INVALID;
 	*form_count = 0;
 	if (skipped_records)
@@ -638,6 +704,8 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 		if (composes(decompositions + item,canonical_lemma) &&
 		    !strchr(decompositions[item].preverbs,','))
 			variants = 1;
+	if (flags & MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS)
+		variants = 0;
 	pass.service = service;
 	pass.lemma = canonical_lemma;
 	pass.seen = variants ? &seen : NULL;
@@ -651,7 +719,8 @@ morpheus_generation_service_generate(morpheus_generation_service *service,
 	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
 		if (composes(decompositions + item,canonical_lemma))
 			result = generate_decomposition(&pass,decompositions + item);
-	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
+	for (item = 0; variants && item != count &&
+	               result == MORPHEUS_GENERATION_OK; item++)
 		if (composes(decompositions + item,canonical_lemma))
 			result = generate_variants(&pass,decompositions + item);
 	morpheus_runtime_context_activate(previous);

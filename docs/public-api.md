@@ -129,10 +129,10 @@ On samples of the Alpheios data, more than 99.5 % of the generated forms
 meet the first property, compounds included
 ([gener-derivations.md](gener-derivations.md#measures),
 [compound verbs](#compound-verbs)). The second is not yet met. On the verbs
-of the Perseus treebank (AGDT 2.1), 87.6 % of the tokens that analysis reads
+of the Perseus treebank (AGDT 2.1), 89.3 % of the tokens that analysis reads
 as a verb have every such reading generated (66.6 % before compound verbs);
-91.4 % of the readings as a simple verb are, 86.2 % of those as a listed
-compound and 49.9 % of those as a hyphenated one.
+91.4 % of the readings as a simple verb are, 92.2 % of those as a listed
+compound and 57.4 % of those as a hyphenated one.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
@@ -141,7 +141,8 @@ morphological interpretations and dual forms by default, and returns records
 in a deterministic total order. Results own all text and remain valid after
 their context is closed.
 
-Pass `NULL` options for defaults, including a 4,096-record limit. A non-NULL
+Pass `NULL` options for defaults, including a 65,536-record limit (4,096 before
+0.6.0, which many compound verbs exceed). A non-NULL
 `morpheus_generation_options` must set
 `MORPHEUS_GENERATION_OPTIONS_VERSION`, its complete `struct_size`, and may set
 a limit up to `MORPHEUS_GENERATION_MAX_LIMIT` (65,536). Zero trait fields mean
@@ -149,6 +150,9 @@ no filter. Equality-valued traits select one value; dialect, region, gender,
 case, and voice fields accept their documented masks. Dialect-neutral forms
 match any requested dialect. `MORPHEUS_GENERATION_EXCLUDE_DUALS` removes dual
 records and conflicts with an explicit dual-number filter.
+`MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS` returns a compound verb's
+plain forms without its [preverb variants](#compound-verbs); versions before
+0.6.0 reject it.
 
 A lemma has one or more source records in the index. A record that the
 engine cannot generate — for example, one whose stem class has no ending table
@@ -196,10 +200,16 @@ lists them: apocope (ἄμβαλε, κάββαλε, ὕββαλε: `apocope`, `p
 εἰς (`short-eis`), ξυν- for συν- (`sigma-to-ci`), ἐνι- for ἐν-, ποτι- and
 προτι- for προσ-, πεδα- for μετα-, παραι-, ὑπαι-, ὑπειρ-, the augment before
 the preverb in the augmented indicative (ἠνάβληντο, ἠφίει:
-`preverb-augment`), and the Ionic and Aeolic unaspirated preverb before a
-rough breathing (ἀπίκετο, κατίστη: `unaspirated-preverb`). A variant
-returns only the forms its flags change, and only those that begin as the
-table spells the variant.
+`preverb-augment`), and the unaspirated preverb before a rough breathing
+(ἀπίκετο, κατίστη: `unaspirated-preverb`), which analysis reads as Ionic.
+Those forms are Ionic, and a form whose stem, ending or augment names only
+other dialects is left out: analysis accepts it with every dialect, through
+a defect of its dialect check, and the readings it gives that way are
+mostly misreadings (ἔπεσον as ἐφέζομαι, ἀπιοῦσα as ἀφίημι). A variant
+returns only the forms its flags change, with every reading of each
+(ξυνέβαλλον, first singular and third plural), and only those that begin as
+the table spells the variant. `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`
+leaves the variants out.
 
 A name that analysis never reports returns no record: `a)po/-di/dwmi`,
 because analysis names that compound `a)podi/dwmi`, or a listed name that
@@ -208,10 +218,11 @@ carries a preverb of its own (`pb:`) is generated under the lemma that
 analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
 
 Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
-the Alpheios data. On 300 of them (seed 78), 99.91 % of the 687,543 generated
-surfaces, preverb variants included, analyze back to the compound with the
-same tense and mood; every other surface is a form, or the variant of a form,
-that also fails for the simple verb, from which the compound inherits it. The remaining limits mirror the data or are left for later:
+the Alpheios data. On 300 of them (seed 78), 99.91 % of the 684,910 generated
+surfaces analyze back to the compound with the same tense and mood: 99.90 %
+of the 508,733 plain surfaces and 99.95 % of the 176,177 that the preverb
+variants add. The surfaces that fail are forms, or variants of forms, that
+also fail for the simple verb, from which the compound inherits them. The remaining limits mirror the data or are left for later:
 
 - **Preverb variants.** Two kinds that depend on the following sounds are
   not generated: the dissimilated ἀμπ- (ἀμπέχω) and the elided forms that

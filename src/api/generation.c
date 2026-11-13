@@ -57,7 +57,8 @@ static morpheus_status validate_options(
   if(options->version != MORPHEUS_GENERATION_OPTIONS_VERSION ||
      options->struct_size < sizeof *options)
     return(MORPHEUS_ABI_MISMATCH);
-  if(options->flags & ~MORPHEUS_GENERATION_EXCLUDE_DUALS)
+  if(options->flags & ~(MORPHEUS_GENERATION_EXCLUDE_DUALS|
+                        MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS))
     return(MORPHEUS_INVALID_ARGUMENT);
   if(options->part_of_speech > MORPHEUS_PART_OF_SPEECH_INTERJECTION ||
      !enum_at_most(options->person,MORPHEUS_PERSON_THIRD) ||
@@ -225,8 +226,11 @@ morpheus_status morpheus_generate(
   canonical[output]=0;
   status=ensure_generation_service(context);
   if(status != MORPHEUS_OK) return(status);
-  normalized_status=morpheus_generation_normalize(
+  normalized_status=morpheus_generation_normalize_flags(
       context->public_generation_service,canonical,
+      options && (options->flags &
+                  MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS)
+          ? MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS : 0u,
       (size_t)MORPHEUS_GENERATION_MAX_LIMIT,&normalized);
   if(normalized_status == MORPHEUS_GENERATION_NORMALIZE_NOT_FOUND) {
     owned=generation_result_create(0);

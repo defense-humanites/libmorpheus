@@ -290,6 +290,8 @@ class GenerationOptions:
     mood: Mood = Mood.NONE
     voice: Voice = Voice.NONE
     degree: Degree = Degree.NONE
+    # Needs libmorpheus 0.6.0 or later, which rejects nothing else.
+    exclude_preverb_variants: bool = False
 
 
 @dataclass(frozen=True, slots=True)

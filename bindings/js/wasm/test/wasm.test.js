@@ -281,6 +281,14 @@ test(
       assert.equal(partial.skippedRecords, 1);
       assert.deepEqual(Object.keys(partial), Object.keys([...partial]));
       assert.equal(context.generate("missing").skippedRecords, 0);
+      // A compound's preverb variants (here the apocope, flag 4) can be left
+      // out.
+      const apocope = (form) => (form.morphFlags[0] & (1 << 4)) !== 0;
+      const all = context.generate("katalu/w");
+      const plain = context.generate("katalu/w", { excludePreverbVariants: true });
+      assert.equal(all.some(apocope), true);
+      assert.equal(plain.some(apocope), false);
+      assert.equal(plain.length > 0 && plain.length < all.length, true);
     } finally {
       context.close();
     }

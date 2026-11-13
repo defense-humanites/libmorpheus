@@ -41,4 +41,13 @@ morpheus_generation_status morpheus_generation_service_generate(
     morpheus_generation_visitor visitor, void *state, size_t *form_count,
     size_t *skipped_records);
 
+/* Leaves out the preverb variants of a compound (apocope, psilosis...). */
+#define MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS 1u
+
+/* As above, with MORPHEUS_GENERATION_SERVICE_* flags. */
+morpheus_generation_status morpheus_generation_service_generate_flags(
+    morpheus_generation_service *service, const char *canonical_lemma,
+    unsigned flags, morpheus_generation_visitor visitor, void *state,
+    size_t *form_count, size_t *skipped_records);
+
 #endif

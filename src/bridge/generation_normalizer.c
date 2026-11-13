@@ -330,6 +330,16 @@ morpheus_generation_normalize(
     morpheus_generation_service *service, const char *canonical_lemma,
     size_t result_limit, morpheus_normalized_generation_result **result)
 {
+	return morpheus_generation_normalize_flags(service,canonical_lemma,0,
+	                                           result_limit,result);
+}
+
+morpheus_generation_normalize_status
+morpheus_generation_normalize_flags(
+    morpheus_generation_service *service, const char *canonical_lemma,
+    unsigned flags, size_t result_limit,
+    morpheus_normalized_generation_result **result)
+{
 	morpheus_normalized_generation_result *created;
 	morpheus_generation_status generated;
 	collector collect;
@@ -343,8 +353,8 @@ morpheus_generation_normalize(
 	if (!created)
 		return MORPHEUS_GENERATION_NORMALIZE_NO_MEMORY;
 	collect = (collector){ created, result_limit, 0, 0 };
-	generated = morpheus_generation_service_generate(
-	    service,canonical_lemma,collect_form,&collect,&generated_count,
+	generated = morpheus_generation_service_generate_flags(
+	    service,canonical_lemma,flags,collect_form,&collect,&generated_count,
 	    &created->skipped_records);
 	if (collect.limit_exceeded) {
 		morpheus_normalized_generation_result_free(created);

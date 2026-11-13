@@ -24,12 +24,22 @@ the corpus.
   accepts, with their flags, as `rule_files/raw_preverbs.table` lists them:
   apocope (κάββαλε), ἐς for εἰς, ξυν- for συν-, ἐνι-, ποτι-, προτι-, πεδα-,
   παραι-, ὑπαι-, ὑπειρ-, the augment before the preverb (ἠφίει) and the
-  unaspirated preverb (ἀπίκετο). A variant adds only the forms its flags
-  change. The dissimilated and elided variants and compounds of several
-  preverbs are left out.
+  unaspirated preverb, Ionic as analysis reads it (ἀπίκετο). A variant adds
+  only the forms its flags change, with every reading of each. The
+  dissimilated and elided variants and compounds of several preverbs are
+  left out.
+- `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS` leaves those variants out
+  and returns a compound's plain forms; earlier versions reject the flag.
+  The Python (`exclude_preverb_variants`), Node.js and WebAssembly
+  (`excludePreverbVariants`) bindings pass it. C ABI 2 unchanged.
 
 ### Changed
 
+- The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
+  with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
+  records, instead of 4,096. 3,593 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,632) and failed by default; the largest, ὑποβοηθέω, returns
+  31,526.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
   instead of 0.4.6 and ship the skipped generation-record count (see

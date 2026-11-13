@@ -136,6 +136,8 @@ export type MorpheusMorphFlagName =
 export interface MorpheusGenerationOptions {
   readonly resultLimit?: number;
   readonly excludeDuals?: boolean;
+  /** Leaves out a compound verb's preverb variants (libmorpheus 0.6.0+). */
+  readonly excludePreverbVariants?: boolean;
   readonly partOfSpeech?: MorpheusPartOfSpeech;
   readonly dialect?: MorpheusDialect;
   readonly geographicRegion?: MorpheusGeographicRegion;

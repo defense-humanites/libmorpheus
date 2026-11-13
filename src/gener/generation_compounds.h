@@ -76,7 +76,7 @@ typedef struct {
  * variant flag ("apocope poetic" for a)na/ and kata/, "short_eis" for ei)s,
  * "prevb_augment" for a)na/, a)po/, meta/...), except those that depend on
  * the following sounds (dissimilation, elision), then "unasp_preverb", the
- * Ionic and Aeolic psilosis that analysis applies without a table line
+ * psilosis that analysis applies without a table line and reads as Ionic
  * (a)pi/keto). *variants stays valid until the table is destroyed. Same
  * conditions as above.
  */

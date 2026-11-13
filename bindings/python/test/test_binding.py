@@ -206,6 +206,20 @@ class BindingTest(unittest.TestCase):
                     )
         self.assertEqual(caught.exception.status, Status.RESULT_LIMIT_EXCEEDED)
 
+    def test_generation_flags_reach_the_native_options(self) -> None:
+        from libmorpheus._library import _generation_options
+
+        self.assertEqual(_generation_options(GenerationOptions()).flags, 0)
+        self.assertEqual(
+            _generation_options(GenerationOptions(exclude_duals=True)).flags, 1
+        )
+        self.assertEqual(
+            _generation_options(
+                GenerationOptions(exclude_preverb_variants=True)
+            ).flags,
+            2,
+        )
+
     def test_reports_native_status_and_enforces_lifetimes(self) -> None:
         library = Library(self.library_path)
         context = library.context("fixture-stemlib", Language.LATIN)

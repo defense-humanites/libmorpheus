@@ -35,6 +35,22 @@ test("analyzes Greek and preserves multiple semantic records", async () => {
   }
 });
 
+test("leaves out a compound's preverb variants on request", async () => {
+  const library = new MorpheusLibrary(nativeLibrary);
+  const context = library.createContext(stemlib, MorpheusLanguage.Greek);
+  try {
+    const apocope = (form) => form.morphFlags.includes("apocope");
+    const all = await context.generate("katalu/w");
+    const plain = await context.generate("katalu/w", { excludePreverbVariants: true });
+    assert.ok(all.some(apocope));
+    assert.ok(!plain.some(apocope));
+    assert.ok(plain.length > 0 && plain.length < all.length);
+  } finally {
+    await context.close();
+    library.close();
+  }
+});
+
 test("reports skipped generation records without changing the array", async () => {
   const library = new MorpheusLibrary(nativeLibrary);
   const context = library.createContext(stemlib, MorpheusLanguage.Greek);

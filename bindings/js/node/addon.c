@@ -602,10 +602,13 @@ static bool node_morpheus_generation_options(napi_env env, napi_value object,
   out->struct_size = (uint32_t)sizeof(*out);
   uint32_t result_limit = 0;
   uint32_t exclude_duals = 0;
+  uint32_t exclude_preverb_variants = 0;
   if (!node_morpheus_optional_uint32(env, object, "resultLimit",
                                      &result_limit) ||
       !node_morpheus_optional_uint32(env, object, "excludeDuals",
                                      &exclude_duals) ||
+      !node_morpheus_optional_uint32(env, object, "excludePreverbVariants",
+                                     &exclude_preverb_variants) ||
       !node_morpheus_optional_uint32(env, object, "partOfSpeech",
                                      &out->part_of_speech) ||
       !node_morpheus_optional_uint32(env, object, "dialect", &out->dialect) ||
@@ -625,6 +628,8 @@ static bool node_morpheus_generation_options(napi_env env, napi_value object,
   }
   out->result_limit = result_limit;
   if (exclude_duals != 0u) out->flags |= MORPHEUS_GENERATION_EXCLUDE_DUALS;
+  if (exclude_preverb_variants != 0u)
+    out->flags |= MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS;
   return true;
 }
 

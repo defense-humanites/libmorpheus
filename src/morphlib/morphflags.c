@@ -279,8 +279,8 @@ int init_prvb_tab(void)
 
 /*
  * Move the preverb flags of a word to its preverb. Called for every
- * candidate key, so it tests the eight preverb flags directly rather than
- * every flag number against the context's table.
+ * candidate key, so it tests the preverb flags of preverb_morphflags[]
+ * directly rather than every flag number against the context's table.
  */
 void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 {

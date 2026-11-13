@@ -234,8 +234,10 @@ try {
 dialect, region, person, number, gender, case, tense, mood, voice, and degree.
 It preserves dialect masks, duals, duplicate surfaces, and multiple indexed
 interpretations unless filters remove them. `excludeDuals` is available when
-dual forms are unwanted. The default native limit is 4,096 and the explicit
-hard maximum is 65,536.
+dual forms are unwanted, and `excludePreverbVariants` keeps a compound verb's
+plain forms without its preverb variants (apocope, psilosis…; libmorpheus 0.6.0
+or later). The default native limit is 65,536 from libmorpheus 0.6.0 (4,096
+before), which is also the explicit hard maximum.
 
 A lemma's source record that the engine cannot generate (for example, one
 whose stem class has no ending table) is skipped rather than failing the
