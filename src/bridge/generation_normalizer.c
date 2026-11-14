@@ -24,22 +24,11 @@ typedef struct {
 static uint32_t
 effective_dialect(const gk_word *form)
 {
-	uint32_t augment = (uint32_t)(unsigned short)dialect_of(aug1_gstr_of(form));
-	uint32_t ending = (uint32_t)(unsigned short)dialect_of(ends_gstr_of(form));
-	uint32_t stem = (uint32_t)(unsigned short)dialect_of(stem_gstr_of(form));
-	uint32_t dialect = stem & ending;
-	uint32_t constraint = (uint32_t)(unsigned short)dialect_of(form);
+	unsigned dialect = 0;
 
-	/* Match the effective-dialect calculation used by the legacy renderer. */
-	if (!dialect)
-		dialect =
-		    (uint32_t)(unsigned short)dialect_of(prvb_gstr_of(form)) |
-		    augment | stem | ending;
-	if (augment)
-		dialect &= augment;
-	if (constraint)
-		dialect &= constraint;
-	return dialect;
+	/* The service has left out the forms whose parts share no dialect. */
+	(void)morpheus_generation_form_dialect(form,&dialect);
+	return (uint32_t)dialect;
 }
 
 static int

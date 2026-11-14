@@ -212,27 +212,85 @@ typedef struct {
 
 /*
  * Analysis reads an unaspirated preverb before a rough breathing (a)pi/keto)
- * as Ionic (checkgenwds.c): it rejects the reading when the preverb names
- * dialects without Ionic, and labels the others Ionic alone. A form whose
- * preverb, augment, stem and ending name dialects without Ionic is dropped,
- * which is what analysis means: it keeps such a reading with every dialect,
- * as AndDialect() returns -1 there. The others are labelled Ionic.
+ * as Ionic (checkgenwds.c) and labels the reading Ionic alone, so such a
+ * form must allow Ionic; morpheus_generation_form_dialect() then leaves out
+ * the forms whose preverb, augment, stem or ending exclude it. Analysis keeps
+ * those with every dialect, as AndDialect() returns -1 there.
  */
 static int
 ionic_form(gk_word *form)
 {
-	Dialect named = (Dialect)(dialect_of(prvb_gstr_of(form)) |
-	                          dialect_of(aug1_gstr_of(form)) |
-	                          dialect_of(stem_gstr_of(form)) |
-	                          dialect_of(ends_gstr_of(form)));
+	Dialect requested = dialect_of(form);
 
-	if (named && !(named & IONIC))
+	set_dialect(form,requested ? (Dialect)(requested & IONIC) : IONIC);
+	return dialect_of(form) != 0;
+}
+
+int
+morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect)
+{
+	const unsigned named[] = {
+		(unsigned short)dialect_of(prvb_gstr_of(form)),
+		(unsigned short)dialect_of(aug1_gstr_of(form)),
+		(unsigned short)dialect_of(stem_gstr_of(form)),
+		(unsigned short)dialect_of(ends_gstr_of(form)),
+		(unsigned short)dialect_of(form)
+	};
+	unsigned result = 0;
+	int constrained = 0;
+	size_t part;
+
+	for (part = 0; part != sizeof named / sizeof *named; part++) {
+		if (!named[part])
+			continue;
+		result = constrained ? result & named[part] : named[part];
+		constrained = 1;
+	}
+	if (dialect)
+		*dialect = result;
+	return !constrained || result != 0;
+}
+
+/* The dialects a variant pass allows its forms, or 0 for any. */
+static Dialect
+variant_dialects(const morpheus_preverb_variant *variant)
+{
+	if (variant && strstr(variant->keys,"unasp_preverb"))
+		return IONIC;
+	return 0;
+}
+
+/*
+ * Gives every part of a form that names dialects the union of them, so that
+ * the form takes them all (see generate_record). The union is that of the
+ * form's own parts, as the engine built them (own is the form's dialect
+ * before the pass asked for any); the dialects the pass allows then restrict
+ * it, as they do any form: an unaspirated preverb stays Ionic. Returns 0, and
+ * changes nothing, when the pass allows none of them.
+ */
+static int
+join_dialects(gk_word *form, Dialect own, Dialect allowed)
+{
+	Dialect joined = (Dialect)(dialect_of(prvb_gstr_of(form)) |
+	                           dialect_of(aug1_gstr_of(form)) |
+	                           dialect_of(stem_gstr_of(form)) |
+	                           dialect_of(ends_gstr_of(form)) |
+	                           own);
+
+	if (allowed)
+		joined = (Dialect)(joined & allowed);
+	if (!joined)
 		return 0;
-	set_dialect(stem_gstr_of(form),IONIC);
-	set_dialect(ends_gstr_of(form),IONIC);
+	if (dialect_of(prvb_gstr_of(form)))
+		set_dialect(prvb_gstr_of(form),joined);
 	if (dialect_of(aug1_gstr_of(form)))
-		set_dialect(aug1_gstr_of(form),IONIC);
-	set_dialect(form,IONIC);
+		set_dialect(aug1_gstr_of(form),joined);
+	if (dialect_of(stem_gstr_of(form)))
+		set_dialect(stem_gstr_of(form),joined);
+	if (dialect_of(ends_gstr_of(form)))
+		set_dialect(ends_gstr_of(form),joined);
+	if (dialect_of(form))
+		set_dialect(form,joined);
 	return 1;
 }
 
@@ -316,6 +374,13 @@ generate_record(const generation_pass *pass,
 	size_t form;
 	int irregular;
 	int mode;
+	/*
+	 * A record that forces its ending states the form and its dialects
+	 * itself: eu)-triain hs_ou,masc,aeolic end:a nom sg is the Aeolic and
+	 * epic nominative eu)tri/aina, though the ending table names that ending
+	 * epic only. Such a form keeps the dialects of all its parts.
+	 */
+	int stated = strstr(record->keys,"end:") != NULL;
 
 	set_lemma(&input,pass->lemma);
 	set_stem(&input,record->stem);
@@ -350,9 +415,17 @@ generate_record(const generation_pass *pass,
 		 * an adjective (:vs:ton os_on comp_only under tei/nw), to which
 		 * the engine attaches no preverb.
 		 */
+		Dialect own;
+
 		if (preverbs && !(stemtype_of(forms + form) & PPARTMASK))
 			continue;
+		own = dialect_of(forms + form);
 		if (pass->variant && !variant_form(pass->variant,forms + form))
+			continue;
+		if (!morpheus_generation_form_dialect(forms + form,NULL) &&
+		    (!stated ||
+		     !join_dialects(forms + form,own,
+		                    variant_dialects(pass->variant))))
 			continue;
 		if (pass->seen) {
 			if (pass->variant &&

@@ -284,13 +284,21 @@ printf("avoid %s:", gkstring_of(wantgkend) ); PrntGkFlags(avoidgkend,stdout); pr
 */
 
 	for(i=0;i<lno;i++) {
+		/*
+		 * EuphEnd() clears R_E_I_ALPHA from the stem once an ending in
+		 * -h has taken the Ionic and epic dialects it has after r, e or
+		 * i: check each ending against the stem as it was, or every
+		 * later ending in -h (xw/rhn, xw/rhs) keeps its Attic label.
+		 */
+		gk_string want = *wantgkend;
+
 		Cur_gkend = * (CurrentList+i);
 /*
 
 printf("peering at [%s]\n", gkstring_of((&Cur_gkend))); 
 PrntAGstr((&Cur_gkend),stdout); printf("\n");
 */
-		rval=WantGkEnd(wantgkend,&Cur_gkend,YES,YES);
+		rval=WantGkEnd(&want,&Cur_gkend,YES,YES);
 		avoidrval=NoWantGkEnd(avoidgkend,&Cur_gkend,0);
 
 		if( rval < 0 || avoidrval ) {
