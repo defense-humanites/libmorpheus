@@ -33,13 +33,21 @@ the corpus.
   The Python (`exclude_preverb_variants`), Node.js and WebAssembly
   (`excludePreverbVariants`) bindings pass it. C ABI 2 unchanged.
 
+- Unaugmented indicatives (#78, the gap in property (b)): analysis reads an
+  imperfect, aorist or pluperfect without its augment as Homeric or Ionic,
+  for every verb, and generation now returns these forms, flagged
+  `unaugmented` (ἄγον, ἀγορήσατο, ἀπόλυον). It labels them as analysis
+  does: the dialects their parts name, within Ionic and epic, or Homeric and
+  Ionic when the parts name none. A pass after the others keeps only the
+  forms and readings it adds: λῦον is an imperfect as well as a participle.
+
 ### Changed
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
   with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
-  records, instead of 4,096. 2,950 listed compound verbs exceed 4,096 records
-  (ἀφίημι: 4,577) and failed by default; the largest, προσκρεμάννυμι,
-  returns 26,774.
+  records, instead of 4,096. 3,185 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,725) and failed by default; the largest, προσκρεμάννυμι,
+  returns 28,200.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
   instead of 0.4.6 and ship the skipped generation-record count (see

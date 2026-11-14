@@ -128,6 +128,16 @@ that forces its ending states the form's dialects itself and keeps their
 union: the Aeolic stem of εὐτρίαινα takes the nominative in -α that the
 ending table calls epic. What a pass requests still restricts that union:
 an unaspirated preverb is Ionic only (see [compound verbs](#compound-verbs)).
+
+Analysis also reads an indicative imperfect, aorist or pluperfect without
+its augment, as Homeric or Ionic, for every verb. Generation returns these
+forms after the others, flagged `unaugmented`, with every reading of each
+(ἄγον, ἀγορήσατο, ἀπόλυον): λῦον is an imperfect as well as a participle.
+As analysis does, it labels them with the dialects their parts name, within
+Ionic and epic, or Homeric and Ionic when their parts name none, so that an
+Attic or common dialect filter leaves out the forms of this pass. Other
+forms carry the flag from the stem data or the ending tables (the epic
+λύτο, the iteratives λύεσκε) and keep the dialects these give them.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
@@ -142,11 +152,15 @@ On samples of the Alpheios data, more than 99.5 % of the generated forms
 meet the first property, compounds included
 ([gener-derivations.md](gener-derivations.md#measures),
 [compound verbs](#compound-verbs)). The second is not yet met. On the verbs
-of the Perseus treebank (AGDT 2.1), 89.0 % of the tokens that analysis reads
+of the Perseus treebank (AGDT 2.1), 92.7 % of the tokens that analysis reads
 as a verb have every such reading generated (66.6 % before compound verbs);
-91.2 % of the readings as a simple verb are, 92.0 % of those as a listed
-compound and 56.7 % of those as a hyphenated one. Over nouns, adjectives,
-pronouns and verbs, 90.0 % of the tokens' readings are generated.
+94.4 % of the readings as a simple verb are, 93.8 % of those as a listed
+compound and 68.9 % of those as a hyphenated one. Over nouns, adjectives,
+pronouns and verbs, 93.0 % of the tokens' readings are generated, comparing
+forms without capitals and without the acute that an enclitic adds; most of
+the rest belong to running text (enclitic pronouns and articles with an
+accent, crasis) or are forms that analysis reads but the index does not
+hold.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
@@ -232,10 +246,10 @@ carries a preverb of its own (`pb:`) is generated under the lemma that
 analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
 
 Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
-the Alpheios data. On 300 of them (seed 78), 99.91 % of the 684,910 generated
-surfaces analyze back to the compound with the same tense and mood: 99.90 %
-of the 508,733 plain surfaces and 99.95 % of the 176,177 that the preverb
-variants add. The surfaces that fail are forms, or variants of forms, that
+the Alpheios data. On 300 of them (seed 78), 99.91 % of the 664,860 generated
+surfaces analyze back to the compound with the same tense and mood, preverb
+variants and unaugmented forms included (684,910 surfaces before dialects
+were intersected and unaugmented forms added). The surfaces that fail are forms, or variants of forms, that
 also fail for the simple verb, from which the compound inherits them. The remaining limits mirror the data or are left for later:
 
 - **Preverb variants.** Two kinds that depend on the following sounds are
