@@ -44,9 +44,9 @@ the corpus.
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
   with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
-  records, instead of 4,096. 3,593 listed compound verbs exceed 4,096 records
-  (ἀφίημι: 4,632) and failed by default; the largest, ὑποβοηθέω, returns
-  31,526.
+  records, instead of 4,096. 2,950 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,577) and failed by default; the largest, προσκρεμάννυμι,
+  returns 26,774.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
   instead of 0.4.6 and ship the skipped generation-record count (see
@@ -91,14 +91,22 @@ the corpus.
   preverb, augment, stem and ending all allow, and a form whose parts share
   no dialect is left out (τιμήσωντι: an Attic-Ionic stem in -η- with a Doric
   ending), unless its record forces the ending (εὐτρίαινα keeps Aeolic and
-  epic). Such forms used to take the union of the dialects, as analysis
-  labels them; an augment, preverb or request that excluded every dialect
-  left the form dialect-neutral.
+  epic). Such a record keeps the union of its parts' dialects, which a
+  pass's request still restricts: an unaspirated preverb stays Ionic. Such
+  forms used to take the union of the dialects, as analysis labels them; an
+  augment, preverb or request that excluded every dialect left the form
+  dialect-neutral. The index loses 3.4 % of its forms (4,550 lemmas lose
+  forms, 16,011 change, most in their labels only), the listed compounds
+  7.6 % (58.3 to 53.8 million forms). The forms left out are nearly all
+  misreadings of analysis, but a few are real: the lyric ἁλίοιο, a Doric
+  stem with an epic ending.
 - After ρ, ε or ι, a first-declension ending in -η is Ionic and epic, not
   Attic: χώρην, χώρης and χώρῃ were labelled Attic, χώρη was not. The
   ending check cleared the stem's flag for this rule after the first ending
-  in -η, so that the stem's later endings missed it. Analysis results are
-  unchanged.
+  in -η, so that the stem's later endings missed it. Analysis shares the
+  check: of 858,532 words compared, one reading changes, the noun χρῆς
+  (χρή) in -ης, now Ionic and epic instead of Doric and Aeolic, as
+  generation labels it too.
 
 ## [0.5.0] - 2026-11-11
 

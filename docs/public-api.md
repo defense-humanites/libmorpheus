@@ -122,17 +122,22 @@ left out: τιμήσωντι, an Attic-Ionic aorist stem in -η- with a Doric en
 or ἁδυτέρην, a Doric stem with an Ionic and epic ending. Analysis accepts
 such forms, labelled with the union of the dialects; the readings it gives
 that way are 0.2 % of the treebank tokens below, almost all misreadings
-(σοῦ as θέω, κτῆσιν as κτάομαι, παροῦσιν as πηρόω). A record that forces
-its ending states the form's dialects itself and keeps their union: the
-Aeolic stem of εὐτρίαινα takes the nominative in -α that the ending table
-calls epic.
+(σοῦ as θέω, κτῆσιν as κτάομαι, παροῦσιν as πηρόω), with a few real forms
+among them (the lyric ἁλίοιο, a Doric stem with an epic ending). A record
+that forces its ending states the form's dialects itself and keeps their
+union: the Aeolic stem of εὐτρίαινα takes the nominative in -α that the
+ending table calls epic. What a pass requests still restricts that union:
+an unaspirated preverb is Ionic only (see [compound verbs](#compound-verbs)).
 
 Analysis also reads an indicative imperfect, aorist or pluperfect without
 its augment, as Homeric or Ionic, for every verb. Generation returns these
-forms after the others, flagged `unaugmented` and labelled Ionic or epic
-(ἄγον, ἀγορήσατο, ἀπόλυον, and the iteratives λύεσκε), with every reading
-of each: λῦον is an imperfect as well as a participle. An Attic or common
-dialect filter leaves them out.
+forms after the others, flagged `unaugmented`, with every reading of each
+(ἄγον, ἀγορήσατο, ἀπόλυον): λῦον is an imperfect as well as a participle.
+As analysis does, it labels them with the dialects their parts name, within
+Ionic and epic, or Homeric and Ionic when their parts name none, so that an
+Attic or common dialect filter leaves out the forms of this pass. Other
+forms carry the flag from the stem data or the ending tables (the epic
+λύτο, the iteratives λύεσκε) and keep the dialects these give them.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
