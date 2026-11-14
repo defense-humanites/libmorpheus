@@ -204,23 +204,29 @@ loads the compound list. A listed compound takes 12 ms at the median and 52
 to 64 ms at the 99th percentile (1,000 compounds, seed 78): it is a whole
 verb paradigm. Its preverb variants bring the listed compounds from 43.7 to
 58.3 million forms; the skipped records are unchanged, since the variants
-reuse the records of the plain forms. The largest, ὑποβοηθέω, returns 31,526
-records, and 3,593 compounds exceed the 4,096 records that were the default
-limit before 0.6.0. Each variant generates the simple verb's records again:
-measured in one session, a compound takes 17 ms at the median and 89 to 95
-ms at the 99th percentile, against 8 ms and 33 to 40 ms with
+reuse the records of the plain forms. The largest, ὑποβοηθέω, returned
+31,526 records, and 3,593 compounds exceeded the 4,096 records that were the
+default limit before 0.6.0 (2,950 once dialects are intersected, below).
+Each variant generates the simple verb's records again: measured in one
+session, a compound takes 17 ms at the median and 89 to 95 ms at the 99th
+percentile, against 8 ms and 33 to 40 ms with
 `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`. The first compound of a
 context also reads `rule_files/raw_preverbs.table`.
 
 A form takes the dialects that its preverb, augment, stem and ending all
 allow, and a form whose parts share none is left out unless its record
 forces the ending ([public-api.md](public-api.md#greek-lemma-generation)).
-This takes the whole index from 23.1 to 22.3 million forms (−3.4 %, 4,550
-lemmas changed, none emptied). On the treebank, 0.24 % of the noun,
-adjective, pronoun and verb tokens lose a reading, nearly all misreadings
-of analysis; on 2,787 lemmas (the 800 most frequent in the treebank and
-2,000 drawn with seed 78), the forms labelled with a dialect that analysis
-does not give them fall from 1.5 % to 1.0 %.
+This takes the whole index from 23.1 to 22.3 million forms (−3.4 %): 4,550
+lemmas lose forms and 16,011 change, most in their labels only; none is
+emptied. The listed compounds go from 58.3 to 53.8 million forms (−7.6 %,
+10,882 compounds lose forms, none is emptied); the largest is now
+προσκρεμάννυμι, with 26,774 records, and ὑποβοηθέω returns 23,226. On the
+treebank, 0.24 % of the noun, adjective, pronoun and verb tokens lose a
+reading, nearly all misreadings of analysis; a few are real forms, such as
+the lyric ἁλίοιο (a Doric stem with an epic ending). On 2,787 lemmas (the
+800 most frequent in the treebank and 2,000 drawn with seed 78), the forms
+labelled with a dialect that analysis does not give them fall from 1.5 % to
+1.0 %.
 
 `tools/gener-default-parts-report.py` measures the effect of the defaults
 on two indices built from the same sources: lemmas, forms, skipped records
