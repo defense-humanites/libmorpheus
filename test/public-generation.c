@@ -471,6 +471,15 @@ int main(int argc, char **argv)
                     MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"ka",&flagged,
                     &prefixed,&dialect);
     assert(flagged && prefixed && dialect==MORPHEUS_DIALECT_IONIC);
+    /*
+     * e(ry reg_fut doric end:w= forces its ending, so its forms keep the
+     * union of their parts' dialects; the unaspirated preverb still allows
+     * Ionic only, and a Doric future without Ionic is left out.
+     */
+    flagged_records(context,"a)fe/rpw",0,
+                    MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"a)",&flagged,
+                    &prefixed,&dialect);
+    assert(flagged && prefixed && dialect==MORPHEUS_DIALECT_IONIC);
     all=flagged_records(context,"katalu/w",0,MORPHEUS_MORPH_FLAG_APOCOPE,
                         "ka",&flagged,&prefixed,NULL);
     assert(flagged);

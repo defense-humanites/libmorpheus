@@ -52,3 +52,7 @@
 
 :le:eu)tri/aina
 :no:eu)-triain hs_ou,masc,aeolic end:a nom sg
+
+:le:e(/rpw
+:vs:e(rp w_stem reg_conj syll_augment
+:vs:e(ry reg_fut reg_conj doric syll_augment end:w=
