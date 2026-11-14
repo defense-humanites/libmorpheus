@@ -257,15 +257,6 @@ morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect)
 	return !constrained || result != 0;
 }
 
-/* The dialects a variant pass allows its forms, or 0 for any. */
-static Dialect
-variant_dialects(const morpheus_preverb_variant *variant)
-{
-	if (variant && strstr(variant->keys,"unasp_preverb"))
-		return IONIC;
-	return 0;
-}
-
 /*
  * Gives every part of a form that names dialects the union of them, so that
  * the form takes them all (see generate_record). The union is that of the
@@ -303,11 +294,15 @@ join_dialects(gk_word *form, Dialect own, Dialect allowed)
 /*
  * Analysis reads a verb form that lacks the augment of the indicative
  * imperfect, aorist or pluperfect as Homeric or Ionic (checkstring.c,
- * checkgenwds.c): a)/gon, a)gorh/sato, a)po/balon. It requests these
- * dialects for the form, so that an ending of other dialects only does not
- * match, and drops a reading that is not indicative.
+ * checkgenwds.c): a)/gon, a)gorh/sato, a)po/balon. It requests Ionic and
+ * epic for the form, so that an ending of other dialects only does not
+ * match, and drops a reading that is not indicative. It labels the reading
+ * with the dialects its parts name, or Homeric and Ionic when they name
+ * none (checkgenwds.c); generation keeps, as for any form, those its parts
+ * and the request all allow.
  */
 #define UNAUGMENTED_KEYS "unaugmented"
+#define UNAUGMENTED_DIALECTS ((Dialect)(IONIC|EPIC))
 
 static const morpheus_preverb_variant unaugmented_variant = {
 	UNAUGMENTED_KEYS, NULL
@@ -317,12 +312,39 @@ static int
 unaugmented_form(gk_word *form)
 {
 	Dialect requested = dialect_of(form);
+	Dialect named = (Dialect)(requested |
+	                          dialect_of(prvb_gstr_of(form)) |
+	                          dialect_of(aug1_gstr_of(form)) |
+	                          dialect_of(stem_gstr_of(form)) |
+	                          dialect_of(ends_gstr_of(form)));
 
 	if (mood_of(forminfo_of(form)) != INDICATIVE)
 		return 0;
-	set_dialect(form,requested ? (Dialect)(requested & (IONIC|EPIC)) :
-	                             (Dialect)(IONIC|EPIC));
+	if (!named) {
+		set_dialect(form,(Dialect)(HOMERIC|IONIC));
+		return 1;
+	}
+	set_dialect(form,requested ? (Dialect)(requested & UNAUGMENTED_DIALECTS) :
+	                             UNAUGMENTED_DIALECTS);
 	return dialect_of(form) != 0;
+}
+
+/*
+ * The dialects a variant pass allows its forms, or 0 for any: Ionic for an
+ * unaspirated preverb, Ionic and epic for an unaugmented form.
+ */
+static Dialect
+variant_dialects(const morpheus_preverb_variant *variant)
+{
+	Dialect allowed = 0;
+
+	if (!variant)
+		return 0;
+	if (strstr(variant->keys,UNAUGMENTED_KEYS))
+		allowed = UNAUGMENTED_DIALECTS;
+	if (strstr(variant->keys,"unasp_preverb"))
+		allowed = allowed ? (Dialect)(allowed & IONIC) : (Dialect)IONIC;
+	return allowed;
 }
 
 /*
