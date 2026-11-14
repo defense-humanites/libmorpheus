@@ -8,7 +8,6 @@
 
 :le:lu/w
 :vs:lu w_stem
-:aj:lut os_on reg_conj
 
 :le:-dhme/w
 :vs:dhm ew_pr ew_denom comp_only
@@ -60,3 +59,8 @@
 
 :le:lanqa/nw
 :vs:lelhk perf_act reg_conj plup ind act attic end:h
+
+:le:paideu/w
+:vs:paideu w_stem
+:aj:paideut os_on reg_conj
+:aj:paideut verb_adj2

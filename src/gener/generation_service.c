@@ -677,12 +677,16 @@ has_key(const char *keys, const char *token)
 }
 
 /*
- * The verbal adjective in -to/s that a verb's derivation lists
- * (:aj:fert os_on reg_conj under fe/rw, :aj:krht os_on a_stem under
- * kera/nnumi). Analysis never gives its forms to the verb: it reads ferto/s
- * as a lemma of its own, suffix-accented, which the index holds apart, and
- * this record would only add a recessive fe/rtos. The verbal adjective in
- * -te/os (verb_adj2 suff_acc) is the verb's, as analysis reads it.
+ * An adjective record of the os_on or os_h_on class that a verb's
+ * derivation lists: the verbal adjective in -to/s (:aj:fert os_on reg_conj
+ * under fe/rw, :aj:krht os_on a_stem under kera/nnumi), and in the Alpheios
+ * data two others (q-nhsim under qnh/skw, gna^f under kna/ptw). Analysis
+ * never gives their forms to the verb: it reads ferto/s as a lemma of its
+ * own, suffix-accented, which the index holds apart, and this record would
+ * only add a recessive fe/rtos. The verbal adjective in -te/os is a
+ * verb_adj2 record, the verb's as analysis reads it, and stays. A
+ * suffix-accented record of the class would stay too; the data have none
+ * under a verb.
  */
 static int
 verbal_adjective_in_tos(const morpheus_gener_record_view *record)

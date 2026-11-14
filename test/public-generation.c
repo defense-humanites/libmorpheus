@@ -405,15 +405,39 @@ int main(int argc, char **argv)
       }
     }
     assert(unaugmented && participle && first_singular && third_plural);
+    morpheus_generation_result_free(result);
+    result=NULL;
     /*
      * Analysis reads the verbal adjective in -to/s as a lemma of its own
-     * (luto/s), never as a form of the verb, so lut os_on reg_conj adds
-     * nothing to lu/w; the adjective a)bol os_on keeps its forms.
+     * (paideuto/s), never as a form of the verb, so paideut os_on reg_conj
+     * adds nothing to paideu/w. The verbal adjective in -te/os (paideut
+     * verb_adj2) is the verb's, and the adjective a)bol os_on of a)/bolos
+     * keeps its forms.
      */
-    for(i=0;i!=morpheus_generation_result_count(result);i++) {
-      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
-      assert(item.part_of_speech!=MORPHEUS_PART_OF_SPEECH_ADJECTIVE);
+    {
+      size_t in_teos=0;
+      size_t verb_forms=0;
+
+      assert(morpheus_generate(context,(const uint8_t *)"paideu/w",8,NULL,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        if(item.part_of_speech!=MORPHEUS_PART_OF_SPEECH_ADJECTIVE) {
+          verb_forms++;
+          continue;
+        }
+        assert(!strncmp(item.surface,"paideute",8));
+        in_teos++;
+      }
+      assert(in_teos && verb_forms);
+      morpheus_generation_result_free(result);
+      result=NULL;
     }
+    assert(morpheus_generate(context,(const uint8_t *)"a)/bolos",8,NULL,
+                             &result)==MORPHEUS_OK);
+    assert(morpheus_generation_result_count(result));
+    assert(morpheus_generation_result_get(result,0,&item)==MORPHEUS_OK);
+    assert(item.part_of_speech==MORPHEUS_PART_OF_SPEECH_ADJECTIVE);
     morpheus_generation_result_free(result);
     result=NULL;
     {
