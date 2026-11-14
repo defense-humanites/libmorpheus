@@ -49,7 +49,13 @@ the corpus.
   accent (λῦτος, φέρτος) and comparatives (λυτοτέραφι) were wrong. The
   index loses 20,860 forms in 156 verbs, and the forms of the 246 most
   frequent verbs that analyze back to the verb rise from 98.3 % to 99.4 %.
-  The verbal adjective in -τέος (`verb_adj2 suff_acc`) stays with the verb.
+  The verbal adjective in -τέος, a `verb_adj2` record, stays with the verb.
+  Nine pairs that analysis reads as verb forms came only from these records
+  and are no longer generated: ἄνυτον and ἀνύτοισι(ν) under ἀνύω (ἄνυτον
+  occurs three times in the treebank), the same forms of ἀρύω, and πάττα,
+  πάττε, πάττω under πατέομαι. The 13 such records of deponent verbs, which
+  the engine could not generate, are no longer counted as skipped: the
+  index skips 345 records instead of 358.
 
 ### Changed
 
