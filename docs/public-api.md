@@ -129,6 +129,13 @@ union: the Aeolic stem of εὐτρίαινα takes the nominative in -α that t
 ending table calls epic. What a pass requests still restricts that union:
 an unaspirated preverb is Ionic only (see [compound verbs](#compound-verbs)).
 
+A verb's own records may list its verbal adjective in -τός (`:aj:fert os_on
+reg_conj` under φέρω). Analysis reads φερτός as a lemma of its own, never
+as a form of the verb, so generation returns it under that lemma only, and
+leaves out every `os_on` or `os_h_on` adjective record of a verb; the
+verbal adjective in -τέος, a `verb_adj2` record, stays with the verb, as
+analysis reads it.
+
 Analysis also reads an indicative imperfect, aorist or pluperfect without
 its augment, as Homeric or Ionic, for every verb. Generation returns these
 forms after the others, flagged `unaugmented`, with every reading of each

@@ -41,6 +41,22 @@ the corpus.
   Ionic when the parts name none. A pass after the others keeps only the
   forms and readings it adds: λῦον is an imperfect as well as a participle.
 
+- A verb no longer returns the verbal adjective in -τός that its derivation
+  lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
+  φερτός as a lemma of its own, which generation returns under that lemma,
+  and never as a form of the verb: none of the 17,642 distinct adjective
+  forms of these verbs analyzed back to the verb, and their recessive
+  accent (λῦτος, φέρτος) and comparatives (λυτοτέραφι) were wrong. The
+  index loses 20,860 forms in 156 verbs, and the forms of the 246 most
+  frequent verbs that analyze back to the verb rise from 98.3 % to 99.4 %.
+  The verbal adjective in -τέος, a `verb_adj2` record, stays with the verb.
+  Nine pairs that analysis reads as verb forms came only from these records
+  and are no longer generated: ἄνυτον and ἀνύτοισι(ν) under ἀνύω (ἄνυτον
+  occurs three times in the treebank), the same forms of ἀρύω, and πάττα,
+  πάττε, πάττω under πατέομαι. The 13 such records of deponent verbs, which
+  the engine could not generate, are no longer counted as skipped: the
+  index skips 345 records instead of 358.
+
 ### Changed
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used

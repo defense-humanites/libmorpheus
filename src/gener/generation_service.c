@@ -658,6 +658,78 @@ record_belongs(morpheus_generation_service *service, const char *lemma,
 	}
 }
 
+/* Whether keys hold the token: "os_on reg_conj" holds os_on. */
+static int
+has_key(const char *keys, const char *token)
+{
+	size_t length = strlen(token);
+	const char *found = keys;
+
+	while ((found = strstr(found,token)) != NULL) {
+		if ((found == keys || isspace((unsigned char)found[-1]) ||
+		     found[-1] == ',') &&
+		    (!found[length] || isspace((unsigned char)found[length]) ||
+		     found[length] == ','))
+			return 1;
+		found += length;
+	}
+	return 0;
+}
+
+/*
+ * An adjective record of the os_on or os_h_on class that a verb's
+ * derivation lists: the verbal adjective in -to/s (:aj:fert os_on reg_conj
+ * under fe/rw, :aj:krht os_on a_stem under kera/nnumi), and in the Alpheios
+ * data two others (q-nhsim under qnh/skw, gna^f under kna/ptw). Analysis
+ * never gives their forms to the verb: it reads ferto/s as a lemma of its
+ * own, suffix-accented, which the index holds apart, and this record would
+ * only add a recessive fe/rtos. The verbal adjective in -te/os is a
+ * verb_adj2 record, the verb's as analysis reads it, and stays. A
+ * suffix-accented record of the class would stay too; the data have none
+ * under a verb.
+ */
+static int
+verbal_adjective_in_tos(const morpheus_gener_record_view *record)
+{
+	return record->kind == MORPHEUS_GENER_RECORD_ADJECTIVE &&
+	       (has_key(record->keys,"os_on") || has_key(record->keys,"os_h_on")) &&
+	       !has_key(record->keys,"suff_acc");
+}
+
+/* Whether a lemma's records include a verb stem or an irregular verb form. */
+static morpheus_generation_status
+lemma_has_verbs(const morpheus_generation_service *service,
+                const morpheus_gener_lemma_view *entry, int *verbs)
+{
+	uint64_t block_number;
+
+	*verbs = 0;
+	for (block_number = entry->first_block;
+	     block_number != entry->first_block + entry->block_count && !*verbs;
+	     block_number++) {
+		morpheus_gener_block_view block;
+		uint64_t record_number;
+
+		if (morpheus_gener_index_block(service->index,block_number,&block) !=
+		    MORPHEUS_GENER_INDEX_OK)
+			return MORPHEUS_GENERATION_INVALID;
+		for (record_number = block.first_record;
+		     record_number != block.first_record + block.record_count &&
+		     !*verbs;
+		     record_number++) {
+			morpheus_gener_record_view record;
+
+			if (morpheus_gener_index_record(service->index,record_number,
+			                                &record) !=
+			    MORPHEUS_GENER_INDEX_OK)
+				return MORPHEUS_GENERATION_INVALID;
+			*verbs = record.kind == MORPHEUS_GENER_RECORD_VERB_STEM ||
+			         record.kind == MORPHEUS_GENER_RECORD_IRREGULAR_VERB;
+		}
+	}
+	return MORPHEUS_GENERATION_OK;
+}
+
 /*
  * Generates the records of one index key under the requested lemma. With
  * preverbs, only verb records are composed: analysis reads a preverb only
@@ -674,6 +746,7 @@ generate_key(const generation_pass *pass, const char *key)
 	uint64_t block_number;
 	/* The lemma the key holds stems of: -dhme/w holds stems of dhme/w. */
 	const char *simple_lemma = key[0] == '-' ? key + 1 : key;
+	int verbs = 0;
 
 	switch (morpheus_gener_index_lookup(service->index,key,&entry)) {
 	case MORPHEUS_GENER_INDEX_OK:
@@ -684,6 +757,11 @@ generate_key(const generation_pass *pass, const char *key)
 		return MORPHEUS_GENERATION_INVALID;
 	}
 	*pass->found = 1;
+	if (!preverbs) {
+		result = lemma_has_verbs(service,&entry,&verbs);
+		if (result != MORPHEUS_GENERATION_OK)
+			return result;
+	}
 	for (block_number = entry.first_block;
 	     block_number != entry.first_block + entry.block_count; block_number++) {
 		morpheus_gener_block_view block;
@@ -713,6 +791,8 @@ generate_key(const generation_pass *pass, const char *key)
 			 */
 			if (pass->unaugmented &&
 			    record.kind != MORPHEUS_GENER_RECORD_VERB_STEM)
+				continue;
+			if (verbs && verbal_adjective_in_tos(&record))
 				continue;
 			if (find_record_preverb(record.keys,&own)) {
 				int belongs;
