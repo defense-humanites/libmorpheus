@@ -246,10 +246,10 @@ carries a preverb of its own (`pb:`) is generated under the lemma that
 analysis names after that preverb: ἀμπέσχον under ἀμπέχω, not ἔχω.
 
 Of the 19,289 names that `vbs.cmp.ml` lists, 19,130 generate records with
-the Alpheios data. On 300 of them (seed 78), 99.91 % of the 684,910 generated
-surfaces analyze back to the compound with the same tense and mood: 99.90 %
-of the 508,733 plain surfaces and 99.95 % of the 176,177 that the preverb
-variants add. The surfaces that fail are forms, or variants of forms, that
+the Alpheios data. On 300 of them (seed 78), 99.91 % of the 664,860 generated
+surfaces analyze back to the compound with the same tense and mood, preverb
+variants and unaugmented forms included (684,910 surfaces before dialects
+were intersected and unaugmented forms added). The surfaces that fail are forms, or variants of forms, that
 also fail for the simple verb, from which the compound inherits them. The remaining limits mirror the data or are left for later:
 
 - **Preverb variants.** Two kinds that depend on the following sounds are
