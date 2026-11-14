@@ -259,17 +259,25 @@ morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect)
 
 /*
  * Gives every part of a form that names dialects the union of them, so that
- * the form takes them all (see generate_record).
+ * the form takes them all (see generate_record). The union is that of the
+ * form's own parts, as the engine built them (own is the form's dialect
+ * before the pass asked for any); the dialects the pass allows then restrict
+ * it, as they do any form: an unaspirated preverb stays Ionic. Returns 0, and
+ * changes nothing, when the pass allows none of them.
  */
-static void
-join_dialects(gk_word *form)
+static int
+join_dialects(gk_word *form, Dialect own, Dialect allowed)
 {
 	Dialect joined = (Dialect)(dialect_of(prvb_gstr_of(form)) |
 	                           dialect_of(aug1_gstr_of(form)) |
 	                           dialect_of(stem_gstr_of(form)) |
 	                           dialect_of(ends_gstr_of(form)) |
-	                           dialect_of(form));
+	                           own);
 
+	if (allowed)
+		joined = (Dialect)(joined & allowed);
+	if (!joined)
+		return 0;
 	if (dialect_of(prvb_gstr_of(form)))
 		set_dialect(prvb_gstr_of(form),joined);
 	if (dialect_of(aug1_gstr_of(form)))
@@ -280,16 +288,21 @@ join_dialects(gk_word *form)
 		set_dialect(ends_gstr_of(form),joined);
 	if (dialect_of(form))
 		set_dialect(form,joined);
+	return 1;
 }
 
 /*
  * Analysis reads a verb form that lacks the augment of the indicative
  * imperfect, aorist or pluperfect as Homeric or Ionic (checkstring.c,
- * checkgenwds.c): a)/gon, a)gorh/sato, a)po/balon. It requests these
- * dialects for the form, so that an ending of other dialects only does not
- * match, and drops a reading that is not indicative.
+ * checkgenwds.c): a)/gon, a)gorh/sato, a)po/balon. It requests Ionic and
+ * epic for the form, so that an ending of other dialects only does not
+ * match, and drops a reading that is not indicative. It labels the reading
+ * with the dialects its parts name, or Homeric and Ionic when they name
+ * none (checkgenwds.c); generation keeps, as for any form, those its parts
+ * and the request all allow.
  */
 #define UNAUGMENTED_KEYS "unaugmented"
+#define UNAUGMENTED_DIALECTS ((Dialect)(IONIC|EPIC))
 
 static const morpheus_preverb_variant unaugmented_variant = {
 	UNAUGMENTED_KEYS, NULL
@@ -299,12 +312,39 @@ static int
 unaugmented_form(gk_word *form)
 {
 	Dialect requested = dialect_of(form);
+	Dialect named = (Dialect)(requested |
+	                          dialect_of(prvb_gstr_of(form)) |
+	                          dialect_of(aug1_gstr_of(form)) |
+	                          dialect_of(stem_gstr_of(form)) |
+	                          dialect_of(ends_gstr_of(form)));
 
 	if (mood_of(forminfo_of(form)) != INDICATIVE)
 		return 0;
-	set_dialect(form,requested ? (Dialect)(requested & (IONIC|EPIC)) :
-	                             (Dialect)(IONIC|EPIC));
+	if (!named) {
+		set_dialect(form,(Dialect)(HOMERIC|IONIC));
+		return 1;
+	}
+	set_dialect(form,requested ? (Dialect)(requested & UNAUGMENTED_DIALECTS) :
+	                             UNAUGMENTED_DIALECTS);
 	return dialect_of(form) != 0;
+}
+
+/*
+ * The dialects a variant pass allows its forms, or 0 for any: Ionic for an
+ * unaspirated preverb, Ionic and epic for an unaugmented form.
+ */
+static Dialect
+variant_dialects(const morpheus_preverb_variant *variant)
+{
+	Dialect allowed = 0;
+
+	if (!variant)
+		return 0;
+	if (strstr(variant->keys,UNAUGMENTED_KEYS))
+		allowed = UNAUGMENTED_DIALECTS;
+	if (strstr(variant->keys,"unasp_preverb"))
+		allowed = allowed ? (Dialect)(allowed & IONIC) : (Dialect)IONIC;
+	return allowed;
 }
 
 /*
@@ -450,15 +490,18 @@ generate_record(const generation_pass *pass,
 		 * an adjective (:vs:ton os_on comp_only under tei/nw), to which
 		 * the engine attaches no preverb.
 		 */
+		Dialect own;
+
 		if (preverbs && !(stemtype_of(forms + form) & PPARTMASK))
 			continue;
+		own = dialect_of(forms + form);
 		if (pass->variant && !variant_form(pass->variant,forms + form))
 			continue;
-		if (!morpheus_generation_form_dialect(forms + form,NULL)) {
-			if (!stated)
-				continue;
-			join_dialects(forms + form);
-		}
+		if (!morpheus_generation_form_dialect(forms + form,NULL) &&
+		    (!stated ||
+		     !join_dialects(forms + form,own,
+		                    variant_dialects(pass->variant))))
+			continue;
 		if (pass->seen) {
 			char reading[MAXWORDSIZE + 64];
 

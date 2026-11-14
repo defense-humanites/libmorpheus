@@ -375,7 +375,8 @@ int main(int argc, char **argv)
    * and generation returns these forms too: lu/on is an imperfect as well
    * as a participle, a)po/luon an imperfect of the compound. Their readings
    * are indicative and their dialects Ionic or epic, so that an Attic
-   * filter leaves them out.
+   * filter leaves them out. When no part names a dialect, the form is
+   * Homeric and Ionic, as analysis labels it.
    */
   {
     const unsigned flag=MORPHEUS_MORPH_FLAG_UNAUGMENTED;
@@ -396,10 +397,12 @@ int main(int argc, char **argv)
       }
       if(strcmp(item.surface,"lu/on")) continue;
       if(item.mood==MORPHEUS_MOOD_PARTICIPLE) participle=1;
-      if(item.tense==MORPHEUS_TENSE_IMPERFECT &&
-         item.person==MORPHEUS_PERSON_FIRST) first_singular=1;
-      if(item.tense==MORPHEUS_TENSE_IMPERFECT &&
-         item.person==MORPHEUS_PERSON_THIRD) third_plural=1;
+      if(item.tense==MORPHEUS_TENSE_IMPERFECT) {
+        assert(item.dialect==
+               (MORPHEUS_DIALECT_HOMERIC|MORPHEUS_DIALECT_IONIC));
+        if(item.person==MORPHEUS_PERSON_FIRST) first_singular=1;
+        if(item.person==MORPHEUS_PERSON_THIRD) third_plural=1;
+      }
     }
     assert(unaugmented && participle && first_singular && third_plural);
     /*
@@ -417,8 +420,67 @@ int main(int argc, char **argv)
       size_t flagged;
       int prefixed;
 
-      flagged_surfaces(context,"a)polu/w",flag,"a)po/lu",&flagged,&prefixed);
-      assert(flagged);
+      /* The preverb comes first, without an augment (not a)pe/luon). */
+      flagged_surfaces(context,"a)polu/w",flag,"a)po",&flagged,&prefixed);
+      assert(flagged && prefixed);
+    }
+    /*
+     * lelhk ... plup ind act attic end:h forces its ending, but its Attic
+     * stem does not allow the Ionic and epic of an unaugmented form: the
+     * record gives its augmented e)lelh/kh and no unaugmented form.
+     */
+    {
+      int augmented=0;
+
+      assert(morpheus_generate(context,(const uint8_t *)"lanqa/nw",8,NULL,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(!(item.morph_flags[flag/8u] & (1u<<(flag%8u))));
+        if(!strcmp(item.surface,"e)lelh/kh")) augmented=1;
+      }
+      assert(augmented);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+    /*
+     * The unaugmented forms of a preverb variant come last (ka/lluon,
+     * apocope and unaugmented), and MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS
+     * leaves them out with the other variants.
+     */
+    {
+      const unsigned apocope=MORPHEUS_MORPH_FLAG_APOCOPE;
+      morpheus_generation_options options=default_options();
+      size_t both=0;
+      size_t plain=0;
+      int kalluon=0;
+
+      assert(morpheus_generate(context,(const uint8_t *)"katalu/w",8,NULL,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        if(!(item.morph_flags[flag/8u] & (1u<<(flag%8u))) ||
+           !(item.morph_flags[apocope/8u] & (1u<<(apocope%8u))))
+          continue;
+        both++;
+        assert(item.mood==MORPHEUS_MOOD_INDICATIVE);
+        if(!strcmp(item.surface,"ka/lluon") &&
+           item.tense==MORPHEUS_TENSE_IMPERFECT) kalluon=1;
+      }
+      assert(both && kalluon);
+      morpheus_generation_result_free(result);
+      result=NULL;
+      options.flags=MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS;
+      assert(morpheus_generate(context,(const uint8_t *)"katalu/w",8,&options,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(!(item.morph_flags[apocope/8u] & (1u<<(apocope%8u))));
+        if(item.morph_flags[flag/8u] & (1u<<(flag%8u))) plain++;
+      }
+      assert(plain);
+      morpheus_generation_result_free(result);
+      result=NULL;
     }
   }
 
@@ -521,6 +583,15 @@ int main(int argc, char **argv)
     assert(first_singular && third_plural);
     flagged_records(context,"kaqi/zw",0,
                     MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"ka",&flagged,
+                    &prefixed,&dialect);
+    assert(flagged && prefixed && dialect==MORPHEUS_DIALECT_IONIC);
+    /*
+     * e(ry reg_fut doric end:w= forces its ending, so its forms keep the
+     * union of their parts' dialects; the unaspirated preverb still allows
+     * Ionic only, and a Doric future without Ionic is left out.
+     */
+    flagged_records(context,"a)fe/rpw",0,
+                    MORPHEUS_MORPH_FLAG_UNASPIRATED_PREVERB,"a)",&flagged,
                     &prefixed,&dialect);
     assert(flagged && prefixed && dialect==MORPHEUS_DIALECT_IONIC);
     all=flagged_records(context,"katalu/w",0,MORPHEUS_MORPH_FLAG_APOCOPE,
