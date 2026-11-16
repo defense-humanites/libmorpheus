@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -87,9 +88,10 @@ record_keys(const char *source, const char *preverbs, const char *variant)
 }
 
 /*
- * The raw forms a request has returned, so that a preverb variant returns
- * only the forms that its flags change (an apocope pass on a)na/ also
- * yields the forms where nothing is cut).
+ * The raw forms a request has returned, with their readings, so that a
+ * preverb variant or the unaugmented pass returns only the forms that its
+ * flags change (an apocope pass on a)na/ also yields the forms where nothing
+ * is cut).
  */
 typedef struct {
 	char **slots;
@@ -203,6 +205,10 @@ typedef struct {
 	 * first singular and third plural), and each must reach the visitor.
 	 */
 	surface_set *added;
+	/* The unaugmented pass, alone or combined with a preverb variant. */
+	int unaugmented;
+	/* Whether the preverb variants are generated. */
+	int preverb_variants;
 	morpheus_generation_visitor visitor;
 	void *state;
 	size_t *form_count;
@@ -212,28 +218,133 @@ typedef struct {
 
 /*
  * Analysis reads an unaspirated preverb before a rough breathing (a)pi/keto)
- * as Ionic (checkgenwds.c): it rejects the reading when the preverb names
- * dialects without Ionic, and labels the others Ionic alone. A form whose
- * preverb, augment, stem and ending name dialects without Ionic is dropped,
- * which is what analysis means: it keeps such a reading with every dialect,
- * as AndDialect() returns -1 there. The others are labelled Ionic.
+ * as Ionic (checkgenwds.c) and labels the reading Ionic alone, so such a
+ * form must allow Ionic; morpheus_generation_form_dialect() then leaves out
+ * the forms whose preverb, augment, stem or ending exclude it. Analysis keeps
+ * those with every dialect, as AndDialect() returns -1 there.
  */
 static int
 ionic_form(gk_word *form)
 {
-	Dialect named = (Dialect)(dialect_of(prvb_gstr_of(form)) |
+	Dialect requested = dialect_of(form);
+
+	set_dialect(form,requested ? (Dialect)(requested & IONIC) : IONIC);
+	return dialect_of(form) != 0;
+}
+
+int
+morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect)
+{
+	const unsigned named[] = {
+		(unsigned short)dialect_of(prvb_gstr_of(form)),
+		(unsigned short)dialect_of(aug1_gstr_of(form)),
+		(unsigned short)dialect_of(stem_gstr_of(form)),
+		(unsigned short)dialect_of(ends_gstr_of(form)),
+		(unsigned short)dialect_of(form)
+	};
+	unsigned result = 0;
+	int constrained = 0;
+	size_t part;
+
+	for (part = 0; part != sizeof named / sizeof *named; part++) {
+		if (!named[part])
+			continue;
+		result = constrained ? result & named[part] : named[part];
+		constrained = 1;
+	}
+	if (dialect)
+		*dialect = result;
+	return !constrained || result != 0;
+}
+
+/*
+ * Gives every part of a form that names dialects the union of them, so that
+ * the form takes them all (see generate_record). The union is that of the
+ * form's own parts, as the engine built them (own is the form's dialect
+ * before the pass asked for any); the dialects the pass allows then restrict
+ * it, as they do any form: an unaspirated preverb stays Ionic. Returns 0, and
+ * changes nothing, when the pass allows none of them.
+ */
+static int
+join_dialects(gk_word *form, Dialect own, Dialect allowed)
+{
+	Dialect joined = (Dialect)(dialect_of(prvb_gstr_of(form)) |
+	                           dialect_of(aug1_gstr_of(form)) |
+	                           dialect_of(stem_gstr_of(form)) |
+	                           dialect_of(ends_gstr_of(form)) |
+	                           own);
+
+	if (allowed)
+		joined = (Dialect)(joined & allowed);
+	if (!joined)
+		return 0;
+	if (dialect_of(prvb_gstr_of(form)))
+		set_dialect(prvb_gstr_of(form),joined);
+	if (dialect_of(aug1_gstr_of(form)))
+		set_dialect(aug1_gstr_of(form),joined);
+	if (dialect_of(stem_gstr_of(form)))
+		set_dialect(stem_gstr_of(form),joined);
+	if (dialect_of(ends_gstr_of(form)))
+		set_dialect(ends_gstr_of(form),joined);
+	if (dialect_of(form))
+		set_dialect(form,joined);
+	return 1;
+}
+
+/*
+ * Analysis reads a verb form that lacks the augment of the indicative
+ * imperfect, aorist or pluperfect as Homeric or Ionic (checkstring.c,
+ * checkgenwds.c): a)/gon, a)gorh/sato, a)po/balon. It requests Ionic and
+ * epic for the form, so that an ending of other dialects only does not
+ * match, and drops a reading that is not indicative. It labels the reading
+ * with the dialects its parts name, or Homeric and Ionic when they name
+ * none (checkgenwds.c); generation keeps, as for any form, those its parts
+ * and the request all allow.
+ */
+#define UNAUGMENTED_KEYS "unaugmented"
+#define UNAUGMENTED_DIALECTS ((Dialect)(IONIC|EPIC))
+
+static const morpheus_preverb_variant unaugmented_variant = {
+	UNAUGMENTED_KEYS, NULL
+};
+
+static int
+unaugmented_form(gk_word *form)
+{
+	Dialect requested = dialect_of(form);
+	Dialect named = (Dialect)(requested |
+	                          dialect_of(prvb_gstr_of(form)) |
 	                          dialect_of(aug1_gstr_of(form)) |
 	                          dialect_of(stem_gstr_of(form)) |
 	                          dialect_of(ends_gstr_of(form)));
 
-	if (named && !(named & IONIC))
+	if (mood_of(forminfo_of(form)) != INDICATIVE)
 		return 0;
-	set_dialect(stem_gstr_of(form),IONIC);
-	set_dialect(ends_gstr_of(form),IONIC);
-	if (dialect_of(aug1_gstr_of(form)))
-		set_dialect(aug1_gstr_of(form),IONIC);
-	set_dialect(form,IONIC);
-	return 1;
+	if (!named) {
+		set_dialect(form,(Dialect)(HOMERIC|IONIC));
+		return 1;
+	}
+	set_dialect(form,requested ? (Dialect)(requested & UNAUGMENTED_DIALECTS) :
+	                             UNAUGMENTED_DIALECTS);
+	return dialect_of(form) != 0;
+}
+
+/*
+ * The dialects a variant pass allows its forms, or 0 for any: Ionic for an
+ * unaspirated preverb, Ionic and epic for an unaugmented form.
+ */
+static Dialect
+variant_dialects(const morpheus_preverb_variant *variant)
+{
+	Dialect allowed = 0;
+
+	if (!variant)
+		return 0;
+	if (strstr(variant->keys,UNAUGMENTED_KEYS))
+		allowed = UNAUGMENTED_DIALECTS;
+	if (strstr(variant->keys,"unasp_preverb"))
+		allowed = allowed ? (Dialect)(allowed & IONIC) : (Dialect)IONIC;
+	return allowed;
 }
 
 /*
@@ -278,8 +389,12 @@ variant_form(const morpheus_preverb_variant *variant, gk_word *form)
 		if (!matched)
 			return 0;
 	}
+	if (strstr(variant->keys,UNAUGMENTED_KEYS) && !unaugmented_form(form))
+		return 0;
 	if (strstr(variant->keys,"unasp_preverb"))
 		return ionic_form(form);
+	if (strstr(variant->keys,UNAUGMENTED_KEYS))
+		return 1;
 	if (!strstr(variant->keys,"prevb_augment"))
 		return 1;
 	if (mood_of(info) != INDICATIVE ||
@@ -300,6 +415,24 @@ variant_form(const morpheus_preverb_variant *variant, gk_word *form)
 }
 
 /*
+ * A raw form and its reading, as the passes compare them: a variant or an
+ * unaugmented form that the flags leave unchanged repeats an earlier form
+ * and its reading, while one that only shares its surface is another
+ * reading (unaugmented lu=on, an imperfect, beside the participle lu=on).
+ */
+static void
+form_reading(const gk_word *form, char *reading, size_t size)
+{
+	word_form info = forminfo_of(form);
+
+	snprintf(reading,size,"%s|%x|%x|%x|%x|%x|%x|%x|%x",workword_of(form),
+	         (unsigned)tense_of(info),(unsigned)mood_of(info),
+	         (unsigned)voice_of(info),(unsigned)person_of(info),
+	         (unsigned)number_of(info),(unsigned)case_of(info),
+	         (unsigned)gender_of(info),(unsigned)degree_of(info));
+}
+
+/*
  * *unusable is set when the record failed before any of its forms reached the
  * visitor, so the caller may skip it without exposing a partial record.
  */
@@ -316,6 +449,13 @@ generate_record(const generation_pass *pass,
 	size_t form;
 	int irregular;
 	int mode;
+	/*
+	 * A record that forces its ending states the form and its dialects
+	 * itself: eu)-triain hs_ou,masc,aeolic end:a nom sg is the Aeolic and
+	 * epic nominative eu)tri/aina, though the ending table names that ending
+	 * epic only. Such a form keeps the dialects of all its parts.
+	 */
+	int stated = strstr(record->keys,"end:") != NULL;
 
 	set_lemma(&input,pass->lemma);
 	set_stem(&input,record->stem);
@@ -350,16 +490,26 @@ generate_record(const generation_pass *pass,
 		 * an adjective (:vs:ton os_on comp_only under tei/nw), to which
 		 * the engine attaches no preverb.
 		 */
+		Dialect own;
+
 		if (preverbs && !(stemtype_of(forms + form) & PPARTMASK))
 			continue;
+		own = dialect_of(forms + form);
 		if (pass->variant && !variant_form(pass->variant,forms + form))
 			continue;
+		if (!morpheus_generation_form_dialect(forms + form,NULL) &&
+		    (!stated ||
+		     !join_dialects(forms + form,own,
+		                    variant_dialects(pass->variant))))
+			continue;
 		if (pass->seen) {
-			if (pass->variant &&
-			    surface_set_has(pass->seen,workword_of(forms + form)))
+			char reading[MAXWORDSIZE + 64];
+
+			form_reading(forms + form,reading,sizeof reading);
+			if (pass->variant && surface_set_has(pass->seen,reading))
 				continue;
 			if (!surface_set_add(pass->variant ? pass->added : pass->seen,
-			                     workword_of(forms + form))) {
+			                     reading)) {
 				release_forms(forms);
 				release_input(&input);
 				return MORPHEUS_GENERATION_NO_MEMORY;
@@ -508,6 +658,78 @@ record_belongs(morpheus_generation_service *service, const char *lemma,
 	}
 }
 
+/* Whether keys hold the token: "os_on reg_conj" holds os_on. */
+static int
+has_key(const char *keys, const char *token)
+{
+	size_t length = strlen(token);
+	const char *found = keys;
+
+	while ((found = strstr(found,token)) != NULL) {
+		if ((found == keys || isspace((unsigned char)found[-1]) ||
+		     found[-1] == ',') &&
+		    (!found[length] || isspace((unsigned char)found[length]) ||
+		     found[length] == ','))
+			return 1;
+		found += length;
+	}
+	return 0;
+}
+
+/*
+ * An adjective record of the os_on or os_h_on class that a verb's
+ * derivation lists: the verbal adjective in -to/s (:aj:fert os_on reg_conj
+ * under fe/rw, :aj:krht os_on a_stem under kera/nnumi), and in the Alpheios
+ * data two others (q-nhsim under qnh/skw, gna^f under kna/ptw). Analysis
+ * never gives their forms to the verb: it reads ferto/s as a lemma of its
+ * own, suffix-accented, which the index holds apart, and this record would
+ * only add a recessive fe/rtos. The verbal adjective in -te/os is a
+ * verb_adj2 record, the verb's as analysis reads it, and stays. A
+ * suffix-accented record of the class would stay too; the data have none
+ * under a verb.
+ */
+static int
+verbal_adjective_in_tos(const morpheus_gener_record_view *record)
+{
+	return record->kind == MORPHEUS_GENER_RECORD_ADJECTIVE &&
+	       (has_key(record->keys,"os_on") || has_key(record->keys,"os_h_on")) &&
+	       !has_key(record->keys,"suff_acc");
+}
+
+/* Whether a lemma's records include a verb stem or an irregular verb form. */
+static morpheus_generation_status
+lemma_has_verbs(const morpheus_generation_service *service,
+                const morpheus_gener_lemma_view *entry, int *verbs)
+{
+	uint64_t block_number;
+
+	*verbs = 0;
+	for (block_number = entry->first_block;
+	     block_number != entry->first_block + entry->block_count && !*verbs;
+	     block_number++) {
+		morpheus_gener_block_view block;
+		uint64_t record_number;
+
+		if (morpheus_gener_index_block(service->index,block_number,&block) !=
+		    MORPHEUS_GENER_INDEX_OK)
+			return MORPHEUS_GENERATION_INVALID;
+		for (record_number = block.first_record;
+		     record_number != block.first_record + block.record_count &&
+		     !*verbs;
+		     record_number++) {
+			morpheus_gener_record_view record;
+
+			if (morpheus_gener_index_record(service->index,record_number,
+			                                &record) !=
+			    MORPHEUS_GENER_INDEX_OK)
+				return MORPHEUS_GENERATION_INVALID;
+			*verbs = record.kind == MORPHEUS_GENER_RECORD_VERB_STEM ||
+			         record.kind == MORPHEUS_GENER_RECORD_IRREGULAR_VERB;
+		}
+	}
+	return MORPHEUS_GENERATION_OK;
+}
+
 /*
  * Generates the records of one index key under the requested lemma. With
  * preverbs, only verb records are composed: analysis reads a preverb only
@@ -524,6 +746,7 @@ generate_key(const generation_pass *pass, const char *key)
 	uint64_t block_number;
 	/* The lemma the key holds stems of: -dhme/w holds stems of dhme/w. */
 	const char *simple_lemma = key[0] == '-' ? key + 1 : key;
+	int verbs = 0;
 
 	switch (morpheus_gener_index_lookup(service->index,key,&entry)) {
 	case MORPHEUS_GENER_INDEX_OK:
@@ -534,6 +757,11 @@ generate_key(const generation_pass *pass, const char *key)
 		return MORPHEUS_GENERATION_INVALID;
 	}
 	*pass->found = 1;
+	if (!preverbs) {
+		result = lemma_has_verbs(service,&entry,&verbs);
+		if (result != MORPHEUS_GENERATION_OK)
+			return result;
+	}
 	for (block_number = entry.first_block;
 	     block_number != entry.first_block + entry.block_count; block_number++) {
 		morpheus_gener_block_view block;
@@ -556,6 +784,15 @@ generate_key(const generation_pass *pass, const char *key)
 			if (preverbs &&
 			    record.kind != MORPHEUS_GENER_RECORD_VERB_STEM &&
 			    record.kind != MORPHEUS_GENER_RECORD_IRREGULAR_VERB)
+				continue;
+			/*
+			 * Only a stem takes or leaves the augment: an irregular
+			 * form is spelled out with its own.
+			 */
+			if (pass->unaugmented &&
+			    record.kind != MORPHEUS_GENER_RECORD_VERB_STEM)
+				continue;
+			if (verbs && verbal_adjective_in_tos(&record))
 				continue;
 			if (find_record_preverb(record.keys,&own)) {
 				int belongs;
@@ -657,6 +894,87 @@ generate_variants(generation_pass *pass,
 	return result;
 }
 
+/*
+ * Ends a pass of the unaugmented forms: its forms join those returned before
+ * the next pass compares with them.
+ */
+static morpheus_generation_status
+end_pass(generation_pass *pass, morpheus_generation_status result)
+{
+	if (result == MORPHEUS_GENERATION_OK &&
+	    !surface_set_merge(pass->seen,pass->added))
+		result = MORPHEUS_GENERATION_NO_MEMORY;
+	surface_set_free(pass->added);
+	return result;
+}
+
+/*
+ * The unaugmented forms of the lemma and of its compounds come last, from
+ * their verb stems with the key unaugmented, then those of the preverb
+ * variants other than the augment before the preverb (apocope, psilosis:
+ * a)pi/kato). Like a variant, the pass returns only the forms and readings
+ * that differ from those already returned.
+ */
+static morpheus_generation_status
+generate_unaugmented(generation_pass *pass,
+                     const morpheus_compound_decomposition *decompositions,
+                     size_t count)
+{
+	morpheus_generation_status result;
+	surface_set added = { 0 };
+	size_t item;
+
+	pass->unaugmented = 1;
+	pass->variant = &unaugmented_variant;
+	pass->added = &added;
+	pass->preverbs = NULL;
+	result = generate_key(pass,pass->lemma);
+	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
+		if (composes(decompositions + item,pass->lemma))
+			result = generate_decomposition(pass,decompositions + item);
+	result = end_pass(pass,result);
+	for (item = 0; pass->preverb_variants && item != count &&
+	               result == MORPHEUS_GENERATION_OK; item++) {
+		const morpheus_preverb_variant *variants = NULL;
+		size_t variant_count = 0;
+		size_t variant;
+
+		if (!composes(decompositions + item,pass->lemma) ||
+		    strchr(decompositions[item].preverbs,','))
+			continue;
+		if (morpheus_compound_preverb_variants(&pass->service->compounds,
+		                                       decompositions[item].preverbs,
+		                                       &variants,&variant_count) !=
+		    MORPHEUS_COMPOUND_OK) {
+			result = MORPHEUS_GENERATION_NO_MEMORY;
+			break;
+		}
+		for (variant = 0; variant != variant_count &&
+		                  result == MORPHEUS_GENERATION_OK; variant++) {
+			char keys[256];
+			morpheus_preverb_variant combined;
+
+			if (strstr(variants[variant].keys,"prevb_augment"))
+				continue;
+			if ((size_t)snprintf(keys,sizeof keys,"%s %s",
+			                     variants[variant].keys,UNAUGMENTED_KEYS) >=
+			    sizeof keys)
+				continue;
+			combined.keys = keys;
+			combined.prefixes = variants[variant].prefixes;
+			pass->variant = &combined;
+			result = end_pass(pass,
+			                  generate_decomposition(pass,decompositions + item));
+		}
+	}
+	surface_set_free(&added);
+	pass->unaugmented = 0;
+	pass->variant = NULL;
+	pass->added = NULL;
+	pass->preverbs = NULL;
+	return result;
+}
+
 morpheus_generation_status
 morpheus_generation_service_generate(morpheus_generation_service *service,
                                      const char *canonical_lemma,
@@ -683,9 +1001,12 @@ morpheus_generation_service_generate_flags(
 	generation_pass pass = { 0 };
 	int found = 0;
 	int variants = 0;
+	int unaugmented;
 
 	if (!service || !canonical_lemma || !*canonical_lemma || !visitor ||
-	    !form_count || (flags & ~MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS))
+	    !form_count ||
+	    (flags & ~(MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS|
+	               MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED)))
 		return MORPHEUS_GENERATION_INVALID;
 	*form_count = 0;
 	if (skipped_records)
@@ -708,12 +1029,14 @@ morpheus_generation_service_generate_flags(
 		variants = 0;
 	pass.service = service;
 	pass.lemma = canonical_lemma;
-	pass.seen = variants ? &seen : NULL;
+	unaugmented = !(flags & MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED);
+	pass.seen = variants || unaugmented ? &seen : NULL;
 	pass.visitor = visitor;
 	pass.state = state;
 	pass.form_count = form_count;
 	pass.skipped_records = skipped_records;
 	pass.found = &found;
+	pass.preverb_variants = variants;
 	if (result == MORPHEUS_GENERATION_OK)
 		result = generate_key(&pass,canonical_lemma);
 	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
@@ -723,6 +1046,8 @@ morpheus_generation_service_generate_flags(
 	               result == MORPHEUS_GENERATION_OK; item++)
 		if (composes(decompositions + item,canonical_lemma))
 			result = generate_variants(&pass,decompositions + item);
+	if (unaugmented && result == MORPHEUS_GENERATION_OK)
+		result = generate_unaugmented(&pass,decompositions,count);
 	morpheus_runtime_context_activate(previous);
 	free(decompositions);
 	surface_set_free(&seen);

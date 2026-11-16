@@ -33,13 +33,37 @@ the corpus.
   The Python (`exclude_preverb_variants`), Node.js and WebAssembly
   (`excludePreverbVariants`) bindings pass it. C ABI 2 unchanged.
 
+- Unaugmented indicatives (#78, the gap in property (b)): analysis reads an
+  imperfect, aorist or pluperfect without its augment as Homeric or Ionic,
+  for every verb, and generation now returns these forms, flagged
+  `unaugmented` (ἄγον, ἀγορήσατο, ἀπόλυον). It labels them as analysis
+  does: the dialects their parts name, within Ionic and epic, or Homeric and
+  Ionic when the parts name none. A pass after the others keeps only the
+  forms and readings it adds: λῦον is an imperfect as well as a participle.
+
+- A verb no longer returns the verbal adjective in -τός that its derivation
+  lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
+  φερτός as a lemma of its own, which generation returns under that lemma,
+  and never as a form of the verb: none of the 17,642 distinct adjective
+  forms of these verbs analyzed back to the verb, and their recessive
+  accent (λῦτος, φέρτος) and comparatives (λυτοτέραφι) were wrong. The
+  index loses 20,860 forms in 156 verbs, and the forms of the 246 most
+  frequent verbs that analyze back to the verb rise from 98.3 % to 99.4 %.
+  The verbal adjective in -τέος, a `verb_adj2` record, stays with the verb.
+  Nine pairs that analysis reads as verb forms came only from these records
+  and are no longer generated: ἄνυτον and ἀνύτοισι(ν) under ἀνύω (ἄνυτον
+  occurs three times in the treebank), the same forms of ἀρύω, and πάττα,
+  πάττε, πάττω under πατέομαι. The 13 such records of deponent verbs, which
+  the engine could not generate, are no longer counted as skipped: the
+  index skips 345 records instead of 358.
+
 ### Changed
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
   with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
-  records, instead of 4,096. 3,593 listed compound verbs exceed 4,096 records
-  (ἀφίημι: 4,632) and failed by default; the largest, ὑποβοηθέω, returns
-  31,526.
+  records, instead of 4,096. 3,185 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,725) and failed by default; the largest, προσκρεμάννυμι,
+  returns 28,200.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
   instead of 0.4.6 and ship the skipped generation-record count (see
@@ -80,6 +104,26 @@ the corpus.
   augmented preverb leaves a participle record no ending. It also freed that
   buffer twice when a stem produced too many forms. Analysis results are
   unchanged.
+- Generated dialects (#78, item 4). A form now has the dialects that its
+  preverb, augment, stem and ending all allow, and a form whose parts share
+  no dialect is left out (τιμήσωντι: an Attic-Ionic stem in -η- with a Doric
+  ending), unless its record forces the ending (εὐτρίαινα keeps Aeolic and
+  epic). Such a record keeps the union of its parts' dialects, which a
+  pass's request still restricts: an unaspirated preverb stays Ionic. Such
+  forms used to take the union of the dialects, as analysis labels them; an
+  augment, preverb or request that excluded every dialect left the form
+  dialect-neutral. The index loses 3.4 % of its forms (4,550 lemmas lose
+  forms, 16,011 change, most in their labels only), the listed compounds
+  7.6 % (58.3 to 53.8 million forms). The forms left out are nearly all
+  misreadings of analysis, but a few are real: the lyric ἁλίοιο, a Doric
+  stem with an epic ending.
+- After ρ, ε or ι, a first-declension ending in -η is Ionic and epic, not
+  Attic: χώρην, χώρης and χώρῃ were labelled Attic, χώρη was not. The
+  ending check cleared the stem's flag for this rule after the first ending
+  in -η, so that the stem's later endings missed it. Analysis shares the
+  check: of 858,532 words compared, one reading changes, the noun χρῆς
+  (χρή) in -ης, now Ionic and epic instead of Doric and Aeolic, as
+  generation labels it too.
 
 ## [0.5.0] - 2026-11-11
 

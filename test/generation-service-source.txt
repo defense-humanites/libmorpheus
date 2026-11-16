@@ -45,3 +45,22 @@
 
 :le:h(du/s
 :aj:h(duter os_h_on irreg_comp
+:aj:a(_duter os_h_on irreg_comp doric
+
+:le:xw/ra
+:no:xwr h_hs fem
+
+:le:eu)tri/aina
+:no:eu)-triain hs_ou,masc,aeolic end:a nom sg
+
+:le:e(/rpw
+:vs:e(rp w_stem reg_conj syll_augment
+:vs:e(ry reg_fut reg_conj doric syll_augment end:w=
+
+:le:lanqa/nw
+:vs:lelhk perf_act reg_conj plup ind act attic end:h
+
+:le:paideu/w
+:vs:paideu w_stem
+:aj:paideut os_on reg_conj
+:aj:paideut verb_adj2
