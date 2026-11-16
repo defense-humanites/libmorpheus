@@ -45,6 +45,12 @@ the corpus.
   generation returns an irregular form (`:wd:`, `:vb:`) that can take a
   movable ν with it too, flagged `nu_movable` (ἀνδράσιν beside ἀνδράσι,
   εἰσίν). A form the data already spell with its ν comes once.
+- Accented clitics (#100): analysis reads a clitic with an accent as it
+  reads it without, and generation now returns the accented forms too,
+  after the others and with the unaccented form's reading and flag. A
+  proclitic is accented as the analysis index accents it (ὅ, οἵ, εἴς,
+  οὔκ), an enclitic with an acute on its ultima (ἐστί, εἰσίν, φησί, τινός,
+  μοί; Smyth 183d), and ἐστί(ν) also as ἔστι(ν) (Smyth 187).
 - A verb no longer returns the verbal adjective in -τός that its derivation
   lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
   φερτός as a lemma of its own, which generation returns under that lemma,

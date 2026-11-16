@@ -57,6 +57,8 @@ int morpheus_generation_form_dialect(const gk_word *form, unsigned *dialect);
 #define MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED 2u
 /* Leaves out the movable nu that irregular forms take (a)ndra/sin). */
 #define MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE 4u
+/* Leaves out the accented forms of clitics (o(/, e)sti/). */
+#define MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS 8u
 
 /* As above, with MORPHEUS_GENERATION_SERVICE_* flags. */
 morpheus_generation_status morpheus_generation_service_generate_flags(

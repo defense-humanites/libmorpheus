@@ -154,6 +154,25 @@ the data already spell with its ν comes once. Generation also reads a
 record's keys as the analysis index does when a comma joins them, in any
 key: `xalk os_ou suff_acc,masc` is suffix-accented (χαλκός), and
 `ei)ru w_stem reg_conj syll_augment epic,ionic` is Ionic and epic.
+
+Analysis reads a clitic with an accent as it reads it without: its index
+holds a proclitic with an acute on its penult, or on its ultima when it has
+one syllable, and the accent of an enclitic does not decide its reading.
+Generation returns the accented forms of the lemma's clitics after the
+others, with the reading and the `enclitic` or `proclitic` flag of the
+unaccented form:
+- a proclitic as the analysis index accents it: ὅ, οἵ, εἴς, οὔκ;
+- an enclitic with the acute it takes on its ultima before another
+  enclitic (Smyth 183d): ἐστί, εἰσίν, φησί, τινός, μοί;
+- ἐστί(ν) also as ἔστι(ν), the form at the head of a sentence or meaning
+  "exists" (Smyth 187).
+
+Analysis also gives a clitic forms it reads without regard to their
+accent, such as τίνα and τοῦ under τις, which are forms of the
+interrogative τίς; generation does not return those. Nor does it return
+the second accent that an enclitic puts on the word before it (τοῦτό,
+εἶναί), or crasis (κἀγώ, τοὔργον): analysis removes the second accent
+before it looks a word up, and a lookup table can do the same.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other

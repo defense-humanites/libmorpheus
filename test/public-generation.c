@@ -678,6 +678,60 @@ int main(int argc, char **argv)
   }
 
   /*
+   * Analysis reads a clitic with an accent as it reads it without, and
+   * generation returns the accented forms too: a proclitic accented as the
+   * analysis index accents it (o(/, oi(/), an enclitic with an acute on its
+   * ultima (tino/s, tisi/, tisi/n with its movable nu), and e)sti(n) also
+   * as e)/sti(n). The accented form keeps the reading and the clitic's
+   * flag.
+   */
+  {
+    static const struct {
+      const char *lemma;
+      const char *surface;
+      unsigned flag;
+    } accented[] = {
+      { "o(", "o(/", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "o(", "oi(/", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "o(", "o(", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "tis", "tino/s", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tinos", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tisi/", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tisi/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)sti/", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)sti/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)/sti", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)/stin", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "ei)si/n", MORPHEUS_MORPH_FLAG_ENCLITIC }
+    };
+    size_t entry;
+
+    for(entry=0;entry!=sizeof accented/sizeof accented[0];entry++) {
+      const unsigned flag=accented[entry].flag;
+      size_t found=0;
+
+      assert(morpheus_generate(context,
+                               (const uint8_t *)accented[entry].lemma,
+                               strlen(accented[entry].lemma),NULL,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        if(strcmp(item.surface,accented[entry].surface)) continue;
+        assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+        if(!strcmp(accented[entry].lemma,"ei)mi/2") &&
+           strncmp(item.surface,"ei)",3))
+          assert(item.person==MORPHEUS_PERSON_THIRD &&
+                 item.number==MORPHEUS_NUMBER_SINGULAR &&
+                 item.tense==MORPHEUS_TENSE_PRESENT);
+        found++;
+      }
+      assert(found==1);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+  }
+
+  /*
    * pro and peri do not elide before a vowel; the engine marks the hiatus
    * with '+', which surfaces keep only as the diaeresis of an iota or
    * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but

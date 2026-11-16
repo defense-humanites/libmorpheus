@@ -14,6 +14,8 @@
 #include "generation_compounds.h"
 #include "../morphlib/gkstring.proto.h"
 #include "../morphlib/numovable.proto.h"
+#include "../greeklib/addaccent.proto.h"
+#include "../greeklib/getsyll.proto.h"
 #include "../morphlib/runtime_context_internal.h"
 
 struct morpheus_generation_service {
@@ -212,6 +214,8 @@ typedef struct {
 	int unaugmented;
 	/* The pass of irregular forms with a movable nu. */
 	int nu_movable;
+	/* The pass of accented clitics, and the accent it gives (CLITIC_*). */
+	int clitic_accent;
 	/* Whether the preverb variants are generated. */
 	int preverb_variants;
 	morpheus_generation_visitor visitor;
@@ -361,6 +365,58 @@ nu_movable_form(gk_word *form)
 	workword_of(form)[length] = 'n';
 	workword_of(form)[length + 1] = 0;
 	add_morphflag(morphflags_of(form),NU_MOVABLE);
+	return 1;
+}
+
+/*
+ * Analysis reads a clitic with an accent as it reads it without: the indexer
+ * stores a proclitic with an acute on its penult, or on its ultima when it
+ * has one syllable (indexstems.c, dumpaccstem), and the accent of an
+ * enclitic does not decide its reading. Generation returns the accented
+ * forms after the others:
+ * - CLITIC_LAST: a proclitic as the indexer accents it (o(/, oi(/, ei)/s,
+ *   ou)/k), and an enclitic with the acute that it takes on its ultima
+ *   before another enclitic (e)sti/, tino/s, fhsi/, moi/; Smyth 183d);
+ * - CLITIC_ESTI: e)sti(n) also accented on its penult, at the head of a
+ *   sentence or meaning "exists" (e)/sti; Smyth 187).
+ */
+#define CLITIC_LAST 1
+#define CLITIC_ESTI 2
+
+static const morpheus_preverb_variant clitic_variant = { "", NULL };
+
+static int
+clitic_accent_form(gk_word *form, int accent)
+{
+	char *word = workword_of(form);
+	int enclitic = Is_enclitic(morphflags_of(form)) ||
+	               Is_enclitic(morphflags_of(stem_gstr_of(form)));
+	int proclitic = Is_proclitic(morphflags_of(form)) ||
+	                Is_proclitic(morphflags_of(stem_gstr_of(form)));
+	char *syllable;
+	const char *cursor;
+
+	if (!enclitic && !proclitic)
+		return 0;
+	if (strlen(word) + 2 > MAXWORDSIZE)
+		return 0;
+	for (cursor = word; *cursor; cursor++)
+		if (Is_accent(*cursor) || *cursor == '\'')
+			return 0;
+	if (accent == CLITIC_ESTI) {
+		if (!enclitic || (strcmp(word,"e)sti") && strcmp(word,"e)stin")))
+			return 0;
+		syllable = getsyll(word,PENULT);
+	} else if (proclitic) {
+		syllable = getsyll(word,PENULT);
+		if (syllable == P_ERR)
+			syllable = getsyll(word,ULTIMA);
+	} else {
+		syllable = getsyll(word,ULTIMA);
+	}
+	if (syllable == P_ERR)
+		return 0;
+	addaccent(word,ACUTE,syllable);
 	return 1;
 }
 
@@ -533,6 +589,9 @@ generate_record(const generation_pass *pass,
 			continue;
 		own = dialect_of(forms + form);
 		if (pass->variant && !variant_form(pass->variant,forms + form))
+			continue;
+		if (pass->clitic_accent &&
+		    !clitic_accent_form(forms + form,pass->clitic_accent))
 			continue;
 		if (!morpheus_generation_form_dialect(forms + form,NULL) &&
 		    (!stated ||
@@ -733,16 +792,30 @@ verbal_adjective_in_tos(const morpheus_gener_record_view *record)
 	       !has_key(record->keys,"suff_acc");
 }
 
-/* Whether a lemma's records include a verb stem or an irregular verb form. */
+/* Whether a record is a clitic, which the clitic pass accents. */
+static int
+clitic_record(const morpheus_gener_record_view *record)
+{
+	return has_key(record->keys,"enclitic") ||
+	       has_key(record->keys,"proclitic");
+}
+
+/*
+ * Whether a lemma's records include a verb stem or an irregular verb form
+ * (*verbs), and a clitic (*clitics, when not NULL).
+ */
 static morpheus_generation_status
 lemma_has_verbs(const morpheus_generation_service *service,
-                const morpheus_gener_lemma_view *entry, int *verbs)
+                const morpheus_gener_lemma_view *entry, int *verbs,
+                int *clitics)
 {
 	uint64_t block_number;
 
 	*verbs = 0;
+	if (clitics)
+		*clitics = 0;
 	for (block_number = entry->first_block;
-	     block_number != entry->first_block + entry->block_count && !*verbs;
+	     block_number != entry->first_block + entry->block_count;
 	     block_number++) {
 		morpheus_gener_block_view block;
 		uint64_t record_number;
@@ -751,8 +824,7 @@ lemma_has_verbs(const morpheus_generation_service *service,
 		    MORPHEUS_GENER_INDEX_OK)
 			return MORPHEUS_GENERATION_INVALID;
 		for (record_number = block.first_record;
-		     record_number != block.first_record + block.record_count &&
-		     !*verbs;
+		     record_number != block.first_record + block.record_count;
 		     record_number++) {
 			morpheus_gener_record_view record;
 
@@ -760,8 +832,13 @@ lemma_has_verbs(const morpheus_generation_service *service,
 			                                &record) !=
 			    MORPHEUS_GENER_INDEX_OK)
 				return MORPHEUS_GENERATION_INVALID;
-			*verbs = record.kind == MORPHEUS_GENER_RECORD_VERB_STEM ||
-			         record.kind == MORPHEUS_GENER_RECORD_IRREGULAR_VERB;
+			if (record.kind == MORPHEUS_GENER_RECORD_VERB_STEM ||
+			    record.kind == MORPHEUS_GENER_RECORD_IRREGULAR_VERB)
+				*verbs = 1;
+			if (clitics && clitic_record(&record))
+				*clitics = 1;
+			if (*verbs && (!clitics || *clitics))
+				return MORPHEUS_GENERATION_OK;
 		}
 	}
 	return MORPHEUS_GENERATION_OK;
@@ -795,7 +872,7 @@ generate_key(const generation_pass *pass, const char *key)
 	}
 	*pass->found = 1;
 	if (!preverbs) {
-		result = lemma_has_verbs(service,&entry,&verbs);
+		result = lemma_has_verbs(service,&entry,&verbs,NULL);
 		if (result != MORPHEUS_GENERATION_OK)
 			return result;
 	}
@@ -833,6 +910,8 @@ generate_key(const generation_pass *pass, const char *key)
 			    ((record.kind != MORPHEUS_GENER_RECORD_INDECLINABLE &&
 			      record.kind != MORPHEUS_GENER_RECORD_IRREGULAR_VERB) ||
 			     has_key(record.keys,NU_MOVABLE_KEYS)))
+				continue;
+			if (pass->clitic_accent && !clitic_record(&record))
 				continue;
 			if (verbs && verbal_adjective_in_tos(&record))
 				continue;
@@ -1049,6 +1128,61 @@ generate_nu_movable(generation_pass *pass,
 	return result;
 }
 
+/*
+ * The accented clitics of the lemma come last (see clitic_accent_form):
+ * with their acute, then with their acute and a movable nu (ei)si/n), then
+ * e)/sti(n). Clitics are the lemma's own irregular forms: a compound accents
+ * its preverb.
+ */
+static morpheus_generation_status
+generate_clitic_accents(generation_pass *pass)
+{
+	static const struct {
+		const morpheus_preverb_variant *variant;
+		int accent;
+	} steps[] = {
+		{ &clitic_variant, CLITIC_LAST },
+		{ &nu_movable_variant, CLITIC_LAST },
+		{ &clitic_variant, CLITIC_ESTI }
+	};
+	morpheus_generation_status result = MORPHEUS_GENERATION_OK;
+	morpheus_gener_lemma_view entry;
+	size_t step;
+	int verbs;
+	int clitics;
+
+	/* Most lemmas have no clitic: one look at their records spares the passes. */
+	switch (morpheus_gener_index_lookup(pass->service->index,pass->lemma,
+	                                    &entry)) {
+	case MORPHEUS_GENER_INDEX_OK:
+		break;
+	case MORPHEUS_GENER_INDEX_NOT_FOUND:
+		return MORPHEUS_GENERATION_OK;
+	default:
+		return MORPHEUS_GENERATION_INVALID;
+	}
+	result = lemma_has_verbs(pass->service,&entry,&verbs,&clitics);
+	if (result != MORPHEUS_GENERATION_OK || !clitics)
+		return result;
+	pass->preverbs = NULL;
+	for (step = 0; step != sizeof steps / sizeof steps[0] &&
+	               result == MORPHEUS_GENERATION_OK; step++) {
+		surface_set added = { 0 };
+
+		pass->variant = steps[step].variant;
+		pass->clitic_accent = steps[step].accent;
+		pass->nu_movable = steps[step].variant == &nu_movable_variant;
+		pass->added = &added;
+		result = end_pass(pass,generate_key(pass,pass->lemma));
+		surface_set_free(&added);
+	}
+	pass->clitic_accent = 0;
+	pass->nu_movable = 0;
+	pass->variant = NULL;
+	pass->added = NULL;
+	return result;
+}
+
 morpheus_generation_status
 morpheus_generation_service_generate(morpheus_generation_service *service,
                                      const char *canonical_lemma,
@@ -1077,12 +1211,14 @@ morpheus_generation_service_generate_flags(
 	int variants = 0;
 	int unaugmented;
 	int nu_movable;
+	int clitics;
 
 	if (!service || !canonical_lemma || !*canonical_lemma || !visitor ||
 	    !form_count ||
 	    (flags & ~(MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS|
 	               MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED|
-	               MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE)))
+	               MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE|
+	               MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS)))
 		return MORPHEUS_GENERATION_INVALID;
 	*form_count = 0;
 	if (skipped_records)
@@ -1107,7 +1243,9 @@ morpheus_generation_service_generate_flags(
 	pass.lemma = canonical_lemma;
 	unaugmented = !(flags & MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED);
 	nu_movable = !(flags & MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE);
-	pass.seen = variants || unaugmented || nu_movable ? &seen : NULL;
+	clitics = !(flags & MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS);
+	pass.seen = variants || unaugmented || nu_movable || clitics ? &seen
+	                                                             : NULL;
 	pass.visitor = visitor;
 	pass.state = state;
 	pass.form_count = form_count;
@@ -1127,6 +1265,8 @@ morpheus_generation_service_generate_flags(
 		result = generate_unaugmented(&pass,decompositions,count);
 	if (nu_movable && result == MORPHEUS_GENERATION_OK)
 		result = generate_nu_movable(&pass,decompositions,count);
+	if (clitics && result == MORPHEUS_GENERATION_OK)
+		result = generate_clitic_accents(&pass);
 	morpheus_runtime_context_activate(previous);
 	free(decompositions);
 	surface_set_free(&seen);
