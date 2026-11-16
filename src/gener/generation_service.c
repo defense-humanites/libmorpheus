@@ -13,6 +13,7 @@
 #include "gener_internal.h"
 #include "generation_compounds.h"
 #include "../morphlib/gkstring.proto.h"
+#include "../morphlib/numovable.proto.h"
 #include "../morphlib/runtime_context_internal.h"
 
 struct morpheus_generation_service {
@@ -76,14 +77,16 @@ record_keys(const char *source, const char *preverbs, const char *variant)
 		copy[length + added] = ' ';
 		memcpy(copy + length + added + 1,variant,strlen(variant) + 1);
 	}
-	cursor = copy;
-	while (isspace((unsigned char)*cursor))
-		cursor++;
-	while (*cursor && !isspace((unsigned char)*cursor)) {
+	/*
+	 * A comma joins keys as a space does, in any of the record's own keys,
+	 * as the analysis index reads them (indexstems.c): xalk os_ou
+	 * suff_acc,masc is suffix-accented, and ui( irreg_decl3 masc
+	 * os_ou,suff_acc,masc an os_ou stem. The preverbs added after them keep
+	 * theirs (a)po/,e)k).
+	 */
+	for (cursor = copy; cursor != copy + length; cursor++)
 		if (*cursor == ',')
 			*cursor = ' ';
-		cursor++;
-	}
 	return copy;
 }
 
@@ -207,6 +210,8 @@ typedef struct {
 	surface_set *added;
 	/* The unaugmented pass, alone or combined with a preverb variant. */
 	int unaugmented;
+	/* The pass of irregular forms with a movable nu. */
+	int nu_movable;
 	/* Whether the preverb variants are generated. */
 	int preverb_variants;
 	morpheus_generation_visitor visitor;
@@ -330,6 +335,36 @@ unaugmented_form(gk_word *form)
 }
 
 /*
+ * Beside an irregular form (:wd:, :vb:) that can take a movable nu, the
+ * analysis index holds the same form with it (indexstems.c, takes_nu_movable):
+ * a)ndra/sin beside a)ndra/si, while the data spell out only some of these
+ * forms. A pass after the others adds the nu to the forms that take one.
+ */
+#define NU_MOVABLE_KEYS "nu_movable"
+
+static const morpheus_preverb_variant nu_movable_variant = {
+	NU_MOVABLE_KEYS, NULL
+};
+
+static int
+nu_movable_form(gk_word *form)
+{
+	gk_string probe = { 0 };
+	size_t length = strlen(workword_of(form));
+
+	if (length + 2 > MAXWORDSIZE)
+		return 0;
+	set_gkstring(&probe,workword_of(form));
+	forminfo_of(&probe) = forminfo_of(form);
+	if (!takes_nu_movable(&probe))
+		return 0;
+	workword_of(form)[length] = 'n';
+	workword_of(form)[length + 1] = 0;
+	add_morphflag(morphflags_of(form),NU_MOVABLE);
+	return 1;
+}
+
+/*
  * The dialects a variant pass allows its forms, or 0 for any: Ionic for an
  * unaspirated preverb, Ionic and epic for an unaugmented form.
  */
@@ -389,6 +424,8 @@ variant_form(const morpheus_preverb_variant *variant, gk_word *form)
 		if (!matched)
 			return 0;
 	}
+	if (strstr(variant->keys,NU_MOVABLE_KEYS))
+		return nu_movable_form(form);
 	if (strstr(variant->keys,UNAUGMENTED_KEYS) && !unaugmented_form(form))
 		return 0;
 	if (strstr(variant->keys,"unasp_preverb"))
@@ -792,6 +829,11 @@ generate_key(const generation_pass *pass, const char *key)
 			if (pass->unaugmented &&
 			    record.kind != MORPHEUS_GENER_RECORD_VERB_STEM)
 				continue;
+			if (pass->nu_movable &&
+			    ((record.kind != MORPHEUS_GENER_RECORD_INDECLINABLE &&
+			      record.kind != MORPHEUS_GENER_RECORD_IRREGULAR_VERB) ||
+			     has_key(record.keys,NU_MOVABLE_KEYS)))
+				continue;
 			if (verbs && verbal_adjective_in_tos(&record))
 				continue;
 			if (find_record_preverb(record.keys,&own)) {
@@ -975,6 +1017,38 @@ generate_unaugmented(generation_pass *pass,
 	return result;
 }
 
+/*
+ * The irregular forms of the lemma and of its compounds that take a movable
+ * nu, with it, after every other form; like a variant, the pass returns only
+ * the forms and readings not already returned, so a form the data spell out
+ * with its nu comes once.
+ */
+static morpheus_generation_status
+generate_nu_movable(generation_pass *pass,
+                    const morpheus_compound_decomposition *decompositions,
+                    size_t count)
+{
+	morpheus_generation_status result;
+	surface_set added = { 0 };
+	size_t item;
+
+	pass->nu_movable = 1;
+	pass->variant = &nu_movable_variant;
+	pass->added = &added;
+	pass->preverbs = NULL;
+	result = generate_key(pass,pass->lemma);
+	for (item = 0; item != count && result == MORPHEUS_GENERATION_OK; item++)
+		if (composes(decompositions + item,pass->lemma))
+			result = generate_decomposition(pass,decompositions + item);
+	result = end_pass(pass,result);
+	surface_set_free(&added);
+	pass->nu_movable = 0;
+	pass->variant = NULL;
+	pass->added = NULL;
+	pass->preverbs = NULL;
+	return result;
+}
+
 morpheus_generation_status
 morpheus_generation_service_generate(morpheus_generation_service *service,
                                      const char *canonical_lemma,
@@ -1002,11 +1076,13 @@ morpheus_generation_service_generate_flags(
 	int found = 0;
 	int variants = 0;
 	int unaugmented;
+	int nu_movable;
 
 	if (!service || !canonical_lemma || !*canonical_lemma || !visitor ||
 	    !form_count ||
 	    (flags & ~(MORPHEUS_GENERATION_SERVICE_NO_PREVERB_VARIANTS|
-	               MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED)))
+	               MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED|
+	               MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE)))
 		return MORPHEUS_GENERATION_INVALID;
 	*form_count = 0;
 	if (skipped_records)
@@ -1030,7 +1106,8 @@ morpheus_generation_service_generate_flags(
 	pass.service = service;
 	pass.lemma = canonical_lemma;
 	unaugmented = !(flags & MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED);
-	pass.seen = variants || unaugmented ? &seen : NULL;
+	nu_movable = !(flags & MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE);
+	pass.seen = variants || unaugmented || nu_movable ? &seen : NULL;
 	pass.visitor = visitor;
 	pass.state = state;
 	pass.form_count = form_count;
@@ -1048,6 +1125,8 @@ morpheus_generation_service_generate_flags(
 			result = generate_variants(&pass,decompositions + item);
 	if (unaugmented && result == MORPHEUS_GENERATION_OK)
 		result = generate_unaugmented(&pass,decompositions,count);
+	if (nu_movable && result == MORPHEUS_GENERATION_OK)
+		result = generate_nu_movable(&pass,decompositions,count);
 	morpheus_runtime_context_activate(previous);
 	free(decompositions);
 	surface_set_free(&seen);

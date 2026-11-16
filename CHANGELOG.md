@@ -41,6 +41,10 @@ the corpus.
   Ionic when the parts name none. A pass after the others keeps only the
   forms and readings it adds: λῦον is an imperfect as well as a participle.
 
+- Movable ν on irregular forms (#100): as the analysis index does,
+  generation returns an irregular form (`:wd:`, `:vb:`) that can take a
+  movable ν with it too, flagged `nu_movable` (ἀνδράσιν beside ἀνδράσι,
+  εἰσίν). A form the data already spell with its ν comes once.
 - A verb no longer returns the verbal adjective in -τός that its derivation
   lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
   φερτός as a lemma of its own, which generation returns under that lemma,
@@ -117,6 +121,16 @@ the corpus.
   7.6 % (58.3 to 53.8 million forms). The forms left out are nearly all
   misreadings of analysis, but a few are real: the lyric ἁλίοιο, a Doric
   stem with an epic ending.
+- Generation reads a record's keys as the analysis index does when a comma
+  joins them, in any key (#100); it read only the commas of the first one.
+  χαλκός is suffix-accented again (it came out as χάλκος), υἱός and υἱόν
+  are generated from `ui( irreg_decl3 masc os_ou,suff_acc,masc`, and
+  records that name their dialects or voice after a comma keep to them
+  (`ei)ru … epic,ionic`, `ai)n umi_pr numi epic,mid`). 113 lemmas change:
+  all 401 surfaces they gain analyze back to their lemma; of the 1,016
+  they lose, 412 did not, and 604 are hybrids of the dialects now read
+  with endings of others, which generation leaves out (see dialects
+  above). The index skips 340 records instead of 345.
 - After ρ, ε or ι, a first-declension ending in -η is Ionic and epic, not
   Attic: χώρην, χώρης and χώρῃ were labelled Attic, χώρη was not. The
   ending check cleared the stem's flag for this rule after the first ending

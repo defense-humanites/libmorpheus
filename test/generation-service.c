@@ -113,10 +113,13 @@ generate_and_check(const morpheus_gener_index *index, const char *lemma,
 	       MORPHEUS_GENERATION_OK);
 	/*
 	 * The fixtures record the engine's forms of each record; the
-	 * unaugmented pass adds forms of its own (public-generation.c).
+	 * unaugmented and movable nu passes add forms of their own
+	 * (public-generation.c).
 	 */
 	assert(morpheus_generation_service_generate_flags(
-	           service,lemma,MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED,
+	           service,lemma,
+	           MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED|
+	           MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
 	           summarize,&summary,&count,&skipped) ==
 	       MORPHEUS_GENERATION_OK);
 	assert(skipped == 0);

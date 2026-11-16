@@ -64,3 +64,15 @@
 :vs:paideu w_stem
 :aj:paideut os_on reg_conj
 :aj:paideut verb_adj2
+
+:le:xalko/s
+:no:xalk os_ou suff_acc,masc
+
+:le:ui(o/s
+:no:ui( irreg_decl3 masc os_ou,suff_acc,masc
+:wd:ui(e/si irreg_decl3 masc irreg_decl3 dat pl masc
+
+:le:a)nh/r
+:wd:a)ndra/si irreg_decl3 masc dat pl
+:wd:a)ndrsi/ irreg_decl3 masc dat pl
+:wd:a)ndrsi/n irreg_decl3 masc dat pl nu_movable

@@ -634,6 +634,50 @@ int main(int argc, char **argv)
   }
 
   /*
+   * A comma joins a record's keys as a space does, as the analysis index
+   * reads them: xalk os_ou suff_acc,masc is suffix-accented (xalko/s, not
+   * xa/lkos), and ui( irreg_decl3 masc os_ou,suff_acc,masc an os_ou stem.
+   */
+  {
+    int has_surface;
+    int has_recessive;
+
+    generated_surfaces(context,"xalko/s","xalko/s","xa/lk",&has_surface,
+                       &has_recessive);
+    assert(has_surface && !has_recessive);
+    generated_surfaces(context,"ui(o/s","ui(o/n","ui(o/n",&has_surface,
+                       &has_recessive);
+    assert(has_surface);
+  }
+
+  /*
+   * An irregular form that can take a movable nu comes with it too, as the
+   * analysis index holds it: a)ndra/sin beside a)ndra/si. A form the data
+   * spell out with its nu (a)ndrsi/n) comes once.
+   */
+  {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_NU_MOVABLE;
+    size_t with_nu=0;
+    size_t spelled=0;
+
+    assert(morpheus_generate(context,(const uint8_t *)"a)nh/r",6,NULL,
+                             &result)==MORPHEUS_OK);
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      if(!strcmp(item.surface,"a)ndra/sin")) {
+        assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+        assert(item.grammatical_case==MORPHEUS_CASE_DATIVE &&
+               item.number==MORPHEUS_NUMBER_PLURAL);
+        with_nu++;
+      }
+      if(!strcmp(item.surface,"a)ndrsi/n")) spelled++;
+    }
+    assert(with_nu==1 && spelled==1);
+    morpheus_generation_result_free(result);
+    result=NULL;
+  }
+
+  /*
    * pro and peri do not elide before a vowel; the engine marks the hiatus
    * with '+', which surfaces keep only as the diaeresis of an iota or
    * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but

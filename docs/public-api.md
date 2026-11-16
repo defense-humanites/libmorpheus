@@ -145,6 +145,15 @@ Ionic and epic, or Homeric and Ionic when their parts name none, so that an
 Attic or common dialect filter leaves out the forms of this pass. Other
 forms carry the flag from the stem data or the ending tables (the epic
 λύτο, the iteratives λύεσκε) and keep the dialects these give them.
+
+Beside an irregular form that can take a movable ν (a `:wd:` or `:vb:`
+record ending in -σι, -ξι, -ψι, or in -ε at the third person), the analysis
+index holds the same form with the ν. Generation returns these forms last,
+flagged `nu_movable`: ἀνδράσιν beside ἀνδράσι, εἰσίν beside εἰσί. A form
+the data already spell with its ν comes once. Generation also reads a
+record's keys as the analysis index does when a comma joins them, in any
+key: `xalk os_ou suff_acc,masc` is suffix-accented (χαλκός), and
+`ei)ru w_stem reg_conj syll_augment epic,ionic` is Ionic and epic.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
