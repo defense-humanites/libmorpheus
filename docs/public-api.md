@@ -169,10 +169,15 @@ unaccented form:
 
 Analysis also gives a clitic forms it reads without regard to their
 accent, such as τίνα and τοῦ under τις, which are forms of the
-interrogative τίς; generation does not return those. Nor does it return
-the second accent that an enclitic puts on the word before it (τοῦτό,
-εἶναί), or crasis (κἀγώ, τοὔργον): analysis removes the second accent
-before it looks a word up, and a lookup table can do the same.
+interrogative τίς; generation does not return those.
+
+To look up running text in generated forms, normalize the text as analysis
+does before it looks a word up: remove the second accent that an enclitic
+puts on the word before it (τοῦτό, εἶναί), and remove the diaeresis, which
+editions and the stem data write differently (πάϊς, ὀΐω, νηΐ; ἀολλέες,
+which generation writes `a)olle/+es`). On AGDT 2.1, the readings that
+generation returns rise from 95.2 % to 96.3 % with these two steps. Crasis
+(κἀγώ, τοὔργον, 0.3 % of the readings) needs a table of its own.
 Generation therefore serves to find the forms of a lemma in a text, to
 precompute a form-to-lemma table, and to check the stem data; it does not
 give a reference paradigm, which an application must select with other
@@ -273,6 +278,14 @@ returns only the forms its flags change, with every reading of each
 (ξυνέβαλλον, first singular and third plural), and only those that begin as
 the table spells the variant. `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`
 leaves the variants out.
+
+Analysis also cuts ἀνα-, κατα- and παρα- before any consonant, where the
+table lists the apocope only before labials, gutturals and λ (ἀμ-, ἀγ-,
+ἀλ-, κάβ-, κάγ-...). Generation keeps to the table. Of the readings that
+analysis gives AGDT 2.1 tokens, the cuts it does not return are 0.5 %,
+nearly all misreadings (ἀνδρῶν, ἄνδρα as ἀναδράω, ἀναγκαῖον as a compound
+of ἀνά and ἀνακαίω); 0.03 % are forms that analysis reads no other way,
+the Homeric ἀνστάντες, κάτθεσαν, παρθέμενοι.
 
 A name that analysis never reports returns no record: `a)po/-di/dwmi`,
 because analysis names that compound `a)podi/dwmi`, or a listed name that
