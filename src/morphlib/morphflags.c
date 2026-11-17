@@ -224,32 +224,55 @@ int is_prvb_morphflag(long mnum)
 
 /*
  * The morph flags that belong to a preverb rather than to the word it is
- * attached to. init_prvb_tab() builds its lookup table from this list.
+ * attached to. init_prvb_tab() builds its lookup table from this list, and
+ * xfer_prvbflags() moves them with preverb_morphflag_mask, built from it
+ * too.
+ *
+ * After DOUBLED_CONS come the shapes of the preverb itself (e)s for ei)s,
+ * cun for su/n...), which rstprevb() applies from the preverb's flags. Not
+ * IOTA_INTENS, which also marks the deictic iota of a word (e)keinosi/) and
+ * must stay in the stem keys the stemlib build writes.
  */
+#define PREVERB_MORPHFLAGS(X, byte) \
+	X(DISSIMILATION, byte) \
+	X(PREVB_AUGMENT, byte) \
+	X(ELIDE_PREVERB, byte) \
+	X(ROOT_PREVERB, byte) \
+	X(RAW_PREVERB, byte) \
+	X(UNASP_PREVERB, byte) \
+	X(APOCOPE, byte) \
+	X(DOUBLED_CONS, byte) \
+	X(SIG_TO_CI, byte) \
+	X(SHORT_EIS, byte) \
+	X(PROS_TO_POTI, byte) \
+	X(META_TO_PEDA, byte) \
+	X(PROS_TO_PROTI, byte) \
+	X(UPO_TO_UPAI, byte) \
+	X(PARA_TO_PARAI, byte) \
+	X(UPER_TO_UPEIR, byte) \
+	X(EN_TO_ENI, byte)
+
+#define PREVERB_MORPHFLAG_ENTRY(flag, byte) flag,
 static const int preverb_morphflags[] = {
-	DISSIMILATION,
-	PREVB_AUGMENT,
-	ELIDE_PREVERB,
-	ROOT_PREVERB,
-	RAW_PREVERB,
-	UNASP_PREVERB,
-	APOCOPE,
-	DOUBLED_CONS,
-	/*
-	 * The shapes of the preverb itself (e)s for ei)s, cun for su/n...),
-	 * which rstprevb() applies from the preverb's flags. Not IOTA_INTENS,
-	 * which also marks the deictic iota of a word (e)keinosi/) and must stay
-	 * in the stem keys the stemlib build writes.
-	 */
-	SIG_TO_CI,
-	SHORT_EIS,
-	PROS_TO_POTI,
-	META_TO_PEDA,
-	PROS_TO_PROTI,
-	UPO_TO_UPAI,
-	PARA_TO_PARAI,
-	UPER_TO_UPEIR,
-	EN_TO_ENI
+	PREVERB_MORPHFLAGS(PREVERB_MORPHFLAG_ENTRY, 0)
+};
+
+/* The bit of flag n in byte `byte` of a MorphFlags array, as mflag_num_to_bits(). */
+#define PREVERB_MORPHFLAG_BIT(flag, byte) \
+	| (((flag) - 1) / 8 == (byte) ? 1U << (((flag) - 1) % 8) : 0U)
+#define PREVERB_MORPHFLAG_BYTE(byte) \
+	(MorphFlags)(0U PREVERB_MORPHFLAGS(PREVERB_MORPHFLAG_BIT, byte))
+
+_Static_assert(MORPHFLAG_STORAGE_BYTES == 14,
+               "preverb_morphflag_mask lists one byte per storage byte");
+static const MorphFlags preverb_morphflag_mask[MORPHFLAG_STORAGE_BYTES] = {
+	PREVERB_MORPHFLAG_BYTE(0), PREVERB_MORPHFLAG_BYTE(1),
+	PREVERB_MORPHFLAG_BYTE(2), PREVERB_MORPHFLAG_BYTE(3),
+	PREVERB_MORPHFLAG_BYTE(4), PREVERB_MORPHFLAG_BYTE(5),
+	PREVERB_MORPHFLAG_BYTE(6), PREVERB_MORPHFLAG_BYTE(7),
+	PREVERB_MORPHFLAG_BYTE(8), PREVERB_MORPHFLAG_BYTE(9),
+	PREVERB_MORPHFLAG_BYTE(10), PREVERB_MORPHFLAG_BYTE(11),
+	PREVERB_MORPHFLAG_BYTE(12), PREVERB_MORPHFLAG_BYTE(13)
 };
 
 void * zogalloc(size_t, size_t);
@@ -279,17 +302,20 @@ int init_prvb_tab(void)
 
 /*
  * Move the preverb flags of a word to its preverb. Called for every
- * candidate key, so it tests the preverb flags of preverb_morphflags[]
- * directly rather than every flag number against the context's table.
+ * candidate key during analysis, so it moves them a byte at a time through
+ * preverb_morphflag_mask rather than testing each flag: with one test per
+ * flag, the 17 flags cost analysis a tenth of its instructions.
  */
 void xfer_prvbflags(MorphFlags *word_mf, MorphFlags *prvb_mf)
 {
 	size_t i;
 
-	for(i=0;i<sizeof preverb_morphflags / sizeof preverb_morphflags[0];i++) {
-		if( has_morphflag(word_mf,preverb_morphflags[i]) ) {
-				zap_morphflag(word_mf,preverb_morphflags[i]);
-				add_morphflag(prvb_mf,preverb_morphflags[i]);
+	for(i=0;i<MORPHFLAG_STORAGE_BYTES;i++) {
+		MorphFlags moved = (MorphFlags)(word_mf[i] & preverb_morphflag_mask[i]);
+
+		if( moved ) {
+			word_mf[i] = (MorphFlags)(word_mf[i] & (MorphFlags)~moved);
+			prvb_mf[i] = (MorphFlags)(prvb_mf[i] | moved);
 		}
 	}
 }
