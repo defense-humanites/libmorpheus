@@ -9,6 +9,15 @@ the corpus.
 
 ## [Unreleased]
 
+### Changed
+
+- Node.js binding 0.4.0 (`docs/release-node-0.4.0.md`) and Python binding
+  0.4.0 (`docs/release-python-0.4.0.md`) declare native release 0.6.0
+  instead of 0.5.0, and pass `excludePreverbVariants` and
+  `exclude_preverb_variants` (see 0.6.0 below). Node.js pins
+  `@libmorpheus/data` 0.3.0, and Python's `--gener-index` verifies that
+  package's index (`8ba328ca…`). C ABI 2 unchanged.
+
 ## [0.6.0] - 2026-11-17
 
 Target project version: **0.6.0**. C ABI: **2**. Shared-library SONAME: **1**.

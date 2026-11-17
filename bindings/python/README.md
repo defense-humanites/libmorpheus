@@ -310,8 +310,8 @@ Neither is part of the Python wheel or source distribution.
 | PyPI wheel or source distribution | Not included | Not included | Run `libmorpheus-setup`, or `libmorpheus-native` and `libmorpheus-data`. |
 | Recursive project checkout | Build with CMake | Perseids submodule | Pass the build output and `stemlib/` paths explicitly. |
 
-Binding and runtime versions are independent. Python binding `0.3.0` targets
-native runtime `0.5.0` and requires C ABI `2`. The package exports
+Binding and runtime versions are independent. Python binding `0.4.0` targets
+native runtime `0.6.0` and requires C ABI `2`. The package exports
 `MORPHEUS_PYTHON_VERSION`, `MORPHEUS_NATIVE_VERSION`, and
 `MORPHEUS_NATIVE_ABI_VERSION`; `__version__` is the conventional alias for the
 Python package version.
@@ -366,7 +366,7 @@ for pinned sources, validation, and redistribution boundaries.
 libmorpheus-native --output <directory>
 ```
 
-The command downloads the archive of the declared native release (`v0.5.0`)
+The command downloads the archive of the declared native release (`v0.6.0`)
 for this host (Linux x86-64 glibc, Linux aarch64 glibc or macOS arm64; musl
 hosts are refused rather than given an incompatible binary), verifies it
 against the SHA-256 sidecar published with the release, extracts it with
@@ -401,7 +401,7 @@ installed native library.
 The release qualification matrix covers Python 3.11, 3.14 and 3.15 on Linux with the
 real runtime and an ABI fixture. The native release currently provides Linux
 x86-64 glibc, Linux aarch64 glibc, and macOS arm64 archives. Windows is not
-supported by native runtime `0.5.0`.
+supported by native runtime `0.6.0`.
 
 ## Documentation
 
