@@ -9,6 +9,27 @@ the corpus.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-17
+
+Target project version: **0.6.0**. C ABI: **2**. Shared-library SONAME: **1**.
+
+This native release brings experimental generation close to the inverse of
+analysis. `morpheus_generate()` accepts the compound verbs analysis reports
+and returns their preverb variants. It also returns the unaugmented
+indicatives, movable ν and accented clitics that analysis reads, labels each
+form with the dialects all its parts allow, and leaves out the verbal
+adjectives that analysis gives to lemmas of their own. On the AGDT 2.1
+treebank, the readings analysis gives that generation returns rise from
+82.8 % to 95.2 %. The default generation limit becomes the maximum, 65,536
+records, and one generation flag is added; the C ABI is unchanged.
+Generation takes longer for a large verb, about twice as long for ἵημι.
+Analysis results are unchanged except one reading of χρῆς. It is the release
+WebAssembly binding 0.3.0 is compiled from and declares. `@libmorpheus/data`
+0.3.0 prepares the index that keeps the compound-only stems apart
+(`8ba328ca…`). The binding releases published since 0.5.0 (Node.js 0.3.0
+and Python 0.3.0) are listed below; the Node.js and Python bindings declare
+this release in their next versions.
+
 ### Added
 
 - Experimental generation composes compound verbs as analysis finds them
@@ -57,9 +78,9 @@ the corpus.
   εἰσίν, φησί, τινός, μοί; Smyth 185). A verb takes it only in an
   indicative of two syllables or fewer (Smyth 181, and φής): the
   infinitive ἐμεν, the epic ἐασι and the imperative φαθι, which the data
-  mark enclitic, stay unaccented. ἐστί(ν) also comes as ἔστι(ν) (Smyth 187). Where texts write
-  an enclitic with its own accent (τινῶν) or in its emphatic form (σφίσι),
-  generation does not return it.
+  mark enclitic, stay unaccented. ἐστί(ν) also comes as ἔστι(ν) (Smyth
+  187). Where texts write an enclitic with its own accent (τινῶν) or in its
+  emphatic form (σφίσι), generation does not return it.
 - A verb no longer returns the verbal adjective in -τός that its derivation
   lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
   φερτός as a lemma of its own, which generation returns under that lemma,
@@ -80,8 +101,8 @@ the corpus.
 
 - The default generation limit (`MORPHEUS_GENERATION_DEFAULT_LIMIT`, used
   with `NULL` options or a zero `result_limit`) is now the maximum, 65,536
-  records, instead of 4,096. 3,185 listed compound verbs exceed 4,096 records
-  (ἀφίημι: 4,725) and failed by default; the largest, προσκρεμάννυμι,
+  records, instead of 4,096. 3,180 listed compound verbs exceed 4,096 records
+  (ἀφίημι: 4,727) and failed by default; the largest, προσκρεμάννυμι,
   returns 28,200.
 - Node.js binding 0.3.0 (`docs/release-node-0.3.0.md`) and Python binding
   0.3.0 (`docs/release-python-0.3.0.md`) declare native release 0.5.0
@@ -96,9 +117,9 @@ the corpus.
   builders keep that leading hyphen; requests, canonicalised without
   hyphens, never reach it. The default index becomes `8ba328ca…` (prepared
   source `a618d41c…`); the data package's manifest and the Python
-  binding's `--gener-index` pin it. With an earlier runtime the reserved keys are
-  inert; with an earlier index, compounds are generated without the
-  compound-only stems.
+  binding's `--gener-index` pin it. With an earlier runtime the reserved
+  keys are inert; with an earlier index, compounds are generated without
+  the compound-only stems.
 - A record that carries its own preverb (`pb:`) is generated under the lemma
   analysis names after that preverb: ἀμπέσχον under ἀμπέχω instead of ἔχω,
   the `pb:e)pi/` stems filed under μελέομαι under ἐπιμελέομαι.

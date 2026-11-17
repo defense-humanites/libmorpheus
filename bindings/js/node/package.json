@@ -54,7 +54,7 @@
     "setup.js"
   ],
   "dependencies": {
-    "@libmorpheus/data": "0.2.0"
+    "@libmorpheus/data": "0.3.0"
   },
   "optionalDependencies": {
     "@libmorpheus/node-darwin-arm64": "0.3.0",

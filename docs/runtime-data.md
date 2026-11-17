@@ -114,7 +114,8 @@ is:
 8ba328ca8429c657aeb53a47a92045ac4bd64cdeab726af01e8afbcfd67d8fc2
 ```
 
-Native 0.5.0 and `@libmorpheus/data` 0.2.0 prepare
+Native 0.6.0 and `@libmorpheus/data` 0.3.0 prepare this index. Native 0.5.0
+and `@libmorpheus/data` 0.2.0 prepare
 `a2f9767708a488fb6e5e6672a8bf4d1701ca259bab1fb733a12299e2bd2aa331`, which
 drops the compound-only stems. Native releases up to 0.4.6 and
 `@libmorpheus/data` 0.1.0 prepare the historical index,
