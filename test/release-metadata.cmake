@@ -522,3 +522,36 @@ if(MORPHEUS_PROJECT_VERSION STREQUAL "0.5.0")
     message(FATAL_ERROR "Accepted 0.5.0 benchmark digest differs")
   endif()
 endif()
+
+if(MORPHEUS_PROJECT_VERSION STREQUAL "0.6.0")
+  foreach(expected_minor_release_value IN ITEMS
+          "Previous release tag: `v0.5.0`"
+          "Benchmark evidence: **accepted**"
+          "b00ee435eb1ec96b425df74a8aa40a9dc6c4271d"
+          "998060d582bb22340ce5b497f186ddc0dea2f34c6ba0c41bc26ef0f29a7aa05e"
+          "This native release brings experimental generation")
+    string(FIND "${release_decision}" "${expected_minor_release_value}"
+                minor_release_value_at)
+    if(minor_release_value_at EQUAL -1)
+      message(FATAL_ERROR
+        "release-0.6.0.md is missing: ${expected_minor_release_value}")
+    endif()
+  endforeach()
+  # The schema 3 report measured through the Node.js binding on the release
+  # candidate; it is the baseline of the next native release.
+  set(benchmark_path
+      "${MORPHEUS_SOURCE_DIR}/bench/release-evidence/benchmark-0.6.0.json")
+  set(benchmark_checksum
+      "998060d582bb22340ce5b497f186ddc0dea2f34c6ba0c41bc26ef0f29a7aa05e")
+  if(NOT EXISTS "${benchmark_path}" OR
+     NOT EXISTS "${benchmark_path}.sha256")
+    message(FATAL_ERROR "Accepted 0.6.0 benchmark evidence is missing")
+  endif()
+  file(SHA256 "${benchmark_path}" actual_benchmark_checksum)
+  file(READ "${benchmark_path}.sha256" recorded_benchmark_checksum)
+  if(NOT actual_benchmark_checksum STREQUAL benchmark_checksum OR
+     NOT recorded_benchmark_checksum MATCHES
+       "^${benchmark_checksum}  benchmark-0.6.0.json")
+    message(FATAL_ERROR "Accepted 0.6.0 benchmark digest differs")
+  endif()
+endif()
