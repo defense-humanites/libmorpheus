@@ -5,8 +5,7 @@
 Version 0.3.0 of the WebAssembly binding compiles libmorpheus 0.6.0, C ABI 2,
 with Emscripten 4.0.15. It supersedes 0.2.0 for the generation changes of
 0.6.0 and passes the new preverb-variant flag. This document records the
-intended contract; it does not authorize or record creation of the
-`wasm-v0.3.0` tag.
+intended contract and, in its last section, the publication.
 
 ## Why a new version
 
@@ -58,5 +57,36 @@ As for 0.2.0, with these steps:
    `SHA256SUMS`, from `docs/release-notes/wasm-v0.3.0.md`.
 
 The `v0.6.0` tag must exist first, on the same commit or on an ancestor with
-an unchanged runtime. After publication, the maintainer exercises the
-package from JSR itself and records the result here.
+an unchanged runtime.
+
+## Publication record
+
+- Tag: `wasm-v0.3.0`, created by the maintainer on 2026-11-17 on
+  `7dcc93a18121ff79c3b694afb3b9fc9e4ebf1886`, the commit of
+  [`v0.6.0`](release-0.6.0.md), after that native release was published.
+- Tagged qualification: [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/44166719612)
+  and [WebAssembly](https://github.com/defense-humanites/libmorpheus/actions/runs/44166719778),
+  both passed at their first attempt.
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/44166719572).
+  - The rebuilt module reproduced the qualified artifact byte for byte.
+  - npm accepted the version: `latest` is now `0.3.0`, with tarball
+    integrity
+    `sha512-OyOoEeEFRbB1piKFWJRzNPfbgTjkTjgOZ3zZjZ4KWAHUQxPsc9QfGxo2GDubQjFVQFYdp3c/7rQDt0GeEzD9gw==`.
+  - JSR accepted the version.
+  - The [`wasm-v0.3.0` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/wasm-v0.3.0)
+    carries the module files.
+- Module digests (`SHA256SUMS`):
+  `fc3e28b8a1c90c75ddce6053aaca5b554075ce0e7ad15d3c23d19c538c4665ed`
+  (`morpheus.mjs`),
+  `787b9e7d584289fd0a76a578264637e6cf84e05a425731b2d1a59cef7c7d3b29`
+  (`morpheus.wasm`). A module built outside CI from the tagged commit with
+  the pinned Emscripten 4.0.15 has the same two digests.
+- npm check: `@libmorpheus/wasm@0.3.0` installed from npm reports
+  WebAssembly 0.3.0 and native 0.6.0. It was run over the Alpheios Greek
+  tree and the index that `@libmorpheus/data` 0.3.0 prepared from npm
+  (`8ba328ca…`), and gave what native 0.6.0 gives with the same files:
+  - δίδωμι generates 3,317 records, with `skippedRecords` 1, not enumerable;
+  - καταβάλλω generates 5,825 records, 3,040 with
+    `excludePreverbVariants`.
+- JSR end-to-end check: to be done by the maintainer, from
+  `@libmorpheus/wasm@0.3.0` as JSR serves it, and recorded here.

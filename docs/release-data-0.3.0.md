@@ -5,8 +5,7 @@
 `@libmorpheus/data` 0.3.0 supersedes 0.2.0 for the generation index that
 `--with-gener` prepares. The package still contains no linguistic data, and
 its datasets, commands and options are unchanged. This document records the
-intended contract; it does not authorize or record creation of the
-`data-v0.3.0` tag.
+intended contract and, in its last section, the publication.
 
 ## Release record
 
@@ -80,6 +79,32 @@ As for 0.2.0, `data-release.yml` does the following:
    `docs/release-notes/data-v0.3.0.md`.
 
 Before tagging, the package command run from the tree prepared `8ba328ca…`
-from the downloaded Alpheios archive. After publication, the maintainer
-prepares an index from the published package and records here that its
-digest is `8ba328ca…`.
+from the downloaded Alpheios archive.
+
+## Publication record
+
+- Tag: `data-v0.3.0`, created by the maintainer on 2026-11-17 on
+  `7dcc93a18121ff79c3b694afb3b9fc9e4ebf1886`, the commit of
+  [`v0.6.0`](release-0.6.0.md) and [`wasm-v0.3.0`](release-wasm-0.3.0.md).
+- Tagged Linux CI: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/44166762277).
+- Publication workflow: [passed at the first attempt](https://github.com/defense-humanites/libmorpheus/actions/runs/44166762426).
+  - The package checks passed, and the command installed from the tarball
+    acquired the Perseids Latin runtime subset.
+  - npm accepted the version: `latest` is now `0.3.0`, with tarball
+    integrity
+    `sha512-9j50TlbFQHYpgunJhL+ovIpMKJeKaG8liB8uXBQlyHGgVFJsWkBnbyxKNOCx8ZS6cyMY1KNbMVwxwxuO6NkCBA==`.
+  - JSR accepted the version.
+  - The [`data-v0.3.0` pre-release](https://github.com/defense-humanites/libmorpheus/releases/tag/data-v0.3.0)
+    carries `libmorpheus-data-0.3.0.tgz` and `SHA256SUMS`. The tarball's
+    SHA-256 is
+    `16316bb62ce5b8e478c6f9e65c949d8162332ccde273aa3846a85f062ef47d97`,
+    the same digest that an `npm pack` of the tagged commit produced outside
+    CI with npm 10.9.4.
+- npm check: `npx @libmorpheus/data@0.3.0 --dataset alpheios --languages grc
+  --subset runtime --with-gener` prepared the index
+  `8ba328ca8429c657aeb53a47a92045ac4bd64cdeab726af01e8afbcfd67d8fc2`. npm
+  served the version about two minutes after the publication step.
+- JSR end-to-end check: to be done by the maintainer, with Deno from
+  `jsr:@libmorpheus/data@0.3.0`, and recorded here.
+- The Node.js binding depends on this version from 0.4.0, and the Python
+  binding verifies its index digest from 0.4.0.
