@@ -261,6 +261,14 @@ run_differential(const morpheus_gener_index *index, const char *fixture_path)
 	assert(surface_forms(index,"a)nh/r",
 	                     MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
 	                     "a)ndra/si") == 1);
+	/* The clitic pass adds tino/s; its flag leaves it out. */
+	assert(surface_forms(index,"tis",0,"tino/s") == 1);
+	assert(surface_forms(index,"tis",
+	                     MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS,
+	                     "tino/s") == 0);
+	assert(surface_forms(index,"tis",
+	                     MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS,
+	                     "tinos") == 1);
 }
 
 static void *

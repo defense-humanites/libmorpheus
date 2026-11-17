@@ -168,47 +168,59 @@ Generation returns the accented forms of the lemma's clitics after the
 others, with the reading and the `enclitic` or `proclitic` flag of the
 unaccented form:
 - a proclitic as the analysis index accents it: ὅ, οἵ, εἴς, οὔκ;
-- an enclitic with the acute it takes on its ultima before another
-  enclitic (Smyth 183d): ἐστί, εἰσίν, φησί, τινός, μοί;
+- an enclitic with the accent that its record writes (ἄσσα, ἄττα), or else
+  with the acute that a following enclitic gives its ultima (Smyth 185):
+  ἐστί, εἰσίν, φησί, τινός, μοί;
 - ἐστί(ν) also as ἔστι(ν), the form at the head of a sentence or meaning
   "exists" (Smyth 187).
 
-Analysis also gives a clitic forms it reads without regard to their
-accent, such as τίνα and τοῦ under τις, which are forms of the
-interrogative τίς; generation does not return those.
+A verb takes that acute only in an indicative of two syllables or fewer:
+Smyth (181) counts as enclitic the dissyllabic forms of the present
+indicative of εἰμί and φημί, and the data add φής. They also mark as
+enclitic the infinitive ἐμεν, the epic ἐασι and the imperative φαθι, which
+generation leaves without an accent; texts write ἔμεν and ἔασι.
 
-To look up running text in generated forms, normalize the text as analysis
-does before it looks a word up: remove the second accent that an enclitic
-puts on the word before it (τοῦτό, εἶναί), and remove the diaeresis, which
-editions and the stem data write differently (πάϊς, ὀΐω, νηΐ; ἀολλέες,
-which generation writes `a)olle/+es`). On AGDT 2.1, the readings that
-generation returns rise from 95.2 % to 96.3 % with these two steps. Crasis
-(κἀγώ, τοὔργον, 0.3 % of the readings) needs a table of its own.
+The acute on the ultima is not always the accent that texts write. After a
+paroxytone, a disyllabic enclitic keeps its own accent (Smyth 183d), a
+circumflex in τινῶν and τινοῖν; σφίσι(ν), accented on its penult, is the
+emphatic form of σφισι(ν) (Smyth 325). Generation returns τινών and σφισί,
+and analysis reads either spelling. Analysis also gives a clitic forms that
+it reads without regard to their accent, such as τίνα and τοῦ under τις,
+which are forms of the interrogative τίς; generation does not return those.
 
 Generation thus returns what analysis accepts, not what texts attest. It
-serves to find the forms of a lemma in a text, to
-precompute a form-to-lemma table, and to check the stem data; it does not
-give a reference paradigm, which an application must select with other
-sources. A generated form may also belong to another lemma: Doric ἄγγελον,
-an aorist of ἀγγέλλω, is also the accusative of ἄγγελος. To search a text by
-lemma, generate the candidate forms, then confirm each match by analysis.
-Generated forms are isolated words with their own accent; running text needs
-the normalization that analysis applies (grave accents, enclitics, elision,
-crasis).
+serves to find the forms of a lemma in a text, to precompute a form-to-lemma
+table, and to check the stem data; it does not give a reference paradigm,
+which an application must select with other sources. A generated form may
+also belong to another lemma: Doric ἄγγελον, an aorist of ἀγγέλλω, is also
+the accusative of ἄγγελος. To search a text by lemma, generate the
+candidate forms, then confirm each match by analysis.
+
+Generated forms are isolated words with their own accent. To look up
+running text in them, normalize the text as analysis does before it looks
+a word up (grave accents, elision, enclitics). Besides turning grave
+accents into acute, two steps matter: remove the second accent that an
+enclitic puts on the word before it (τοῦτό, εἶναί), and remove the
+diaeresis, which editions and the stem data write differently (πάϊς, ὀΐω,
+νηΐ; ἀολλέες, which generation writes `a)olle/+es`). On AGDT 2.1, the
+readings that generation returns rise from 95.2 % to 96.3 % with these two
+steps. Crasis (κἀγώ, τοὔργον, 0.3 % of the readings) needs a table of its
+own.
 
 On samples of the Alpheios data, more than 99.5 % of the generated forms
 meet the first property, compounds included
 ([gener-derivations.md](gener-derivations.md#measures),
 [compound verbs](#compound-verbs)). The second is not yet met. On the verbs
-of the Perseus treebank (AGDT 2.1), 92.7 % of the tokens that analysis reads
+of the Perseus treebank (AGDT 2.1), 94.2 % of the tokens that analysis reads
 as a verb have every such reading generated (66.6 % before compound verbs);
-94.4 % of the readings as a simple verb are, 93.8 % of those as a listed
+96.2 % of the readings as a simple verb are, 93.9 % of those as a listed
 compound and 68.9 % of those as a hyphenated one. Over nouns, adjectives,
-pronouns and verbs, 93.0 % of the tokens' readings are generated, comparing
-forms without capitals and without the acute that an enclitic adds; most of
-the rest belong to running text (enclitic pronouns and articles with an
-accent, crasis) or are forms that analysis reads but the index does not
-hold.
+pronouns and verbs, 95.2 % of the tokens' readings are generated, comparing
+forms without capitals and without the acute that an enclitic adds. Most of
+the rest are readings that analysis gives without regard to accent (τίνα
+under τις, μάχης under μαχάω) or through compounds it builds (ἀνδρῶν as
+ἀναδράω, Ἀπόλλων as ἀπό-λάω), and forms of running text (second accents,
+diaeresis, crasis; see above); a few are forms that the data lack.
 
 `morpheus_generate()` accepts an explicit-length Greek Beta Code lemma. It
 applies the generation-index canonicalisation rules (initial `!`, hyphens,
@@ -287,13 +299,16 @@ returns only the forms its flags change, with every reading of each
 the table spells the variant. `MORPHEUS_GENERATION_EXCLUDE_PREVERB_VARIANTS`
 leaves the variants out.
 
-Analysis also cuts ἀνα-, κατα- and παρα- before any consonant, where the
-table lists the apocope only before labials, gutturals and λ (ἀμ-, ἀγ-,
-ἀλ-, κάβ-, κάγ-...). Generation keeps to the table. Of the readings that
-analysis gives AGDT 2.1 tokens, the cuts it does not return are 0.5 %,
-nearly all misreadings (ἀνδρῶν, ἄνδρα as ἀναδράω, ἀναγκαῖον as a compound
-of ἀνά and ἀνακαίω); 0.03 % are forms that analysis reads no other way,
-the Homeric ἀνστάντες, κάτθεσαν, παρθέμενοι.
+Analysis also reads as apocope any preverb that ends in a consonant before
+a consonant (`preverb2.c`): ἀν- before δ, ἀπ- before π (ἄππιον as
+ἀποπίνω). The table lists only some cuts of ἀνά, κατά and ὑπό (ἀμ-, ἀγ-,
+ἀλ-; κα-, κάβ-, κάδ-, κάκ-, κάλ-, κάν-, κάπ-, κάρ-; ὑβ-), none of παρά, and
+generation keeps to it. Of the readings that analysis gives AGDT 2.1
+tokens, the cuts it does not return are 0.5 %, nearly all misreadings
+(ἀνδρῶν, ἄνδρα as ἀναδράω, ἀναγκαῖον as a compound of ἀνά and ἀνακαίω),
+nearly half of them on hyphenated lemmas (ἀνά-διδράσκω), which take no
+preverb variant. 0.03 % are forms that analysis reads no other way, the
+Homeric ἀνστάντες, κάτθεσαν, παρθέμενοι.
 
 A name that analysis never reports returns no record: `a)po/-di/dwmi`,
 because analysis names that compound `a)podi/dwmi`, or a listed name that

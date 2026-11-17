@@ -52,8 +52,14 @@ the corpus.
   reads it without, and generation now returns the accented forms too,
   after the others and with the unaccented form's reading and flag. A
   proclitic is accented as the analysis index accents it (ὅ, οἵ, εἴς,
-  οὔκ), an enclitic with an acute on its ultima (ἐστί, εἰσίν, φησί, τινός,
-  μοί; Smyth 183d), and ἐστί(ν) also as ἔστι(ν) (Smyth 187).
+  οὔκ). An enclitic takes the accent that its record writes (ἄσσα, ἄττα),
+  or else the acute that a following enclitic gives its ultima (ἐστί,
+  εἰσίν, φησί, τινός, μοί; Smyth 185). A verb takes it only in an
+  indicative of two syllables or fewer (Smyth 181, and φής): the
+  infinitive ἐμεν, the epic ἐασι and the imperative φαθι, which the data
+  mark enclitic, stay unaccented. ἐστί(ν) also comes as ἔστι(ν) (Smyth 187). Where texts write
+  an enclitic with its own accent (τινῶν) or in its emphatic form (σφίσι),
+  generation does not return it.
 - A verb no longer returns the verbal adjective in -τός that its derivation
   lists (`:aj:fert os_on reg_conj` under φέρω, #78 item 6). Analysis reads
   φερτός as a lemma of its own, which generation returns under that lemma,

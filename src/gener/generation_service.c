@@ -16,6 +16,8 @@
 #include "../morphlib/numovable.proto.h"
 #include "../greeklib/addaccent.proto.h"
 #include "../greeklib/getsyll.proto.h"
+#include "../greeklib/nsylls.proto.h"
+#include "../greeklib/stripacc.proto.h"
 #include "../morphlib/runtime_context_internal.h"
 
 struct morpheus_generation_service {
@@ -375,24 +377,74 @@ nu_movable_form(gk_word *form)
  * enclitic does not decide its reading. Generation returns the accented
  * forms after the others:
  * - CLITIC_LAST: a proclitic as the indexer accents it (o(/, oi(/, ei)/s,
- *   ou)/k), and an enclitic with the acute that it takes on its ultima
- *   before another enclitic (e)sti/, tino/s, fhsi/, moi/; Smyth 183d);
+ *   ou)/k); an enclitic with the accent that its record writes and the
+ *   engine strips (a)/ssa, a)/tta under tis), or else with the acute that
+ *   it takes on its ultima from a following enclitic (e)sti/, tino/s,
+ *   fhsi/, moi/; Smyth 185);
  * - CLITIC_ESTI: e)sti(n) also accented on its penult, at the head of a
  *   sentence or meaning "exists" (e)/sti; Smyth 187).
+ * A verb takes that acute only in an indicative of two syllables or fewer:
+ * Smyth (181) counts as enclitic the dissyllabic forms of the present
+ * indicative of ei)mi/ and fhmi/, and the data add fhs. They also mark as
+ * enclitic the infinitive e)men, the epic e)a_si and the imperative fa^qi,
+ * which stay unaccented.
  */
 #define CLITIC_LAST 1
 #define CLITIC_ESTI 2
 
 static const morpheus_preverb_variant clitic_variant = { "", NULL };
 
+/* Whether text carries an accent. */
 static int
-clitic_accent_form(gk_word *form, int accent)
+has_accent(const char *text)
+{
+	for (; *text; text++)
+		if (Is_accent(*text))
+			return 1;
+	return 0;
+}
+
+/*
+ * Gives an enclitic form the accent that its record's stem writes, when the
+ * form is that stem without its accent, or that stem with a movable nu.
+ * Returns 0 when the form is neither.
+ */
+static int
+written_clitic_accent(char *word, const char *stem)
+{
+	char bare[MAXWORDSIZE];
+	size_t length = strlen(stem);
+	size_t bare_length;
+
+	if (length >= sizeof bare)
+		return 0;
+	memcpy(bare,stem,length + 1);
+	stripacc(bare);
+	bare_length = strlen(bare);
+	if (strncmp(word,bare,bare_length))
+		return 0;
+	if (!word[bare_length]) {
+		memcpy(word,stem,length + 1);
+		return 1;
+	}
+	if (!strcmp(word + bare_length,"n") && length + 2 <= MAXWORDSIZE) {
+		memcpy(word,stem,length);
+		word[length] = 'n';
+		word[length + 1] = 0;
+		return 1;
+	}
+	return 0;
+}
+
+static int
+clitic_accent_form(gk_word *form, int accent, const char *stem)
 {
 	char *word = workword_of(form);
 	int enclitic = Is_enclitic(morphflags_of(form)) ||
 	               Is_enclitic(morphflags_of(stem_gstr_of(form)));
 	int proclitic = Is_proclitic(morphflags_of(form)) ||
 	                Is_proclitic(morphflags_of(stem_gstr_of(form)));
+	int mood = mood_of(forminfo_of(form));
 	char *syllable;
 	const char *cursor;
 
@@ -403,6 +455,10 @@ clitic_accent_form(gk_word *form, int accent)
 	for (cursor = word; *cursor; cursor++)
 		if (Is_accent(*cursor) || *cursor == '\'')
 			return 0;
+	if (enclitic && has_accent(stem))
+		return accent == CLITIC_LAST && written_clitic_accent(word,stem);
+	if (enclitic && mood && (mood != INDICATIVE || nsylls(word) > 2))
+		return 0;
 	if (accent == CLITIC_ESTI) {
 		if (!enclitic || (strcmp(word,"e)sti") && strcmp(word,"e)stin")))
 			return 0;
@@ -591,7 +647,8 @@ generate_record(const generation_pass *pass,
 		if (pass->variant && !variant_form(pass->variant,forms + form))
 			continue;
 		if (pass->clitic_accent &&
-		    !clitic_accent_form(forms + form,pass->clitic_accent))
+		    !clitic_accent_form(forms + form,pass->clitic_accent,
+		                       record->stem))
 			continue;
 		if (!morpheus_generation_form_dialect(forms + form,NULL) &&
 		    (!stated ||

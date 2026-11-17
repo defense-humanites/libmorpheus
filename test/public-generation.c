@@ -736,7 +736,12 @@ int main(int argc, char **argv)
    * analysis index accents it (o(/, oi(/), an enclitic with an acute on its
    * ultima (tino/s, tisi/, tisi/n with its movable nu), and e)sti(n) also
    * as e)/sti(n). The accented form keeps the reading and the clitic's
-   * flag.
+   * flag. An enclitic whose record writes an accent takes that one (a)/tta,
+   * not a)tta/), and the acute goes before a diaeresis (tinoii/+n). A verb
+   * takes it only in an indicative of one or two syllables: the infinitive
+   * e)men and the trisyllabic e)a_si, marked enclitic, stay unaccented. An
+   * elided form (sf') and a compound (a)/peimi) take no accent of this
+   * pass.
    */
   {
     static const struct {
@@ -755,8 +760,23 @@ int main(int argc, char **argv)
       { "ei)mi/2", "e)sti/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
       { "ei)mi/2", "e)/sti", MORPHEUS_MORPH_FLAG_ENCLITIC },
       { "ei)mi/2", "e)/stin", MORPHEUS_MORPH_FLAG_ENCLITIC },
-      { "ei)mi/2", "ei)si/n", MORPHEUS_MORPH_FLAG_ENCLITIC }
+      { "ei)mi/2", "ei)si/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "a)/tta", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tinoii/+n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)a_si", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)men", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/", "ei)mi/", MORPHEUS_MORPH_FLAG_ENCLITIC }
     };
+    static const struct {
+      const char *lemma;
+      const char *surface;
+    } absent[] = {
+      { "tis", "a)tta/" },
+      { "ei)mi/2", "e)a_si/" },
+      { "ei)mi/2", "e)a_si/n" },
+      { "ei)mi/2", "e)me/n" }
+    };
+    static const char *const unchanged[] = { "sfei=s", "a)/peimi1" };
     size_t entry;
 
     for(entry=0;entry!=sizeof accented/sizeof accented[0];entry++) {
@@ -771,14 +791,35 @@ int main(int argc, char **argv)
         assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
         if(strcmp(item.surface,accented[entry].surface)) continue;
         assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
-        if(!strcmp(accented[entry].lemma,"ei)mi/2") &&
-           strncmp(item.surface,"ei)",3))
+        if(!strncmp(item.surface,"e)st",4) ||
+           !strncmp(item.surface,"e)/st",5))
           assert(item.person==MORPHEUS_PERSON_THIRD &&
                  item.number==MORPHEUS_NUMBER_SINGULAR &&
                  item.tense==MORPHEUS_TENSE_PRESENT);
         found++;
       }
       assert(found==1);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+    for(entry=0;entry!=sizeof absent/sizeof absent[0];entry++) {
+      assert(morpheus_generate(context,(const uint8_t *)absent[entry].lemma,
+                               strlen(absent[entry].lemma),NULL,&result)==
+             MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(strcmp(item.surface,absent[entry].surface));
+      }
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+    for(entry=0;entry!=sizeof unchanged/sizeof unchanged[0];entry++) {
+      assert(morpheus_generate(context,(const uint8_t *)unchanged[entry],
+                               strlen(unchanged[entry]),NULL,&result)==
+             MORPHEUS_OK);
+      assert(morpheus_generation_result_count(result)==1);
+      assert(morpheus_generation_result_get(result,0,&item)==MORPHEUS_OK);
+      assert(!strcmp(item.surface,entry ? "a)/peimi" : "sf'"));
       morpheus_generation_result_free(result);
       result=NULL;
     }
