@@ -684,6 +684,8 @@ morpheus_generation_service_destroy(morpheus_generation_service *service)
 /*
  * The preverb a record names: the value of its last pb: key, or of its last
  * rpb: key (a preverb that is part of the stem, which analysis ignores).
+ * A comma joins it to the other keys as a space does (aor2,pb:e)pi/ under
+ * au)re/w, which analysis gives to e)paure/w).
  */
 typedef struct {
 	char value[MAXWORDSIZE];
@@ -702,8 +704,8 @@ find_record_preverb(const char *keys, record_preverb *found)
 		size_t length;
 		size_t prefix = 0;
 
-		cursor += strspn(cursor," \t");
-		length = strcspn(cursor," \t");
+		cursor += strspn(cursor," \t,");
+		length = strcspn(cursor," \t,");
 		if (length > 3 && !strncmp(cursor,"pb:",3))
 			prefix = 3;
 		else if (length > 4 && !strncmp(cursor,"rpb:",4))

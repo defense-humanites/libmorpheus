@@ -44,7 +44,10 @@ the corpus.
 - Movable ν on irregular forms (#100): as the analysis index does,
   generation returns an irregular form (`:wd:`, `:vb:`) that can take a
   movable ν with it too, flagged `nu_movable` (ἀνδράσιν beside ἀνδράσι,
-  εἰσίν). A form the data already spell with its ν comes once.
+  εἰσίν). It follows the index's rule, which looks only at the ending, so it
+  also returns forms that texts do not use, such as ἐσσίν or οὑτοσίν;
+  analysis accepts them too. A form the data already spell with its ν comes
+  once.
 - Accented clitics (#100): analysis reads a clitic with an accent as it
   reads it without, and generation now returns the accented forms too,
   after the others and with the unaccented form's reading and flag. A
@@ -132,11 +135,16 @@ the corpus.
   χαλκός is suffix-accented again (it came out as χάλκος), υἱός and υἱόν
   are generated from `ui( irreg_decl3 masc os_ou,suff_acc,masc`, and
   records that name their dialects or voice after a comma keep to them
-  (`ei)ru … epic,ionic`, `ai)n umi_pr numi epic,mid`). 113 lemmas change:
-  all 401 surfaces they gain analyze back to their lemma; of the 1,016
-  they lose, 412 did not, and 604 are hybrids of the dialects now read
-  with endings of others, which generation leaves out (see dialects
-  above). The index skips 340 records instead of 345.
+  (`ei)ru … epic,ionic`, `ai)n umi_pr numi epic,mid`). A preverb joined
+  by a comma counts too: the `aor2,pb:e)pi/` stems filed under αὐρέω go to
+  ἐπαυρέω, as analysis reads them, and αὐρέω, left with no record, returns
+  nothing, like κουρέω. 115 lemmas change, 105 of them in their surfaces.
+  All 401 surfaces they gain analyze back to their lemma. Of the 1,344 they
+  lose, 740 did not: the 328 of αὐρέω and 412 others. The other 604 still
+  do but are no longer generated: 547 hybrids of the dialects now read with
+  endings of others, which generation leaves out (see dialects above), and
+  57 recessive forms of suffix-accented lemmas (χάλκος, φείδου, Ἐρίνυς).
+  The index skips 340 records instead of 345.
 - After ρ, ε or ι, a first-declension ending in -η is Ionic and epic, not
   Attic: χώρην, χώρης and χώρῃ were labelled Attic, χώρη was not. The
   ending check cleared the stem's flag for this rule after the first ending

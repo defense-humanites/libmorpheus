@@ -142,6 +142,40 @@ summarize_multiple(const gk_word *form, void *state)
 	return 1;
 }
 
+typedef struct {
+	const char *surface;
+	size_t count;
+} surface_count;
+
+static int
+count_surface(const gk_word *form, void *state)
+{
+	surface_count *summary = state;
+
+	if (!strcmp(workword_of(form),summary->surface))
+		summary->count++;
+	return 1;
+}
+
+/* How many forms of lemma, generated with flags, are spelled surface. */
+static size_t
+surface_forms(const morpheus_gener_index *index, const char *lemma,
+              unsigned flags, const char *surface)
+{
+	morpheus_generation_service *service = NULL;
+	surface_count summary = { surface, 0 };
+	size_t count = 0;
+	size_t skipped = 0;
+
+	assert(morpheus_generation_service_create(index,&service) ==
+	       MORPHEUS_GENERATION_OK);
+	assert(morpheus_generation_service_generate_flags(
+	           service,lemma,flags,count_surface,&summary,&count,&skipped) ==
+	       MORPHEUS_GENERATION_OK);
+	morpheus_generation_service_destroy(service);
+	return summary.count;
+}
+
 static size_t
 parse_size(const char *value)
 {
@@ -219,6 +253,14 @@ run_differential(const morpheus_gener_index *index, const char *fixture_path)
 		assert(count > 0);
 		morpheus_generation_service_destroy(service);
 	}
+	/* The movable nu pass adds a)ndra/sin; its flag leaves it out. */
+	assert(surface_forms(index,"a)nh/r",0,"a)ndra/sin") == 1);
+	assert(surface_forms(index,"a)nh/r",
+	                     MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
+	                     "a)ndra/sin") == 0);
+	assert(surface_forms(index,"a)nh/r",
+	                     MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
+	                     "a)ndra/si") == 1);
 }
 
 static void *

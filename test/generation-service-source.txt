@@ -89,3 +89,9 @@
 :vb:e)sti irreg_mi pres ind act sg 3rd  enclitic
 :vb:e)stin irreg_mi pres ind act sg 3rd  enclitic nu_movable
 :vb:ei)si irreg_mi pres ind act pl enclitic 3rd
+
+:le:ei)=mi
+:vb:h)/i+e irreg_mi sg imperf ind act 3rd epic,ionic
+
+:le:au)re/w
+:vs:au)r aor2,pb:e)pi/ poetic syll_augment
