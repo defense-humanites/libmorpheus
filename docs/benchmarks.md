@@ -343,7 +343,21 @@ thirteen result counts are identical and analysis is within noise. Warm
 generation falls by 23 to 71 %, but from the binding's direct decoding, which
 the baseline did not have. Against the bindings reports of the same decoding
 on native 0.4.6, generation is within their own spread. The
-[0.5.0 release decision](release-0.5.0.md#benchmark-evidence) reads it.
+[0.5.0 release decision](release-0.5.0.md#benchmark-evidence) reads it. It
+was the baseline of 0.6.0.
+
+The accepted 0.6.0 report is retained at
+[`bench/release-evidence/benchmark-0.6.0.json`](../bench/release-evidence/benchmark-0.6.0.json)
+with its companion SHA-256 file. It was produced on 2026-11-17 on the same
+host and toolchain, through the tree's Node.js binding 0.3.0, from
+`b00ee435eb1ec96b425df74a8aa40a9dc6c4271d`, the merge of the 0.6.0
+preparation. Compared with `benchmark-0.5.0.json` (`complete` scope), nine
+result counts are identical. The four maximal generation rows change as the
+release decision predicted, since ἵημι returns 2,949 records instead of
+2,918. Analysis is within noise. Generation is slower, by 51 to 78 % warm
+for the maximal lemma and 35 to 42 % cold: the passes that 0.6.0 adds
+cost this time. The
+[0.6.0 release decision](release-0.6.0.md#benchmark-evidence) reads it.
 **This report is the baseline of the next native release.**
 
 The wrapper refuses a dirty tracked worktree or submodule, an uninitialized or

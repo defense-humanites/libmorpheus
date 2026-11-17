@@ -146,34 +146,74 @@ against its share of the treebank readings above.
 - C ABI: **2**
 - SONAME major: **1**
 - Previous release tag: `v0.5.0`
-- Benchmark evidence: pending (maintainer's schema 3 report from the
-  controlled Apple Silicon host, on the candidate commit)
+- Benchmark evidence: **accepted**
 - Pre-release Linux CI: pending (the tagged commit's run)
 - Pre-release platform qualification: pending (manual dispatch with
   `package_artifacts` on the exact candidate commit)
 
-## Expected benchmark outcome
+## Benchmark evidence
 
-The release report is compared with
-[`benchmark-0.5.0.json`](../bench/release-evidence/benchmark-0.5.0.json),
-the accepted 0.5.0 report (`complete` scope):
+The schema 3 report from source revision
+`b00ee435eb1ec96b425df74a8aa40a9dc6c4271d` (the merge of the release
+preparation) uses the pinned Alpheios stemlib revision
+`4632415fe93c85e9fdca47a0c5a13f31385f0023` on the controlled Apple Silicon
+host, with the toolchain of the baseline (Apple Clang 21 build 2100.4.1.1,
+Node.js 26.13.1, libuv thread pool of four) and the tree's Node.js binding,
+0.3.0. It is retained as
+[`benchmark-0.6.0.json`](../bench/release-evidence/benchmark-0.6.0.json);
+its SHA-256 is
+`998060d582bb22340ce5b497f186ddc0dea2f34c6ba0c41bc26ef0f29a7aa05e`. The
+release validator passes with the recorded source revision and compiler,
+and the comparison with
+[`benchmark-0.5.0.json`](../bench/release-evidence/benchmark-0.5.0.json)
+has `complete` scope.
 
-```sh
-sh bench/release.sh benchmark-0.6.0.json \
-  bench/release-evidence/benchmark-0.5.0.json
-```
+Nine of the thirteen result counts equal the baseline's: the five analysis
+rows and the four `lo/gos` rows. The four `i(/hmi` rows change as predicted,
+because ἵημι returns 2,949 records instead of 2,918 on the historical index:
+58,980, 117,960, 235,920 and 29,490 records instead of 58,360, 116,720,
+233,440 and 29,180. It gains 62 unaugmented forms and 4 with a movable ν, and
+loses 17 compound-only forms, which analysis accepts only after a preverb,
+and dialect hybrids.
 
-Nine of the thirteen result counts must equal the baseline's: the five
-analysis rows and the four `lo/gos` rows. The four `i(/hmi` rows change,
-because ἵημι returns 2,949 records instead of 2,918 on the historical
-index. It gains 62 unaugmented forms and 4 with a movable ν. It loses 17
-compound-only forms, which analysis accepts only after a preverb, and
-dialect hybrids. The rows become 58,980, 117,960, 235,920 and 29,490
-records instead of 58,360, 116,720, 233,440 and 29,180.
+| Row | 0.5.0 (µs) | 0.6.0 (µs) | Change |
+| --- | --- | --- | --- |
+| `node`, 1 context | 213 | 214 | +0.3 % |
+| `node`, 2 contexts | 131 | 132 | +0.3 % |
+| `node`, 4 contexts | 86 | 83 | −3.8 % |
+| `cruncher-persistent` | 211 | 201 | −4.4 % |
+| `cruncher-cold` | 2,700 | 2,741 | +1.5 % |
+| maximal generation, warm, 1 / 2 / 4 contexts | 3,659 / 1,755 / 1,113 | 6,010 / 3,125 / 1,677 | +64.3 / +78.1 / +50.7 % |
+| small generation, warm, 1 / 2 / 4 contexts | 35 / 21 / 14 | 42 / 23 / 14 | +19.5 / +12.7 / −2.7 % |
+| maximal / small generation, cold | 19,036 / 14,708 | 27,089 / 19,908 | +42.3 / +35.3 % |
 
-Analysis rows should stay within noise. Generation rows are expected to be
-slower, as measured above: about twice as long for the maximal lemma, half
-as long again for the small one, and about 10–15 ms more for the cold rows.
+Analysis is within noise, as #105 made it; `cruncher-persistent` stays
+within the 202–227 µs that the retained reports since 0.4.6 measured.
+
+Generation is slower, as expected, though less than on the sandbox. Through
+the Node.js binding, which also decodes each record, these changes appear:
+- maximal warm generation takes 51 to 78 % longer, 2.4 ms more at one
+  context, against twice as long natively;
+- small warm generation moves by −2.7 to +19.5 %, a few microseconds;
+- cold generation takes 5 to 8 ms more, for the compound table the first
+  request builds.
+
+This is the cost of the passes described above, and it is accepted for this
+release.
+
+Between the two reports, the binding's code differs only by the option
+that passes the new flag, so the comparison isolates the runtime.
+
+Peak RSS stays within 2 % for analysis. For generation, it rises by 10.7 to
+14.0 % with two and four contexts, up to 13 MiB at four, as each context
+builds its compound table. With one context it moves by −2.8 to +4.9 %.
+
+RSS growth of the two-context maximal row reaches 13.2 MiB against 2.9 MiB,
+which follows the order of allocations within one process. The one-context
+row grows less than in 0.5.0 (14.2 against 17.7 MiB).
+
+This report replaces `benchmark-0.5.0.json` as the baseline of the next
+native release.
 
 ## Remaining authorization
 

@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-11-17T17:13:22.164Z",
+  "label": "release-candidate",
+  "platform": {
+    "os": "darwin",
+    "arch": "arm64",
+    "release": "27.2.0"
+  },
+  "runtime": {
+    "node": "26.13.1",
+    "v8": "14.6.202.34-node.40",
+    "uv": "1.53.0",
+    "uvThreadpoolSize": 4
+  },
+  "binding": {
+    "package": "@libmorpheus/node",
+    "version": "0.3.0"
+  },
+  "hardwareConcurrency": 12,
+  "sourceRevision": "b00ee435eb1ec96b425df74a8aa40a9dc6c4271d",
+  "stemlibRevision": "4632415fe93c85e9fdca47a0c5a13f31385f0023",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "corpus": "test/fixture.json",
+  "corpusSha256": "cc6f0eb3a2e52b0c6d6c3784d95d01ab3e7c1c824df7e38b6b9b96adcd1539c2",
+  "uniqueWords": 24,
+  "iterations": 20,
+  "warmupIterations": 2,
+  "generationSmallLemma": "lo/gos",
+  "generationMaximalLemma": "i(/hmi",
+  "generationIndexSha256": "5aa76d8c86c54af5121a3cce506ecaa57d14c6667ac0f091efd164ddfa9822d6",
+  "wasmModule": null,
+  "wasmModuleSha256": null,
+  "wasmRuntimeBytes": null,
+  "wasmResultDelivery": null,
+  "python": null,
+  "measurements": [
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 102.72920900000003,
+      "operationsPerSecond": 4672.478301667833,
+      "meanMicroseconds": 214.01918541666674,
+      "startupMs": 3.5711669999999742,
+      "results": 740,
+      "peakRssBytes": 24677232,
+      "rssGrowthBytes": 7012712
+    },
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 2,
+      "operations": 480,
+      "durationMs": 63.13354099999998,
+      "operationsPerSecond": 7602.931696798064,
+      "meanMicroseconds": 131.52821041666664,
+      "startupMs": 0.5397500000000264,
+      "results": 740,
+      "peakRssBytes": 26708848,
+      "rssGrowthBytes": 1998848
+    },
+    {
+      "engine": "node",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 4,
+      "operations": 480,
+      "durationMs": 39.81412499999999,
+      "operationsPerSecond": 12056.02283109324,
+      "meanMicroseconds": 82.94609374999999,
+      "startupMs": 0.7543329999999742,
+      "results": 740,
+      "peakRssBytes": 30559184,
+      "rssGrowthBytes": 3850336
+    },
+    {
+      "engine": "cruncher-persistent",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 1,
+      "operations": 480,
+      "durationMs": 96.69249999999994,
+      "operationsPerSecond": 4964.190604235078,
+      "meanMicroseconds": 201.4427083333332,
+      "startupMs": null,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "workload": "analysis",
+      "lemma": null,
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 27.414709000000016,
+      "operationsPerSecond": 364.76768730246215,
+      "meanMicroseconds": 2741.4709000000016,
+      "startupMs": 2.7414709000000017,
+      "results": null,
+      "peakRssBytes": null,
+      "rssGrowthBytes": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 0.8312909999999647,
+      "operationsPerSecond": 24058.963708257215,
+      "meanMicroseconds": 41.564549999998235,
+      "startupMs": 0.2657080000000178,
+      "results": 360,
+      "peakRssBytes": 44239824,
+      "rssGrowthBytes": 13238272
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 1,
+      "operations": 20,
+      "durationMs": 120.19662499999993,
+      "operationsPerSecond": 166.3940231266894,
+      "meanMicroseconds": 6009.8312499999965,
+      "startupMs": 0.2900409999999738,
+      "results": 58980,
+      "peakRssBytes": 59101816,
+      "rssGrowthBytes": 14861992
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 0.9335409999999911,
+      "operationsPerSecond": 42847.609264082006,
+      "meanMicroseconds": 23.338524999999777,
+      "startupMs": 0.5551249999999754,
+      "results": 720,
+      "peakRssBytes": 72372856,
+      "rssGrowthBytes": 13271040
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 2,
+      "operations": 40,
+      "durationMs": 125.00162499999999,
+      "operationsPerSecond": 319.99584005407934,
+      "meanMicroseconds": 3125.0406249999996,
+      "startupMs": 0.4484579999999596,
+      "results": 117960,
+      "peakRssBytes": 86234752,
+      "rssGrowthBytes": 13861896
+    },
+    {
+      "engine": "generation-small-warm",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 1.0974999999999682,
+      "operationsPerSecond": 72892.93849658525,
+      "meanMicroseconds": 13.718749999999602,
+      "startupMs": 1.0350000000000819,
+      "results": 1440,
+      "peakRssBytes": 112793240,
+      "rssGrowthBytes": 26558488
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 4,
+      "operations": 80,
+      "durationMs": 134.14141699999993,
+      "operationsPerSecond": 596.3855294595556,
+      "meanMicroseconds": 1676.767712499999,
+      "startupMs": 0.7860829999999623,
+      "results": 235920,
+      "peakRssBytes": 139894776,
+      "rssGrowthBytes": 27101536
+    },
+    {
+      "engine": "generation-small-cold",
+      "workload": "generation",
+      "lemma": "lo/gos",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 199.0753340000001,
+      "operationsPerSecond": 50.232240223191056,
+      "meanMicroseconds": 19907.53340000001,
+      "startupMs": 19.907533400000013,
+      "results": 180,
+      "peakRssBytes": 139894776,
+      "rssGrowthBytes": 0
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "workload": "generation",
+      "lemma": "i(/hmi",
+      "contexts": 0,
+      "operations": 10,
+      "durationMs": 270.88591599999995,
+      "operationsPerSecond": 36.91590964810441,
+      "meanMicroseconds": 27088.591599999996,
+      "startupMs": 27.088591599999994,
+      "results": 29490,
+      "peakRssBytes": 140091384,
+      "rssGrowthBytes": 196608
+    }
+  ],
+  "comparisonBaselineSchemaVersion": 3,
+  "comparisonScope": "complete",
+  "comparison": [
+    {
+      "engine": "node",
+      "contexts": 1,
+      "throughputChangePercent": -0.3001016001203838,
+      "meanLatencyChangePercent": 0.3010049207038845,
+      "peakRssChangePercent": 1.0057172046602059,
+      "rssGrowthChangePercent": 3.1316362558251987
+    },
+    {
+      "engine": "node",
+      "contexts": 2,
+      "throughputChangePercent": -0.30668959309592125,
+      "meanLatencyChangePercent": 0.3076330717117992,
+      "peakRssChangePercent": 0.6791745926822079,
+      "rssGrowthChangePercent": -3.937007874015752
+    },
+    {
+      "engine": "node",
+      "contexts": 4,
+      "throughputChangePercent": 3.986964425313899,
+      "meanLatencyChangePercent": -3.834100213760383,
+      "peakRssChangePercent": 1.9680900759976083,
+      "rssGrowthChangePercent": 11.905990894844276
+    },
+    {
+      "engine": "cruncher-persistent",
+      "contexts": 1,
+      "throughputChangePercent": 4.64367246684092,
+      "meanLatencyChangePercent": -4.4376046418978525,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "cruncher-cold",
+      "contexts": 0,
+      "throughputChangePercent": -1.524728932924313,
+      "meanLatencyChangePercent": 1.5483368732092773,
+      "peakRssChangePercent": null,
+      "rssGrowthChangePercent": null
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 1,
+      "throughputChangePercent": -16.31486446983056,
+      "meanLatencyChangePercent": 19.495534501403622,
+      "peakRssChangePercent": 4.854021006534337,
+      "rssGrowthChangePercent": 12.066574202496527
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 1,
+      "throughputChangePercent": -39.12322080590862,
+      "meanLatencyChangePercent": 64.2662462170894,
+      "peakRssChangePercent": -2.7766401586794442,
+      "rssGrowthChangePercent": -20.087812045916575
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 2,
+      "throughputChangePercent": -11.26977818863326,
+      "meanLatencyChangePercent": 12.701172113140768,
+      "peakRssChangePercent": -0.3389196785148818,
+      "rssGrowthChangePercent": 12.188365650969523
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 2,
+      "throughputChangePercent": -43.85036354527392,
+      "meanLatencyChangePercent": 78.09554311296536,
+      "peakRssChangePercent": 14.016229156527892,
+      "rssGrowthChangePercent": 359.79853892959216
+    },
+    {
+      "engine": "generation-small-warm",
+      "contexts": 4,
+      "throughputChangePercent": 2.8207744874766183,
+      "meanLatencyChangePercent": -2.7433896520787204,
+      "peakRssChangePercent": 13.391384086712765,
+      "rssGrowthChangePercent": 11.408923221793899
+    },
+    {
+      "engine": "generation-maximal-warm",
+      "contexts": 4,
+      "throughputChangePercent": -33.64847562330432,
+      "meanLatencyChangePercent": 50.71243794230369,
+      "peakRssChangePercent": 10.724285758156471,
+      "rssGrowthChangePercent": 0.8516907739403834
+    },
+    {
+      "engine": "generation-small-cold",
+      "contexts": 0,
+      "throughputChangePercent": -26.11595116047881,
+      "meanLatencyChangePercent": 35.347211706282636,
+      "peakRssChangePercent": 10.709929280382969,
+      "rssGrowthChangePercent": 0
+    },
+    {
+      "engine": "generation-maximal-cold",
+      "contexts": 0,
+      "throughputChangePercent": -29.725397757482508,
+      "meanLatencyChangePercent": 42.29891996385868,
+      "peakRssChangePercent": 10.764988634386263,
+      "rssGrowthChangePercent": 71.42857142857142
+    }
+  ]
+}
