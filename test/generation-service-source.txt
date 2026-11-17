@@ -64,3 +64,41 @@
 :vs:paideu w_stem
 :aj:paideut os_on reg_conj
 :aj:paideut verb_adj2
+
+:le:xalko/s
+:no:xalk os_ou suff_acc,masc
+
+:le:ui(o/s
+:no:ui( irreg_decl3 masc os_ou,suff_acc,masc
+:wd:ui(e/si irreg_decl3 masc irreg_decl3 dat pl masc
+
+:le:a)nh/r
+:wd:a)ndra/si irreg_decl3 masc dat pl
+:wd:a)ndrsi/ irreg_decl3 masc dat pl
+:wd:a)ndrsi/n irreg_decl3 masc dat pl nu_movable
+
+:le:o(
+:wd:o( article  nom masc sg proclitic
+:wd:oi( article  nom voc masc pl proclitic
+
+:le:tis
+:wd:tinos   indef gen sg enclitic
+:wd:tisi indef dat pl enclitic
+:wd:a)/tta indef_pron enclitic neut nom acc pl epic
+:wd:tinoii+n   indef gen/dat dual epic enclitic
+
+:le:sfei=s
+:wd:sf' pron3 masc fem pl dat enclitic
+
+:le:ei)mi/2
+:vb:e)sti irreg_mi pres ind act sg 3rd  enclitic
+:vb:e)stin irreg_mi pres ind act sg 3rd  enclitic nu_movable
+:vb:ei)si irreg_mi pres ind act pl enclitic 3rd
+:vb:e)a_si irreg_mi pres ind act pl enclitic 3rd epic
+:vb:e)men irreg_mi pres inf act poetic enclitic
+
+:le:ei)=mi
+:vb:h)/i+e irreg_mi sg imperf ind act 3rd epic,ionic
+
+:le:au)re/w
+:vs:au)r aor2,pb:e)pi/ poetic syll_augment

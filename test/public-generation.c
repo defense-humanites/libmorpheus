@@ -634,6 +634,198 @@ int main(int argc, char **argv)
   }
 
   /*
+   * A comma joins a record's keys as a space does, as the analysis index
+   * reads them: xalk os_ou suff_acc,masc is suffix-accented (xalko/s, not
+   * xa/lkos), and ui( irreg_decl3 masc os_ou,suff_acc,masc an os_ou stem.
+   */
+  {
+    int has_surface;
+    int has_recessive;
+
+    generated_surfaces(context,"xalko/s","xalko/s","xa/lk",&has_surface,
+                       &has_recessive);
+    assert(has_surface && !has_recessive);
+    generated_surfaces(context,"ui(o/s","ui(o/n","ui(o/n",&has_surface,
+                       &has_recessive);
+    assert(has_surface);
+  }
+
+  /*
+   * An irregular form that can take a movable nu comes with it too, as the
+   * analysis index holds it: a)ndra/sin beside a)ndra/si. A form the data
+   * spell out with its nu (a)ndrsi/n) comes once.
+   */
+  {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_NU_MOVABLE;
+    size_t with_nu=0;
+    size_t spelled=0;
+
+    assert(morpheus_generate(context,(const uint8_t *)"a)nh/r",6,NULL,
+                             &result)==MORPHEUS_OK);
+    for(i=0;i!=morpheus_generation_result_count(result);i++) {
+      assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+      if(!strcmp(item.surface,"a)ndra/sin")) {
+        assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+        assert(item.grammatical_case==MORPHEUS_CASE_DATIVE &&
+               item.number==MORPHEUS_NUMBER_PLURAL);
+        with_nu++;
+      }
+      if(!strcmp(item.surface,"a)ndrsi/n")) spelled++;
+    }
+    assert(with_nu==1 && spelled==1);
+    morpheus_generation_result_free(result);
+    result=NULL;
+  }
+
+  /*
+   * The movable nu of a third person in -e, on the simple verb and on a
+   * compound of it (h)/i+en, a)nh/i+en), and the dialects that a record
+   * names after a comma (epic,ionic) on both forms.
+   */
+  {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_NU_MOVABLE;
+    const char *lemmas[2]={"ei)=mi","a)/neimi"};
+    const char *bare[2]={"h)/i+e","a)nh/i+e"};
+    const char *with_nu[2]={"h)/i+en","a)nh/i+en"};
+    size_t lemma;
+
+    for(lemma=0;lemma!=2;lemma++) {
+      size_t found_bare=0;
+      size_t found_nu=0;
+
+      assert(morpheus_generate(context,(const uint8_t *)lemmas[lemma],
+                               strlen(lemmas[lemma]),NULL,&result)==
+             MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(item.dialect==(MORPHEUS_DIALECT_IONIC|MORPHEUS_DIALECT_EPIC));
+        if(!strcmp(item.surface,bare[lemma])) {
+          assert(!(item.morph_flags[flag/8u] & (1u<<(flag%8u))));
+          found_bare++;
+        }
+        if(!strcmp(item.surface,with_nu[lemma])) {
+          assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+          assert(item.person==MORPHEUS_PERSON_THIRD &&
+                 item.number==MORPHEUS_NUMBER_SINGULAR);
+          found_nu++;
+        }
+      }
+      assert(found_bare==1 && found_nu==1);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+  }
+
+  /*
+   * A comma joins a record's own preverb to its other keys too: the
+   * aor2,pb:e)pi/ stem filed under au)re/w belongs to the compound that
+   * analysis names after e)pi/, and the simple verb, left with no record,
+   * returns nothing.
+   */
+  {
+    assert(morpheus_generate(context,(const uint8_t *)"au)re/w",7,NULL,
+                             &result)==MORPHEUS_OK);
+    assert(morpheus_generation_result_count(result)==0);
+    morpheus_generation_result_free(result);
+    result=NULL;
+  }
+
+  /*
+   * Analysis reads a clitic with an accent as it reads it without, and
+   * generation returns the accented forms too: a proclitic accented as the
+   * analysis index accents it (o(/, oi(/), an enclitic with an acute on its
+   * ultima (tino/s, tisi/, tisi/n with its movable nu), and e)sti(n) also
+   * as e)/sti(n). The accented form keeps the reading and the clitic's
+   * flag. An enclitic whose record writes an accent takes that one (a)/tta,
+   * not a)tta/), and the acute goes before a diaeresis (tinoii/+n). A verb
+   * takes it only in an indicative of one or two syllables: the infinitive
+   * e)men and the trisyllabic e)a_si, marked enclitic, stay unaccented. An
+   * elided form (sf') and a compound (a)/peimi) take no accent of this
+   * pass.
+   */
+  {
+    static const struct {
+      const char *lemma;
+      const char *surface;
+      unsigned flag;
+    } accented[] = {
+      { "o(", "o(/", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "o(", "oi(/", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "o(", "o(", MORPHEUS_MORPH_FLAG_PROCLITIC },
+      { "tis", "tino/s", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tinos", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tisi/", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tisi/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)sti/", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)sti/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)/sti", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)/stin", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "ei)si/n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "a)/tta", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "tis", "tinoii/+n", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)a_si", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/2", "e)men", MORPHEUS_MORPH_FLAG_ENCLITIC },
+      { "ei)mi/", "ei)mi/", MORPHEUS_MORPH_FLAG_ENCLITIC }
+    };
+    static const struct {
+      const char *lemma;
+      const char *surface;
+    } absent[] = {
+      { "tis", "a)tta/" },
+      { "ei)mi/2", "e)a_si/" },
+      { "ei)mi/2", "e)a_si/n" },
+      { "ei)mi/2", "e)me/n" }
+    };
+    static const char *const unchanged[] = { "sfei=s", "a)/peimi1" };
+    size_t entry;
+
+    for(entry=0;entry!=sizeof accented/sizeof accented[0];entry++) {
+      const unsigned flag=accented[entry].flag;
+      size_t found=0;
+
+      assert(morpheus_generate(context,
+                               (const uint8_t *)accented[entry].lemma,
+                               strlen(accented[entry].lemma),NULL,
+                               &result)==MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        if(strcmp(item.surface,accented[entry].surface)) continue;
+        assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+        if(!strncmp(item.surface,"e)st",4) ||
+           !strncmp(item.surface,"e)/st",5))
+          assert(item.person==MORPHEUS_PERSON_THIRD &&
+                 item.number==MORPHEUS_NUMBER_SINGULAR &&
+                 item.tense==MORPHEUS_TENSE_PRESENT);
+        found++;
+      }
+      assert(found==1);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+    for(entry=0;entry!=sizeof absent/sizeof absent[0];entry++) {
+      assert(morpheus_generate(context,(const uint8_t *)absent[entry].lemma,
+                               strlen(absent[entry].lemma),NULL,&result)==
+             MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(strcmp(item.surface,absent[entry].surface));
+      }
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+    for(entry=0;entry!=sizeof unchanged/sizeof unchanged[0];entry++) {
+      assert(morpheus_generate(context,(const uint8_t *)unchanged[entry],
+                               strlen(unchanged[entry]),NULL,&result)==
+             MORPHEUS_OK);
+      assert(morpheus_generation_result_count(result)==1);
+      assert(morpheus_generation_result_get(result,0,&item)==MORPHEUS_OK);
+      assert(!strcmp(item.surface,entry ? "a)/peimi" : "sf'"));
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+  }
+
+  /*
    * pro and peri do not elide before a vowel; the engine marks the hiatus
    * with '+', which surfaces keep only as the diaeresis of an iota or
    * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but

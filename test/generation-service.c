@@ -113,10 +113,14 @@ generate_and_check(const morpheus_gener_index *index, const char *lemma,
 	       MORPHEUS_GENERATION_OK);
 	/*
 	 * The fixtures record the engine's forms of each record; the
-	 * unaugmented pass adds forms of its own (public-generation.c).
+	 * unaugmented, movable nu and clitic passes add forms of their own
+	 * (public-generation.c).
 	 */
 	assert(morpheus_generation_service_generate_flags(
-	           service,lemma,MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED,
+	           service,lemma,
+	           MORPHEUS_GENERATION_SERVICE_NO_UNAUGMENTED|
+	           MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE|
+	           MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS,
 	           summarize,&summary,&count,&skipped) ==
 	       MORPHEUS_GENERATION_OK);
 	assert(skipped == 0);
@@ -136,6 +140,40 @@ summarize_multiple(const gk_word *form, void *state)
 	if (!strcmp(workword_of(form),"deu/teron"))
 		summary->saw_second = 1;
 	return 1;
+}
+
+typedef struct {
+	const char *surface;
+	size_t count;
+} surface_count;
+
+static int
+count_surface(const gk_word *form, void *state)
+{
+	surface_count *summary = state;
+
+	if (!strcmp(workword_of(form),summary->surface))
+		summary->count++;
+	return 1;
+}
+
+/* How many forms of lemma, generated with flags, are spelled surface. */
+static size_t
+surface_forms(const morpheus_gener_index *index, const char *lemma,
+              unsigned flags, const char *surface)
+{
+	morpheus_generation_service *service = NULL;
+	surface_count summary = { surface, 0 };
+	size_t count = 0;
+	size_t skipped = 0;
+
+	assert(morpheus_generation_service_create(index,&service) ==
+	       MORPHEUS_GENERATION_OK);
+	assert(morpheus_generation_service_generate_flags(
+	           service,lemma,flags,count_surface,&summary,&count,&skipped) ==
+	       MORPHEUS_GENERATION_OK);
+	morpheus_generation_service_destroy(service);
+	return summary.count;
 }
 
 static size_t
@@ -215,6 +253,22 @@ run_differential(const morpheus_gener_index *index, const char *fixture_path)
 		assert(count > 0);
 		morpheus_generation_service_destroy(service);
 	}
+	/* The movable nu pass adds a)ndra/sin; its flag leaves it out. */
+	assert(surface_forms(index,"a)nh/r",0,"a)ndra/sin") == 1);
+	assert(surface_forms(index,"a)nh/r",
+	                     MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
+	                     "a)ndra/sin") == 0);
+	assert(surface_forms(index,"a)nh/r",
+	                     MORPHEUS_GENERATION_SERVICE_NO_NU_MOVABLE,
+	                     "a)ndra/si") == 1);
+	/* The clitic pass adds tino/s; its flag leaves it out. */
+	assert(surface_forms(index,"tis",0,"tino/s") == 1);
+	assert(surface_forms(index,"tis",
+	                     MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS,
+	                     "tino/s") == 0);
+	assert(surface_forms(index,"tis",
+	                     MORPHEUS_GENERATION_SERVICE_NO_CLITIC_ACCENTS,
+	                     "tinos") == 1);
 }
 
 static void *
