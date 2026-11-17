@@ -678,6 +678,59 @@ int main(int argc, char **argv)
   }
 
   /*
+   * The movable nu of a third person in -e, on the simple verb and on a
+   * compound of it (h)/i+en, a)nh/i+en), and the dialects that a record
+   * names after a comma (epic,ionic) on both forms.
+   */
+  {
+    const unsigned flag=MORPHEUS_MORPH_FLAG_NU_MOVABLE;
+    const char *lemmas[2]={"ei)=mi","a)/neimi"};
+    const char *bare[2]={"h)/i+e","a)nh/i+e"};
+    const char *with_nu[2]={"h)/i+en","a)nh/i+en"};
+    size_t lemma;
+
+    for(lemma=0;lemma!=2;lemma++) {
+      size_t found_bare=0;
+      size_t found_nu=0;
+
+      assert(morpheus_generate(context,(const uint8_t *)lemmas[lemma],
+                               strlen(lemmas[lemma]),NULL,&result)==
+             MORPHEUS_OK);
+      for(i=0;i!=morpheus_generation_result_count(result);i++) {
+        assert(morpheus_generation_result_get(result,i,&item)==MORPHEUS_OK);
+        assert(item.dialect==(MORPHEUS_DIALECT_IONIC|MORPHEUS_DIALECT_EPIC));
+        if(!strcmp(item.surface,bare[lemma])) {
+          assert(!(item.morph_flags[flag/8u] & (1u<<(flag%8u))));
+          found_bare++;
+        }
+        if(!strcmp(item.surface,with_nu[lemma])) {
+          assert(item.morph_flags[flag/8u] & (1u<<(flag%8u)));
+          assert(item.person==MORPHEUS_PERSON_THIRD &&
+                 item.number==MORPHEUS_NUMBER_SINGULAR);
+          found_nu++;
+        }
+      }
+      assert(found_bare==1 && found_nu==1);
+      morpheus_generation_result_free(result);
+      result=NULL;
+    }
+  }
+
+  /*
+   * A comma joins a record's own preverb to its other keys too: the
+   * aor2,pb:e)pi/ stem filed under au)re/w belongs to the compound that
+   * analysis names after e)pi/, and the simple verb, left with no record,
+   * returns nothing.
+   */
+  {
+    assert(morpheus_generate(context,(const uint8_t *)"au)re/w",7,NULL,
+                             &result)==MORPHEUS_OK);
+    assert(morpheus_generation_result_count(result)==0);
+    morpheus_generation_result_free(result);
+    result=NULL;
+  }
+
+  /*
    * pro and peri do not elide before a vowel; the engine marks the hiatus
    * with '+', which surfaces keep only as the diaeresis of an iota or
    * upsilon that would otherwise form a diphthong: proe/xw, perie/xw, but

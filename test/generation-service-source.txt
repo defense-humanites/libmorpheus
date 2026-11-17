@@ -76,3 +76,9 @@
 :wd:a)ndra/si irreg_decl3 masc dat pl
 :wd:a)ndrsi/ irreg_decl3 masc dat pl
 :wd:a)ndrsi/n irreg_decl3 masc dat pl nu_movable
+
+:le:ei)=mi
+:vb:h)/i+e irreg_mi sg imperf ind act 3rd epic,ionic
+
+:le:au)re/w
+:vs:au)r aor2,pb:e)pi/ poetic syll_augment
