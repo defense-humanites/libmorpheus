@@ -35,5 +35,25 @@ class NativeSupines(unittest.TestCase):
             finally:
                 for reader in readers.values():reader.close()
 
+    def test_participle_voice_follows_the_dep_flag_of_the_supine_key(self):
+        # Since release 0.4.5 the runtime resolves the pp_su stem class: a
+        # participle is deponent when its fourth-principal-part key carries
+        # `dep`, which a deponent derivation hands down. A written supine record
+        # carries no flag (the lexer prints `pp4` alone) and stays passive even
+        # under a deponent present; the family cells of CELLS rely on that.
+        voices=lambda rows,lemma:sorted({m.cell_signature(r)[7] for r in rows if r.lemma==lemma and m.cell_signature(r)[6]==7})
+        cases=((b'zzzortor',[b':de:zzzort are_vb dep'],b'zzzortatus',[5]),
+               (b'zzzaror',[b':vs:zzzar conj1 dep',b':vs:zzzarat pp4'],b'zzzaratus',[2]),
+               (b'zzzaro',[b':vs:zzzar conj1',b':vs:zzzarat pp4'],b'zzzaratus',[2]))
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            for index,(lemma,records,form,expected) in enumerate(cases):
+                source=root/('voice%d.stems'%index)
+                m.native.write_private(source,b':le:'+lemma+b'\n'+b'\n'.join(records)+b'\n')
+                m.native.build_trial(BUILD/'stemlib-production/latin',source,BUILD,root/('voice%d'%index))
+                reader=m.direct.StrictRows(BUILD/('libmorpheus.dylib' if sys.platform=='darwin' else 'libmorpheus.so'),root/('voice%d'%index))
+                try:self.assertEqual(voices(reader.analyses(form,require_untruncated=True),lemma),expected)
+                finally:reader.close()
+
 
 if __name__=='__main__':unittest.main()

@@ -25,6 +25,13 @@ backlinked presents of one proof pre-empt the other. This document qualifies
 the recipes applied together, in a fixed order, on one private candidate. It
 changes no recipe.
 
+Every figure below was measured on the analysis runtime of 21 October 2026
+(base `8085e2d`). Release 0.4.5 changed the voice of deponent participles,
+and with it the reading counts over LISTALL: the
+[runtime requalification](latin-runtime-requalification.md) says which
+figures move, which checks are pinned per runtime, and how the combination
+is measured again.
+
 ## Stage chain (eleven stages)
 
 `tools/reconstruct-latin-combined-candidate.py` applies, each on the output

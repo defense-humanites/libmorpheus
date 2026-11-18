@@ -18,6 +18,32 @@ INDEXES={'nomind':'106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1b
     'nomind.lindex':'e70bc11f301cbdf9765cb56b30109f0fc53539c19056168c2e09c05503d05210',
     'vbind':'d13367a683e0645adcbe83ab1b34ddc9a4444c8d22d2c9d83fcaf5e875f39ac4',
     'vbind.lindex':'486c8641cb83a5d1b8dd2184aae9204b7f7a77ce3293daadbe4a7c1b3b36e954'}
+# LISTALL analysis rows of the original candidate, by analysis runtime. The same
+# candidate and the same indexes do not yield the same rows under every runtime:
+# release 0.4.5 resolved the pp_su stem class, and a perfect participle derived
+# from a deponent derivation is deponent since then, no longer passive. A runtime
+# is named by the SHA-256 of the fourth-principal-part ending table that its
+# controlled baseline builds, which that change rewrote. The first entry is the
+# runtime of every receipt archived up to 8bfd450 (base 8085e2d); the second
+# was measured on 69ba91c (releases 0.4.5 to 0.6.0).
+RUNTIME_TABLE='Latin/endtables/out/pp4.out'
+ORIGINAL_ROWS={'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530,
+    '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9':2102153}
+
+
+def original_rows(baseline,rows):
+    """Compare the original candidate's LISTALL rows with the count qualified for this runtime.
+
+    A runtime without a qualified count is reported, not refused: its first
+    qualification measures the count to pin in ORIGINAL_ROWS."""
+    table=native.digest(baseline/RUNTIME_TABLE)
+    return {'runtime_ending_table_sha256':table,'analysis_rows':rows,'qualified_analysis_rows':ORIGINAL_ROWS.get(table)}
+
+
+def original_rows_differ(baseline,rows):
+    """Whether this runtime has a qualified count that the measured rows contradict."""
+    expected=original_rows(baseline,rows)['qualified_analysis_rows']
+    return expected is not None and rows!=expected
 
 
 def records(rows):
@@ -81,7 +107,7 @@ def prepare(args):
         delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-differences.jsonl')
         if any(r['counts']['distinct_forms']!=1033579 or r['input_sha256']!=FORMS_SHA for r in (control,delta)):
             raise ValueError('full candidate LISTALL scope differs')
-        if delta['analysis_rows']['curated']!=2100530:
+        if original_rows_differ(args.baseline,delta['analysis_rows']['curated']):
             raise ValueError('full candidate original reading count differs')
     finally:
         for reader in readers.values():reader.close()
