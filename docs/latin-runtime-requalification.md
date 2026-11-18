@@ -229,17 +229,51 @@ lemmas without definition and readings identical at a lower multiplicity
 The 349 additional unmatched readings are one class: each differs from a
 candidate reading of the same form, under the same lemma, by its voice and
 by nothing else. 210 fall under the changed-definition dossiers (68 lemmas
-instead of 67) and 139 under the mapped compositions. The receipt does not
-say which voice stands on which side. The probe of the first section gives
-the likely reading: the baseline derives the participles of a deponent verb
-from a deponent derivation, which reports them as deponent since release
-0.4.5, where the candidate writes the supine of the same verb as a `pp4`
-record, which stays passive. If so, these are not readings the candidate
-lacks but readings it labels with the voice of the earlier runtime, and
-whether a written supine under a deponent present should carry `dep` is a
-question the earlier runtime could not raise. It is recorded for
-[issue #112](https://github.com/defense-humanites/libmorpheus/issues/112);
-no recipe is proposed here.
+instead of 67) and 139 under the mapped compositions.
+
+### Which voice stands on which side — `3f4e8ca`
+
+The attribution receipt now names, for those readings, the voice the
+baseline reports and the voice the candidate reports, by lemma category and
+by mood and tense. The
+[run](https://github.com/defense-humanites/libmorpheus/actions/runs/44365608629)
+dispatched on `3f4e8ca` posts a
+[receipt](qualification/latin-residual-loss-attribution-3f4e8ca.json)
+identical to `f9d5d51` in every earlier field.
+
+| Baseline → candidate | Form | Dossiers (readings / lemmas) | Mapped compositions (readings / lemmas) |
+| --- | --- | ---: | ---: |
+| passive → deponent | perfect participle | 72 / 2 | 69 / 2 |
+| active → deponent | future participle | 66 / 2 | 66 / 1 |
+| none → deponent | supine | 4 / 2 | 4 / 1 |
+| deponent → passive | perfect participle | 33 / 1 | — |
+| deponent → active | future participle | 33 / 1 | — |
+| deponent → none | supine | 2 / 1 | — |
+
+In 281 of the 349 readings the candidate is the deponent side, in 68 the
+baseline is, and a handful of lemmas carries them all: two and one under
+the dossiers, two under the compositions.
+
+The local replay of the chain on the pinned TEI, over synthetic forms,
+finds the same two kinds under the dossiers and shows what they are:
+
+- **Candidate deponent, baseline passive.** The article's headword is
+  deponent and the lexer marks its derivation `dep`; the curated witness
+  writes the same verb without that mark, as an unmarked derivation
+  (*dispertior*) or as a conjugation with a written supine (*punior*).
+  Since release 0.4.5 the mark decides the voice of the participles.
+- **Baseline deponent, candidate passive.** The witness records one lemma
+  with both an active and a deponent derivation of the same stem
+  (*incarno*); the candidate carries the active one only.
+
+Neither kind is a reading the candidate lacks through a lexer defect, and
+neither is the case first supposed here, a written supine under a deponent
+present: no rule on written supines follows. The first kind is the
+candidate following its source where the witness does not mark the
+deponent; the second is one witness doublet, which belongs with the
+changed-definition dossiers of decision 1. The receipt gives the counts
+over LISTALL; that its lemmas are the ones of the local replay is likely
+from the matching lemma counts, not established.
 
 ## What is not part of the resumption
 
@@ -260,6 +294,7 @@ The local counts of the first section come from synthetic forms on the
 controlled baseline, not from LISTALL. The ten separate trial qualifiers
 share the per-runtime pin, now qualified for the current runtime, but were
 not re-run: their archived receipts remain those of the earlier runtime.
-The two forms no longer recognized have not been identified, and the
-side each voice stands on among the 349 voice-only readings is inferred
-from the synthetic probe, not read from a receipt.
+The two forms no longer recognized have not been identified. The voice
+pairs of the 349 voice-only readings are read from a receipt; the blocks
+behind them were examined on the local replay over synthetic forms, not
+over LISTALL.
