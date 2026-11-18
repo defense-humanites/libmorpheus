@@ -68,7 +68,8 @@ the API, on every seventh form, the rows go from 86,327 to 86,433.
 | **2,100,530 analysis rows of the original candidate** | reading counts | **moves** |
 | Every LISTALL reading count of a receipt | reading counts | moves |
 | Lemma identity: 24,168 readings matched at ten fields, none at nine | voice | readings of voice variants move from ten fields to nine on participles |
-| Historical complete-loss reproduction (`reproduce-latin-complete-losses.py`: 2,048,328 baseline rows, 6,789 forms, private difference fingerprint) | reading counts and voice | cannot reproduce |
+| Baseline comparison the residual loss attribution checks (37,519 removed readings, 5,413 lost forms) | reading counts | the removed readings move |
+| Historical complete-loss reproduction of the loss source review (`reproduce-latin-complete-losses.py`: 2,048,328 baseline rows, 6,789 forms, private difference fingerprint) | reading counts and voice | cannot reproduce |
 
 The row count was pinned as a literal in eleven qualifiers, checked after
 the LISTALL passes: on the current runtime each of them would have failed at
@@ -191,15 +192,24 @@ forms and their 8,447 readings are the same.
 
 ## What comes next
 
-The residual loss attribution and the witness backlog screen
-(`latin-residual-loss-attribution.yml`, `latin-witness-backlog.yml`) have
-not been run on the current runtime. The attribution first reproduces the
-historical complete losses in `tools/reproduce-latin-complete-losses.py`
-against values of the earlier runtime: 2,048,328 baseline and 2,100,530
-candidate rows, now 2,050,019 and 2,102,153, and the fingerprint of a
-private difference file that carries the voice. The 6,789 forms it expects
-are unchanged; its row count and its fingerprint need a re-pinning of their
-own before the attribution can run.
+The residual loss attribution (`latin-residual-loss-attribution.yml`) has
+not been run on the current runtime. Its tool checks, after its LISTALL
+pass, the baseline comparison of the qualified combination: 37,519 removed
+readings and 5,413 lost forms for `ec3fc3d4…`. On the current runtime the
+receipt above gives 37,868 and 5,413, so that check needs the same
+per-runtime pin before the attribution can run.
+
+The witness backlog screen (`latin-witness-backlog.yml`) reads no analysis:
+it compares the candidate with the curated witness and does not depend on
+the runtime.
+
+The historical complete-loss reproduction of
+`tools/reproduce-latin-complete-losses.py`, which only the loss source
+review runs (`latin-loss-source-review.yml`), is bound to the earlier
+runtime by its row counts (2,048,328 baseline and 2,100,530 candidate rows,
+now 2,050,019 and 2,102,153) and by the fingerprint of a private difference
+file that carries the voice. It documents the losses as first measured and
+is not a step of the resumption.
 
 ## Limits
 
