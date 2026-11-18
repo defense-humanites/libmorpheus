@@ -196,8 +196,13 @@ The residual loss attribution (`latin-residual-loss-attribution.yml`) has
 not been run on the current runtime. Its tool checks, after its LISTALL
 pass, the baseline comparison of the qualified combination: 37,519 removed
 readings and 5,413 lost forms for `ec3fc3d4…`. On the current runtime the
-receipt above gives 37,868 and 5,413, so that check needs the same
-per-runtime pin before the attribution can run.
+receipt above gives 37,868 and 5,413. The check is pinned per combination
+and per runtime as well (`QUALIFIED_BASELINE_COMPARISON` in
+`tools/attribute-latin-residual-losses.py`), from the combined receipt of
+each runtime; a combination that no receipt qualified on the runtime at
+hand is refused before any analysis, since the combination is qualified
+first. The receipt of the attribution names its runtime
+(`runtime_ending_table_sha256`).
 
 The witness backlog screen (`latin-witness-backlog.yml`) reads no analysis:
 it compares the candidate with the curated witness and does not depend on

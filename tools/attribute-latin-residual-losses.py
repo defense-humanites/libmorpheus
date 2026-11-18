@@ -47,12 +47,28 @@ FIELDS = ('workword', 'lemma', 'part_of_speech', 'person', 'number', 'gender',
           'grammatical_case', 'tense', 'mood', 'voice', 'degree')
 NOTATION = str.maketrans('', '', '_^-')
 # Readings removed and forms completely lost against the controlled baseline,
-# as the combined-candidate receipt of each qualified combination records them.
+# as the combined-candidate receipt of each qualified combination records them,
+# by analysis runtime. A runtime is named as in ORIGINAL_ROWS of the candidate
+# qualifier: by the SHA-256 of the fourth-principal-part ending table its
+# controlled baseline builds. The removed readings move with the runtime (a
+# deponent participle is deponent since release 0.4.5); the lost forms do not.
+EARLIER_RUNTIME = '62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c'
 QUALIFIED_BASELINE_COMPARISON = {
-    'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463': {'removed_rows': 38066, 'forms': 5766},
-    'd02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0': {'removed_rows': 37609, 'forms': 5497},
-    'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e': {'removed_rows': 37519, 'forms': 5413},
+    ('f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463', EARLIER_RUNTIME): {'removed_rows': 38066, 'forms': 5766},
+    ('d02f4bdb4a3a10c56ae25779cb5c4dd65d8f027d359d4d040daec05ce88944f0', EARLIER_RUNTIME): {'removed_rows': 37609, 'forms': 5497},
+    ('ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e', EARLIER_RUNTIME): {'removed_rows': 37519, 'forms': 5413},
+    # Receipt latin-combined-candidate-69ba91c.json.
+    ('ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e',
+     '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9'): {'removed_rows': 37868, 'forms': 5413},
 }
+
+
+def qualified_comparison(combined_sha, runtime):
+    """The baseline comparison qualified for a combination on a runtime; the combination is qualified first."""
+    expected = QUALIFIED_BASELINE_COMPARISON.get((combined_sha, runtime))
+    if expected is None:
+        raise ValueError('residual loss attribution has no qualified baseline comparison for this combined candidate on this runtime')
+    return expected
 
 
 def composed_lemmas(compounds=COMPOUNDS):
@@ -168,9 +184,8 @@ def prepare(args):
         raise ValueError('residual loss attribution input receipt differs')
     target = changed.loss.private_target(args.output, [*paths.values(), args.library, args.baseline, args.tools, args.filters, args.witness])
     target.mkdir(mode=0o700)
-    expected = QUALIFIED_BASELINE_COMPARISON.get(combined.COMBINED_SHA)
-    if expected is None:
-        raise ValueError('residual loss attribution has no qualified baseline comparison for this combined candidate')
+    runtime = native.digest(args.baseline / changed.reproduction.candidate.RUNTIME_TABLE)
+    expected = qualified_comparison(combined.COMBINED_SHA, runtime)
     baseline_indexes = {n: native.digest(args.baseline / 'Latin/steminds' / n) for n in changed.reproduction.candidate.INDEXES}
     combination = combined.combine.prepare(args.candidate, args.headers, args.tei, args.filters, target / 'combination')
     if combination['output_sha256'] != combined.COMBINED_SHA:
@@ -200,6 +215,7 @@ def prepare(args):
             'scope': 'readings of the controlled rebuilt baseline that the combined candidate removes on LISTALL and that lemma identity does not explain, attributed by lemma category of the open decisions and by differing fields; witness used for membership only; no candidate changed, no production promotion',
             'input_sha256': receipts, 'witness_sha256': native.digest(args.witness), 'compounds_sha256': native.digest(args.compounds),
             'combined_source_sha256': native.digest(stems), 'trial_indexes_sha256': trial_indexes,
+            'runtime_ending_table_sha256': runtime,
             'baseline_comparison': {k: comparison[k] for k in ('counts', 'global_eleven_field_multisets')},
             'lemma_categories': dict(sorted(Counter(categories.values()).items())),
             **report, 'original_inputs_unchanged': True}

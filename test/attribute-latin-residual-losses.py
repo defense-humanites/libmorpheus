@@ -83,6 +83,21 @@ class Attribution(unittest.TestCase):
             {'lemma_category': 'candidate_lemma_outside_curated_witness', 'differing_fields': 'mood', 'readings': 1},
             {'lemma_category': 'curated_lemma_with_candidate_definition', 'differing_fields': 'tense', 'readings': 1}])
 
+    def test_baseline_comparison_is_qualified_per_combination_and_runtime(self):
+        eleven = 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
+        current = '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9'
+        self.assertEqual(attribution.qualified_comparison(eleven, attribution.EARLIER_RUNTIME), {'removed_rows': 37519, 'forms': 5413})
+        # The removed readings move with the runtime; the lost forms do not.
+        self.assertEqual(attribution.qualified_comparison(eleven, current), {'removed_rows': 37868, 'forms': 5413})
+        # A combination that no receipt qualified on a runtime is refused before any analysis.
+        six = 'f719a4e118195bc0d7696c30121a11495fac21cdfadb70ad95dd378443812463'
+        self.assertEqual(attribution.qualified_comparison(six, attribution.EARLIER_RUNTIME)['forms'], 5766)
+        for combined, runtime in ((six, current), (eleven, '0' * 64), ('0' * 64, current)):
+            with self.assertRaisesRegex(ValueError, 'no qualified baseline comparison'):
+                attribution.qualified_comparison(combined, runtime)
+        candidate = attribution.sibling('qualify-latin-historical-source-candidate')
+        self.assertEqual({runtime for _, runtime in attribution.QUALIFIED_BASELINE_COMPARISON}, set(candidate.ORIGINAL_ROWS))
+
 
 if __name__ == '__main__':
     unittest.main()
