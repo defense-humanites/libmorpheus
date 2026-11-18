@@ -252,8 +252,12 @@ never moves, and a wrong publication is corrected by a new version.
   exists; every release workflow (native, WebAssembly, data, Node.js,
   Python) publishes them. Node.js and Python releases carry the files their
   registry serves, checked against the registry's digests
-  (`tools/registry-release-assets.py`). Binding releases never become the
-  repository's latest release.
+  (`tools/registry-release-assets.py`). The script waits up to twenty
+  minutes for each file the registry does not serve yet: npm lists a version
+  before it serves its tarball. If the release job still fails after the
+  packages are published, re-run that failed job once the registry serves
+  them (`gh run rerun <id> --failed`); the publication job is not repeated.
+  Binding releases never become the repository's latest release.
 - To change the notes or title of a published release, edit the notes file on
   `main` and run the `Release notes` workflow for that tag (`tags: v0.4.5`);
   `tags: all` applies every notes file. Tags and assets are never touched, and
