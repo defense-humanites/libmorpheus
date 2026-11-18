@@ -188,7 +188,7 @@ Reconnaître une forme ne signifie pas rétablir son ancienne signature : les **
 
 ### Limites et prochain contrôle
 
-L’expansion privée comporte **7 directives de classes de présent et 3 directives classées « autres »** par le classificateur actuel. Ce dernier reconnaît `perfstem` mais ne distingue pas encore les alias réguliers `avperf` et `ivperf`, présents dans les règles historiques de [`are_vb`](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/stemlib/Latin/derivs/source/are_vb.deriv) et [`ire_vb`](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/stemlib/Latin/derivs/source/ire_vb.deriv). **On ne peut donc pas déduire de cet agrégat qu’aucun parfait n’a été extrapolé**, ni identifier sûrement les trois autres directives sans compléter ce contrôle. L’absence de récupération d’anciennes lectures parfaites ne prouve pas non plus l’absence de nouvelles lectures parfaites. Cette limite ne change pas les comptes natifs ci-dessus.
+L’expansion privée comporte **7 directives de classes de présent et 3 directives classées « autres »** par le classificateur actuel. Ce dernier reconnaît `perfstem` mais ne distingue pas encore les alias réguliers `avperf` et `ivperf`, présents dans les règles historiques de [`are_vb`](../stemlib/Latin/derivs/source/are_vb.deriv) et [`ire_vb`](../stemlib/Latin/derivs/source/ire_vb.deriv). **On ne peut donc pas déduire de cet agrégat qu’aucun parfait n’a été extrapolé**, ni identifier sûrement les trois autres directives sans compléter ce contrôle. L’absence de récupération d’anciennes lectures parfaites ne prouve pas non plus l’absence de nouvelles lectures parfaites. Cette limite ne change pas les comptes natifs ci-dessus.
 
 Le prochain essai doit **identifier complètement ces classes puis isoler les seules directives de présent**, qualifier les familles natives attendues et examiner les parties principales source avant d’ajouter quoi que ce soit au candidat. La simplification du champ reste une contre-épreuve diagnostique, pas une règle de récupération autorisée. Les mesures portent sur les formes d’entrée et les 591 formes ciblées ; elles n’établissent ni un paradigme complet ni l’absence globale de régressions de l’assemblage contrefactuel.
 
@@ -203,7 +203,7 @@ Les trois workflows sont verts : [Linux CI](https://github.com/defense-humanites
 | Index secondaire contrefactuel | `ccafc613bf74bab0ee194bfcff9a19165ece1e2e312726662d47e3bc0d225b9f` |
 | Dossier natif ciblé | `2d48ac575e8b0e6a8d708e5e9edea909096153569f8de42e6bcb569fef6f4093` |
 
-Les formes, lemmes, transcriptions et radicaux individuels restent privés dans le runner ; aucun artefact lexical n’est téléversé. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-terminal-conjugation-probe.md). La PR reste en brouillon et le corpus de production demeure inchangé.
+Les formes, lemmes, transcriptions et radicaux individuels restent privés dans le runner ; aucun artefact lexical n’est téléversé. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole](latin-terminal-conjugation-probe.md). La PR reste en brouillon et le corpus de production demeure inchangé.
 
 ## Revue source des 30 lemmes sans définition finale qualifiée sur `c8efbce`
 
@@ -235,7 +235,7 @@ Ces profils décrivent la syntaxe projetée, pas une approbation linguistique. L
 
 Les **deux passes grammaticales globales** et le diagnostic natif des **6 789 formes / 11 005 lectures / 133 lemmes** reproduisent les mesures et empreintes précédentes. **41 tests ciblés et six tests natifs synthétiques passent dans le runner.** Les trois workflows du dernier commit sont verts : [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/37634470838), [qualification des plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37634470791) et [recherche lexicale](https://github.com/defense-humanites/libmorpheus/actions/runs/37634462185). Le [job latin](https://github.com/defense-humanites/libmorpheus/actions/runs/37634462185/job/112836888973) a réussi. La première tentative des deux workflows généraux échouait uniquement sur l’absence de l’identifiant SPDX dans le nouveau protocole ; cet oubli est corrigé dans le dernier commit.
 
-Empreinte SHA-256 du dossier privé des 30 revues : `0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc`. Les deux rejeux `2250541` et `c8efbce` reproduisent la même revue et son empreinte. Les formes, lemmes, articles individuels, radicaux et transcriptions restent privés dans le runner ; aucun dossier n’est téléversé en artefact. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-missing-definition-review.md). La PR reste en brouillon et le corpus de production demeure inchangé.
+Empreinte SHA-256 du dossier privé des 30 revues : `0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc`. Les deux rejeux `2250541` et `c8efbce` reproduisent la même revue et son empreinte. Les formes, lemmes, articles individuels, radicaux et transcriptions restent privés dans le runner ; aucun dossier n’est téléversé en artefact. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole](latin-missing-definition-review.md). La PR reste en brouillon et le corpus de production demeure inchangé.
 
 ## Diagnostic natif et source des pertes complètes qualifié sur `8eeb5f6`
 
@@ -292,7 +292,7 @@ Le sélecteur de recherche n’est pas le `vtags` historique et sa partition ne 
 | Assemblage verbal développé témoin | `f64a9c551a1c56013c645628408e79a02bb6b9672bc98585f8c0edd7038836c3` |
 | Assemblage verbal développé final | `83e4157c96bc029fa6950c589c5a26f4f1c55eef07a2654d7cc771ceeafa0940` |
 
-Le dossier privé garde les formes, les lectures natives, les radicaux, les définitions et les articles XML avec leurs empreintes. Il n’est ni commité ni téléversé comme artifact Actions. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole du diagnostic](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-complete-loss-diagnostic.md).
+Le dossier privé garde les formes, les lectures natives, les radicaux, les définitions et les articles XML avec leurs empreintes. Il n’est ni commité ni téléversé comme artifact Actions. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. [Protocole du diagnostic](latin-complete-loss-diagnostic.md).
 
 Les 30 lemmes sans définition finale et les 59 lemmes modifiés restent à arbitrer sur preuve source. Les cas issus de préverbes et les rapprochements non résolus demandent leurs propres critères. Aucun radical ni paradigme n’est ajouté par cette étape ; le corpus de production demeure inchangé et la PR reste en brouillon.
 
@@ -300,7 +300,7 @@ Les 30 lemmes sans définition finale et les 59 lemmes modifiés restent à arbi
 
 Le commit [`d861a41`](https://github.com/defense-humanites/libmorpheus/commit/d861a41a473561d6badab187d8ed093c36f07b4e) ajoute deux passes complètes : la racine finale contre elle-même, puis le témoin reconstruit contrôlé contre cette racine. Chaque passe couvre **1 033 579 formes**, avec options natives zéro et tous les couples de statuts API `0,0`. Les multisets sont comparés pour chaque forme dans les onze champs : workword, lemme, POS, personne, nombre, genre, cas, temps, mode, voix et degré. L’ordre des résultats est ignoré et leur multiplicité est conservée.
 
-Le contrôle de la même racine conserve **2 100 530 lectures**, avec zéro changement de compte ou de multiset, zéro ajout et zéro suppression. Les sources, les candidats des deux traitements de quantité, les quatre index et les totaux de reconnaissance et de lectures reproduisent exactement les [empreintes de référence](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/tools/latin-final-present-reference.json) qualifiées sur `e42866d`. Les onze passes de comptes précédentes restent qualifiées sur ce commit ; la présente exécution ajoute **deux passes grammaticales globales**, sans les répéter.
+Le contrôle de la même racine conserve **2 100 530 lectures**, avec zéro changement de compte ou de multiset, zéro ajout et zéro suppression. Les sources, les candidats des deux traitements de quantité, les quatre index et les totaux de reconnaissance et de lectures reproduisent exactement les [empreintes de référence](../tools/latin-final-present-reference.json) qualifiées sur `e42866d`. Les onze passes de comptes précédentes restent qualifiées sur ce commit ; la présente exécution ajoute **deux passes grammaticales globales**, sans les répéter.
 
 ### Matrice finale mesurée
 
@@ -358,7 +358,7 @@ Les **24 tests unitaires ciblés et cinq tests d’intégration native** passent
 
 Empreinte SHA-256 du fichier privé des différences globales : `08f0aca20f35eecf95f24a50690ad91a35a139663f558570d9ea86ea07f8bd52`. Le contrôle identique produit un fichier vide, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`. Les formes, lemmes et signatures détaillées restent privés dans le runner ; seuls outils, tests synthétiques, agrégats et empreintes sont publiés.
 
-[Protocole global](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-global-reading-qualification.md). Cette qualification établit la mesure, pas l’acceptabilité d’un remplacement du corpus. La PR reste en brouillon ; le corpus de production demeure inchangé.
+[Protocole global](latin-global-reading-qualification.md). Cette qualification établit la mesure, pas l’acceptabilité d’un remplacement du corpus. La PR reste en brouillon ; le corpus de production demeure inchangé.
 
 ## Qualification complète du présent cité et des cinq graphies sur `e42866d`
 
@@ -405,7 +405,7 @@ Ces mesures sont une série Linux contrôlée. Sur `e42866d`, le croisement comp
 
 **35 tests ciblés passent localement et quatre tests natifs synthétiques passent dans le runner.** Les trois workflows du commit sont verts : [Linux CI](https://github.com/defense-humanites/libmorpheus/actions/runs/37426892295), [qualification des plateformes](https://github.com/defense-humanites/libmorpheus/actions/runs/37426892334) et [recherche lexicale](https://github.com/defense-humanites/libmorpheus/actions/runs/37426884736). Le [job latin complet](https://github.com/defense-humanites/libmorpheus/actions/runs/37426884736/job/112148459316) a réussi.
 
-Protocoles : [présent cité](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-coordinated-present-qualification.md) et [cinq graphies](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-bounded-present-qualification.md). Ces fichiers décrivent les critères et attentes au commit ; les mesures finales du run sont consignées ici. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. La PR reste en brouillon et le corpus de production demeure inchangé.
+Protocoles : [présent cité](latin-coordinated-present-qualification.md) et [cinq graphies](latin-bounded-present-qualification.md). Ces fichiers décrivent les critères et attentes au commit ; les mesures finales du run sont consignées ici. Seuls outils, tests synthétiques, agrégats et empreintes sont publiés. La PR reste en brouillon et le corpus de production demeure inchangé.
 
 ## Inventaire source et neuf présents supplémentaires
 
@@ -434,7 +434,7 @@ Ces mesures constituent une **série locale macOS distincte** : les sorties brut
 
 Au stade des neuf ajouts, **six dossiers stricts** restaient : cinq graphies à qualifier et l’abréviation exclue. Le dossier à supins coordonnés était hors de ce sélecteur ; les deux nouveaux essais qualifiés ci-dessus laissent désormais uniquement l’abréviation exclue. Empreinte privée des six dossiers : `bca781f7c5292333e4df155022f4816f55f0771b8669fe52ddb35a2e42d058d6`.
 
-Critères et limites : [inventaire restant](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-remaining-present-review.md) et [qualification des renvois indépendants](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-backlinked-present-qualification.md).
+Critères et limites : [inventaire restant](latin-remaining-present-review.md) et [qualification des renvois indépendants](latin-backlinked-present-qualification.md).
 
 ## Qualification Linux complète sur `6d0a199`
 
@@ -459,7 +459,7 @@ Le candidat après l’alternance vocalique reconnaît **847 544** formes et ret
 | Candidat seul | 16 343 |
 | Aucune | 179 246 |
 
-Le gain net de 9 554 formes ne résout pas les 6 789 pertes. La comparaison globale témoin→alternance vocalique porte sur les comptes et ne contrôle pas les multisets grammaticaux ; aucun contrôle grammatical global témoin→renvois indépendants n’a été exécuté. [Compte rendu complet](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-present-replay-qualification.md).
+Le gain net de 9 554 formes ne résout pas les 6 789 pertes. La comparaison globale témoin→alternance vocalique porte sur les comptes et ne contrôle pas les multisets grammaticaux ; aucun contrôle grammatical global témoin→renvois indépendants n’a été exécuté. [Compte rendu complet](latin-present-replay-qualification.md).
 
 ### Empreintes du nouveau rejeu
 

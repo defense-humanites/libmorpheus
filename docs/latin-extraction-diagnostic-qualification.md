@@ -14,7 +14,7 @@ Le commit [`40b6cd6`](https://github.com/defense-humanites/libmorpheus/commit/40
 
 Ce contrôle démontre la structure de l’identifiant ; **il n’est pas une trace complète de la résolution dans la table des composés**, une correspondance un-à-un des formes, ni une preuve d’attestation. L’absence de résultat dans la recherche TEI précédente porte sur cet identifiant de composition et les variantes bornées examinées ; elle ne permet pas de le traiter silencieusement comme une identité lexicale source. La légitimité des formes préfixées et la productivité native restent à arbitrer.
 
-Dossier privé SHA-256 : `4cedccff96d5201c0884b6045f556b6d1e162dc2e9bb396b33a61468163d0ff5`. Les entrées sont vérifiées inchangées. [Méthode et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-preverb-identifier-diagnostic.md).
+Dossier privé SHA-256 : `4cedccff96d5201c0884b6045f556b6d1e162dc2e9bb396b33a61468163d0ff5`. Les entrées sont vérifiées inchangées. [Méthode et limites](latin-preverb-identifier-diagnostic.md).
 
 ### Contrôles synthétiques locaux distincts
 
@@ -32,7 +32,7 @@ Le commit [`f3f8c15`](https://github.com/defense-humanites/libmorpheus/commit/f3
 
 Cette absence de jointure **ne prouve pas l’absence du lemme dans le TEI complet** : les articles en erreur de projection sont exclus de cet index, et aucune identité alternative n’est substituée. Une recherche source élargie et bornée reste nécessaire avant arbitrage. Les 123 lectures ne sont pas approuvées ; la copie de présent reste expérimentale.
 
-Dossier privé SHA-256 : `8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a`. Les entrées sont vérifiées inchangées. Articles, formes et décompositions restent privés. Aucun essai n’est promu ; PR en brouillon, production inchangée. [Méthode et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-source-present-preverb-review.md).
+Dossier privé SHA-256 : `8d79a647c74830d83f026058866aa149915f529ff0b9da706c1bb260b6cf4e1a`. Les entrées sont vérifiées inchangées. Articles, formes et décompositions restent privés. Aucun essai n’est promu ; PR en brouillon, production inchangée. [Méthode et limites](latin-source-present-preverb-review.md).
 
 ## Présent à chiffre source sur `1174ee2` — qualification mesurée
 
@@ -78,7 +78,7 @@ Les index du candidat final d’origine sont vérifiés inchangés. Aucun essai 
 | Relecture privée des routes | `461da7b4d5a082c072c553d501f4541c1f297f78b92c0b2a79fca28a3c34c627` |
 | Différence vide du contrôle identique | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-[Critères et limites de cette qualification](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-isolated-source-present-qualification.md). Les mesures complètes des itérations précédentes sont conservées dans le [compte rendu archivé](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-extraction-diagnostic-qualification.md).
+[Critères et limites de cette qualification](latin-isolated-source-present-qualification.md). Les mesures complètes des itérations précédentes sont conservées dans le [compte rendu archivé](latin-extraction-diagnostic-qualification.md).
 
 ## Essais natifs des champs isolés qualifiés sur `e131f03`
 
@@ -105,7 +105,7 @@ Empreintes communes aux deux essais :
 | Index verbal | `3a6bef5237ba8a6d5ad2876e09f8c4a99829906ed38f97819c7ded7f09b87553` | `00fb4438695a8de07da3c2b28f3ac91dd510cca1dccfa3eb8b31e0420e10bd8a` |
 | Index secondaire | `e4aa833fd24c1271f2742a7af74560957818de1dee48a375d61292bf71ea5226` | `1401f2885c3a2d44df8bbaaf4774dbecb9c42952e5ff6d924c7821c3d6315b50` |
 
-Les sondes privées conservent la position du champ source et ont des empreintes distinctes : `921c65aa5fe79a85d30ff596a5dc1d0bfabdee018376719462830cc02696863f` et `5299af6c2e2fbb7f87f56e061d62d54f939cb1da22f94ce45a2196f620134f58`. Le dossier des huit blocages garde `64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c` ; les empreintes des diagnostics des sept chiffres terminaux restent reproduites. Les témoins nominaux et les quatre index finaux sont vérifiés inchangés. Aucun essai n’est promu au candidat ou à la production ; la PR reste en brouillon. [Critères et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-isolated-field-native-probe.md).
+Les sondes privées conservent la position du champ source et ont des empreintes distinctes : `921c65aa5fe79a85d30ff596a5dc1d0bfabdee018376719462830cc02696863f` et `5299af6c2e2fbb7f87f56e061d62d54f939cb1da22f94ce45a2196f620134f58`. Le dossier des huit blocages garde `64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c` ; les empreintes des diagnostics des sept chiffres terminaux restent reproduites. Les témoins nominaux et les quatre index finaux sont vérifiés inchangés. Aucun essai n’est promu au candidat ou à la production ; la PR reste en brouillon. [Critères et limites](latin-isolated-field-native-probe.md).
 
 
 ## Huit autres blocages d’extraction qualifiés sur `453e6d3`
@@ -127,7 +127,7 @@ Pour les deux en-têtes multiples, **cinq essais** gardent chaque occurrence sou
 
 Ces **deux succès sont des essais de champs, pas un compte de lemmes récupérés**. Ils localisent une piste liée à la combinaison des champs ; ils ne justifient ni la suppression d’une information source ni la promotion d’une dérivation productive. Aucun index correspondant n’est construit et aucune récupération native n’est revendiquée. La prochaine qualification doit rattacher les essais réussis à leurs dossiers, examiner les radicaux émis et leur productivité, puis contrôler les lectures attendues et les différences avant/après sur une copie privée.
 
-Le dossier privé a SHA-256 `64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c`. Le dossier préalable reste `0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc` ; les trois empreintes des sondes/revue des sept chiffres terminaux reproduisent `dbba407` et leurs index du candidat final restent inchangés. Aucun candidat ni radical de production n’est modifié ; la PR reste en brouillon. [Critères et limites](https://github.com/defense-humanites/libmorpheus/blob/research/lexical-arbitration-2026-09-29/docs/latin-extraction-blocker-review.md).
+Le dossier privé a SHA-256 `64804fe621a6376419636eb2558a4ebce2ad8e408b06b2efa0df415314dcee9c`. Le dossier préalable reste `0cf86ce597e83ff92f0301b06fb34b700a714eaddccd66eb9a195cf0c58decbc` ; les trois empreintes des sondes/revue des sept chiffres terminaux reproduisent `dbba407` et leurs index du candidat final restent inchangés. Aucun candidat ni radical de production n’est modifié ; la PR reste en brouillon. [Critères et limites](latin-extraction-blocker-review.md).
 
 ## Provenance native et indices d’attestation qualifiés sur `dbba407`
 

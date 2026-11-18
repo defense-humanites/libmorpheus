@@ -17,9 +17,13 @@ every example is derivable from the public source header and the public
 lexer. The candidate files, the per-lemma dossiers and any list of forms or
 stems stay private, in the sessions that produced them. Each decision below
 names the receipt that measures it; the receipts carry counts, categories
-and fingerprints only. The repository maintainer decides; until then the
-default holds: nothing is admitted beyond the bounded recipes, nothing is
-promoted and the PR stays a draft.
+and fingerprints only. A form carrying readings of two categories is
+counted under both, so the forms of the four headings below sum to 5,561
+for 5,413 distinct forms. The repository maintainer decides, in
+[issue #112](https://github.com/defense-humanites/libmorpheus/issues/112);
+until then the default holds: nothing is admitted beyond the bounded
+recipes and nothing is promoted. PR #18 was merged as a frozen research
+archive with these decisions open.
 
 ## 1. Changed-definition dossiers — 2,249 lost forms, 39 lemmas
 
