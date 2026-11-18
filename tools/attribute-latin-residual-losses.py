@@ -114,6 +114,16 @@ def differing_fields(removed, after):
     return '+'.join(best) if best else 'identical_reading_at_lower_multiplicity'
 
 
+def voice_pair(removed, after):
+    """The voice of a removed reading and the voices of the candidate readings that differ from it by voice alone."""
+    voice = FIELDS.index('voice')
+    def rest(signature):
+        return (signature[0].translate(NOTATION),) + tuple(signature[1:voice]) + tuple(signature[voice + 1:])
+    others = sorted({str(candidate[voice]) for candidate in after
+                     if rest(candidate) == rest(removed) and candidate[voice] != removed[voice]})
+    return '%s>%s' % (removed[voice], '+'.join(others))
+
+
 def difference_size(fields):
     """Coarse size of a difference: how many grammatical fields, and whether the lemma differs too."""
     if fields in ('no_candidate_reading', 'identical_reading_at_lower_multiplicity'):
@@ -128,6 +138,7 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks, compos
     lost = {'readings': Counter(), 'forms': Counter(), 'lemmas': {}}
     unmatched = {'readings': Counter(), 'lemmas': {}}
     by_fields = Counter(); fields_by_category = Counter(); by_size = Counter(); counts = Counter(); by_pos = Counter()
+    voice_only = Counter(); voice_only_lemmas = {}
     for line in delta_path.read_bytes().splitlines():
         row = json.loads(line)
         removed = Counter({tuple(r['signature']): r['multiplicity'] for r in row['removed']})
@@ -159,6 +170,9 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks, compos
             fields = differing_fields(signature, after)
             by_fields[fields] += count; fields_by_category[(category, fields)] += count
             by_size[difference_size(fields)] += count
+            if fields == 'voice':
+                key = (category, voice_pair(signature, after), str(signature[FIELDS.index('mood')]), str(signature[FIELDS.index('tense')]))
+                voice_only[key] += count; voice_only_lemmas.setdefault(key[:2], set()).add(signature[1])
     def table(part):
         return {c: {'readings': part['readings'][c], **({'forms': part['forms'][c]} if 'forms' in part else {}),
                     'lemmas': len(part['lemmas'][c])} for c in sorted(part['readings'])}
@@ -171,7 +185,15 @@ def attribute(delta_path, after_signatures, categories, candidate_blocks, compos
             'unmatched_readings_by_differing_fields': dict(sorted(by_fields.items(), key=lambda i: (-i[1], i[0]))),
             'unmatched_readings_by_category_and_fields': [
                 {'lemma_category': c, 'differing_fields': f, 'readings': n}
-                for (c, f), n in sorted(fields_by_category.items(), key=lambda i: (-i[1], i[0]))]}
+                for (c, f), n in sorted(fields_by_category.items(), key=lambda i: (-i[1], i[0]))],
+            # Readings that differ from a candidate reading of the form by voice alone: which voice the
+            # baseline reports and which the candidate reports, by mood and tense. Engine codes, no lemma.
+            'voice_only_readings_by_voice_pair': [
+                {'lemma_category': c, 'voice_pair': p, 'readings': sum(n for k, n in voice_only.items() if k[:2] == (c, p)),
+                 'lemmas': len(names)} for (c, p), names in sorted(voice_only_lemmas.items())],
+            'voice_only_readings_by_mood_and_tense': [
+                {'lemma_category': c, 'voice_pair': p, 'mood': m, 'tense': t, 'readings': n}
+                for (c, p, m, t), n in sorted(voice_only.items(), key=lambda i: (-i[1], i[0]))]}
 
 
 def prepare(args):

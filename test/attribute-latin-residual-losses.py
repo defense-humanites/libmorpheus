@@ -83,6 +83,30 @@ class Attribution(unittest.TestCase):
             {'lemma_category': 'candidate_lemma_outside_curated_witness', 'differing_fields': 'mood', 'readings': 1},
             {'lemma_category': 'curated_lemma_with_candidate_definition', 'differing_fields': 'tense', 'readings': 1}])
 
+    def test_voice_only_readings_name_the_voice_on_each_side(self):
+        # A deponent participle of the baseline (voice 5) that the candidate reads as passive (2), under the
+        # same lemma; one the candidate reads both as active and as passive; and a reading that differs by
+        # tense as well, which is not a voice-only reading.
+        rows = [row('perditus', [signature('perditus', 'perdo', tense=5, mood=7, voice=5)], [signature('perditus', 'perdo', tense=5, mood=7, voice=2)]),
+                row('perdita', [signature('perdi_ta', 'perdo', tense=5, mood=7, voice=5)],
+                    [signature('perdita', 'perdo', tense=5, mood=7, voice=2), signature('perdita', 'perdo', tense=5, mood=7, voice=1)]),
+                row('amatur', [signature('amatur', 'amo', voice=5)], [signature('amatur', 'amo', tense=2, voice=2)])]
+        after = {r['form']: [s for s in json.loads(json.dumps(candidates))] for r, candidates in zip(rows, (
+            [signature('perditus', 'perdo', tense=5, mood=7, voice=2)],
+            [signature('perdita', 'perdo', tense=5, mood=7, voice=2), signature('perdita', 'perdo', tense=5, mood=7, voice=1)],
+            [signature('amatur', 'amo', tense=2, voice=2)]))}
+        with tempfile.TemporaryDirectory() as directory:
+            delta = Path(directory) / 'delta.jsonl'
+            delta.write_text(''.join(json.dumps(r) + '\n' for r in rows))
+            report = attribution.attribute(delta, lambda form: after.get(form, []), CATEGORIES, BLOCKS)
+        self.assertEqual(report['unmatched_readings_by_differing_fields'], {'voice': 2, 'tense+voice': 1})
+        self.assertEqual(report['voice_only_readings_by_voice_pair'], [
+            {'lemma_category': 'curated_lemma_with_candidate_definition', 'voice_pair': '5>1+2', 'readings': 1, 'lemmas': 1},
+            {'lemma_category': 'curated_lemma_with_candidate_definition', 'voice_pair': '5>2', 'readings': 1, 'lemmas': 1}])
+        self.assertEqual(report['voice_only_readings_by_mood_and_tense'], [
+            {'lemma_category': 'curated_lemma_with_candidate_definition', 'voice_pair': '5>1+2', 'mood': '7', 'tense': '5', 'readings': 1},
+            {'lemma_category': 'curated_lemma_with_candidate_definition', 'voice_pair': '5>2', 'mood': '7', 'tense': '5', 'readings': 1}])
+
     def test_baseline_comparison_is_qualified_per_combination_and_runtime(self):
         eleven = 'ec3fc3d4b154db5ad0b9df0d7f337716f7ceb7e94eea760857800fc5c74ed46e'
         current = '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9'
