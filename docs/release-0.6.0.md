@@ -147,9 +147,13 @@ against its share of the treebank readings above.
 - SONAME major: **1**
 - Previous release tag: `v0.5.0`
 - Benchmark evidence: **accepted**
-- Pre-release Linux CI: pending (the tagged commit's run)
-- Pre-release platform qualification: pending (manual dispatch with
-  `package_artifacts` on the exact candidate commit)
+- Pre-release Linux CI: [passed on `7dcc93a`](https://github.com/defense-humanites/libmorpheus/actions/runs/44138463704)
+- Pre-release platform qualification: [passed on `7dcc93a`](https://github.com/defense-humanites/libmorpheus/actions/runs/44138484613)
+  (manual dispatch with `package_artifacts`, first attempt)
+- Tagged platform run and release publication: [passed on `7dcc93a`](https://github.com/defense-humanites/libmorpheus/actions/runs/44163354021)
+  (second attempt)
+- Release: [`v0.6.0`](https://github.com/defense-humanites/libmorpheus/releases/tag/v0.6.0),
+  created on 2026-11-17 on `7dcc93a18121ff79c3b694afb3b9fc9e4ebf1886`
 
 ## Benchmark evidence
 
@@ -215,17 +219,45 @@ row grows less than in 0.5.0 (14.2 against 17.7 MiB).
 This report replaces `benchmark-0.5.0.json` as the baseline of the next
 native release.
 
-## Remaining authorization
+## Publication record
 
-Before publication, a maintainer must:
+The tag was created by the maintainer on 2026-11-17 on `7dcc93a`, the merge
+of the accepted benchmark evidence. That commit descends from the measured
+revision `b00ee43` and differs from it only by that evidence and these
+documents.
 
-1. run `bench/release.sh` on the candidate commit on the controlled host,
-   have the report reviewed against the baseline and committed with its
-   sidecar as `bench/release-evidence/benchmark-0.6.0.json`;
-2. dispatch the platform workflow with `package_artifacts` for the candidate
-   commit and inspect the three native archives;
-3. confirm the final tagged Linux CI and platform runs and record their links
-   above;
-4. explicitly authorize creation of `v0.6.0`, then of `wasm-v0.3.0` on the
-   same commit or a descendant with an unchanged runtime, and of
-   `data-v0.3.0`.
+The Linux CI of the merge commit on `main` passed at its first attempt,
+including the push-only sanitizer, ThreadSanitizer, byte-conversion,
+legacy-make and release jobs. The manual `package_artifacts` dispatch also
+passed at its first attempt and produced the three archives.
+
+On the tag, Linux CI and WebAssembly passed at their first attempt. The
+platform run's first `apple-silicon` job waited fifteen minutes without a
+macOS runner and was cancelled before any step ran, as during the 0.5.0
+publication; the other qualification jobs had passed. The second attempt
+qualified Apple Silicon and published the release. The tag never moved.
+
+The release carries the three native archives and their digests, plus the
+accepted benchmark report and its sidecar:
+
+| Asset | SHA-256 |
+|---|---|
+| `libmorpheus-0.6.0-Linux-x86_64-glibc.tar.gz` | `c3858a14b00e727be72d1a6163778c9c1f9b7b19e7c9424bcab3a3d6d23479d5` |
+| `libmorpheus-0.6.0-Linux-aarch64-glibc.tar.gz` | `a4d0bdbea11dbd4c0bd252baba35f9aa43b795c7bbbdd6d4e0d8195428c2e4f6` |
+| `libmorpheus-0.6.0-macOS-arm64.tar.gz` | `a310afa8882fe08c04770e4712c947c3383d29adb5b886fada46cd71c4bf12d0` |
+| `benchmark-0.6.0.json` | `998060d582bb22340ce5b497f186ddc0dea2f34c6ba0c41bc26ef0f29a7aa05e` |
+
+After publication, the Linux x86-64 archive was downloaded and checked
+against its sidecar. The tree's Node.js binding, declaring 0.6.0, acquired
+the same archive with `libmorpheus-native`. Through the Python binding of
+the tree, whose 26 tests pass against it, it was exercised over the index of
+`@libmorpheus/data` 0.3.0:
+- δίδωμι generates 3,317 records (2,212 distinct surfaces), with one record
+  skipped;
+- καταβάλλω generates 5,825 records, 3,040 with
+  `exclude_preverb_variants`;
+- τις returns ἄττα and τινός accented.
+
+WebAssembly binding 0.3.0 and data package 0.3.0 were tagged on the same
+commit afterwards; see [`release-wasm-0.3.0.md`](release-wasm-0.3.0.md) and
+[`release-data-0.3.0.md`](release-data-0.3.0.md).
