@@ -59,7 +59,8 @@ class CandidateTrial(unittest.TestCase):
                 self.assertFalse(m.original_rows_differ(root,7));self.assertTrue(m.original_rows_differ(root,8))
                 self.assertEqual(m.original_rows(root,8)['qualified_analysis_rows'],7)
             finally:del m.ORIGINAL_ROWS[digest]
-        self.assertEqual(m.ORIGINAL_ROWS,{'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530})
+        self.assertEqual(m.ORIGINAL_ROWS,{'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530,
+            '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9':2102153})
 
 
 if __name__=='__main__':unittest.main()

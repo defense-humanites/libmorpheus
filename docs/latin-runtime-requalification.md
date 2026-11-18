@@ -78,8 +78,9 @@ the end of its run. It is now pinned once, per runtime, in
 - `ORIGINAL_ROWS` maps a runtime to the rows qualified for it. A runtime is
   named by the SHA-256 of the fourth-principal-part ending table its
   controlled baseline builds (`Latin/endtables/out/pp4.out`), the table the
-  0.4.5 change rewrote. Its one entry is the runtime of the archived
-  receipts: `62b662c8…` → 2,100,530.
+  0.4.5 change rewrote. It holds the runtime of the receipts archived by
+  PR #18 (`62b662c8…` → 2,100,530) and the current one, measured below
+  (`3955d877…` → 2,102,153).
 - `original_rows_differ()` replaces the literal in the eleven qualifiers. A
   qualified runtime keeps the exact check. A runtime without a qualified
   count is measured, not refused.
@@ -101,34 +102,109 @@ nine-field matches (16, with voice pairs passive→deponent, active→deponent
 and deponent→passive) where the earlier runtime reports none, and ten-field
 matches fall from 511 to 495.
 
-## Running the measurement
+## First measurement on the current runtime — `69ba91c`
+
+The [dispatched run](https://github.com/defense-humanites/libmorpheus/actions/runs/44289719751)
+succeeds in under 17 minutes, 12 of them in the four LISTALL passes (the
+last run on the earlier runtime posted its receipt after 33 minutes). The
+[aggregate receipt](qualification/latin-combined-candidate-69ba91c.json)
+carries counts, categories and SHA-256 values only. It is compared here
+with the receipt of the earlier runtime,
+[`8bfd450`](qualification/latin-combined-candidate-8bfd450.json).
+
+Nothing that depends on the source, the lexer or the recipes moves: the
+eleven stage fingerprints and their counts, the combined source
+`ec3fc3d4…`, the +734 / −140 records, the four index fingerprints of the
+original candidate and of the trial, the family cells (4,404 of 4,404
+covered after, 132 before), the 823 historical readings restored on family
+forms and the enclitic displacement review are identical.
+
+| Measure | Earlier runtime | Current runtime | Change |
+| --- | ---: | ---: | ---: |
+| Readings of the original candidate | 2,100,530 | 2,102,153 | +1,623 |
+| Readings of the combined candidate | 2,149,567 | 2,151,190 | +1,623 |
+| Readings of the controlled baseline | 2,048,328 | 2,050,019 | +1,691 |
+| Forms recognized by the combined candidate | 853,570 | 853,568 | −2 |
+| Forms recognized by the original candidate | 847,750 | 847,748 | −2 |
+| Forms recognized by the baseline | 837,990 | 837,988 | −2 |
+| Forms the combination gains / loses over the original | 5,895 / 75 | 5,895 / 75 | 0 |
+| Baseline forms the combination does not recognize | 5,413 | 5,413 | 0 |
+| Readings on those forms | 8,447 | 8,447 | 0 |
+| Baseline forms the original does not recognize | 6,789 | 6,789 | 0 |
+| Baseline readings kept by the combination | 2,010,809 | 2,012,151 | +1,342 |
+| Baseline readings removed by the combination | 37,519 | 37,868 | +349 |
+| Readings added by the combination | 138,758 | 139,039 | +281 |
+| Historical readings no longer removed | 4,255 | 4,255 | 0 |
+| Completely lost forms no longer lost | 1,376 | 1,376 | 0 |
+
+Each of the three sides recognizes two forms fewer, and every comparison
+counts the same two more forms as recognized by neither side. The receipt
+does not name them. On the synthetic list the one form that lost every
+reading was a nominal stem read with a supine ending, a reading only the
+all-ones stem type allowed; whether the two LISTALL forms are of that kind
+is not established.
+
+Lemma identity among the readings the combination still removes:
+
+| Measure | Earlier runtime | Current runtime |
+| --- | ---: | ---: |
+| Removed readings | 37,519 | 37,868 |
+| Matched at ten fields | 24,168 | 21,441 |
+| Matched at nine fields (voice differs) | 0 | 2,727 |
+| Matched, total | 24,168 | 24,168 |
+| Without lemma match on recognized forms | 4,904 | 5,253 |
+| On completely lost forms | 8,447 | 8,447 |
+| Active lemma matched by deponent, ten / nine fields | 5,911 / 0 | 3,742 / 1,489 |
+| Deponent lemma matched by active, ten / nine fields | 4,132 / 0 | 2,860 / 1,136 |
+
+The matched total is unchanged; 2,727 matches move from ten fields to nine
+because a deponent participle no longer shares the voice of its active
+doublet. The nine-field voice pairs are passive→deponent 785,
+active→deponent 693, deponent→passive 608, deponent→active 561,
+none→deponent 45 and deponent→none 35. The voice variants counted under
+the two voice relations fall from 10,043 to 9,227: the review looks for a
+ten-field match before a nine-field one, and 816 readings that no longer
+match their voice doublet at ten fields match a native composition there
+instead (+544, +136 and +136 under the three composition relations). The
+349 additional removed readings all fall among the
+readings without lemma match: the baseline gains 1,691 readings where the
+candidates gain 1,623.
+
+The measured rows are pinned in `ORIGINAL_ROWS`. The receipts of the
+earlier runtime stay as they are: they are the measurements of their
+runtime, and the figures of [latin-combined-candidate.md](latin-combined-candidate.md)
+and of the [open decisions](latin-open-decisions.md) remain those. The
+sizes of the open decisions do not move with the runtime: the 5,413 lost
+forms and their 8,447 readings are the same.
+
+## Running a measurement
 
 1. Dispatch `latin-combined-candidate.yml` on a branch that has an open
    pull request. Both publication steps look for an open pull request on
    the dispatched branch; on `main` the receipt, or the exception lines of
    a failure, stay in the run log.
-2. The run takes four full LISTALL passes (35 to 60 minutes on the earlier
-   runtime; the synthetic list above is analysed in 24 s on the current one
-   against 39 s). It needs prior agreement, like every LISTALL
-   qualification.
-3. From the receipt posted on the pull request: add the measured rows to
-   `ORIGINAL_ROWS` under the posted table fingerprint, archive the receipt
-   under `docs/qualification/`, and record the figures that moved next to
-   the archived ones in [latin-combined-candidate.md](latin-combined-candidate.md).
-   The earlier receipts stay: they are the measurements of their runtime.
-4. The residual loss attribution and the witness backlog screen come next
-   (`latin-residual-loss-attribution.yml`, `latin-witness-backlog.yml`).
-   The attribution first reproduces the historical complete losses against
-   values of the earlier runtime; it needs its own re-pinning, decided from
-   the combined receipt.
+2. The run takes four full LISTALL passes and needs prior agreement, like
+   every LISTALL qualification.
+3. On a runtime without a qualified count, add the measured rows to
+   `ORIGINAL_ROWS` under the posted table fingerprint and archive the
+   receipt under `docs/qualification/`.
+
+## What comes next
+
+The residual loss attribution and the witness backlog screen
+(`latin-residual-loss-attribution.yml`, `latin-witness-backlog.yml`) have
+not been run on the current runtime. The attribution first reproduces the
+historical complete losses in `tools/reproduce-latin-complete-losses.py`
+against values of the earlier runtime: 2,048,328 baseline and 2,100,530
+candidate rows, now 2,050,019 and 2,102,153, and the fingerprint of a
+private difference file that carries the voice. The 6,789 forms it expects
+are unchanged; its row count and its fingerprint need a re-pinning of their
+own before the attribution can run.
 
 ## Limits
 
-The chain itself was not replayed locally: it needs the pinned TEI, flex
-and LISTALL. The counts above come from synthetic forms on the controlled
-baseline, not from the candidate over LISTALL; they show that the counts
-move, not by how much. Whether the index fingerprints of the original
-candidate and the family cells hold is a prediction the run settles. The
-ten separate trial qualifiers share the per-runtime pin but were not
-re-run; each needs the same first measurement before its receipt can be
-compared with the archived one.
+The local counts of the first section come from synthetic forms on the
+controlled baseline, not from LISTALL. The ten separate trial qualifiers
+share the per-runtime pin, now qualified for the current runtime, but were
+not re-run: their archived receipts remain those of the earlier runtime.
+The two forms no longer recognized have not been identified.

@@ -24,9 +24,11 @@ INDEXES={'nomind':'106592a19b3b34a343c271fadcc559cdef10363c0d7f4ea024a71ae613e1b
 # from a deponent derivation is deponent since then, no longer passive. A runtime
 # is named by the SHA-256 of the fourth-principal-part ending table that its
 # controlled baseline builds, which that change rewrote. The first entry is the
-# runtime of every receipt archived up to 8bfd450 (base 8085e2d).
+# runtime of every receipt archived up to 8bfd450 (base 8085e2d); the second
+# was measured on 69ba91c (releases 0.4.5 to 0.6.0).
 RUNTIME_TABLE='Latin/endtables/out/pp4.out'
-ORIGINAL_ROWS={'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530}
+ORIGINAL_ROWS={'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530,
+    '3955d877e17378d1365c6462d8d6ab1b42fba4dcff435c21e260b47457e45ec9':2102153}
 
 
 def original_rows(baseline,rows):
