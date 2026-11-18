@@ -190,19 +190,58 @@ forms and their 8,447 readings are the same.
    `ORIGINAL_ROWS` under the posted table fingerprint and archive the
    receipt under `docs/qualification/`.
 
-## What comes next
+## Residual loss attribution on the current runtime — `f9d5d51`
 
-The residual loss attribution (`latin-residual-loss-attribution.yml`) has
-not been run on the current runtime. Its tool checks, after its LISTALL
-pass, the baseline comparison of the qualified combination: 37,519 removed
-readings and 5,413 lost forms for `ec3fc3d4…`. On the current runtime the
-receipt above gives 37,868 and 5,413. The check is pinned per combination
-and per runtime as well (`QUALIFIED_BASELINE_COMPARISON` in
+The attribution tool checked, after its LISTALL pass, the baseline
+comparison of the qualified combination: 37,519 removed readings and 5,413
+lost forms for `ec3fc3d4…`. The combined receipt above gives 37,868 and
+5,413 on the current runtime, so the check is pinned per combination and per
+runtime as well (`QUALIFIED_BASELINE_COMPARISON` in
 `tools/attribute-latin-residual-losses.py`), from the combined receipt of
-each runtime; a combination that no receipt qualified on the runtime at
-hand is refused before any analysis, since the combination is qualified
-first. The receipt of the attribution names its runtime
+each runtime. A combination that no receipt qualified on the runtime at hand
+is refused before any analysis, since the combination is qualified first.
+The receipt of the attribution names its runtime
 (`runtime_ending_table_sha256`).
+
+The [dispatched run](https://github.com/defense-humanites/libmorpheus/actions/runs/44299413400)
+succeeds in under nine minutes. Its
+[receipt](qualification/latin-residual-loss-attribution-f9d5d51.json) is
+compared with the one of the earlier runtime,
+[`0f0d489`](qualification/latin-residual-loss-attribution-0f0d489.json).
+
+| Measure | Earlier runtime | Current runtime |
+| --- | ---: | ---: |
+| Completely lost forms | 5,413 | 5,413 |
+| Readings on those forms | 8,447 | 8,447 |
+| Removed readings matched by lemma identity | 24,168 | 24,168 |
+| Unmatched readings on recognized forms | 4,904 | 5,253 |
+| of which under changed-definition dossiers (decision 1) | 2,327 | 2,537 |
+| of which under mapped compositions (decision 2) | 129 | 268 |
+| of which differing from a candidate reading by voice alone | 0 | 349 |
+
+The table of completely lost forms by lemma category is identical, row for
+row: the sizes of the [open decisions](latin-open-decisions.md), which are
+counted in lost forms, do not move. So are the lemma categories and every
+other class of unmatched readings, hyphenated compositions (1,710), curated
+lemmas without definition and readings identical at a lower multiplicity
+(2,105) included.
+
+The 349 additional unmatched readings are one class: each differs from a
+candidate reading of the same form, under the same lemma, by its voice and
+by nothing else. 210 fall under the changed-definition dossiers (68 lemmas
+instead of 67) and 139 under the mapped compositions. The receipt does not
+say which voice stands on which side. The probe of the first section gives
+the likely reading: the baseline derives the participles of a deponent verb
+from a deponent derivation, which reports them as deponent since release
+0.4.5, where the candidate writes the supine of the same verb as a `pp4`
+record, which stays passive. If so, these are not readings the candidate
+lacks but readings it labels with the voice of the earlier runtime, and
+whether a written supine under a deponent present should carry `dep` is a
+question the earlier runtime could not raise. It is recorded for
+[issue #112](https://github.com/defense-humanites/libmorpheus/issues/112);
+no recipe is proposed here.
+
+## What is not part of the resumption
 
 The witness backlog screen (`latin-witness-backlog.yml`) reads no analysis:
 it compares the candidate with the curated witness and does not depend on
@@ -213,8 +252,7 @@ The historical complete-loss reproduction of
 review runs (`latin-loss-source-review.yml`), is bound to the earlier
 runtime by its row counts (2,048,328 baseline and 2,100,530 candidate rows,
 now 2,050,019 and 2,102,153) and by the fingerprint of a private difference
-file that carries the voice. It documents the losses as first measured and
-is not a step of the resumption.
+file that carries the voice. It documents the losses as first measured.
 
 ## Limits
 
@@ -222,4 +260,6 @@ The local counts of the first section come from synthetic forms on the
 controlled baseline, not from LISTALL. The ten separate trial qualifiers
 share the per-runtime pin, now qualified for the current runtime, but were
 not re-run: their archived receipts remain those of the earlier runtime.
-The two forms no longer recognized have not been identified.
+The two forms no longer recognized have not been identified, and the
+side each voice stands on among the 349 voice-only readings is inferred
+from the synthetic probe, not read from a receipt.
