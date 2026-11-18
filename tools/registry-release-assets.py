@@ -10,8 +10,15 @@ three platform addon packages), each tarball checked against the registry's
 SHA-512 integrity. PyPI: every file of the `libmorpheus` release (wheel and
 source distribution), each checked against the registry's SHA-256 digest.
 The staged files are therefore the bytes users install. Standard library
-only; a version not yet visible is retried for up to five minutes, since a
-registry can lag a fresh publication.
+only.
+
+A registry can lag a fresh publication, and npm lags it twice: it lists a
+version before it serves its tarball, and its CDN can then keep that
+tarball's 404 for minutes. The `node-v0.4.0` release job found the facade's
+metadata after two minutes and its tarball missing; npm served the tarball
+about five minutes later. Every request that answers 404 (metadata,
+tarball, PyPI file) is therefore retried until twenty minutes after the
+script started.
 """
 
 from __future__ import annotations
@@ -33,8 +40,9 @@ NPM_PACKAGES = (
     "@libmorpheus/node-linux-x64-gnu",
 )
 PYPI_PROJECT = "libmorpheus"
-ATTEMPTS = 20
 DELAY_SECONDS = 15
+DEADLINE_SECONDS = 20 * 60
+STARTED = time.monotonic()
 
 
 def fetch(url: str) -> bytes:
@@ -43,23 +51,26 @@ def fetch(url: str) -> bytes:
         return response.read()
 
 
-def fetch_json_when_visible(url: str) -> dict:
-    for attempt in range(1, ATTEMPTS + 1):
+def fetch_when_served(url: str) -> bytes:
+    """Fetch url, retrying a 404 until the deadline: the registry may not
+    serve a freshly published file yet."""
+    while True:
         try:
-            return json.loads(fetch(url))
+            return fetch(url)
         except urllib.error.HTTPError as error:
-            if error.code != 404 or attempt == ATTEMPTS:
+            if error.code != 404 or time.monotonic() - STARTED > DEADLINE_SECONDS:
                 raise
-        print(f"not yet visible, retrying: {url}", file=sys.stderr)
+        print(f"not yet served, retrying: {url}", file=sys.stderr)
         time.sleep(DELAY_SECONDS)
-    raise AssertionError("unreachable")
 
 
 def stage_npm(version: str, output: Path) -> list[Path]:
     staged = []
     for package in NPM_PACKAGES:
-        metadata = fetch_json_when_visible(
-            f"https://registry.npmjs.org/{urllib.parse.quote(package, safe='@')}/{version}"
+        metadata = json.loads(
+            fetch_when_served(
+                f"https://registry.npmjs.org/{urllib.parse.quote(package, safe='@')}/{version}"
+            )
         )
         if metadata.get("version") != version:
             raise SystemExit(f"{package}: registry returned version {metadata.get('version')}")
@@ -67,7 +78,7 @@ def stage_npm(version: str, output: Path) -> list[Path]:
         algorithm, _, expected = integrity.partition("-")
         if algorithm != "sha512":
             raise SystemExit(f"{package}: unsupported integrity {integrity}")
-        tarball = fetch(metadata["dist"]["tarball"])
+        tarball = fetch_when_served(metadata["dist"]["tarball"])
         if base64.b64encode(hashlib.sha512(tarball).digest()).decode() != expected:
             raise SystemExit(f"{package}: tarball does not match the registry integrity")
         name = package.removeprefix("@").replace("/", "-") + f"-{version}.tgz"
@@ -78,7 +89,7 @@ def stage_npm(version: str, output: Path) -> list[Path]:
 
 
 def stage_pypi(version: str, output: Path) -> list[Path]:
-    metadata = fetch_json_when_visible(f"https://pypi.org/pypi/{PYPI_PROJECT}/{version}/json")
+    metadata = json.loads(fetch_when_served(f"https://pypi.org/pypi/{PYPI_PROJECT}/{version}/json"))
     files = metadata.get("urls") or []
     if not any(entry["packagetype"] == "bdist_wheel" for entry in files) or not any(
         entry["packagetype"] == "sdist" for entry in files
@@ -86,7 +97,7 @@ def stage_pypi(version: str, output: Path) -> list[Path]:
         raise SystemExit(f"{PYPI_PROJECT} {version}: wheel or source distribution missing on PyPI")
     staged = []
     for entry in files:
-        content = fetch(entry["url"])
+        content = fetch_when_served(entry["url"])
         if hashlib.sha256(content).hexdigest() != entry["digests"]["sha256"]:
             raise SystemExit(f"{entry['filename']}: does not match the PyPI digest")
         path = output / entry["filename"]
