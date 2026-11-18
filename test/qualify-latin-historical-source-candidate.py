@@ -43,5 +43,23 @@ class CandidateTrial(unittest.TestCase):
                 m.prepare(SimpleNamespace(candidate=f,review=f,forms=f,output=root/'out'))
             self.assertFalse((root/'out').exists())
 
+    def test_original_rows_are_pinned_per_runtime_and_reported_for_an_unqualified_one(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);table=root/m.RUNTIME_TABLE;table.parent.mkdir(parents=True)
+            table.write_bytes(b'synthetic ending table')
+            digest=m.native.digest(table)
+            # A runtime nobody qualified yet: measured, never refused.
+            self.assertNotIn(digest,m.ORIGINAL_ROWS)
+            self.assertEqual(m.original_rows(root,7),{'runtime_ending_table_sha256':digest,
+                'analysis_rows':7,'qualified_analysis_rows':None})
+            self.assertFalse(m.original_rows_differ(root,7))
+            # A qualified runtime: its count is exact.
+            m.ORIGINAL_ROWS[digest]=7
+            try:
+                self.assertFalse(m.original_rows_differ(root,7));self.assertTrue(m.original_rows_differ(root,8))
+                self.assertEqual(m.original_rows(root,8)['qualified_analysis_rows'],7)
+            finally:del m.ORIGINAL_ROWS[digest]
+        self.assertEqual(m.ORIGINAL_ROWS,{'62b662c86b1844f3c2b7cc02b4f7cf12535536c92c049aeb2f16766da30e751c':2100530})
+
 
 if __name__=='__main__':unittest.main()

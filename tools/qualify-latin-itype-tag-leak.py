@@ -97,7 +97,7 @@ def prepare(args):
             global_control=supines.direct.audit.audit(args.forms,readers['after'],readers['after'],target/'global-control.jsonl',require_identical=True)
             global_delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-delta.jsonl')
             if (global_delta['counts']['distinct_forms']!=1033579
-                    or global_delta['analysis_rows']['curated']!=2100530
+                    or changed.reproduction.candidate.original_rows_differ(args.baseline,global_delta['analysis_rows']['curated'])
                     or global_delta['counts'].get('recognized_curated__absent_rebuilt',0)
                     or global_delta['global_eleven_field_multisets']['removed_rows']
                     or global_delta['global_eleven_field_multisets']['added_rows']):

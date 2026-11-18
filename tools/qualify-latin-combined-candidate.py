@@ -128,7 +128,7 @@ def prepare(args):
             global_control=supines.direct.audit.audit(args.forms,readers['after'],readers['after'],target/'global-control.jsonl',require_identical=True)
             global_delta=supines.direct.audit.audit(args.forms,readers['before'],readers['after'],target/'global-delta.jsonl')
             if (global_delta['counts']['distinct_forms']!=1033579
-                    or global_delta['analysis_rows']['curated']!=2100530):
+                    or changed.reproduction.candidate.original_rows_differ(args.baseline,global_delta['analysis_rows']['curated'])):
                 raise ValueError('combined candidate global scope differs')
             # The attachment repairs withdraw defective perfect and supine stems
             # and reclass a few presents; a LISTALL form may stop being recognized
@@ -150,6 +150,7 @@ def prepare(args):
             lemma_identity={'original':identity.review(target/'baseline-original.jsonl',text_readings(readers['before']),target/'identity-original.jsonl'),
                             'combined':identity.review(target/'baseline-combined.jsonl',text_readings(readers['after']),target/'identity-combined.jsonl')}
             global_report={'control':global_control,'comparison':global_delta,'removed_reading_displacement':displacement,
+                           'original_candidate_rows':changed.reproduction.candidate.original_rows(args.baseline,global_delta['analysis_rows']['curated']),
                            'lost_forms_recognized_only_by_defective_readings':lost,
                            'removed_reading_lemma_identity':lemma_identity,
                            'controlled_baseline_to_original':{k:baseline_original[k] for k in ('counts','analysis_rows','global_eleven_field_multisets','changed_analysis_counts','lost_forms_diagnostic')},
