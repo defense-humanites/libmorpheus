@@ -25,6 +25,14 @@ until then the default holds: nothing is admitted beyond the bounded
 recipes and nothing is promoted. PR #18 was merged as a frozen research
 archive with these decisions open.
 
+The figures below are those of the analysis runtime of 21 October 2026. On
+the runtime of release 0.4.5 and later the lost forms and their readings
+are the same, heading for heading; 349 more removed readings stay
+unmatched, each differing from a candidate reading of the same form and
+lemma by its voice alone, 210 under the dossiers of decision 1 and 139
+under the mapped compositions of decision 2 (see the
+[runtime requalification](latin-runtime-requalification.md)).
+
 ## 1. Changed-definition dossiers — 2,249 lost forms, 39 lemmas
 
 These are the 59 lemmas whose candidate block differs from the witness
